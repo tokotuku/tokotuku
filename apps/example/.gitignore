@@ -22,3 +22,11 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# cloudflare / wrangler local dev
+.wrangler/
+.dev.vars
+.dev.vars.*
+
+# generated cloudflare worker types (regenerate with `bun run cf-typegen`)
+worker-configuration.d.ts

@@ -1,0 +1,22 @@
+$schema: "https://moonrepo.dev/schemas/project.json"
+language: "typescript"
+stack: "frontend"
+layer: "application"
+
+tasks:
+  build:
+    command: "astro build"
+    inputs:
+      - "src/**/*"
+      - "astro.config.mjs"
+      - "wrangler.jsonc"
+      - "tsconfig.json"
+    outputs:
+      - "dist"
+
+  dev:
+    command: "astro dev"
+    options:
+      persistent: true
+      runInCI: false
+      cache: false

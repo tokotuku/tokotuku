@@ -1,0 +1,30 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "tokotuku-example",
+  "compatibility_date": "2026-07-08",
+  "compatibility_flags": ["nodejs_compat"],
+  "main": "@astrojs/cloudflare/entrypoints/server",
+  "assets": {
+    "binding": "ASSETS",
+    "directory": "./dist/client"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "tokotuku-example-products",
+      // Placeholder — fine for --local dev as-is.
+      // Replace with the real UUID printed by `wrangler d1 create tokotuku-example-products`
+      // before running any --remote command or `wrangler deploy`.
+      "database_id": "00000000-0000-0000-0000-000000000000"
+    }
+  ],
+  "r2_buckets": [
+    {
+      // Named PRODUCT_IMAGES (not IMAGES) to avoid colliding with the
+      // @astrojs/cloudflare adapter's own default Cloudflare Images binding,
+      // which is also named "IMAGES" by default.
+      "binding": "PRODUCT_IMAGES",
+      "bucket_name": "tokotuku-example-images"
+    }
+  ]
+}

@@ -1,5 +1,15 @@
 ---
+import { env } from "cloudflare:workers";
 
+const { results: products } = await env.DB.prepare(
+  "SELECT id, name, description, price_cents, image_key FROM products ORDER BY id",
+).all<{
+  id: number;
+  name: string;
+  description: string;
+  price_cents: number;
+  image_key: string;
+}>();
 ---
 
 <html lang="en">
@@ -9,9 +19,27 @@
 		<link rel="icon" href="/favicon.ico" />
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
+		<title>Astro + Cloudflare D1 + R2</title>
+		<style>
+			body { font-family: system-ui, sans-serif; margin: 2rem; }
+			.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.5rem; }
+			.card { border: 1px solid #ddd; border-radius: 8px; padding: 1rem; }
+			.card img { width: 100%; border-radius: 4px; }
+			.price { font-weight: 600; }
+		</style>
 	</head>
 	<body>
-		<h1>Astro</h1>
+		<h1>Products</h1>
+		<p>Rows from D1, images streamed from R2 through <code>/api/images/[...key]</code>.</p>
+		<div class="grid">
+			{products.map((product) => (
+				<div class="card">
+					<img src={`/api/images/${product.image_key}`} alt={product.name} />
+					<h2>{product.name}</h2>
+					<p>{product.description}</p>
+					<p class="price">${(product.price_cents / 100).toFixed(2)}</p>
+				</div>
+			))}
+		</div>
 	</body>
 </html>
