@@ -1,0 +1,33 @@
+$schema: "https://moonrepo.dev/schemas/project.json"
+language: "typescript"
+stack: "frontend"
+layer: "library"
+
+tasks:
+  build:
+    command: "tsup"
+    inputs:
+      - "src/**/*"
+      - "tsup.config.ts"
+      - "tsconfig.json"
+    outputs:
+      - "dist"
+
+  typecheck:
+    command: "tsc --noEmit -p tsconfig.json"
+    inputs:
+      - "src/**/*"
+      - "tsconfig.json"
+
+  lint:
+    command: "biome check ."
+    inputs:
+      - "src/**/*"
+      - "*.ts"
+      - "*.json"
+
+  test:
+    command: "vitest run"
+    inputs:
+      - "src/**/*"
+      - "vitest.config.ts"

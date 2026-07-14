@@ -1,0 +1,27 @@
+$schema: "https://moonrepo.dev/schemas/project.json"
+language: "typescript"
+stack: "frontend"
+layer: "library"
+
+dependsOn:
+  - "elements"
+
+tasks:
+  # No "typecheck" task yet: `tsc` errors on zero input files (TS18003), and
+  # src/ is intentionally empty until the first wrapper component exists.
+  # Add it back once packages/astro/src has real content.
+  lint:
+    command: "biome check ."
+    inputs:
+      - "src/**/*"
+      - "*.ts"
+      - "*.astro"
+      - "*.json"
+
+  test:
+    command: "vitest run"
+    deps:
+      - "elements:build"
+    inputs:
+      - "src/**/*"
+      - "vitest.config.ts"

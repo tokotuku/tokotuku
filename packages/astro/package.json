@@ -1,0 +1,22 @@
+{
+  "name": "@tokotuku/astro",
+  "version": "0.0.0",
+  "description": "Astro wrappers around @tokotuku/elements Web Components. No business logic lives here — thin pass-through only.",
+  "type": "module",
+  "sideEffects": true,
+  "peerDependencies": {
+    "astro": ">=7.0.0"
+  },
+  "dependencies": {
+    "@tokotuku/elements": "workspace:*"
+  },
+  "devDependencies": {
+    "@tokotuku/config": "workspace:*"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "biome check .",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  }
+}
