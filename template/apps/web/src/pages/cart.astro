@@ -2,16 +2,9 @@
 import { env } from "cloudflare:workers";
 import StoreHeader from "@tokotuku-starter/ui/StoreHeader.astro";
 import Layout from "../layouts/Layout.astro";
+import { listProducts } from "../lib/products";
 
-const { results: products } = await env.DB.prepare(
-  "SELECT id, name, description, price_cents, image_key FROM products ORDER BY id",
-).all<{
-  id: number;
-  name: string;
-  description: string;
-  price_cents: number;
-  image_key: string;
-}>();
+const products = await listProducts(env.DB);
 ---
 
 <Layout title="Cart — Tokotuku">
@@ -24,7 +17,7 @@ const { results: products } = await env.DB.prepare(
         {
           products.map((product) => (
             <article data-cart-row data-product-id={product.id} hidden>
-              <img src={`/api/images/${product.image_key}`} alt="" />
+              <img src={`/api/images/${product.imageKey}`} alt="" />
               <div><h2><a href={`/products/${product.id}`}>{product.name}</a></h2><p>{product.description}</p><button type="button" data-remove-item>Remove</button></div>
               <div class="quantity"><label>Qty <input type="number" min="1" max="99" value="1" data-quantity /></label><strong data-line-total></strong></div>
             </article>
@@ -38,7 +31,7 @@ const { results: products } = await env.DB.prepare(
   </main>
 </Layout>
 
-<script is:inline define:vars={{ prices: Object.fromEntries(products.map((product) => [product.id, product.price_cents])) }}>
+<script is:inline define:vars={{ prices: Object.fromEntries(products.map((product) => [product.id, product.priceCents])) }}>
   const cartKey = "tokotuku-cart";
   const currency = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
 

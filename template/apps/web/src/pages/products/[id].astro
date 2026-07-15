@@ -2,28 +2,19 @@
 import { env } from "cloudflare:workers";
 import StoreHeader from "@tokotuku-starter/ui/StoreHeader.astro";
 import Layout from "../../layouts/Layout.astro";
+import { findProductById } from "../../lib/products";
 
 const id = Number(Astro.params.id);
-const product = await env.DB.prepare(
-  "SELECT id, name, description, price_cents, image_key FROM products WHERE id = ?",
-)
-  .bind(id)
-  .first<{
-    id: number;
-    name: string;
-    description: string;
-    price_cents: number;
-    image_key: string;
-  }>();
+const product = await findProductById(env.DB, id);
 
 if (!product) return new Response("Product not found", { status: 404 });
 
 const currency = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
-const imageUrl = `/api/images/${product.image_key}`;
+const imageUrl = `/api/images/${product.imageKey}`;
 const serialized = JSON.stringify({
   id: product.id,
   name: product.name,
-  priceCents: product.price_cents,
+  priceCents: product.priceCents,
   imageUrl,
 });
 ---
@@ -37,7 +28,7 @@ const serialized = JSON.stringify({
       <section>
         <p class="eyebrow">Tokotuku essential</p>
         <h1>{product.name}</h1>
-        <p class="price">{currency.format(product.price_cents / 100)}</p>
+        <p class="price">{currency.format(product.priceCents / 100)}</p>
         <p class="description">{product.description}</p>
         <button type="button" data-add-to-cart data-product={serialized}>Add to cart</button>
         <ul><li>Free shipping over $50</li><li>30-day straightforward returns</li><li>Secure checkout-ready foundation</li></ul>

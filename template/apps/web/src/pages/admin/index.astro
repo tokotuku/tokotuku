@@ -14,6 +14,7 @@ import StatCard from "@tokotuku-starter/ui/StatCard.astro";
 import Tabs from "@tokotuku-starter/ui/Tabs.astro";
 import Layout from "../../layouts/Layout.astro";
 import { createAuth } from "../../lib/auth";
+import { listProducts } from "../../lib/products";
 
 const auth = createAuth(env, Astro.url.origin);
 const session = await auth.api.getSession({ headers: Astro.request.headers });
@@ -22,17 +23,9 @@ if (!session) {
   return Astro.redirect("/login?next=/admin");
 }
 
-const { results: products } = await env.DB.prepare(
-  "SELECT id, name, description, price_cents, image_key FROM products ORDER BY id",
-).all<{
-  id: number;
-  name: string;
-  description: string;
-  price_cents: number;
-  image_key: string;
-}>();
+const products = await listProducts(env.DB);
 
-const totalValue = products.reduce((total, product) => total + product.price_cents, 0);
+const totalValue = products.reduce((total, product) => total + product.priceCents, 0);
 const averagePrice = products.length > 0 ? totalValue / products.length : 0;
 const currency = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
 
@@ -40,7 +33,7 @@ const priceChart: ChartInput = {
   data: {
     values: products.map((product) => ({
       product: product.name,
-      price: product.price_cents / 100,
+      price: product.priceCents / 100,
     })),
   },
   semantic_types: {
@@ -65,7 +58,7 @@ const priceChart: ChartInput = {
 const tableRows = products.map((product) => ({
   id: product.id,
   product: product.name,
-  price: currency.format(product.price_cents / 100),
+  price: currency.format(product.priceCents / 100),
   status: "Active",
 }));
 ---
@@ -151,12 +144,12 @@ const tableRows = products.map((product) => ({
           {
             products.map((product) => (
               <article>
-                <img src={`/api/images/${product.image_key}`} alt="" />
+                <img src={`/api/images/${product.imageKey}`} alt="" />
                 <div>
                   <h3>{product.name}</h3>
                   <p>{product.description}</p>
                 </div>
-                <strong>{currency.format(product.price_cents / 100)}</strong>
+                <strong>{currency.format(product.priceCents / 100)}</strong>
               </article>
             ))
           }

@@ -3,16 +3,9 @@ import { env } from "cloudflare:workers";
 import ProductCard from "@tokotuku-starter/ui/ProductCard.astro";
 import StoreHeader from "@tokotuku-starter/ui/StoreHeader.astro";
 import Layout from "../../layouts/Layout.astro";
+import { listProducts } from "../../lib/products";
 
-const { results: products } = await env.DB.prepare(
-  "SELECT id, name, description, price_cents, image_key FROM products ORDER BY id",
-).all<{
-  id: number;
-  name: string;
-  description: string;
-  price_cents: number;
-  image_key: string;
-}>();
+const products = await listProducts(env.DB);
 const currency = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
 ---
 
@@ -31,9 +24,9 @@ const currency = new Intl.NumberFormat("en-US", { style: "currency", currency: "
             id={product.id}
             name={product.name}
             description={product.description}
-            price={currency.format(product.price_cents / 100)}
-            priceCents={product.price_cents}
-            imageUrl={`/api/images/${product.image_key}`}
+            price={currency.format(product.priceCents / 100)}
+            priceCents={product.priceCents}
+            imageUrl={`/api/images/${product.imageKey}`}
           />
         ))
       }
