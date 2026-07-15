@@ -7,6 +7,7 @@ composition; accessible, reusable primitives remain versioned in `@tokotuku/elem
 ## Included surfaces
 
 - app shell, sidebar, top bar, and page header;
+- public store header and commerce product cards;
 - buttons, inputs, cards, alerts, badges, skeletons, and empty states;
 - stat cards, data tables, tabs, and pagination;
 - accessible charts compiled by Flint Chart and rendered by modular ECharts with SVG.

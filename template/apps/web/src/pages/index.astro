@@ -1,321 +1,377 @@
 ---
 import { env } from "cloudflare:workers";
-import Alert from "@tokotuku-starter/ui/Alert.astro";
-import AppButton from "@tokotuku-starter/ui/AppButton.astro";
-import AppShell from "@tokotuku-starter/ui/AppShell.astro";
-import AppSidebar from "@tokotuku-starter/ui/AppSidebar.astro";
-import AppTopbar from "@tokotuku-starter/ui/AppTopbar.astro";
-import Badge from "@tokotuku-starter/ui/Badge.astro";
-import Chart from "@tokotuku-starter/ui/Chart.astro";
-import type { ChartInput } from "@tokotuku-starter/ui/chart";
-import DataTable from "@tokotuku-starter/ui/DataTable.astro";
-import PageHeader from "@tokotuku-starter/ui/PageHeader.astro";
-import StatCard from "@tokotuku-starter/ui/StatCard.astro";
-import Tabs from "@tokotuku-starter/ui/Tabs.astro";
+import ProductCard from "@tokotuku-starter/ui/ProductCard.astro";
+import StoreHeader from "@tokotuku-starter/ui/StoreHeader.astro";
 import Layout from "../layouts/Layout.astro";
-import { createAuth } from "../lib/auth";
 
-const auth = createAuth(env, Astro.url.origin);
-const session = await auth.api.getSession({ headers: Astro.request.headers });
-
-if (!session) {
-  return Astro.redirect("/login");
-}
-
-const { results: products } = await env.DB.prepare(
-  "SELECT id, name, description, price_cents, image_key FROM products ORDER BY id",
-).all<{
+interface Product {
   id: number;
   name: string;
   description: string;
   price_cents: number;
   image_key: string;
-}>();
+}
 
-const totalValue = products.reduce((total, product) => total + product.price_cents, 0);
-const averagePrice = products.length > 0 ? totalValue / products.length : 0;
+const { results: products } = await env.DB.prepare(
+  "SELECT id, name, description, price_cents, image_key FROM products ORDER BY id LIMIT 6",
+).all<Product>();
+
 const currency = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
-
-const priceChart: ChartInput = {
-  data: {
-    values: products.map((product) => ({
-      product: product.name,
-      price: product.price_cents / 100,
-    })),
-  },
-  semantic_types: {
-    product: "Category",
-    price: "Price",
-  },
-  chart_spec: {
-    chartType: "Bar Chart",
-    encodings: {
-      x: "product",
-      y: "price",
-    },
-    baseSize: { width: 720, height: 320 },
-  },
-  field_display_names: {
-    product: "Product",
-    price: "Price",
-  },
-  options: { addTooltips: true },
-};
-
-const tableRows = products.map((product) => ({
-  id: product.id,
-  product: product.name,
-  price: currency.format(product.price_cents / 100),
-  status: "Active",
-}));
 ---
 
-<Layout title="Dashboard — Tokotuku starter">
-  <AppShell>
-    <AppSidebar
-      slot="sidebar"
-      brand="Tokotuku"
-      items={[
-        { label: "Overview", href: "/", active: true },
-        { label: "Products", href: "/#products", badge: String(products.length) },
-        { label: "Analytics", href: "/#analytics" },
-      ]}
-    >
-      <p slot="footer" class="account-label">Signed in as<br /><strong>{session.user.email}</strong></p>
-    </AppSidebar>
+<Layout title="Tokotuku — Useful things, thoughtfully made">
+  <StoreHeader current="home" />
 
-    <AppTopbar slot="header" title="Commerce workspace">
-      <div id="sign-out">
-        <AppButton variant="secondary" size="sm">Sign out</AppButton>
+  <main>
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Built for everyday momentum</p>
+        <h1>Small upgrades.<br /><span>Better days.</span></h1>
+        <p class="hero-description">
+          Straightforward products, fair prices, and no unnecessary noise. Discover reliable
+          essentials made to earn their place in your day.
+        </p>
+        <div class="hero-actions">
+          <a class="primary-action" href="/products">Shop the collection</a>
+          <a class="secondary-action" href="#featured">Explore featured</a>
+        </div>
+        <dl>
+          <div><dt>Free shipping</dt><dd>Orders over $50</dd></div>
+          <div><dt>30-day returns</dt><dd>Simple and stress-free</dd></div>
+          <div><dt>Secure account</dt><dd>Powered by Better Auth</dd></div>
+        </dl>
       </div>
-    </AppTopbar>
-
-    <PageHeader
-      eyebrow="Dashboard"
-      title={`Welcome back, ${session.user.name}`}
-      description="A complete starter surface built from Tokotuku primitives, Cloudflare data, and Flint-powered charts."
-    >
-      <div slot="actions">
-        <AppButton>Add product</AppButton>
+      <div class="hero-visual" aria-hidden="true">
+        <div class="visual-card visual-card-main">
+          <span>01</span>
+          <strong>Made useful</strong>
+          <p>Considered essentials for work, home, and everywhere between.</p>
+        </div>
+        <div class="visual-card visual-card-accent"><span>New</span><strong>Simple by design</strong></div>
+        <div class="orb"></div>
       </div>
-    </PageHeader>
-
-    <Alert title="Starter is connected" tone="success">
-      Better Auth is protecting this page, products are loaded from D1, and images are served from R2.
-    </Alert>
-
-    <section class="stats" aria-label="Product statistics">
-      <StatCard
-        label="Active products"
-        value={String(products.length)}
-        change="Live from D1"
-        trend="up"
-      />
-      <StatCard
-        label="Catalog value"
-        value={currency.format(totalValue / 100)}
-        change="Across all products"
-      />
-      <StatCard
-        label="Average price"
-        value={currency.format(averagePrice / 100)}
-        change="Current catalog"
-      />
     </section>
 
-    <Tabs
-      items={[
-        { label: "Overview", href: "/", active: true },
-        { label: "Products", href: "/#products", count: products.length },
-        { label: "Activity", href: "/#activity" },
-      ]}
-    />
-
-    <section id="analytics" class="dashboard-grid">
-      <Chart
-        input={priceChart}
-        title="Catalog price comparison"
-        description="Price in US dollars for every active product. Select a bar to emit a chart-select event."
-      />
-
-      <aside class="product-preview">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">R2 assets</p>
-            <h2>Product preview</h2>
-          </div>
-          <Badge tone="accent">{products.length} items</Badge>
-        </div>
-        <div class="product-list">
-          {
-            products.map((product) => (
-              <article>
-                <img src={`/api/images/${product.image_key}`} alt="" />
-                <div>
-                  <h3>{product.name}</h3>
-                  <p>{product.description}</p>
-                </div>
-                <strong>{currency.format(product.price_cents / 100)}</strong>
-              </article>
-            ))
-          }
-        </div>
-      </aside>
+    <section class="trust-strip" aria-label="Store benefits">
+      <span>Thoughtful design</span><span>Fair pricing</span><span>Fast fulfillment</span><span>Human support</span>
     </section>
 
-    <section id="products" class="products-section">
+    <section id="featured" class="featured">
       <div class="section-heading">
         <div>
-          <p class="eyebrow">Data display</p>
-          <h2>Products</h2>
+          <p class="eyebrow">Featured collection</p>
+          <h2>Good choices, made easy.</h2>
         </div>
-        <Badge tone="success">Operational</Badge>
+        <a href="/products">View all products →</a>
       </div>
-      <DataTable
-        caption="Active products"
-        columns={[
-          { key: "id", label: "ID" },
-          { key: "product", label: "Product" },
-          { key: "price", label: "Price", align: "end" },
-          { key: "status", label: "Status", align: "center" },
-        ]}
-        rows={tableRows}
-      />
+
+      <div class="product-grid">
+        {
+          products.map((product) => (
+            <ProductCard
+              id={product.id}
+              name={product.name}
+              description={product.description}
+              price={currency.format(product.price_cents / 100)}
+              priceCents={product.price_cents}
+              imageUrl={`/api/images/${product.image_key}`}
+            />
+          ))
+        }
+      </div>
     </section>
-  </AppShell>
+
+    <section class="story">
+      <p class="eyebrow">The Tokotuku standard</p>
+      <h2>Everything you need.<br />Nothing you don’t.</h2>
+      <p>
+        This storefront is backed by Cloudflare D1 and R2, while the protected commerce
+        workspace lives at <a href="/admin">/admin</a>. The starter is ready to extend with real
+        inventory, orders, and payments.
+      </p>
+    </section>
+  </main>
+
+  <footer>
+    <a href="/" class="footer-brand">Tokotuku</a>
+    <p>Useful things, thoughtfully made.</p>
+    <nav aria-label="Footer navigation"><a href="/products">Shop</a><a href="/cart">Cart</a><a href="/admin">Admin</a></nav>
+  </footer>
 </Layout>
 
 <style>
-  .account-label {
+  main,
+  footer {
+    width: min(100% - calc(var(--tk-spacing-4) * 2), 76rem);
+    margin-inline: auto;
+  }
+
+  .hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(22rem, 0.95fr);
+    gap: clamp(3rem, 8vw, 7rem);
+    align-items: center;
+    min-height: min(46rem, calc(100vh - 4.5rem));
+    padding-block: var(--tk-spacing-12);
+  }
+
+  .eyebrow {
     margin: 0;
-    overflow: hidden;
-    color: var(--tk-color-fg-muted);
+    color: var(--tk-color-accent);
     font-size: var(--tk-font-size-xs);
-    text-overflow: ellipsis;
+    font-weight: var(--tk-font-weight-bold);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
   }
 
-  .account-label strong {
+  h1 {
+    max-width: 12ch;
+    margin: var(--tk-spacing-4) 0;
     color: var(--tk-color-fg);
-    font-weight: var(--tk-font-weight-medium);
+    font-size: clamp(3rem, 7vw, 6.4rem);
+    line-height: 0.92;
+    letter-spacing: -0.06em;
   }
 
-  .stats {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: var(--tk-spacing-4);
-    margin-block: var(--tk-spacing-5) var(--tk-spacing-6);
+  h1 span {
+    color: var(--tk-color-accent);
   }
 
-  .dashboard-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1.6fr) minmax(18rem, 0.8fr);
-    gap: var(--tk-spacing-5);
+  .hero-description {
+    max-width: 38rem;
+    margin: 0;
+    color: var(--tk-color-fg-muted);
+    font-size: var(--tk-font-size-lg);
+    line-height: var(--tk-line-height-relaxed);
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--tk-spacing-3);
     margin-top: var(--tk-spacing-6);
   }
 
-  .product-preview,
-  .products-section {
-    padding: var(--tk-spacing-5);
-    border: 1px solid var(--tk-color-border);
-    border-radius: var(--tk-radius-xl);
-    background: var(--tk-color-bg);
-    box-shadow: var(--tk-shadow-sm);
+  .hero-actions a {
+    padding: var(--tk-spacing-3) var(--tk-spacing-5);
+    border-radius: var(--tk-radius-md);
+    font-size: var(--tk-font-size-sm);
+    font-weight: var(--tk-font-weight-semibold);
+    text-decoration: none;
   }
 
-  .products-section {
-    margin-top: var(--tk-spacing-5);
+  .primary-action {
+    background: var(--tk-color-accent);
+    color: var(--tk-color-accent-fg);
+  }
+
+  .secondary-action {
+    border: 1px solid var(--tk-color-border);
+    color: var(--tk-color-fg);
+  }
+
+  dl {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--tk-spacing-3);
+    margin: var(--tk-spacing-8) 0 0;
+  }
+
+  dt {
+    color: var(--tk-color-fg);
+    font-size: var(--tk-font-size-sm);
+    font-weight: var(--tk-font-weight-semibold);
+  }
+
+  dd {
+    margin: var(--tk-spacing-1) 0 0;
+    color: var(--tk-color-fg-muted);
+    font-size: var(--tk-font-size-xs);
+  }
+
+  .hero-visual {
+    position: relative;
+    min-height: 34rem;
+  }
+
+  .visual-card {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: var(--tk-spacing-6);
+    border-radius: var(--tk-radius-2xl);
+    box-shadow: var(--tk-shadow-xl);
+  }
+
+  .visual-card span {
+    position: absolute;
+    top: var(--tk-spacing-5);
+    left: var(--tk-spacing-5);
+    font-size: var(--tk-font-size-xs);
+    font-weight: var(--tk-font-weight-bold);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .visual-card strong {
+    font-size: var(--tk-font-size-2xl);
+  }
+
+  .visual-card p {
+    max-width: 20rem;
+    margin: var(--tk-spacing-2) 0 0;
+    line-height: var(--tk-line-height-relaxed);
+  }
+
+  .visual-card-main {
+    inset: 2rem 3rem 1rem 0;
+    z-index: 2;
+    background: var(--tk-color-fg);
+    color: var(--tk-color-bg);
+    transform: rotate(-3deg);
+  }
+
+  .visual-card-accent {
+    right: 0;
+    bottom: 0;
+    z-index: 3;
+    width: 48%;
+    min-height: 11rem;
+    background: var(--tk-color-accent);
+    color: var(--tk-color-accent-fg);
+    transform: rotate(4deg);
+  }
+
+  .orb {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 15rem;
+    height: 15rem;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--tk-color-accent) 22%, var(--tk-color-bg));
+  }
+
+  .trust-strip {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--tk-spacing-4);
+    padding-block: var(--tk-spacing-5);
+    border-block: 1px solid var(--tk-color-border);
+    color: var(--tk-color-fg-muted);
+    font-size: var(--tk-font-size-xs);
+    font-weight: var(--tk-font-weight-semibold);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .featured {
+    padding-block: var(--tk-spacing-12);
   }
 
   .section-heading {
     display: flex;
-    align-items: center;
+    align-items: end;
     justify-content: space-between;
-    gap: var(--tk-spacing-4);
-    margin-bottom: var(--tk-spacing-4);
+    gap: var(--tk-spacing-5);
+    margin-bottom: var(--tk-spacing-6);
   }
 
   .section-heading h2,
-  .section-heading p {
-    margin: 0;
-  }
-
-  .section-heading h2 {
+  .story h2 {
+    margin: var(--tk-spacing-2) 0 0;
     color: var(--tk-color-fg);
-    font-size: var(--tk-font-size-lg);
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    letter-spacing: -0.04em;
   }
 
-  .eyebrow {
-    margin-bottom: var(--tk-spacing-1) !important;
+  .section-heading a,
+  .story a {
     color: var(--tk-color-accent);
-    font-size: var(--tk-font-size-xs);
+    font-size: var(--tk-font-size-sm);
     font-weight: var(--tk-font-weight-semibold);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
   }
 
-  .product-list {
+  .product-grid {
     display: grid;
-    gap: var(--tk-spacing-3);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--tk-spacing-5);
   }
 
-  .product-list article {
-    display: grid;
-    grid-template-columns: 3rem minmax(0, 1fr) auto;
+  .story {
+    margin-bottom: var(--tk-spacing-12);
+    padding: clamp(2rem, 6vw, 5rem);
+    border-radius: var(--tk-radius-2xl);
+    background: var(--tk-color-bg-subtle);
+  }
+
+  .story > p:last-child {
+    max-width: 45rem;
+    color: var(--tk-color-fg-muted);
+    font-size: var(--tk-font-size-lg);
+    line-height: var(--tk-line-height-relaxed);
+  }
+
+  footer {
+    display: flex;
     align-items: center;
-    gap: var(--tk-spacing-3);
-    padding-bottom: var(--tk-spacing-3);
-    border-bottom: 1px solid var(--tk-color-border);
-  }
-
-  .product-list article:last-child {
-    padding-bottom: 0;
-    border-bottom: 0;
-  }
-
-  .product-list img {
-    width: 3rem;
-    height: 3rem;
-    border-radius: var(--tk-radius-lg);
-    object-fit: cover;
-  }
-
-  .product-list h3,
-  .product-list p {
-    margin: 0;
-  }
-
-  .product-list h3,
-  .product-list strong {
-    color: var(--tk-color-fg);
+    justify-content: space-between;
+    gap: var(--tk-spacing-5);
+    padding-block: var(--tk-spacing-8);
+    border-top: 1px solid var(--tk-color-border);
+    color: var(--tk-color-fg-muted);
     font-size: var(--tk-font-size-sm);
   }
 
-  .product-list p {
-    overflow: hidden;
-    color: var(--tk-color-fg-muted);
-    font-size: var(--tk-font-size-xs);
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  footer a {
+    color: inherit;
+    text-decoration: none;
   }
 
-  @media (max-width: 64rem) {
-    .dashboard-grid {
+  .footer-brand {
+    color: var(--tk-color-fg);
+    font-size: var(--tk-font-size-lg);
+    font-weight: var(--tk-font-weight-bold);
+  }
+
+  footer nav {
+    display: flex;
+    gap: var(--tk-spacing-4);
+  }
+
+  @media (max-width: 60rem) {
+    .hero {
       grid-template-columns: 1fr;
+    }
+
+    .hero-visual {
+      min-height: 25rem;
+    }
+
+    .product-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
 
   @media (max-width: 42rem) {
-    .stats {
+    .hero {
+      min-height: auto;
+    }
+
+    dl,
+    .product-grid {
       grid-template-columns: 1fr;
+    }
+
+    .trust-strip {
+      flex-wrap: wrap;
+    }
+
+    .section-heading,
+    footer {
+      align-items: flex-start;
+      flex-direction: column;
     }
   }
 </style>
-
-<script>
-  import { authClient } from "../lib/auth-client";
-
-  document.getElementById("sign-out")?.addEventListener("click", async () => {
-    await authClient.signOut();
-    location.href = "/login";
-  });
-</script>

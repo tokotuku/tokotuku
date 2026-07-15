@@ -2,11 +2,14 @@
 import AppButton from "@tokotuku-starter/ui/AppButton.astro";
 import AppInput from "@tokotuku-starter/ui/AppInput.astro";
 import Layout from "../layouts/Layout.astro";
+
+const requestedNext = Astro.url.searchParams.get("next") ?? "/";
+const next = requestedNext.startsWith("/") && !requestedNext.startsWith("//") ? requestedNext : "/";
 ---
 
 <Layout title="Sign in — Tokotuku starter">
   <main class="auth-page">
-    <div id="login-page" class="auth-form">
+    <div id="login-page" class="auth-form" data-next={next}>
       <h1>Sign in</h1>
       <AppInput label="Email" type="email" name="email" required />
       <AppInput label="Password" type="password" name="password" required />
@@ -66,7 +69,7 @@ import Layout from "../layouts/Layout.astro";
       return;
     }
 
-    location.href = "/";
+    location.href = container?.dataset.next ?? "/";
   }
 
   button?.addEventListener("click", submit);

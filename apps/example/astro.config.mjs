@@ -7,10 +7,13 @@ export default defineConfig({
   publicDir: "../../template/apps/web/public",
   output: "server",
   server: {
+    host: "127.0.0.1",
     port: 4400,
   },
   adapter: cloudflare({
     configPath: "../../template/apps/web/wrangler.jsonc",
-    persistState: "../../template/apps/web/.wrangler/state",
+    persistState: {
+      path: "../../template/apps/web/.wrangler/state",
+    },
   }),
 });

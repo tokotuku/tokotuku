@@ -17,8 +17,10 @@
     "./EmptyState.astro": "./src/components/feedback/EmptyState.astro",
     "./PageHeader.astro": "./src/components/layout/PageHeader.astro",
     "./Pagination.astro": "./src/components/navigation/Pagination.astro",
+    "./ProductCard.astro": "./src/components/commerce/ProductCard.astro",
     "./Skeleton.astro": "./src/components/feedback/Skeleton.astro",
     "./StatCard.astro": "./src/components/data-display/StatCard.astro",
+    "./StoreHeader.astro": "./src/components/layout/StoreHeader.astro",
     "./Tabs.astro": "./src/components/navigation/Tabs.astro",
     "./chart": "./src/charts/types.ts"
   },

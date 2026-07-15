@@ -1,0 +1,63 @@
+---
+import { env } from "cloudflare:workers";
+import StoreHeader from "@tokotuku-starter/ui/StoreHeader.astro";
+import Layout from "../../layouts/Layout.astro";
+
+const id = Number(Astro.params.id);
+const product = await env.DB.prepare(
+  "SELECT id, name, description, price_cents, image_key FROM products WHERE id = ?",
+)
+  .bind(id)
+  .first<{
+    id: number;
+    name: string;
+    description: string;
+    price_cents: number;
+    image_key: string;
+  }>();
+
+if (!product) return new Response("Product not found", { status: 404 });
+
+const currency = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
+const imageUrl = `/api/images/${product.image_key}`;
+const serialized = JSON.stringify({
+  id: product.id,
+  name: product.name,
+  priceCents: product.price_cents,
+  imageUrl,
+});
+---
+
+<Layout title={`${product.name} — Tokotuku`}>
+  <StoreHeader current="products" />
+  <main>
+    <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="/">Home</a><span>/</span><a href="/products">Shop</a><span>/</span><span>{product.name}</span></nav>
+    <div class="product-detail">
+      <div class="media"><img src={imageUrl} alt="" /></div>
+      <section>
+        <p class="eyebrow">Tokotuku essential</p>
+        <h1>{product.name}</h1>
+        <p class="price">{currency.format(product.price_cents / 100)}</p>
+        <p class="description">{product.description}</p>
+        <button type="button" data-add-to-cart data-product={serialized}>Add to cart</button>
+        <ul><li>Free shipping over $50</li><li>30-day straightforward returns</li><li>Secure checkout-ready foundation</li></ul>
+      </section>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  main { width: min(100% - calc(var(--tk-spacing-4) * 2), 76rem); margin-inline: auto; padding-block: var(--tk-spacing-6) var(--tk-spacing-12); }
+  .breadcrumbs { display: flex; gap: var(--tk-spacing-2); margin-bottom: var(--tk-spacing-6); color: var(--tk-color-fg-muted); font-size: var(--tk-font-size-sm); }
+  .breadcrumbs a { color: inherit; }
+  .product-detail { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(20rem, 0.9fr); gap: clamp(2rem, 7vw, 6rem); align-items: center; }
+  .media { overflow: hidden; aspect-ratio: 1; border-radius: var(--tk-radius-2xl); background: var(--tk-color-bg-subtle); }
+  img { width: 100%; height: 100%; object-fit: cover; }
+  .eyebrow { margin: 0; color: var(--tk-color-accent); font-size: var(--tk-font-size-xs); font-weight: var(--tk-font-weight-bold); letter-spacing: 0.1em; text-transform: uppercase; }
+  h1 { margin: var(--tk-spacing-3) 0; color: var(--tk-color-fg); font-size: clamp(3rem, 7vw, 5.5rem); letter-spacing: -0.06em; line-height: 0.95; }
+  .price { color: var(--tk-color-fg); font-size: var(--tk-font-size-2xl); font-weight: var(--tk-font-weight-bold); }
+  .description { color: var(--tk-color-fg-muted); font-size: var(--tk-font-size-lg); line-height: var(--tk-line-height-relaxed); }
+  button { width: 100%; min-height: 3.25rem; margin-top: var(--tk-spacing-4); border: 0; border-radius: var(--tk-radius-md); background: var(--tk-color-accent); color: var(--tk-color-accent-fg); cursor: pointer; font: inherit; font-weight: var(--tk-font-weight-bold); }
+  ul { display: grid; gap: var(--tk-spacing-2); margin-top: var(--tk-spacing-5); padding: var(--tk-spacing-5) 0 0; border-top: 1px solid var(--tk-color-border); color: var(--tk-color-fg-muted); font-size: var(--tk-font-size-sm); list-style-position: inside; }
+  @media (max-width: 48rem) { .product-detail { grid-template-columns: 1fr; } }
+</style>

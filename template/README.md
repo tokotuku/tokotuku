@@ -20,6 +20,15 @@ The starter UI includes its dashboard shell, navigation, feedback states, data d
 tables, and statistics. Charts use Flint Chart as the declarative compiler and a modular
 ECharts 6 SVG runtime. See `packages/ui/README.md` for the inventory and chart API.
 
+## Application routes
+
+- `/` is the public storefront and featured catalog.
+- `/products` and `/products/[id]` are public shopping routes backed by D1 and R2.
+- `/cart` keeps the starter cart in local storage until an order backend is connected.
+- `/checkout` requires Better Auth and marks the payment/order integration boundary.
+- `/admin` is the authenticated commerce dashboard with the Flint/ECharts analytics view.
+- `/login` and `/register` handle customer and operator authentication.
+
 ## Start
 
 ```sh

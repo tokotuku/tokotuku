@@ -17,6 +17,8 @@ bun run example
 ```
 
 Open `http://localhost:4400`, register a local account, and use the seeded store dashboard.
+The root route is a public storefront. Use `/admin` for the authenticated dashboard; the
+example shares the template's local D1 and R2 persistence so both surfaces see the same data.
 
 Initialize the local Cloudflare resources once if needed:
 

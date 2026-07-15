@@ -1,0 +1,322 @@
+---
+import { env } from "cloudflare:workers";
+import Alert from "@tokotuku-starter/ui/Alert.astro";
+import AppButton from "@tokotuku-starter/ui/AppButton.astro";
+import AppShell from "@tokotuku-starter/ui/AppShell.astro";
+import AppSidebar from "@tokotuku-starter/ui/AppSidebar.astro";
+import AppTopbar from "@tokotuku-starter/ui/AppTopbar.astro";
+import Badge from "@tokotuku-starter/ui/Badge.astro";
+import Chart from "@tokotuku-starter/ui/Chart.astro";
+import type { ChartInput } from "@tokotuku-starter/ui/chart";
+import DataTable from "@tokotuku-starter/ui/DataTable.astro";
+import PageHeader from "@tokotuku-starter/ui/PageHeader.astro";
+import StatCard from "@tokotuku-starter/ui/StatCard.astro";
+import Tabs from "@tokotuku-starter/ui/Tabs.astro";
+import Layout from "../../layouts/Layout.astro";
+import { createAuth } from "../../lib/auth";
+
+const auth = createAuth(env, Astro.url.origin);
+const session = await auth.api.getSession({ headers: Astro.request.headers });
+
+if (!session) {
+  return Astro.redirect("/login?next=/admin");
+}
+
+const { results: products } = await env.DB.prepare(
+  "SELECT id, name, description, price_cents, image_key FROM products ORDER BY id",
+).all<{
+  id: number;
+  name: string;
+  description: string;
+  price_cents: number;
+  image_key: string;
+}>();
+
+const totalValue = products.reduce((total, product) => total + product.price_cents, 0);
+const averagePrice = products.length > 0 ? totalValue / products.length : 0;
+const currency = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
+
+const priceChart: ChartInput = {
+  data: {
+    values: products.map((product) => ({
+      product: product.name,
+      price: product.price_cents / 100,
+    })),
+  },
+  semantic_types: {
+    product: "Category",
+    price: "Price",
+  },
+  chart_spec: {
+    chartType: "Bar Chart",
+    encodings: {
+      x: "product",
+      y: "price",
+    },
+    baseSize: { width: 720, height: 320 },
+  },
+  field_display_names: {
+    product: "Product",
+    price: "Price",
+  },
+  options: { addTooltips: true },
+};
+
+const tableRows = products.map((product) => ({
+  id: product.id,
+  product: product.name,
+  price: currency.format(product.price_cents / 100),
+  status: "Active",
+}));
+---
+
+<Layout title="Dashboard — Tokotuku starter">
+  <AppShell>
+    <AppSidebar
+      slot="sidebar"
+      brand="Tokotuku"
+      items={[
+        { label: "Overview", href: "/admin", active: true },
+        { label: "Products", href: "/admin#products", badge: String(products.length) },
+        { label: "Analytics", href: "/admin#analytics" },
+        { label: "View store", href: "/" },
+      ]}
+    >
+      <p slot="footer" class="account-label">Signed in as<br /><strong>{session.user.email}</strong></p>
+    </AppSidebar>
+
+    <AppTopbar slot="header" title="Commerce workspace">
+      <div id="sign-out">
+        <AppButton variant="secondary" size="sm">Sign out</AppButton>
+      </div>
+    </AppTopbar>
+
+    <PageHeader
+      eyebrow="Dashboard"
+      title={`Welcome back, ${session.user.name}`}
+      description="A complete starter surface built from Tokotuku primitives, Cloudflare data, and Flint-powered charts."
+    >
+      <div slot="actions">
+        <AppButton>Add product</AppButton>
+      </div>
+    </PageHeader>
+
+    <Alert title="Starter is connected" tone="success">
+      Better Auth is protecting this page, products are loaded from D1, and images are served from R2.
+    </Alert>
+
+    <section class="stats" aria-label="Product statistics">
+      <StatCard
+        label="Active products"
+        value={String(products.length)}
+        change="Live from D1"
+        trend="up"
+      />
+      <StatCard
+        label="Catalog value"
+        value={currency.format(totalValue / 100)}
+        change="Across all products"
+      />
+      <StatCard
+        label="Average price"
+        value={currency.format(averagePrice / 100)}
+        change="Current catalog"
+      />
+    </section>
+
+    <Tabs
+      items={[
+        { label: "Overview", href: "/admin", active: true },
+        { label: "Products", href: "/admin#products", count: products.length },
+        { label: "Activity", href: "/admin#activity" },
+      ]}
+    />
+
+    <section id="analytics" class="dashboard-grid">
+      <Chart
+        input={priceChart}
+        title="Catalog price comparison"
+        description="Price in US dollars for every active product. Select a bar to emit a chart-select event."
+      />
+
+      <aside class="product-preview">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">R2 assets</p>
+            <h2>Product preview</h2>
+          </div>
+          <Badge tone="accent">{products.length} items</Badge>
+        </div>
+        <div class="product-list">
+          {
+            products.map((product) => (
+              <article>
+                <img src={`/api/images/${product.image_key}`} alt="" />
+                <div>
+                  <h3>{product.name}</h3>
+                  <p>{product.description}</p>
+                </div>
+                <strong>{currency.format(product.price_cents / 100)}</strong>
+              </article>
+            ))
+          }
+        </div>
+      </aside>
+    </section>
+
+    <section id="products" class="products-section">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Data display</p>
+          <h2>Products</h2>
+        </div>
+        <Badge tone="success">Operational</Badge>
+      </div>
+      <DataTable
+        caption="Active products"
+        columns={[
+          { key: "id", label: "ID" },
+          { key: "product", label: "Product" },
+          { key: "price", label: "Price", align: "end" },
+          { key: "status", label: "Status", align: "center" },
+        ]}
+        rows={tableRows}
+      />
+    </section>
+  </AppShell>
+</Layout>
+
+<style>
+  .account-label {
+    margin: 0;
+    overflow: hidden;
+    color: var(--tk-color-fg-muted);
+    font-size: var(--tk-font-size-xs);
+    text-overflow: ellipsis;
+  }
+
+  .account-label strong {
+    color: var(--tk-color-fg);
+    font-weight: var(--tk-font-weight-medium);
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--tk-spacing-4);
+    margin-block: var(--tk-spacing-5) var(--tk-spacing-6);
+  }
+
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(18rem, 0.8fr);
+    gap: var(--tk-spacing-5);
+    margin-top: var(--tk-spacing-6);
+  }
+
+  .product-preview,
+  .products-section {
+    padding: var(--tk-spacing-5);
+    border: 1px solid var(--tk-color-border);
+    border-radius: var(--tk-radius-xl);
+    background: var(--tk-color-bg);
+    box-shadow: var(--tk-shadow-sm);
+  }
+
+  .products-section {
+    margin-top: var(--tk-spacing-5);
+  }
+
+  .section-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--tk-spacing-4);
+    margin-bottom: var(--tk-spacing-4);
+  }
+
+  .section-heading h2,
+  .section-heading p {
+    margin: 0;
+  }
+
+  .section-heading h2 {
+    color: var(--tk-color-fg);
+    font-size: var(--tk-font-size-lg);
+  }
+
+  .eyebrow {
+    margin-bottom: var(--tk-spacing-1) !important;
+    color: var(--tk-color-accent);
+    font-size: var(--tk-font-size-xs);
+    font-weight: var(--tk-font-weight-semibold);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .product-list {
+    display: grid;
+    gap: var(--tk-spacing-3);
+  }
+
+  .product-list article {
+    display: grid;
+    grid-template-columns: 3rem minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--tk-spacing-3);
+    padding-bottom: var(--tk-spacing-3);
+    border-bottom: 1px solid var(--tk-color-border);
+  }
+
+  .product-list article:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+  }
+
+  .product-list img {
+    width: 3rem;
+    height: 3rem;
+    border-radius: var(--tk-radius-lg);
+    object-fit: cover;
+  }
+
+  .product-list h3,
+  .product-list p {
+    margin: 0;
+  }
+
+  .product-list h3,
+  .product-list strong {
+    color: var(--tk-color-fg);
+    font-size: var(--tk-font-size-sm);
+  }
+
+  .product-list p {
+    overflow: hidden;
+    color: var(--tk-color-fg-muted);
+    font-size: var(--tk-font-size-xs);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 64rem) {
+    .dashboard-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 42rem) {
+    .stats {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  import { authClient } from "../../lib/auth-client";
+
+  document.getElementById("sign-out")?.addEventListener("click", async () => {
+    await authClient.signOut();
+    location.href = "/login";
+  });
+</script>

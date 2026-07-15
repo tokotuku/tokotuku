@@ -1,0 +1,118 @@
+---
+import { env } from "cloudflare:workers";
+import StoreHeader from "@tokotuku-starter/ui/StoreHeader.astro";
+import Layout from "../layouts/Layout.astro";
+
+const { results: products } = await env.DB.prepare(
+  "SELECT id, name, description, price_cents, image_key FROM products ORDER BY id",
+).all<{
+  id: number;
+  name: string;
+  description: string;
+  price_cents: number;
+  image_key: string;
+}>();
+---
+
+<Layout title="Cart — Tokotuku">
+  <StoreHeader current="cart" />
+  <main>
+    <header><p>Shopping bag</p><h1>Your cart</h1></header>
+    <div class="cart-layout">
+      <section class="cart-items" aria-label="Cart items">
+        <div class="empty" data-cart-empty><h2>Your cart is ready for something useful.</h2><p>Explore the collection and add a product to get started.</p><a href="/products">Shop products</a></div>
+        {
+          products.map((product) => (
+            <article data-cart-row data-product-id={product.id} hidden>
+              <img src={`/api/images/${product.image_key}`} alt="" />
+              <div><h2><a href={`/products/${product.id}`}>{product.name}</a></h2><p>{product.description}</p><button type="button" data-remove-item>Remove</button></div>
+              <div class="quantity"><label>Qty <input type="number" min="1" max="99" value="1" data-quantity /></label><strong data-line-total></strong></div>
+            </article>
+          ))
+        }
+      </section>
+      <aside data-cart-summary hidden>
+        <h2>Order summary</h2><div><span>Subtotal</span><strong data-cart-subtotal>$0.00</strong></div><p>Shipping and taxes are calculated at checkout.</p><a href="/login?next=/checkout">Continue to checkout</a>
+      </aside>
+    </div>
+  </main>
+</Layout>
+
+<script is:inline define:vars={{ prices: Object.fromEntries(products.map((product) => [product.id, product.price_cents])) }}>
+  const cartKey = "tokotuku-cart";
+  const currency = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
+
+  function readCart() {
+    try { return JSON.parse(localStorage.getItem(cartKey) ?? "[]"); } catch { return []; }
+  }
+
+  function renderCart() {
+    const cart = readCart();
+    let subtotal = 0;
+    for (const row of document.querySelectorAll("[data-cart-row]")) {
+      const id = Number(row.getAttribute("data-product-id"));
+      const item = cart.find((entry) => entry.id === id);
+      row.hidden = !item;
+      if (!item) continue;
+      const input = row.querySelector("[data-quantity]");
+      input.value = String(item.quantity);
+      const lineTotal = prices[id] * item.quantity;
+      subtotal += lineTotal;
+      row.querySelector("[data-line-total]").textContent = currency.format(lineTotal / 100);
+    }
+    document.querySelector("[data-cart-empty]").hidden = cart.length > 0;
+    document.querySelector("[data-cart-summary]").hidden = cart.length === 0;
+    document.querySelector("[data-cart-subtotal]").textContent = currency.format(subtotal / 100);
+  }
+
+  document.addEventListener("change", (event) => {
+    const input = event.target.closest("[data-quantity]");
+    if (!input) return;
+    const row = input.closest("[data-cart-row]");
+    const id = Number(row.dataset.productId);
+    const cart = readCart();
+    const item = cart.find((entry) => entry.id === id);
+    if (item) item.quantity = Math.max(1, Number(input.value) || 1);
+    localStorage.setItem(cartKey, JSON.stringify(cart));
+    renderCart();
+  });
+
+  document.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-remove-item]");
+    if (!button) return;
+    const id = Number(button.closest("[data-cart-row]").dataset.productId);
+    localStorage.setItem(cartKey, JSON.stringify(readCart().filter((item) => item.id !== id)));
+    renderCart();
+    location.reload();
+  });
+
+  renderCart();
+</script>
+
+<style>
+  main { width: min(100% - calc(var(--tk-spacing-4) * 2), 76rem); margin-inline: auto; padding-block: var(--tk-spacing-10) var(--tk-spacing-12); }
+  header p { margin: 0; color: var(--tk-color-accent); font-size: var(--tk-font-size-xs); font-weight: var(--tk-font-weight-bold); letter-spacing: 0.1em; text-transform: uppercase; }
+  h1 { margin: var(--tk-spacing-2) 0 var(--tk-spacing-8); font-size: clamp(2.5rem, 6vw, 5rem); letter-spacing: -0.05em; }
+  .cart-layout { display: grid; grid-template-columns: minmax(0, 1fr) 22rem; gap: var(--tk-spacing-8); align-items: start; }
+  .cart-items { display: grid; gap: var(--tk-spacing-4); }
+  article { display: grid; grid-template-columns: 7rem minmax(0, 1fr) auto; gap: var(--tk-spacing-4); align-items: center; padding-bottom: var(--tk-spacing-4); border-bottom: 1px solid var(--tk-color-border); }
+  article img { width: 7rem; height: 7rem; border-radius: var(--tk-radius-lg); object-fit: cover; background: var(--tk-color-bg-subtle); }
+  article h2, article p { margin: 0; }
+  article h2 { font-size: var(--tk-font-size-lg); }
+  article h2 a { color: var(--tk-color-fg); text-decoration: none; }
+  article p { margin-top: var(--tk-spacing-1); color: var(--tk-color-fg-muted); font-size: var(--tk-font-size-sm); }
+  article button { margin-top: var(--tk-spacing-2); padding: 0; border: 0; background: transparent; color: var(--tk-color-danger); cursor: pointer; font: inherit; font-size: var(--tk-font-size-xs); }
+  .quantity { display: grid; justify-items: end; gap: var(--tk-spacing-3); }
+  .quantity label { color: var(--tk-color-fg-muted); font-size: var(--tk-font-size-xs); }
+  input { width: 3.5rem; margin-left: var(--tk-spacing-1); padding: var(--tk-spacing-2); border: 1px solid var(--tk-color-border); border-radius: var(--tk-radius-md); background: var(--tk-color-bg); color: var(--tk-color-fg); }
+  aside { padding: var(--tk-spacing-5); border: 1px solid var(--tk-color-border); border-radius: var(--tk-radius-xl); background: var(--tk-color-bg-subtle); }
+  aside h2 { margin-top: 0; }
+  aside div { display: flex; justify-content: space-between; padding-block: var(--tk-spacing-4); border-block: 1px solid var(--tk-color-border); }
+  aside p { color: var(--tk-color-fg-muted); font-size: var(--tk-font-size-xs); }
+  aside a, .empty a { display: block; margin-top: var(--tk-spacing-4); padding: var(--tk-spacing-3); border-radius: var(--tk-radius-md); background: var(--tk-color-accent); color: var(--tk-color-accent-fg); font-size: var(--tk-font-size-sm); font-weight: var(--tk-font-weight-bold); text-align: center; text-decoration: none; }
+  .empty { padding: var(--tk-spacing-8); border: 1px dashed var(--tk-color-border); border-radius: var(--tk-radius-xl); text-align: center; }
+  .empty h2 { margin-top: 0; }
+  .empty p { color: var(--tk-color-fg-muted); }
+  .empty a { width: fit-content; margin-inline: auto; }
+  @media (max-width: 48rem) { .cart-layout { grid-template-columns: 1fr; } article { grid-template-columns: 5rem minmax(0, 1fr); } article img { width: 5rem; height: 5rem; } .quantity { grid-column: 2; justify-items: start; } }
+</style>

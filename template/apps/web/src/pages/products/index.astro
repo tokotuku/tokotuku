@@ -1,0 +1,57 @@
+---
+import { env } from "cloudflare:workers";
+import ProductCard from "@tokotuku-starter/ui/ProductCard.astro";
+import StoreHeader from "@tokotuku-starter/ui/StoreHeader.astro";
+import Layout from "../../layouts/Layout.astro";
+
+const { results: products } = await env.DB.prepare(
+  "SELECT id, name, description, price_cents, image_key FROM products ORDER BY id",
+).all<{
+  id: number;
+  name: string;
+  description: string;
+  price_cents: number;
+  image_key: string;
+}>();
+const currency = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
+---
+
+<Layout title="Shop — Tokotuku">
+  <StoreHeader current="products" />
+  <main>
+    <header class="page-header">
+      <p>Shop all</p>
+      <h1>Useful by nature.</h1>
+      <span>{products.length} products, ready for everyday life.</span>
+    </header>
+    <div class="product-grid">
+      {
+        products.map((product) => (
+          <ProductCard
+            id={product.id}
+            name={product.name}
+            description={product.description}
+            price={currency.format(product.price_cents / 100)}
+            priceCents={product.price_cents}
+            imageUrl={`/api/images/${product.image_key}`}
+          />
+        ))
+      }
+    </div>
+  </main>
+</Layout>
+
+<style>
+  main {
+    width: min(100% - calc(var(--tk-spacing-4) * 2), 76rem);
+    margin-inline: auto;
+    padding-block: var(--tk-spacing-10) var(--tk-spacing-12);
+  }
+  .page-header { margin-bottom: var(--tk-spacing-8); }
+  .page-header p { margin: 0; color: var(--tk-color-accent); font-size: var(--tk-font-size-xs); font-weight: var(--tk-font-weight-bold); letter-spacing: 0.1em; text-transform: uppercase; }
+  h1 { margin: var(--tk-spacing-2) 0; color: var(--tk-color-fg); font-size: clamp(2.5rem, 6vw, 5rem); letter-spacing: -0.05em; }
+  .page-header span { color: var(--tk-color-fg-muted); }
+  .product-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--tk-spacing-5); }
+  @media (max-width: 60rem) { .product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 38rem) { .product-grid { grid-template-columns: 1fr; } }
+</style>

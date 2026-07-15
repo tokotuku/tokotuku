@@ -1,0 +1,57 @@
+---
+import { env } from "cloudflare:workers";
+import StoreHeader from "@tokotuku-starter/ui/StoreHeader.astro";
+import Layout from "../layouts/Layout.astro";
+import { createAuth } from "../lib/auth";
+
+const auth = createAuth(env, Astro.url.origin);
+const session = await auth.api.getSession({ headers: Astro.request.headers });
+if (!session) return Astro.redirect("/login?next=/checkout");
+---
+
+<Layout title="Checkout — Tokotuku">
+  <StoreHeader />
+  <main>
+    <p class="eyebrow">Secure checkout</p>
+    <h1>Almost yours.</h1>
+    <div class="checkout-grid">
+      <section>
+        <h2>Contact</h2>
+        <label>Email<input type="email" value={session.user.email} /></label>
+        <h2>Shipping address</h2>
+        <div class="fields">
+          <label>Full name<input value={session.user.name} /></label>
+          <label>Address<input autocomplete="street-address" /></label>
+          <label>City<input autocomplete="address-level2" /></label>
+          <label>Postal code<input autocomplete="postal-code" /></label>
+        </div>
+      </section>
+      <aside>
+        <h2>Payment integration</h2>
+        <p>
+          The starter stops before charging real money. Connect your payment provider here,
+          persist the cart as an order in D1, then clear the client cart after confirmation.
+        </p>
+        <button type="button" disabled>Payment provider required</button>
+        <a href="/cart">← Return to cart</a>
+      </aside>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  main { width: min(100% - calc(var(--tk-spacing-4) * 2), 64rem); margin-inline: auto; padding-block: var(--tk-spacing-10) var(--tk-spacing-12); }
+  .eyebrow { margin: 0; color: var(--tk-color-accent); font-size: var(--tk-font-size-xs); font-weight: var(--tk-font-weight-bold); letter-spacing: 0.1em; text-transform: uppercase; }
+  h1 { margin: var(--tk-spacing-2) 0 var(--tk-spacing-8); font-size: clamp(2.5rem, 6vw, 5rem); letter-spacing: -0.05em; }
+  .checkout-grid { display: grid; grid-template-columns: minmax(0, 1fr) 20rem; gap: var(--tk-spacing-8); align-items: start; }
+  section, aside { padding: var(--tk-spacing-6); border: 1px solid var(--tk-color-border); border-radius: var(--tk-radius-xl); }
+  section h2:first-child, aside h2 { margin-top: 0; }
+  label { display: grid; gap: var(--tk-spacing-2); color: var(--tk-color-fg-muted); font-size: var(--tk-font-size-sm); }
+  input { min-height: 2.75rem; padding-inline: var(--tk-spacing-3); border: 1px solid var(--tk-color-border); border-radius: var(--tk-radius-md); background: var(--tk-color-bg); color: var(--tk-color-fg); font: inherit; }
+  .fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--tk-spacing-4); }
+  aside { background: var(--tk-color-bg-subtle); }
+  aside p { color: var(--tk-color-fg-muted); font-size: var(--tk-font-size-sm); line-height: var(--tk-line-height-relaxed); }
+  button { width: 100%; min-height: 2.75rem; border: 0; border-radius: var(--tk-radius-md); background: var(--tk-color-border); color: var(--tk-color-fg-muted); font: inherit; font-weight: var(--tk-font-weight-semibold); }
+  aside a { display: block; margin-top: var(--tk-spacing-4); color: var(--tk-color-accent); font-size: var(--tk-font-size-sm); }
+  @media (max-width: 48rem) { .checkout-grid, .fields { grid-template-columns: 1fr; } }
+</style>
