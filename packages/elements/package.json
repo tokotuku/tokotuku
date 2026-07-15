@@ -15,6 +15,18 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
+    "./button": {
+      "types": "./dist/button.d.ts",
+      "import": "./dist/button.js"
+    },
+    "./input": {
+      "types": "./dist/input.d.ts",
+      "import": "./dist/input.js"
+    },
+    "./card": {
+      "types": "./dist/card.d.ts",
+      "import": "./dist/card.js"
+    },
     "./package.json": "./package.json"
   },
   "dependencies": {
@@ -24,7 +36,8 @@
     "lit": "3.3.3"
   },
   "devDependencies": {
-    "@tokotuku/config": "workspace:*"
+    "@tokotuku/config": "workspace:*",
+    "@tokotuku/testing": "workspace:*"
   },
   "scripts": {
     "build": "tsup",

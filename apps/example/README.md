@@ -40,19 +40,31 @@ All commands are run from the root of the project, from a terminal:
 
 ## ☁️ Cloudflare (D1 + R2) local setup
 
-This app runs on Cloudflare Workers (D1 for the `products` table, R2 for product images).
-Local development is fully offline — no Cloudflare account or `wrangler login` required.
+This app runs on Cloudflare Workers (D1 for the `products` table and Better Auth's own
+tables, R2 for product images). Local development is fully offline — no Cloudflare account
+or `wrangler login` required.
 
-Run these once, from `apps/example`, in order:
+Create a `.dev.vars` file (gitignored) with a local auth secret before running the dev server:
 
 ```sh
-bun install                # installs @astrojs/cloudflare + wrangler
+echo "BETTER_AUTH_SECRET=$(node -e "console.log(require('crypto').randomBytes(32).toString('base64'))")" > .dev.vars
+```
+
+Then, run these once, from `apps/example`, in order:
+
+```sh
+bun install                # installs @astrojs/cloudflare, better-auth, wrangler, etc.
 bun run cf-typegen         # generates worker-configuration.d.ts from wrangler.jsonc
-bun run db:migrate:local   # applies migrations/0000_create_products_table.sql to local D1
+bun run db:migrate:local   # applies migrations/0000_create_products_table.sql and
+                            # 0001_create_auth_tables.sql (Better Auth's user/session/
+                            # account/verification tables) to local D1
 bun run db:seed:local      # inserts sample rows from seed/seed.sql
 bun run r2:seed:local      # uploads seed/images/*.svg into local R2
 bun run dev                # astro dev on http://localhost:4321
 ```
+
+The products page (`/`) redirects to `/login` unless signed in. Register an account at
+`/register`, which signs you in and redirects back to `/`.
 
 All local state lives in `.wrangler/state/` (gitignored) and is shared between the `wrangler`
 CLI commands above and `astro dev` (via the Cloudflare adapter's `platformProxy`). Delete
@@ -74,7 +86,8 @@ run them yourself:
 wrangler login
 wrangler d1 create tokotuku-example-products
 # copy the returned database_id into wrangler.jsonc -> d1_databases[0].database_id
-bun run db:migrate:remote
+wrangler secret put BETTER_AUTH_SECRET   # paste a generated secret, same idea as .dev.vars
+bun run db:migrate:remote        # applies both migrations, including auth tables
 bun run db:seed:remote          # optional
 wrangler r2 bucket create tokotuku-example-images
 wrangler r2 object put tokotuku-example-images/products/widget.svg --remote --file=./seed/images/widget.svg --content-type=image/svg+xml

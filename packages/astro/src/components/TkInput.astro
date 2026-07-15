@@ -1,0 +1,29 @@
+---
+import type { TkInputProps } from "../types.js";
+
+type Props = TkInputProps;
+
+const {
+  label = "",
+  type = "text",
+  name = "",
+  value = "",
+  placeholder = "",
+  required = false,
+  disabled = false,
+} = Astro.props;
+---
+
+<tk-input
+  label={label}
+  type={type}
+  name={name}
+  value={value}
+  placeholder={placeholder}
+  required={required ? true : undefined}
+  disabled={disabled ? true : undefined}
+></tk-input>
+
+<script>
+  import "@tokotuku/elements/input";
+</script>

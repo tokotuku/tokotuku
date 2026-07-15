@@ -7,9 +7,14 @@ dependsOn:
   - "elements"
 
 tasks:
-  # No "typecheck" task yet: `tsc` errors on zero input files (TS18003), and
-  # src/ is intentionally empty until the first wrapper component exists.
-  # Add it back once packages/astro/src has real content.
+  typecheck:
+    command: "tsc --noEmit -p tsconfig.json"
+    deps:
+      - "elements:build"
+    inputs:
+      - "src/**/*"
+      - "tsconfig.json"
+
   lint:
     command: "biome check ."
     inputs:

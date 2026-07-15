@@ -1,5 +1,16 @@
 ---
 import { env } from "cloudflare:workers";
+import TkButton from "@tokotuku/astro/TkButton.astro";
+import TkCard from "@tokotuku/astro/TkCard.astro";
+import Layout from "../layouts/Layout.astro";
+import { createAuth } from "../lib/auth";
+
+const auth = createAuth(env, Astro.url.origin);
+const session = await auth.api.getSession({ headers: Astro.request.headers });
+
+if (!session) {
+  return Astro.redirect("/login");
+}
 
 const { results: products } = await env.DB.prepare(
   "SELECT id, name, description, price_cents, image_key FROM products ORDER BY id",
@@ -12,34 +23,57 @@ const { results: products } = await env.DB.prepare(
 }>();
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro + Cloudflare D1 + R2</title>
-		<style>
-			body { font-family: system-ui, sans-serif; margin: 2rem; }
-			.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.5rem; }
-			.card { border: 1px solid #ddd; border-radius: 8px; padding: 1rem; }
-			.card img { width: 100%; border-radius: 4px; }
-			.price { font-weight: 600; }
-		</style>
-	</head>
-	<body>
-		<h1>Products</h1>
-		<p>Rows from D1, images streamed from R2 through <code>/api/images/[...key]</code>.</p>
-		<div class="grid">
-			{products.map((product) => (
-				<div class="card">
-					<img src={`/api/images/${product.image_key}`} alt={product.name} />
-					<h2>{product.name}</h2>
-					<p>{product.description}</p>
-					<p class="price">${(product.price_cents / 100).toFixed(2)}</p>
-				</div>
-			))}
-		</div>
-	</body>
-</html>
+<Layout title="Astro + Cloudflare D1 + R2">
+  <main class="page">
+    <header class="page-header">
+      <div>
+        <h1>Products</h1>
+        <p>Rows from D1, images streamed from R2 through <code>/api/images/[...key]</code>.</p>
+      </div>
+      <div id="sign-out">
+        <TkButton variant="secondary">Sign out</TkButton>
+      </div>
+    </header>
+    <div class="grid">
+      {
+        products.map((product) => (
+          <TkCard>
+            <img slot="media" src={`/api/images/${product.image_key}`} alt={product.name} />
+            <h2>{product.name}</h2>
+            <p>{product.description}</p>
+            <span slot="footer">${(product.price_cents / 100).toFixed(2)}</span>
+          </TkCard>
+        ))
+      }
+    </div>
+  </main>
+</Layout>
+
+<style>
+  .page {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: var(--tk-spacing-8) var(--tk-spacing-4);
+  }
+  .page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--tk-spacing-4);
+    margin-bottom: var(--tk-spacing-6);
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: var(--tk-spacing-6);
+  }
+</style>
+
+<script>
+  import { authClient } from "../lib/auth-client";
+
+  document.getElementById("sign-out")?.addEventListener("click", async () => {
+    await authClient.signOut();
+    location.href = "/login";
+  });
+</script>

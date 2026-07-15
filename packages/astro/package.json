@@ -4,6 +4,12 @@
   "description": "Astro wrappers around @tokotuku/elements Web Components. No business logic lives here — thin pass-through only.",
   "type": "module",
   "sideEffects": true,
+  "exports": {
+    "./TkButton.astro": "./src/components/TkButton.astro",
+    "./TkInput.astro": "./src/components/TkInput.astro",
+    "./TkCard.astro": "./src/components/TkCard.astro",
+    "./package.json": "./package.json"
+  },
   "peerDependencies": {
     "astro": ">=7.0.0"
   },
