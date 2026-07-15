@@ -1,0 +1,17 @@
+$schema: "https://moonrepo.dev/schemas/project.json"
+language: "typescript"
+stack: "frontend"
+layer: "library"
+
+tasks:
+  lint:
+    command: "biome check ."
+    inputs:
+      - "src/**/*"
+      - "*.json"
+
+  typecheck:
+    command: "astro check"
+    inputs:
+      - "src/**/*"
+      - "tsconfig.json"

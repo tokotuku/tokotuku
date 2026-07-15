@@ -1,0 +1,84 @@
+---
+interface Props {
+  title?: string;
+}
+
+const { title = "Workspace" } = Astro.props;
+---
+
+<div class="topbar-inner">
+  <span class="title">{title}</span>
+  <div class="actions">
+    <label>
+      <span class="sr-only">Color theme</span>
+      <select data-theme-select aria-label="Color theme">
+        <option value="light">Light</option>
+        <option value="dark">Dark</option>
+        <option value="high-contrast">High contrast</option>
+      </select>
+    </label>
+    <slot />
+  </div>
+</div>
+
+<script>
+  const select = document.querySelector<HTMLSelectElement>("[data-theme-select]");
+  const savedTheme = localStorage.getItem("tokotuku-theme") ?? "light";
+
+  document.documentElement.dataset.theme = savedTheme;
+  if (select) select.value = savedTheme;
+
+  select?.addEventListener("change", () => {
+    document.documentElement.dataset.theme = select.value;
+    localStorage.setItem("tokotuku-theme", select.value);
+  });
+</script>
+
+<style>
+  .topbar-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 4rem;
+    padding-inline: var(--tk-spacing-5);
+  }
+
+  .title {
+    color: var(--tk-color-fg);
+    font-size: var(--tk-font-size-sm);
+    font-weight: var(--tk-font-weight-semibold);
+  }
+
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: var(--tk-spacing-3);
+  }
+
+  select {
+    min-height: 2.25rem;
+    padding-inline: var(--tk-spacing-3);
+    border: 1px solid var(--tk-color-border);
+    border-radius: var(--tk-radius-md);
+    background: var(--tk-color-bg);
+    color: var(--tk-color-fg);
+    font: inherit;
+  }
+
+  select:focus-visible {
+    outline: 2px solid var(--tk-color-focus-ring);
+    outline-offset: 2px;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+</style>

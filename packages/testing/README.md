@@ -47,4 +47,5 @@ test("has no accessibility violations", async ({ page }) => {
 ## Trade-offs / future work
 
 - No auto-wired Vitest `setupFiles` convention yet (e.g. automatic `afterEach(cleanupFixtures)`) — call `cleanupFixtures` explicitly for now. Revisit once several components share the exact same setup boilerplate.
-- No Playwright fixtures for navigating to a component's demo page yet, since `apps/playground` has no real per-component pages to navigate to.
+- No Playwright fixtures for navigating to a component's demo page yet. Browser-level starter
+  coverage should target the complete e-commerce app through `apps/example`.

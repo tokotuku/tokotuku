@@ -13,7 +13,7 @@
       "!**/.astro",
       "!**/coverage",
       "!**/playwright-report",
-      "!apps/example"
+      "!template"
     ]
   },
   "formatter": {
@@ -58,16 +58,6 @@
     }
   },
   "overrides": [
-    {
-      "includes": ["packages/cli/**"],
-      "linter": {
-        "rules": {
-          "suspicious": {
-            "noConsole": "off"
-          }
-        }
-      }
-    },
     {
       "includes": ["**/*.astro"],
       "linter": {

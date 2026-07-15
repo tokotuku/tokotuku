@@ -1,0 +1,49 @@
+---
+interface Props {
+  lines?: number;
+}
+
+const { lines = 3 } = Astro.props;
+---
+
+<div class="skeleton" aria-busy="true" aria-label="Loading content">
+  {
+    Array.from({ length: lines }, (_, index) => (
+      <span style={`--line-width:${Math.max(45, 100 - index * 12)}%`}></span>
+    ))
+  }
+</div>
+
+<style>
+  .skeleton {
+    display: grid;
+    gap: var(--tk-spacing-3);
+  }
+
+  span {
+    display: block;
+    width: var(--line-width);
+    height: 0.875rem;
+    border-radius: var(--tk-radius-full);
+    background: linear-gradient(
+      90deg,
+      var(--tk-color-bg-subtle),
+      color-mix(in srgb, var(--tk-color-border) 70%, var(--tk-color-bg)),
+      var(--tk-color-bg-subtle)
+    );
+    background-size: 200% 100%;
+    animation: shimmer var(--tk-duration-slow) linear infinite;
+  }
+
+  @keyframes shimmer {
+    to {
+      background-position: -200% 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    span {
+      animation: none;
+    }
+  }
+</style>

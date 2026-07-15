@@ -3,20 +3,36 @@ language: "typescript"
 stack: "frontend"
 layer: "application"
 
-tasks:
-  build:
-    command: "astro build"
-    inputs:
-      - "src/**/*"
-      - "astro.config.mjs"
-      - "wrangler.jsonc"
-      - "tsconfig.json"
-    outputs:
-      - "dist"
+dependsOn:
+  - "astro"
+  - "elements"
+  - "theme"
 
+tasks:
   dev:
     command: "astro dev"
     options:
       persistent: true
       runInCI: false
+      cache: false
+
+  build:
+    command: "astro build"
+    deps:
+      - "elements:build"
+      - "theme:build"
+    options:
+      cache: false
+
+  typecheck:
+    command: "astro check"
+    deps:
+      - "elements:build"
+      - "theme:build"
+    options:
+      cache: false
+
+  lint:
+    command: "biome check ."
+    options:
       cache: false

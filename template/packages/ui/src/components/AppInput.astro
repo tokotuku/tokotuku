@@ -1,0 +1,17 @@
+---
+import TkInput from "@tokotuku/astro/TkInput.astro";
+
+interface Props {
+  label?: string;
+  type?: "text" | "email" | "password";
+  name?: string;
+  value?: string;
+  placeholder?: string;
+  required?: boolean;
+  disabled?: boolean;
+}
+
+const props = Astro.props;
+---
+
+<TkInput {...props} />

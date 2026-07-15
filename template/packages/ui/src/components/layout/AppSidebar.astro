@@ -1,0 +1,118 @@
+---
+interface NavigationItem {
+  label: string;
+  href: string;
+  active?: boolean;
+  badge?: string;
+}
+
+interface Props {
+  brand?: string;
+  items: NavigationItem[];
+}
+
+const { brand = "Tokotuku", items } = Astro.props;
+---
+
+<nav class="navigation" aria-label="Primary navigation">
+  <a class="brand" href="/">{brand}</a>
+  <ul>
+    {
+      items.map((item) => (
+        <li>
+          <a href={item.href} aria-current={item.active ? "page" : undefined}>
+            <span>{item.label}</span>
+            {item.badge && <span class="badge">{item.badge}</span>}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+  <div class="footer"><slot name="footer" /></div>
+</nav>
+
+<style>
+  .navigation {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+    padding: var(--tk-spacing-5) var(--tk-spacing-3);
+  }
+
+  .brand {
+    color: var(--tk-color-fg);
+    font-size: var(--tk-font-size-lg);
+    font-weight: var(--tk-font-weight-bold);
+    text-decoration: none;
+    padding: var(--tk-spacing-2) var(--tk-spacing-3) var(--tk-spacing-6);
+  }
+
+  ul {
+    display: grid;
+    gap: var(--tk-spacing-1);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  li a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--tk-spacing-3);
+    padding: var(--tk-spacing-3);
+    border-radius: var(--tk-radius-md);
+    color: var(--tk-color-fg-muted);
+    font-size: var(--tk-font-size-sm);
+    font-weight: var(--tk-font-weight-medium);
+    text-decoration: none;
+  }
+
+  li a:hover {
+    background: var(--tk-color-bg-subtle);
+    color: var(--tk-color-fg);
+  }
+
+  li a[aria-current="page"] {
+    background: color-mix(in srgb, var(--tk-color-accent) 12%, var(--tk-color-bg));
+    color: var(--tk-color-accent);
+  }
+
+  .badge {
+    min-width: 1.5rem;
+    padding: var(--tk-spacing-1) var(--tk-spacing-2);
+    border-radius: var(--tk-radius-full);
+    background: var(--tk-color-bg-subtle);
+    color: var(--tk-color-fg-muted);
+    font-size: var(--tk-font-size-xs);
+    text-align: center;
+  }
+
+  .footer {
+    margin-top: auto;
+    padding: var(--tk-spacing-5) var(--tk-spacing-3) 0;
+  }
+
+  @media (max-width: 48rem) {
+    .navigation {
+      min-height: auto;
+    }
+
+    .brand {
+      padding-bottom: var(--tk-spacing-3);
+    }
+
+    ul {
+      display: flex;
+      overflow-x: auto;
+    }
+
+    li {
+      flex: 0 0 auto;
+    }
+
+    .footer {
+      display: none;
+    }
+  }
+</style>

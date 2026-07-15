@@ -1,31 +1,27 @@
 {
   "name": "example",
+  "version": "0.0.0",
+  "private": true,
   "type": "module",
-  "version": "0.0.1",
-  "engines": {
-    "node": ">=22.12.0"
-  },
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "wrangler dev",
-    "deploy": "astro build && wrangler deploy",
-    "astro": "astro",
-    "cf-typegen": "wrangler types",
-    "db:migrate:local": "wrangler d1 migrations apply DB --local",
-    "db:migrate:remote": "wrangler d1 migrations apply DB --remote",
-    "db:seed:local": "wrangler d1 execute DB --local --file=./seed/seed.sql",
-    "db:seed:remote": "wrangler d1 execute DB --remote --file=./seed/seed.sql",
-    "r2:seed:local": "wrangler r2 object put tokotuku-example-images/products/widget.svg --local --file=./seed/images/widget.svg --content-type=image/svg+xml && wrangler r2 object put tokotuku-example-images/products/gadget.svg --local --file=./seed/images/gadget.svg --content-type=image/svg+xml && wrangler r2 object put tokotuku-example-images/products/gizmo.svg --local --file=./seed/images/gizmo.svg --content-type=image/svg+xml"
+    "typecheck": "astro check",
+    "lint": "biome check ."
   },
   "dependencies": {
     "@astrojs/cloudflare": "^14.1.3",
+    "@tokotuku-starter/ui": "file:../../template/packages/ui",
     "@tokotuku/astro": "workspace:*",
+    "@tokotuku/elements": "workspace:*",
     "@tokotuku/theme": "workspace:*",
     "astro": "^7.0.9",
-    "better-auth": "^1.6.23"
+    "better-auth": "^1.6.23",
+    "echarts": "^6.1.0",
+    "flint-chart": "0.2.1"
   },
   "devDependencies": {
+    "@astrojs/check": "^0.9.4",
     "wrangler": "^4.110.0"
   }
 }

@@ -1,0 +1,42 @@
+---
+interface Props {
+  tone?: "neutral" | "accent" | "success" | "warning" | "danger";
+}
+
+const { tone = "neutral" } = Astro.props;
+---
+
+<span class:list={["badge", `badge--${tone}`]}><slot /></span>
+
+<style>
+  .badge {
+    --badge-color: var(--tk-color-fg-muted);
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    padding: var(--tk-spacing-1) var(--tk-spacing-2);
+    border: 1px solid color-mix(in srgb, var(--badge-color) 30%, transparent);
+    border-radius: var(--tk-radius-full);
+    background: color-mix(in srgb, var(--badge-color) 10%, var(--tk-color-bg));
+    color: var(--badge-color);
+    font-size: var(--tk-font-size-xs);
+    font-weight: var(--tk-font-weight-semibold);
+    line-height: var(--tk-line-height-tight);
+  }
+
+  .badge--accent {
+    --badge-color: var(--tk-color-accent);
+  }
+
+  .badge--success {
+    --badge-color: var(--tk-color-success);
+  }
+
+  .badge--warning {
+    --badge-color: var(--tk-color-warning);
+  }
+
+  .badge--danger {
+    --badge-color: var(--tk-color-danger);
+  }
+</style>

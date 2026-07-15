@@ -30,5 +30,5 @@ import { closeIcon } from "@tokotuku/icons/close";
 
 ## Trade-offs / future work
 
-- **Sprite generation** (listed in the brief) is not implemented yet. It belongs alongside `@tokotuku/cli`'s planned `generate icon` command, which is the natural place to regenerate a sprite sheet whenever an icon is added — building a sprite pipeline before that command exists would be speculative.
+- **Sprite generation** (listed in the brief) is not implemented yet. Add it as a package-local build step once a real sprite consumer exists; the current per-icon exports remain the source of truth.
 - Only two placeholder icons exist (`close`, `chevron-down`) to prove the individual-import and tree-shaking setup works end-to-end.

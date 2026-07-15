@@ -7,8 +7,7 @@ A framework-agnostic Web Components design system with first-class Astro support
 ```
 apps/
   docs/        Documentation site (Astro + Starlight)
-  playground/  Manual testing ground for components (Vite)
-  example/     Standalone Astro starter (unrelated to the design system)
+  example/     Runs the complete e-commerce starter from template/
 packages/
   core/        Framework-agnostic utilities/controllers — zero UI
   elements/    Web Components (tk-* custom elements, Lit + Shadow DOM)
@@ -16,11 +15,45 @@ packages/
   theme/       Light/dark/high-contrast themes built from tokens (CSS variables only)
   icons/       Tree-shakeable SVG icon set
   astro/       Astro wrappers around @tokotuku/elements — no duplicated logic
-  cli/         Developer CLI (create component, generate icon/docs/playground/changelog)
   testing/     Shared Vitest/Playwright/accessibility test helpers
 configs/       Shared tsconfig, tsup, and vitest base configs
 scripts/       Repo maintenance scripts (e.g. commit message validation)
+template/      Standalone Bun + Moon starter source (Astro, Cloudflare, Better Auth, app UI)
 ```
+
+The root workspace develops and publishes the `@tokotuku/*` primitive packages. The
+`template/` directory is intentionally a separate workspace: generated applications consume
+released `@tokotuku/*` packages and keep product-specific composition in `packages/ui`.
+
+## Starter template
+
+`template/` is the source of the opinionated Tokotuku starter:
+
+- Bun workspaces orchestrated by Moonrepo
+- Astro on Cloudflare Workers
+- D1 and R2 bindings
+- Better Auth with login and registration flows
+- `packages/ui` for application-specific components composed from `@tokotuku/elements`
+
+Astro's GitHub template argument accepts a repository and optional branch, but not a nested
+directory. Publish the contents of `template/` at the root of a dedicated template branch or
+repository, then install it with:
+
+```sh
+bun create astro@latest my-app --template <owner>/<repo>#template
+```
+
+The `template` branch is a distribution artifact; `template/` on the main development branch is
+the source of truth.
+
+The root example project is the development entry point for that exact template—there is no
+separate application implementation that can drift from the generated starter:
+
+```sh
+bun run example
+```
+
+Then open `http://localhost:4400`.
 
 ## Requirements
 

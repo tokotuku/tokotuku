@@ -1,0 +1,84 @@
+---
+import AppButton from "@tokotuku-starter/ui/AppButton.astro";
+import AppInput from "@tokotuku-starter/ui/AppInput.astro";
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="Register — Tokotuku starter">
+  <main class="auth-page">
+    <div id="register-page" class="auth-form">
+      <h1>Create an account</h1>
+      <AppInput label="Name" name="name" required />
+      <AppInput label="Email" type="email" name="email" required />
+      <AppInput label="Password" type="password" name="password" required />
+      <p id="register-error" class="error" hidden></p>
+      <AppButton>Create account</AppButton>
+      <p class="switch">Already have an account? <a href="/login">Sign in</a></p>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  .auth-page {
+    display: flex;
+    justify-content: center;
+    padding: var(--tk-spacing-8) var(--tk-spacing-4);
+  }
+  .auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--tk-spacing-4);
+    width: 100%;
+    max-width: 360px;
+  }
+  .error {
+    color: var(--tk-color-danger);
+    font-size: var(--tk-font-size-sm);
+    margin: 0;
+  }
+  .switch {
+    font-size: var(--tk-font-size-sm);
+    color: var(--tk-color-fg-muted);
+  }
+</style>
+
+<script>
+  import { authClient } from "../lib/auth-client";
+
+  const container = document.getElementById("register-page");
+  const errorEl = document.getElementById("register-error");
+  const nameInput = container?.querySelector('tk-input[name="name"]');
+  const emailInput = container?.querySelector('tk-input[name="email"]');
+  const passwordInput = container?.querySelector('tk-input[name="password"]');
+  const button = container?.querySelector("tk-button");
+
+  async function submit() {
+    const name = (nameInput as HTMLElement & { value: string })?.value ?? "";
+    const email = (emailInput as HTMLElement & { value: string })?.value ?? "";
+    const password = (passwordInput as HTMLElement & { value: string })?.value ?? "";
+
+    errorEl?.setAttribute("hidden", "");
+
+    const { error } = await authClient.signUp.email({ name, email, password });
+
+    if (error) {
+      if (errorEl) {
+        errorEl.textContent = error.message ?? "Could not create account.";
+        errorEl.removeAttribute("hidden");
+      }
+      return;
+    }
+
+    location.href = "/";
+  }
+
+  button?.addEventListener("click", submit);
+
+  for (const input of [nameInput, emailInput, passwordInput]) {
+    input?.addEventListener("keydown", (event) => {
+      if ((event as KeyboardEvent).key === "Enter") {
+        submit();
+      }
+    });
+  }
+</script>

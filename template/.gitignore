@@ -1,6 +1,10 @@
+node_modules
 dist
 .astro
 .wrangler
 .dev.vars
 .dev.vars.*
 worker-configuration.d.ts
+coverage
+.moon/cache
+.DS_Store
