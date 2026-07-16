@@ -1,0 +1,31 @@
+---
+title: StoreHeader
+description: Storefront navigation, theme selection, and live cart count.
+sidebar:
+  order: 5
+---
+
+`StoreHeader` provides the public storefront header with Home, Shop, Admin, and Cart navigation.
+
+```astro
+---
+import StoreHeader from "@tokotuku-starter/ui/StoreHeader.astro";
+---
+
+<StoreHeader current="products" />
+```
+
+## Props
+
+| Prop | Type | Required |
+| --- | --- | --- |
+| `current` | `"home" \| "products" \| "cart"` | No |
+
+## Client behavior
+
+- Applies and persists `light`, `dark`, or `high-contrast` document themes.
+- Reads `tokotuku-cart` from local storage and displays the total quantity.
+- Handles clicks on `[data-add-to-cart]` buttons anywhere in the document.
+- Updates matching products and briefly changes the button label to “Added”.
+
+Because those listeners intentionally operate at document scope, this page does not mount an interactive instance inside the Starlight shell. View the complete header in the commerce example with `moon run example:dev`.

@@ -1,0 +1,30 @@
+---
+title: AppTopbar
+description: Workspace title, theme selector, and action area.
+sidebar:
+  order: 3
+---
+
+`AppTopbar` renders a compact workspace heading, a light/dark/high-contrast selector, and a default slot for actions.
+
+```astro
+---
+import AppButton from "@tokotuku-starter/ui/AppButton.astro";
+import AppTopbar from "@tokotuku-starter/ui/AppTopbar.astro";
+---
+
+<AppTopbar title="Commerce workspace">
+  <AppButton variant="secondary" size="sm">Sign out</AppButton>
+</AppTopbar>
+```
+
+## Props and slots
+
+| Name | Kind | Default | Purpose |
+| --- | --- | --- | --- |
+| `title` | Prop (`string`) | `"Workspace"` | Workspace label |
+| default | Slot | — | Actions aligned to the right |
+
+## Theme behavior
+
+The selector writes `light`, `dark`, or `high-contrast` to `document.documentElement.dataset.theme` and persists the choice under `tokotuku-theme` in local storage. Because that behavior intentionally controls the entire document, this docs page does not mount an interactive instance inside Starlight.

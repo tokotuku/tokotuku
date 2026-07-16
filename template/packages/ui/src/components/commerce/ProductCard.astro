@@ -6,9 +6,10 @@ interface Props {
   price: string;
   priceCents: number;
   imageUrl: string;
+  stock?: number;
 }
 
-const { id, name, description, price, priceCents, imageUrl } = Astro.props;
+const { id, name, description, price, priceCents, imageUrl, stock = 1 } = Astro.props;
 const serialized = JSON.stringify({ id, name, priceCents, imageUrl });
 ---
 
@@ -24,7 +25,7 @@ const serialized = JSON.stringify({ id, name, priceCents, imageUrl });
     </div>
     <div class="footer">
       <strong>{price}</strong>
-      <button type="button" data-add-to-cart data-product={serialized}>Add to cart</button>
+      <button type="button" data-add-to-cart data-product={serialized} disabled={stock <= 0}>{stock > 0 ? "Add to cart" : "Sold out"}</button>
     </div>
   </div>
 </article>

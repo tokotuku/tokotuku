@@ -19,7 +19,7 @@ const products = await listProducts(env.DB);
             <article data-cart-row data-product-id={product.id} hidden>
               <img src={`/api/images/${product.imageKey}`} alt="" />
               <div><h2><a href={`/products/${product.id}`}>{product.name}</a></h2><p>{product.description}</p><button type="button" data-remove-item>Remove</button></div>
-              <div class="quantity"><label>Qty <input type="number" min="1" max="99" value="1" data-quantity /></label><strong data-line-total></strong></div>
+              <div class="quantity"><label>Qty <input type="number" min="1" max={product.stock} value="1" data-quantity /></label><span>{product.stock} available</span><strong data-line-total></strong></div>
             </article>
           ))
         }
@@ -31,7 +31,7 @@ const products = await listProducts(env.DB);
   </main>
 </Layout>
 
-<script is:inline define:vars={{ prices: Object.fromEntries(products.map((product) => [product.id, product.priceCents])) }}>
+<script is:inline define:vars={{ prices: Object.fromEntries(products.map((product) => [product.id, product.priceCents])), stocks: Object.fromEntries(products.map((product) => [product.id, product.stock])) }}>
   const cartKey = "tokotuku-cart";
   const currency = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
 
@@ -65,7 +65,7 @@ const products = await listProducts(env.DB);
     const id = Number(row.dataset.productId);
     const cart = readCart();
     const item = cart.find((entry) => entry.id === id);
-    if (item) item.quantity = Math.max(1, Number(input.value) || 1);
+    if (item) item.quantity = Math.min(stocks[id], Math.max(1, Number(input.value) || 1));
     localStorage.setItem(cartKey, JSON.stringify(cart));
     renderCart();
   });
@@ -97,6 +97,7 @@ const products = await listProducts(env.DB);
   article button { margin-top: var(--tk-spacing-2); padding: 0; border: 0; background: transparent; color: var(--tk-color-danger); cursor: pointer; font: inherit; font-size: var(--tk-font-size-xs); }
   .quantity { display: grid; justify-items: end; gap: var(--tk-spacing-3); }
   .quantity label { color: var(--tk-color-fg-muted); font-size: var(--tk-font-size-xs); }
+  .quantity span { color: var(--tk-color-fg-muted); font-size:10px; }
   input { width: 3.5rem; margin-left: var(--tk-spacing-1); padding: var(--tk-spacing-2); border: 1px solid var(--tk-color-border); border-radius: var(--tk-radius-md); background: var(--tk-color-bg); color: var(--tk-color-fg); }
   aside { padding: var(--tk-spacing-5); border: 1px solid var(--tk-color-border); border-radius: var(--tk-radius-xl); background: var(--tk-color-bg-subtle); }
   aside h2 { margin-top: 0; }

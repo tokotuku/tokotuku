@@ -2,8 +2,38 @@
 title: Tokotuku UI
 description: A framework-agnostic Web Components design system with first-class Astro support.
 template: splash
+hero:
+  tagline: Accessible Web Components built with Lit, strict TypeScript, and first-class Astro wrappers.
+  actions:
+    - text: Get started
+      link: /getting-started/
+      icon: right-arrow
+      variant: primary
+    - text: Browse components
+      link: /components/button/
+      icon: open-book
 ---
 
-Tokotuku UI is a Web Components design system built on Lit and strict TypeScript, with first-class Astro wrappers via `@tokotuku/astro`.
+import { Card, CardGrid } from "@astrojs/starlight/components";
 
-No components are published yet — this site will grow alongside `@tokotuku/elements`.
+<CardGrid>
+  <Card title="Framework agnostic" icon="puzzle">
+    Use the `tk-*` custom elements from any HTML or JavaScript application.
+  </Card>
+  <Card title="Astro ready" icon="rocket">
+    Typed `.astro` wrappers register each element and forward props and slots.
+  </Card>
+  <Card title="Themeable" icon="seti:css">
+    Light, dark, and high-contrast palettes are exposed through stable CSS custom properties.
+  </Card>
+</CardGrid>
+
+## Available components
+
+- [`tk-button`](/components/button/) — actions with three variants and sizes.
+- [`tk-input`](/components/input/) — labeled text, email, and password fields.
+- [`tk-card`](/components/card/) — a composable media, body, and footer container.
+
+## Starter component library
+
+The commerce starter also includes 18 application-level Astro components for dashboards and storefronts. Browse them under **Starter components** in the sidebar, beginning with [`AppButton`](/starter/core/app-button/).

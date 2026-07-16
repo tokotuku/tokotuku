@@ -1,0 +1,37 @@
+---
+// biome-ignore lint/correctness/noUnusedImports: Astro consumes this in the set:html directive.
+import { themeCss } from "@tokotuku/theme";
+
+interface Props {
+  label?: string;
+  layout?: "row" | "stack";
+}
+
+const { label = "Component preview", layout = "row" } = Astro.props;
+---
+
+<style is:global set:html={themeCss}></style>
+
+<div class:list={["preview", `preview--${layout}`]} aria-label={label}>
+  <slot />
+</div>
+
+<style>
+  .preview {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--tk-spacing-3);
+    margin-block: var(--tk-spacing-4);
+    padding: var(--tk-spacing-6);
+    border: 1px solid var(--tk-color-border);
+    border-radius: var(--tk-radius-lg);
+    background: var(--tk-color-bg);
+    color: var(--tk-color-fg);
+  }
+
+  .preview--stack {
+    display: grid;
+    align-items: stretch;
+  }
+</style>

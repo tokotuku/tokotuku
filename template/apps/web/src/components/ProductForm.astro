@@ -1,0 +1,57 @@
+---
+import type { Product } from "../lib/products";
+
+interface Props {
+  product?: Product;
+  error?: string;
+}
+
+const { product, error } = Astro.props;
+const fields = Object.entries(product?.customFields ?? {});
+---
+
+{error && <p class="form-error" role="alert">{error}</p>}
+<form method="post" enctype="multipart/form-data" class="product-form">
+  <section class="panel form-section">
+    <div class="section-heading"><div><h2>Informasi produk</h2><p>Data utama yang tampil di katalog.</p></div></div>
+    <div class="form-grid">
+      <label class="wide">Nama produk<input name="name" required maxlength="120" value={product?.name} /></label>
+      <label>SKU<input name="sku" required maxlength="60" value={product?.sku} placeholder="KOPI-001" /></label>
+      <label>Kategori<input name="category" required maxlength="80" value={product?.category} placeholder="Coffee" /></label>
+      <label>Harga<input name="price" required type="number" min="0" step="0.01" value={product ? product.priceCents / 100 : undefined} /></label>
+      <label>Stok<input name="stock" required type="number" min="0" step="1" value={product?.stock ?? 0} /></label>
+      <label class="wide">Deskripsi<textarea name="description" required rows="5" maxlength="2000">{product?.description}</textarea></label>
+      <label class="wide">Gambar {product && <span>(kosongkan jika tidak ingin mengganti)</span>}<input name="image" type="file" accept="image/*" required={!product} /></label>
+      {product && <div class="current-image"><img src={`/api/images/${product.imageKey}`} alt="Gambar produk saat ini" /></div>}
+      <label class="toggle wide"><input name="isActive" type="checkbox" checked={product?.isActive ?? true} /> Produk aktif dan tampil di toko</label>
+    </div>
+  </section>
+
+  <section class="panel form-section">
+    <div class="section-heading"><div><h2>Custom fields</h2><p>Tambahkan atribut bebas seperti warna, bahan, ukuran, atau garansi.</p></div><button type="button" class="admin-button" data-add-field>+ Tambah field</button></div>
+    <div class="custom-fields" data-custom-fields>
+      {fields.map(([key, value]) => (
+        <div class="custom-row"><input name="customKey" value={key} placeholder="Nama field" /><input name="customValue" value={value} placeholder="Nilai" /><button type="button" aria-label="Hapus field" data-remove-field>×</button></div>
+      ))}
+    </div>
+    <template data-field-template><div class="custom-row"><input name="customKey" placeholder="Nama field" /><input name="customValue" placeholder="Nilai" /><button type="button" aria-label="Hapus field" data-remove-field>×</button></div></template>
+  </section>
+
+  <div class="form-actions"><a class="admin-button" href="/admin/products">Batal</a><button class="admin-button admin-button--primary" type="submit">Simpan produk</button></div>
+</form>
+
+<script>
+  const fields = document.querySelector<HTMLElement>("[data-custom-fields]");
+  const template = document.querySelector<HTMLTemplateElement>("[data-field-template]");
+  document.querySelector("[data-add-field]")?.addEventListener("click", () => {
+    if (fields && template) fields.appendChild(template.content.cloneNode(true));
+  });
+  document.addEventListener("click", (event) => {
+    const button = (event.target as HTMLElement).closest("[data-remove-field]");
+    button?.closest(".custom-row")?.remove();
+  });
+</script>
+
+<style>
+  .product-form { display: grid; gap: 18px; }.form-section { padding: 22px; }.section-heading { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:20px; }.section-heading h2,.section-heading p { margin:0; }.section-heading h2 { font-size:17px; }.section-heading p { margin-top:5px; color:var(--tk-color-fg-muted); font-size:12px; }.form-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }.form-grid label { display:grid; gap:7px; color:var(--tk-color-fg-muted); font-size:12px; }.form-grid label span { font-weight:400; }.wide { grid-column:1/-1; }.form-grid input,.form-grid textarea,.custom-row input { width:100%; box-sizing:border-box; padding:10px 12px; border:1px solid var(--admin-line); border-radius:10px; outline:none; background:var(--admin-surface); color:var(--tk-color-fg); font:inherit; }.form-grid input:focus,.form-grid textarea:focus,.custom-row input:focus { border-color:var(--admin-blue); }.toggle { display:flex !important; grid-template-columns:auto 1fr; align-items:center; color:var(--tk-color-fg) !important; }.toggle input { width:auto; }.current-image img { width:90px; height:90px; border-radius:12px; object-fit:cover; }.custom-fields { display:grid; gap:10px; }.custom-row { display:grid; grid-template-columns:1fr 1fr 34px; gap:10px; }.custom-row button { border:0; border-radius:8px; background:var(--admin-soft); color:var(--tk-color-danger); cursor:pointer; font-size:20px; }.form-actions { display:flex; justify-content:flex-end; gap:10px; }.form-error { padding:12px 15px; border:1px solid color-mix(in srgb,var(--tk-color-danger) 35%,transparent); border-radius:10px; background:color-mix(in srgb,var(--tk-color-danger) 8%,var(--admin-surface)); color:var(--tk-color-danger); }.product-form > .form-error { margin:0; } @media(max-width:640px){.form-grid{grid-template-columns:1fr}.wide{grid-column:auto}.custom-row{grid-template-columns:1fr 1fr 32px}}
+</style>

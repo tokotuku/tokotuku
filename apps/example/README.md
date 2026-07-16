@@ -16,7 +16,17 @@ From the repository root:
 bun run example
 ```
 
-Open `http://localhost:4400`, register a local account, and use the seeded store dashboard.
+Open `http://localhost:4400` and use one of the seeded local accounts:
+
+| Role | Email | Password | Access |
+| --- | --- | --- | --- |
+| Admin | `admin@example.com` | `admin12345` | Storefront and full back-office access |
+| Staff | `staff@example.com` | `staff12345` | Storefront and limited back-office access |
+| Customer | `customer@example.com` | `customer12345` | Storefront and checkout only |
+
+Newly registered accounts receive the `customer` role. Demo credentials are seeded locally only
+and are never included by `db:seed:remote`.
+
 The root route is a public storefront. Use `/admin` for the authenticated dashboard; the
 example shares the template's local D1 and R2 persistence so both surfaces see the same data.
 

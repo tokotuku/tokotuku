@@ -1,0 +1,43 @@
+---
+interface Item {
+  label: string;
+  value: number;
+  color: string;
+}
+interface Props {
+  items: Item[];
+}
+const { items } = Astro.props;
+let cursor = 0;
+const stops = items
+  .map((item) => {
+    const start = cursor;
+    cursor += item.value;
+    return `${item.color} ${start}% ${cursor}%`;
+  })
+  .join(", ");
+---
+
+<div class="donut-wrap">
+  <div class="donut" style={`background:conic-gradient(${stops})`}>
+    <div></div>
+    {items.map((item, index) => {
+      const before = items.slice(0, index).reduce((sum, value) => sum + value.value, 0);
+      const angle = (before + item.value / 2) * 3.6;
+      return <span style={`--angle:${angle}deg`}>{item.value}%</span>;
+    })}
+  </div>
+  <div class="donut-legend">
+    {items.map((item) => <span><i style={`background:${item.color}`}></i>{item.label}</span>)}
+  </div>
+</div>
+
+<style>
+  .donut-wrap { display: grid; place-items: center; gap: 18px; padding: 12px 0 2px; }
+  .donut { position: relative; width: min(100%, 252px); aspect-ratio: 1; border-radius: 50%; }
+  .donut > div { position: absolute; inset: 31%; border-radius: 50%; background: var(--admin-surface, var(--tk-color-bg)); }
+  .donut > span { position: absolute; top: 50%; left: 50%; width: 43%; color: white; font-size: 11px; font-weight: 750; text-align: right; transform: translate(-50%, -50%) rotate(var(--angle)) translateX(43%) rotate(calc(var(--angle) * -1)); transform-origin: center; }
+  .donut-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 9px 13px; color: var(--tk-color-fg-muted); font-size: 10px; }
+  .donut-legend span { display: inline-flex; align-items: center; gap: 5px; }
+  .donut-legend i { width: 9px; height: 9px; border-radius: 50%; }
+</style>

@@ -1,0 +1,24 @@
+---
+import { env } from "cloudflare:workers";
+import AdminLayout from "../../components/AdminLayout.astro";
+import Icon from "../../components/Icon.astro";
+import { money, topCustomers } from "../../lib/admin-demo";
+import { createAuth } from "../../lib/auth";
+import { canAccessBackoffice } from "../../lib/roles";
+
+const auth = createAuth(env, Astro.url.origin);
+const session = await auth.api.getSession({ headers: Astro.request.headers });
+if (!session) return Astro.redirect("/login?next=/admin/customers");
+if (!canAccessBackoffice(session.user.role)) return Astro.redirect("/403");
+---
+
+<AdminLayout title="Customers" active="customers" user={session.user}>
+  <header class="page-heading"><div><h1>Customers</h1><p>Understand and support your most valuable customers.</p></div><div class="page-actions"><button class="admin-button"><Icon name="download" size={16}/> Export</button><button class="admin-button admin-button--primary"><Icon name="plus" size={16}/> Add customer</button></div></header>
+  <section class="panel data-panel">
+    <div class="table-toolbar"><div class="filter-tabs"><button aria-selected="true">All</button><button>Returning</button><button>New</button></div><label class="table-search"><Icon name="search" size={16}/><input type="search" placeholder="Search customers…" /></label></div>
+    <div class="table-wrap"><table class="admin-table"><thead><tr><th>Customer</th><th class="numeric">Orders</th><th class="numeric">Total spent</th><th>Trend</th><th></th></tr></thead><tbody>{topCustomers.map((customer) => <tr><td><div class="entity"><span class="entity-avatar" style={`background:${customer.color}`}>{customer.name.split(" ").map((part) => part[0]).join("").slice(0,2)}</span><div><strong>{customer.name}</strong><span>Customer since 2025</span></div></div></td><td class="numeric">{customer.orders}</td><td class="money">{money.format(customer.total)}</td><td><span class:list={["status", customer.change >= 0 ? "status--success" : "status--danger"]}>{Math.abs(customer.change)}%</span></td><td><div class="row-actions"><button aria-label={`Edit ${customer.name}`}><Icon name="edit" size={16}/></button></div></td></tr>)}</tbody></table></div>
+    <div class="table-footer"><span>Showing 1–{topCustomers.length} of {topCustomers.length}</span><nav class="pagination"><span>‹</span><span class="active">1</span><span>›</span></nav></div>
+  </section>
+</AdminLayout>
+
+<style>.data-panel{overflow:hidden}.admin-table th:first-child,.admin-table td:first-child{padding-left:20px}.admin-table th:last-child,.admin-table td:last-child{padding-right:20px}</style>

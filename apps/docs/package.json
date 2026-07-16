@@ -14,7 +14,9 @@
   "dependencies": {
     "@astrojs/starlight": "0.41.3",
     "astro": "7.0.9",
-    "@tokotuku/astro": "workspace:*"
+    "@tokotuku/astro": "workspace:*",
+    "@tokotuku/theme": "workspace:*",
+    "@tokotuku-starter/ui": "file:../../template/packages/ui"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.4"

@@ -1,0 +1,62 @@
+---
+title: Getting started
+description: Install Tokotuku UI and render your first component.
+sidebar:
+  order: 1
+---
+
+## Install
+
+Choose the package for your application:
+
+```sh
+bun add @tokotuku/elements @tokotuku/theme
+```
+
+Astro projects can add the typed wrappers as well:
+
+```sh
+bun add @tokotuku/astro @tokotuku/theme
+```
+
+## Web Components
+
+Import only the component modules that a page uses:
+
+```ts
+import "@tokotuku/elements/button";
+import { themeCss } from "@tokotuku/theme";
+
+const style = document.createElement("style");
+style.textContent = themeCss;
+document.head.append(style);
+```
+
+The custom element is then available in HTML:
+
+```html
+<tk-button variant="primary" size="md">Save changes</tk-button>
+```
+
+## Astro
+
+Astro wrappers register their underlying element automatically:
+
+```astro
+---
+import { themeCss } from "@tokotuku/theme";
+import TkButton from "@tokotuku/astro/TkButton.astro";
+---
+
+<style is:global set:html={themeCss}></style>
+<TkButton variant="primary">Save changes</TkButton>
+```
+
+## Package roles
+
+| Package | Purpose |
+| --- | --- |
+| `@tokotuku/elements` | Lit-based `tk-*` Web Components |
+| `@tokotuku/astro` | Thin, typed Astro wrappers |
+| `@tokotuku/theme` | Theme palettes and generated CSS custom properties |
+| `@tokotuku/tokens` | Framework-independent design-token values |

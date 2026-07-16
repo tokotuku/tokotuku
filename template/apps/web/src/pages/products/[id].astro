@@ -26,12 +26,14 @@ const serialized = JSON.stringify({
     <div class="product-detail">
       <div class="media"><img src={imageUrl} alt="" /></div>
       <section>
-        <p class="eyebrow">Tokotuku essential</p>
+        <p class="eyebrow">{product.category}</p>
         <h1>{product.name}</h1>
         <p class="price">{currency.format(product.priceCents / 100)}</p>
         <p class="description">{product.description}</p>
-        <button type="button" data-add-to-cart data-product={serialized}>Add to cart</button>
-        <ul><li>Free shipping over $50</li><li>30-day straightforward returns</li><li>Secure checkout-ready foundation</li></ul>
+        <p class:list={["stock", product.stock < 10 && "stock--low"]}>{product.stock > 0 ? `${product.stock} in stock` : "Out of stock"}</p>
+        <button type="button" data-add-to-cart data-product={serialized} disabled={product.stock <= 0}>{product.stock > 0 ? "Add to cart" : "Sold out"}</button>
+        {Object.keys(product.customFields).length > 0 && <dl>{Object.entries(product.customFields).map(([key, value]) => <div><dt>{key}</dt><dd>{value}</dd></div>)}</dl>}
+        <ul><li>Cash on Delivery</li><li>Pay when your order arrives</li><li>Stock is reserved after checkout</li></ul>
       </section>
     </div>
   </main>
@@ -49,6 +51,7 @@ const serialized = JSON.stringify({
   .price { color: var(--tk-color-fg); font-size: var(--tk-font-size-2xl); font-weight: var(--tk-font-weight-bold); }
   .description { color: var(--tk-color-fg-muted); font-size: var(--tk-font-size-lg); line-height: var(--tk-line-height-relaxed); }
   button { width: 100%; min-height: 3.25rem; margin-top: var(--tk-spacing-4); border: 0; border-radius: var(--tk-radius-md); background: var(--tk-color-accent); color: var(--tk-color-accent-fg); cursor: pointer; font: inherit; font-weight: var(--tk-font-weight-bold); }
+  button:disabled { cursor:not-allowed; opacity:.55; }.stock { margin:var(--tk-spacing-3) 0 0; color:#087b34; font-size:var(--tk-font-size-sm);font-weight:700}.stock--low{color:#b16700} dl{margin:var(--tk-spacing-5) 0 0;border-top:1px solid var(--tk-color-border)}dl div{display:flex;justify-content:space-between;gap:20px;padding:var(--tk-spacing-3) 0;border-bottom:1px solid var(--tk-color-border)}dt{color:var(--tk-color-fg-muted)}dd{margin:0;font-weight:600}
   ul { display: grid; gap: var(--tk-spacing-2); margin-top: var(--tk-spacing-5); padding: var(--tk-spacing-5) 0 0; border-top: 1px solid var(--tk-color-border); color: var(--tk-color-fg-muted); font-size: var(--tk-font-size-sm); list-style-position: inside; }
   @media (max-width: 48rem) { .product-detail { grid-template-columns: 1fr; } }
 </style>

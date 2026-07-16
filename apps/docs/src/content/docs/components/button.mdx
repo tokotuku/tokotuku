@@ -1,0 +1,66 @@
+---
+title: Button
+description: An accessible action control with variants, sizes, and native button semantics.
+sidebar:
+  order: 1
+---
+
+import TkButton from "@tokotuku/astro/TkButton.astro";
+import ComponentPreview from "../../../components/ComponentPreview.astro";
+
+`tk-button` wraps a native `<button>` inside Shadow DOM. Use it to initiate an action, submit a form, or reset form state.
+
+## Preview
+
+<ComponentPreview label="Button variants">
+  <TkButton variant="primary">Primary</TkButton>
+  <TkButton variant="secondary">Secondary</TkButton>
+  <TkButton variant="ghost">Ghost</TkButton>
+  <TkButton disabled>Disabled</TkButton>
+</ComponentPreview>
+
+```astro
+---
+import TkButton from "@tokotuku/astro/TkButton.astro";
+---
+
+<TkButton variant="primary" size="md">Save changes</TkButton>
+```
+
+## Properties
+
+| Property | Type | Default | Reflected |
+| --- | --- | --- | --- |
+| `variant` | `"primary" \| "secondary" \| "ghost"` | `"primary"` | Yes |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Yes |
+| `type` | `"button" \| "submit" \| "reset"` | `"button"` | No |
+| `disabled` | `boolean` | `false` | Yes |
+
+## Slots and CSS parts
+
+| Name | Kind | Purpose |
+| --- | --- | --- |
+| default | Slot | Button label or inline content |
+| `button` | CSS part | Internal native `<button>` element |
+
+```css
+tk-button::part(button) {
+  text-transform: uppercase;
+}
+```
+
+## Web Component usage
+
+```ts
+import "@tokotuku/elements/button";
+```
+
+```html
+<tk-button variant="secondary" size="lg">Continue</tk-button>
+```
+
+## Accessibility
+
+- Keyboard activation and focus behavior come from the internal native button.
+- Focus-visible state uses `--tk-color-focus-ring`.
+- `disabled` is forwarded to the native button and reflected on the host.

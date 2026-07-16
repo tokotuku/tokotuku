@@ -1,0 +1,42 @@
+---
+title: AppCard
+description: Starter-level alias for the slotted Tokotuku card wrapper.
+sidebar:
+  order: 2
+---
+
+import AppButton from "@tokotuku-starter/ui/AppButton.astro";
+import AppCard from "@tokotuku-starter/ui/AppCard.astro";
+import ComponentPreview from "../../../../components/ComponentPreview.astro";
+
+`AppCard` forwards the `media`, default, and `footer` slots to the core [`TkCard`](/components/card/).
+
+## Preview
+
+<ComponentPreview label="AppCard example" layout="stack">
+  <div style="width:min(100%,24rem)">
+    <AppCard>
+      <div slot="media" style="display:grid;min-height:8rem;place-items:center;background:var(--tk-color-bg-subtle)">Media</div>
+      <strong>Starter card</strong>
+      <span>Composable application content.</span>
+      <div slot="footer"><AppButton size="sm">Continue</AppButton></div>
+    </AppCard>
+  </div>
+</ComponentPreview>
+
+```astro
+<AppCard>
+  <img slot="media" src="/cover.jpg" alt="" />
+  <h2>Card title</h2>
+  <p>Card body.</p>
+  <div slot="footer">Footer content</div>
+</AppCard>
+```
+
+## Slots
+
+| Slot | Purpose |
+| --- | --- |
+| `media` | Leading full-width media |
+| default | Main card content |
+| `footer` | Actions or metadata |

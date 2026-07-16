@@ -66,6 +66,7 @@ const currency = new Intl.NumberFormat("en-US", { style: "currency", currency: "
               price={currency.format(product.priceCents / 100)}
               priceCents={product.priceCents}
               imageUrl={`/api/images/${product.imageKey}`}
+              stock={product.stock}
             />
           ))
         }

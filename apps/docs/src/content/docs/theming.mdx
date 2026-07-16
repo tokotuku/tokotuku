@@ -1,0 +1,54 @@
+---
+title: Theming
+description: Apply light, dark, high-contrast, or custom Tokotuku themes.
+sidebar:
+  order: 2
+---
+
+Tokotuku components read their colors, spacing, typography, radius, shadow, and motion from `--tk-*` CSS custom properties.
+
+## Apply the generated theme
+
+```ts
+import { themeCss } from "@tokotuku/theme";
+
+const sheet = new CSSStyleSheet();
+sheet.replaceSync(themeCss);
+document.adoptedStyleSheets = [...document.adoptedStyleSheets, sheet];
+```
+
+In Astro, inject the same CSS string globally from a layout:
+
+```astro
+---
+import { themeCss } from "@tokotuku/theme";
+---
+
+<style is:global set:html={themeCss}></style>
+```
+
+## Select a palette
+
+Set `data-theme` on an ancestor, normally the root element:
+
+```html
+<html data-theme="light">...</html>
+<html data-theme="dark">...</html>
+<html data-theme="high-contrast">...</html>
+```
+
+When `data-theme` is absent, the theme follows `prefers-color-scheme`.
+
+## Override tokens
+
+CSS custom properties cascade through component hosts, including across their Shadow DOM boundary:
+
+```css
+.checkout-actions {
+  --tk-color-accent: #7c3aed;
+  --tk-color-accent-fg: #ffffff;
+  --tk-radius-md: 999px;
+}
+```
+
+Prefer semantic variables such as `--tk-color-accent` and `--tk-color-danger`; components intentionally do not depend on raw palette values.

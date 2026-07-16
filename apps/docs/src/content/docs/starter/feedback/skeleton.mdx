@@ -1,0 +1,27 @@
+---
+title: Skeleton
+description: Reduced-motion-aware placeholder lines for loading content.
+sidebar:
+  order: 3
+---
+
+import Skeleton from "@tokotuku-starter/ui/Skeleton.astro";
+import ComponentPreview from "../../../../components/ComponentPreview.astro";
+
+## Preview
+
+<ComponentPreview label="Skeleton example" layout="stack">
+  <Skeleton lines={4} />
+</ComponentPreview>
+
+```astro
+<Skeleton lines={4} />
+```
+
+## Props
+
+| Prop | Type | Default |
+| --- | --- | --- |
+| `lines` | `number` | `3` |
+
+The root exposes `aria-busy="true"` and `aria-label="Loading content"`. Its shimmer animation is disabled when the user prefers reduced motion.

@@ -33,8 +33,17 @@ From the template root, start the app through Moon:
 bun run dev
 ```
 
-The products page redirects to `/login` until a user registers or signs in. Local D1 and R2
-state lives under `.wrangler/state/`.
+New registrations receive the `customer` role. Local seeding also creates these demo accounts:
+
+| Role | Email | Password |
+| --- | --- | --- |
+| Admin | `admin@example.com` | `admin12345` |
+| Staff | `staff@example.com` | `staff12345` |
+| Customer | `customer@example.com` | `customer12345` |
+
+Only admin and staff accounts can access `/admin`; customers can use the storefront and checkout.
+Demo credentials are local-only and are not included by `db:seed:remote`. Local D1 and R2 state
+lives under `.wrangler/state/`.
 
 ## Deploy
 

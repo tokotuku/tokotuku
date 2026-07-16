@@ -1,0 +1,56 @@
+---
+title: AppSidebar
+description: Primary application navigation with active states, badges, and footer content.
+sidebar:
+  order: 2
+---
+
+import AppSidebar from "@tokotuku-starter/ui/AppSidebar.astro";
+import ComponentPreview from "../../../../components/ComponentPreview.astro";
+
+## Preview
+
+<ComponentPreview label="Application sidebar" layout="stack">
+  <div style="width:min(100%,18rem);min-height:24rem;border:1px solid var(--tk-color-border);border-radius:.75rem;overflow:hidden">
+    <AppSidebar
+      brand="Tokotuku"
+      items={[
+        { label: "Overview", href: "#overview", active: true },
+        { label: "Products", href: "#products", badge: "12" },
+        { label: "Orders", href: "#orders", badge: "3" },
+      ]}
+    >
+      <small slot="footer">Signed in as admin</small>
+    </AppSidebar>
+  </div>
+</ComponentPreview>
+
+```astro
+<AppSidebar
+  brand="Tokotuku"
+  items={[
+    { label: "Overview", href: "/admin", active: true },
+    { label: "Products", href: "/admin/products", badge: "12" },
+  ]}
+>
+  <p slot="footer">Signed in as admin</p>
+</AppSidebar>
+```
+
+## Props
+
+| Prop | Type | Required | Default |
+| --- | --- | --- | --- |
+| `brand` | `string` | No | `"Tokotuku"` |
+| `items` | `NavigationItem[]` | Yes | — |
+
+```ts
+interface NavigationItem {
+  label: string;
+  href: string;
+  active?: boolean;
+  badge?: string;
+}
+```
+
+The optional `footer` slot stays at the bottom of the sidebar on desktop and is hidden in the compact mobile layout.

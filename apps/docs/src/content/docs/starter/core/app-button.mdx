@@ -1,0 +1,38 @@
+---
+title: AppButton
+description: Starter-level alias for the typed Tokotuku button wrapper.
+sidebar:
+  order: 1
+---
+
+import AppButton from "@tokotuku-starter/ui/AppButton.astro";
+import ComponentPreview from "../../../../components/ComponentPreview.astro";
+
+`AppButton` forwards its props and default slot to the core [`TkButton`](/components/button/). Use the alias inside the starter so application code can swap its button implementation without changing every consumer.
+
+## Preview
+
+<ComponentPreview label="AppButton variants">
+  <AppButton>Primary</AppButton>
+  <AppButton variant="secondary">Secondary</AppButton>
+  <AppButton variant="ghost" size="sm">Small ghost</AppButton>
+</ComponentPreview>
+
+```astro
+---
+import AppButton from "@tokotuku-starter/ui/AppButton.astro";
+---
+
+<AppButton variant="primary" size="md">Save changes</AppButton>
+```
+
+## Props
+
+| Prop | Type | Default |
+| --- | --- | --- |
+| `variant` | `"primary" \| "secondary" \| "ghost"` | `"primary"` |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` |
+| `type` | `"button" \| "submit" \| "reset"` | `"button"` |
+| `disabled` | `boolean` | `false` |
+
+The default slot contains the button label or inline content.

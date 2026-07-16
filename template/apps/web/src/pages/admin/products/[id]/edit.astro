@@ -1,0 +1,61 @@
+---
+import { env } from "cloudflare:workers";
+import AdminLayout from "../../../../components/AdminLayout.astro";
+import ProductForm from "../../../../components/ProductForm.astro";
+import { createAuth } from "../../../../lib/auth";
+import { productInputFromForm } from "../../../../lib/product-form";
+import {
+  archiveProduct,
+  findProductById,
+  listInventoryMovements,
+  updateProduct,
+} from "../../../../lib/products";
+import { canAccessBackoffice } from "../../../../lib/roles";
+
+const auth = createAuth(env, Astro.url.origin);
+const session = await auth.api.getSession({ headers: Astro.request.headers });
+if (!session) return Astro.redirect(`/login?next=${encodeURIComponent(Astro.url.pathname)}`);
+if (!canAccessBackoffice(session.user.role)) return Astro.redirect("/403");
+
+const id = Number(Astro.params.id);
+let product = await findProductById(env.DB, id, { includeInactive: true });
+if (!product) return new Response("Product not found", { status: 404 });
+let error = "";
+
+if (Astro.request.method === "POST") {
+  try {
+    const form = await Astro.request.formData();
+    if (form.get("intent") === "archive") {
+      await archiveProduct(env.DB, id);
+      return Astro.redirect("/admin/products?archived=1");
+    }
+    const input = await productInputFromForm(form, env.PRODUCT_IMAGES, product.imageKey);
+    await updateProduct(env.DB, id, input);
+    return Astro.redirect(`/admin/products/${id}/edit?saved=1`);
+  } catch (caught) {
+    error = caught instanceof Error ? caught.message : "Produk gagal disimpan.";
+    product = (await findProductById(env.DB, id, { includeInactive: true })) ?? product;
+  }
+}
+const movements = await listInventoryMovements(env.DB, id);
+const movementDate = new Intl.DateTimeFormat("id-ID", {
+  dateStyle: "medium",
+  timeStyle: "short",
+  timeZone: "Asia/Jakarta",
+});
+---
+
+<AdminLayout title={`Edit ${product.name}`} active="products" user={session.user}>
+  <header class="page-heading">
+    <div><h1>Edit product</h1><p>Perbarui informasi dan stok {product.name}.</p></div>
+    <form method="post" onsubmit="return confirm('Nonaktifkan produk ini dari toko?')"><input type="hidden" name="intent" value="archive" /><button class="admin-button danger-button" type="submit">Nonaktifkan produk</button></form>
+  </header>
+  {Astro.url.searchParams.has("saved") && <p class="save-notice">Produk berhasil disimpan.</p>}
+  <ProductForm product={product} error={error} />
+  <section class="panel movement-panel">
+    <div><h2>Riwayat stok</h2><p>Mutasi dari penjualan, pembatalan, dan perubahan manual.</p></div>
+    {movements.length ? <table><thead><tr><th>Waktu</th><th>Alasan</th><th>Catatan</th><th>Perubahan</th></tr></thead><tbody>{movements.map((movement) => <tr><td>{movementDate.format(new Date(`${movement.createdAt}Z`))}</td><td>{movement.reason.replaceAll("_", " ")}</td><td>{movement.note}</td><td class:list={[movement.quantityChange > 0 ? "positive" : "negative"]}>{movement.quantityChange > 0 ? "+" : ""}{movement.quantityChange}</td></tr>)}</tbody></table> : <p class="empty-movements">Belum ada mutasi stok.</p>}
+  </section>
+</AdminLayout>
+
+<style>.save-notice{padding:11px 14px;border-radius:10px;background:color-mix(in srgb,#0b923d 10%,var(--admin-surface));color:#087b34}.danger-button{color:var(--tk-color-danger)}.movement-panel{margin-top:18px;padding:22px;overflow:auto}.movement-panel h2,.movement-panel p{margin:0}.movement-panel>div p{margin-top:5px;color:var(--tk-color-fg-muted);font-size:12px}.movement-panel table{width:100%;margin-top:18px;border-collapse:collapse;font-size:12px}.movement-panel th,.movement-panel td{padding:11px;border-top:1px solid var(--admin-line);text-align:left}.movement-panel th{color:var(--tk-color-fg-muted)}.positive{color:#087b34;font-weight:700}.negative{color:var(--tk-color-danger);font-weight:700}.empty-movements{margin-top:18px!important;color:var(--tk-color-fg-muted)}</style>

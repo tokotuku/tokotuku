@@ -1,0 +1,77 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Icon from "./Icon.astro";
+
+interface Props {
+  title: string;
+}
+const { title } = Astro.props;
+---
+
+<Layout title={`${title} — Tokotuku`}>
+  <main class="auth-shell">
+    <button class="auth-theme" type="button" data-auth-theme aria-label="Toggle color theme"><Icon name="moon" size={17} /></button>
+    <section class="auth-form-side"><slot /></section>
+    <aside class="auth-story">
+      <a class="auth-brand" href="/">
+        <span><Icon name="logo" size={20} /></span> Tokotuku
+      </a>
+      <div class="story-copy">
+        <p>Run your</p>
+        <strong>commerce, calmly.</strong>
+        <span>Orders, revenue, and customer intelligence — your whole store observed from one calm dashboard.</span>
+      </div>
+    </aside>
+  </main>
+</Layout>
+
+<script>
+  document.querySelector("[data-auth-theme]")?.addEventListener("click", () => {
+    const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    document.documentElement.dataset.theme = next;
+    localStorage.setItem("tokotuku-theme", next);
+  });
+</script>
+
+<style is:global>
+  *, *::before, *::after { box-sizing: border-box; }
+  .auth-shell { position: relative; display: grid; min-height: 100vh; grid-template-columns: minmax(420px, 1fr) minmax(520px, 1.05fr); gap: 24px; padding: 8px; background: var(--tk-color-bg); }
+  .auth-theme { position: absolute; z-index: 2; top: 25px; left: calc(50% - 42px); display: grid; width: 34px; height: 34px; place-items: center; border: 0; border-radius: 9px; background: transparent; color: var(--tk-color-fg); cursor: pointer; }
+  .auth-form-side { display: grid; place-items: center; padding: 48px; }
+  .auth-story { position: relative; display: flex; min-height: calc(100vh - 16px); flex-direction: column; padding: 40px; border-radius: 31px; overflow: hidden; background: radial-gradient(circle at 70% 20%, #17294c, transparent 36%), linear-gradient(155deg, #14284d, #050912 70%); color: white; }
+  .auth-story::after { content: ""; position: absolute; right: -18%; bottom: -32%; width: 75%; aspect-ratio: 1; border: 1px solid rgb(118 169 247 / 14%); border-radius: 50%; box-shadow: 0 0 0 70px rgb(118 169 247 / 3%), 0 0 0 140px rgb(118 169 247 / 2%); }
+  .auth-brand { position: relative; z-index: 1; display: inline-flex; width: fit-content; align-items: center; gap: 11px; color: white; font-size: 18px; font-weight: 700; text-decoration: none; }
+  .auth-brand > span { display: grid; width: 40px; height: 40px; place-items: center; border-radius: 50%; background: #263b61; color: #bed6fb; }
+  .story-copy { position: relative; z-index: 1; max-width: 540px; margin-top: auto; padding-bottom: 4px; }
+  .story-copy p, .story-copy strong { display: block; margin: 0; font-size: clamp(38px, 4vw, 52px); font-weight: 400; letter-spacing: -0.04em; line-height: 1.05; }
+  .story-copy strong { color: #83b4fb; }
+  .story-copy span { display: block; max-width: 500px; margin-top: 21px; color: #b8bdc7; font-size: 17px; line-height: 1.55; }
+  .auth-card { width: min(100%, 384px); }
+  .auth-card h1 { margin: 0; font-size: 25px; font-weight: 520; letter-spacing: -0.025em; }
+  .auth-card > p { margin: 8px 0 26px; color: var(--tk-color-fg-muted); font-size: 14px; }
+  .field { display: grid; gap: 8px; margin-top: 18px; }
+  .field-row { display: flex; align-items: center; justify-content: space-between; }
+  .field label, .field-row label { color: var(--tk-color-fg); font-size: 13px; font-weight: 600; }
+  .field-row a { color: var(--tk-color-accent); font-size: 12px; }
+  .input-wrap { position: relative; display: flex; height: 45px; align-items: center; }
+  .input-wrap > svg { position: absolute; left: 15px; color: var(--tk-color-fg-muted); pointer-events: none; }
+  .input-wrap input { width: 100%; height: 100%; padding: 0 43px; border: 1px solid var(--tk-color-border); border-radius: 13px; outline: 0; background: var(--tk-color-bg); color: var(--tk-color-fg); font: inherit; font-size: 14px; }
+  .input-wrap input:focus { border-color: var(--tk-color-accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--tk-color-accent) 13%, transparent); }
+  .password-toggle { position: absolute; right: 7px; display: grid; width: 34px; height: 34px; place-items: center; border: 0; border-radius: 8px; background: transparent; color: var(--tk-color-fg-muted); cursor: pointer; }
+  .check-row { display: flex; align-items: center; gap: 9px; margin: 18px 0; color: var(--tk-color-fg); font-size: 13px; }
+  .check-row input { width: 16px; height: 16px; accent-color: var(--tk-color-accent); }
+  .auth-submit { display: flex; width: 100%; height: 44px; align-items: center; justify-content: center; gap: 9px; border: 1px solid #1765c8; border-radius: 13px; background: linear-gradient(#438be9, #2876df); color: white; font-size: 13px; font-weight: 650; cursor: pointer; }
+  .auth-submit:disabled { cursor: wait; opacity: .65; }
+  .auth-switch { margin: 24px 0 0 !important; color: var(--tk-color-fg-muted); font-size: 13px !important; text-align: center; }
+  .auth-switch a { color: var(--tk-color-accent); font-weight: 600; }
+  .auth-back { display: inline-flex; align-items: center; gap: 8px; margin-top: 27px; color: var(--tk-color-fg); font-size: 13px; font-weight: 600; text-decoration: none; }
+  .auth-message { margin: 14px 0 0 !important; padding: 10px 12px; border-radius: 10px; background: color-mix(in srgb, var(--tk-color-danger) 10%, var(--tk-color-bg)); color: var(--tk-color-danger) !important; font-size: 12px !important; }
+  .auth-message.success { background: color-mix(in srgb, var(--tk-color-success) 12%, var(--tk-color-bg)); color: var(--tk-color-success) !important; }
+
+  @media (max-width: 880px) {
+    .auth-shell { display: block; padding: 0; }
+    .auth-story { display: none; }
+    .auth-form-side { min-height: 100vh; padding: 72px 24px 40px; }
+    .auth-theme { top: 20px; right: 20px; left: auto; }
+  }
+</style>

@@ -1,0 +1,50 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Icon from "./Icon.astro";
+
+interface Props {
+  code: 403 | 404;
+}
+
+const { code } = Astro.props;
+const forbidden = code === 403;
+---
+
+<Layout title={`${code} — Tokotuku`}>
+  <main class="error-page">
+    <button type="button" data-error-theme aria-label="Toggle color theme"><Icon name="moon" size={17} /></button>
+    <section>
+      <a class="error-brand" href="/"><Icon name="logo" size={18} /> Tokotuku</a>
+      <div class:list={["error-icon", forbidden ? "error-icon--warning" : ""]}><Icon name={forbidden ? "lock" : "search"} size={26} /></div>
+      <p class="error-code">{code}</p>
+      <h1>{forbidden ? "Access denied" : "Page not found"}</h1>
+      <p>{forbidden ? "You don't have permission to view this page. Ask an admin if you think this is a mistake." : "The page you're looking for doesn't exist or may have moved."}</p>
+      <a class="error-primary" href="/admin"><Icon name="dashboard" size={16} /> Back to dashboard</a>
+      <a class="error-secondary" href={forbidden ? "/login" : "mailto:support@tokotuku.dev"}>{forbidden ? "Switch account" : "Contact support"}</a>
+    </section>
+  </main>
+</Layout>
+
+<script>
+  document.querySelector("[data-error-theme]")?.addEventListener("click", () => {
+    const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    document.documentElement.dataset.theme = next;
+    localStorage.setItem("tokotuku-theme", next);
+  });
+</script>
+
+<style>
+  .error-page { position: relative; display: grid; min-height: 100vh; place-items: center; padding: 24px; background: #e8edf5; color: #272b31; text-align: center; }
+  :global([data-theme="dark"]) .error-page { background: #111827; color: #f3f4f6; }
+  .error-page > button { position: absolute; top: 24px; right: 24px; display: grid; width: 36px; height: 36px; place-items: center; border: 0; border-radius: 9px; background: transparent; color: inherit; cursor: pointer; }
+  section { display: flex; width: min(100%, 430px); flex-direction: column; align-items: center; }
+  .error-brand { display: inline-flex; align-items: center; gap: 9px; margin-bottom: 67px; color: inherit; font-size: 18px; font-weight: 750; text-decoration: none; }
+  .error-icon { display: grid; width: 64px; height: 64px; place-items: center; border-radius: 50%; background: #dbeaff; color: #0873e7; }
+  .error-icon--warning { background: #fff1df; color: #c16400; }
+  .error-code { margin: 13px 0 -4px; color: #7d8794; font-size: 11px; font-weight: 700; letter-spacing: .16em; }
+  h1 { margin: 16px 0 0; font-size: 17px; }
+  section > p:not(.error-code) { max-width: 390px; margin: 9px 0 19px; color: #626a75; font-size: 14px; line-height: 1.45; }
+  :global([data-theme="dark"]) section > p:not(.error-code) { color: #aeb7c5; }
+  .error-primary { display: inline-flex; min-height: 38px; align-items: center; gap: 8px; padding: 0 14px; border: 1px solid #1765c8; border-radius: 10px; background: linear-gradient(#438be9, #2876df); color: white; font-size: 13px; font-weight: 650; text-decoration: none; }
+  .error-secondary { margin-top: 14px; color: inherit; font-size: 13px; font-weight: 600; text-decoration: none; }
+</style>
