@@ -2,7 +2,7 @@ name: Sync starter repository
 
 on:
   push:
-    branches: [master]
+    branches: [main]
     paths:
       - "template/**"
       - ".github/workflows/sync-starter.yml"
@@ -29,7 +29,7 @@ jobs:
       - name: Checkout starter repository
         uses: actions/checkout@v7
         with:
-          repository: ${{ github.repository_owner }}/tokotuku-starter
+          repository: ${{ github.repository_owner }}/starter-template
           ref: main
           token: ${{ secrets.STARTER_REPO_TOKEN }}
           path: starter

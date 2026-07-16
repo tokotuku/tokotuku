@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [master]
+    branches: [main]
   pull_request:
 
 concurrency:
@@ -36,4 +36,4 @@ jobs:
       - name: Run affected lint, typecheck, test, build
         run: moon ci :lint :typecheck :test :build
         env:
-          MOON_BASE: origin/master
+          MOON_BASE: origin/main

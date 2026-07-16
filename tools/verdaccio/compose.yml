@@ -1,0 +1,13 @@
+name: tokotuku-registry
+
+services:
+  verdaccio:
+    image: verdaccio/verdaccio:6.2.1
+    ports:
+      - "127.0.0.1:4873:4873"
+    volumes:
+      - ./config.yml:/verdaccio/conf/config.yaml:ro
+      - registry-storage:/verdaccio/storage
+
+volumes:
+  registry-storage:

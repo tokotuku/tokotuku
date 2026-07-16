@@ -36,7 +36,7 @@ Initialize the local Cloudflare resources once if needed:
 cd template/apps/web
 bun run cf-typegen
 bun run db:migrate:local
-bun run db:seed:local
+bun run db:seed:demo
 bun run r2:seed:local
 ```
 

@@ -33,7 +33,12 @@ From the template root, start the app through Moon:
 bun run dev
 ```
 
-New registrations receive the `customer` role. Local seeding also creates these demo accounts:
+Open `http://localhost:4321/setup` and create the first administrator. This is a one-time
+bootstrap route: after the administrator is created it redirects to login permanently and cannot
+be used to create another administrator.
+
+New registrations receive the `customer` role. To use predefined local demo accounts instead of
+the onboarding flow, run `bun run db:seed:demo`. It creates:
 
 | Role | Email | Password |
 | --- | --- | --- |
@@ -42,8 +47,9 @@ New registrations receive the `customer` role. Local seeding also creates these 
 | Customer | `customer@example.com` | `customer12345` |
 
 Only admin and staff accounts can access `/admin`; customers can use the storefront and checkout.
-Demo credentials are local-only and are not included by `db:seed:remote`. Local D1 and R2 state
-lives under `.wrangler/state/`.
+Demo credentials are local-only and are not included by `db:seed:remote`. Because the demo seed
+already contains an administrator, `/setup` is disabled as expected. Local D1 and R2 state lives
+under `.wrangler/state/`.
 
 ## Deploy
 

@@ -37,15 +37,15 @@ released `@tokotuku/*` packages and keep product-specific composition in `packag
 
 Astro's GitHub template argument accepts a repository and optional branch, but not a nested
 directory. The `sync-starter.yml` workflow publishes the contents of `template/` to the root of
-the `<owner>/tokotuku-starter` repository whenever template changes land on `master`. Install it
+the `tokotuku/starter-template` repository whenever template changes land on `main`. Install it
 with:
 
 ```sh
-bun create astro@latest my-app --template <owner>/tokotuku-starter
+bun create astro@latest my-app --template tokotuku/starter-template
 ```
 
 `template/` in this repository is the source of truth; the generated starter repository should
-not be edited directly. To enable synchronization, initialize `tokotuku-starter` with a `main`
+not be edited directly. To enable synchronization, initialize `starter-template` with a `main`
 branch and add a `STARTER_REPO_TOKEN` Actions secret to this repository. The token must have
 read/write Contents access to the starter repository.
 

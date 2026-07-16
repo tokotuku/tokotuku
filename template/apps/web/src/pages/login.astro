@@ -12,12 +12,14 @@ const demoAccounts = import.meta.env.DEV
       { role: "Customer", email: "customer@example.com", password: "customer12345" },
     ]
   : [];
+const setupComplete = Astro.url.searchParams.get("setup") === "complete";
 ---
 
 <AuthFrame title="Sign in">
   <form class="auth-card" id="login-form" data-next={next} novalidate>
     <h1>Welcome back</h1>
     <p>Sign in to your Tokotuku dashboard.</p>
+    {setupComplete && <p class="auth-message success">Administrator created. Sign in to continue.</p>}
 
     <div class="field"><label for="email">Email</label><div class="input-wrap"><Icon name="mail" size={16}/><input id="email" name="email" type="email" autocomplete="email" placeholder="you@tokotuku.com" required /></div></div>
     <div class="field"><div class="field-row"><label for="password">Password</label><a href="/forgot-password">Forgot?</a></div><div class="input-wrap"><Icon name="lock" size={16}/><input id="password" name="password" type="password" autocomplete="current-password" placeholder="Enter your password" required /><button class="password-toggle" type="button" data-password-toggle aria-label="Show password"><Icon name="eye" size={16}/></button></div></div>

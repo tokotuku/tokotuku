@@ -42,6 +42,10 @@ cd ../..
 bun run dev
 ```
 
+Open `/setup` on the first run to create the only bootstrap administrator. Once setup completes,
+the route is permanently disabled. Use `bun run db:seed:demo` instead of `db:seed:local` when you
+want the local admin, staff, and customer demo accounts.
+
 See `apps/web/README.md` for secrets and deployment setup.
 
 ## Commands

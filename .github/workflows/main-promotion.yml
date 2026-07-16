@@ -1,0 +1,28 @@
+name: Main promotion policy
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, edited]
+
+permissions:
+  contents: read
+
+jobs:
+  require-dev-source:
+    name: Require dev as source branch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate pull request source
+        env:
+          BASE_REPOSITORY: ${{ github.repository }}
+          HEAD_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name }}
+          HEAD_BRANCH: ${{ github.head_ref }}
+        run: |
+          if [ "$HEAD_REPOSITORY" != "$BASE_REPOSITORY" ] || [ "$HEAD_BRANCH" != "dev" ]; then
+            echo "Pull requests into main must come from the dev branch in $BASE_REPOSITORY."
+            echo "Received: $HEAD_REPOSITORY:$HEAD_BRANCH"
+            exit 1
+          fi
+
+          echo "Promotion from dev to main is allowed."
