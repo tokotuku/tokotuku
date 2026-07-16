@@ -3,33 +3,31 @@ language: "typescript"
 stack: "frontend"
 layer: "application"
 
+dependsOn:
+  - "ui"
+
 tasks:
   build:
-    command: "astro build"
+    command: "storybook build"
+    deps:
+      - "ui:typecheck"
     inputs:
+      - ".storybook/**/*"
       - "src/**/*"
-      - "astro.config.mjs"
-      - "tsconfig.json"
+      - "package.json"
     outputs:
-      - "dist"
+      - "storybook-static"
 
   dev:
-    command: "astro dev"
+    command: "storybook dev -p 6006"
     options:
       persistent: true
       runInCI: false
       cache: false
 
-  typecheck:
-    command: "astro check"
-    inputs:
-      - "src/**/*"
-      - "astro.config.mjs"
-      - "tsconfig.json"
-
   lint:
     command: "biome check ."
     inputs:
+      - ".storybook/**/*"
       - "src/**/*"
-      - "*.mjs"
       - "*.json"

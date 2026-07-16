@@ -5,27 +5,21 @@ sidebar:
   order: 2
 ---
 
-Tokotuku components read their colors, spacing, typography, radius, shadow, and motion from `--tk-*` CSS custom properties.
+Tokotuku uses Tailwind CSS v4 theme variables plus semantic `--tk-*` CSS custom properties for
+runtime color modes.
 
-## Apply the generated theme
+## Load the global stylesheet
 
-```ts
-import { themeCss } from "@tokotuku/theme";
-
-const sheet = new CSSStyleSheet();
-sheet.replaceSync(themeCss);
-document.adoptedStyleSheets = [...document.adoptedStyleSheets, sheet];
-```
-
-In Astro, inject the same CSS string globally from a layout:
+Import the UI stylesheet once from the application layout:
 
 ```astro
 ---
-import { themeCss } from "@tokotuku/theme";
+import "@tokotuku-starter/ui/styles.css";
 ---
-
-<style is:global set:html={themeCss}></style>
 ```
+
+The stylesheet imports Tailwind, defines its `@theme` utilities, and contains all Tokotuku color
+modes. Components remain zero-runtime; Tailwind generates static CSS during the Vite build.
 
 ## Select a palette
 
@@ -41,7 +35,7 @@ When `data-theme` is absent, the theme follows `prefers-color-scheme`.
 
 ## Override tokens
 
-CSS custom properties cascade through component hosts, including across their Shadow DOM boundary:
+CSS custom properties cascade through the native HTML rendered by Astro components:
 
 ```css
 .checkout-actions {

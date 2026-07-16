@@ -13,6 +13,8 @@
   "scripts": {
     "build": "moon run :build",
     "dev": "moon run web:dev",
+    "storybook": "moon run storybook:dev",
+    "storybook:build": "moon run storybook:build",
     "lint": "moon run :lint",
     "typecheck": "moon run :typecheck"
   },

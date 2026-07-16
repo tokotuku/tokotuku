@@ -1,6 +1,5 @@
 ---
-// biome-ignore lint/correctness/noUnusedImports: Astro consumes this in the set:html directive.
-import { themeCss } from "@tokotuku/theme";
+import "@tokotuku-starter/ui/styles.css";
 
 interface Props {
   label?: string;
@@ -9,8 +8,6 @@ interface Props {
 
 const { label = "Component preview", layout = "row" } = Astro.props;
 ---
-
-<style is:global set:html={themeCss}></style>
 
 <div class:list={["preview", `preview--${layout}`]} aria-label={label}>
   <slot />

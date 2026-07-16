@@ -2,11 +2,10 @@
 
 Development entry point for the complete e-commerce starter in `template/`.
 
-This project runs the application source from `template/apps/web` and installs
-`template/packages/ui` as a local file dependency. Published primitives resolve from the root
-workspace during development. The example therefore exercises the same Cloudflare Workers,
-D1, R2, Better Auth, application UI, and Flint/ECharts integration that generated projects
-receive without waiting for `@tokotuku/*` to be published.
+This project runs the application source from `template/apps/web` and consumes the local
+`template/packages/ui` workspace. The example therefore exercises
+the same Cloudflare Workers, D1, R2, Better Auth, application UI, and Flint/ECharts integration
+that generated projects receive.
 
 ## Run
 

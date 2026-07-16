@@ -8,13 +8,13 @@ Workers. Cloudflare D1, R2, Better Auth, and Tokotuku UI primitives are included
 ```text
 apps/
   web/       Astro + Cloudflare application and Better Auth routes
+  storybook/ Component workshop for the Astro UI package
 packages/
-  ui/        Product UI and charts composed from versioned @tokotuku primitives
+  ui/         Components, Tailwind theme, global styles, and charts
 ```
 
-`@tokotuku/elements` owns accessible primitives. Keep business meaning and application variants
-inside `packages/ui`; prefer slots, CSS custom properties, parts, and composition over extending
-primitive classes.
+`@tokotuku-starter/ui` owns the complete Astro component set and Tailwind v4 theme. Prefer slots,
+native HTML attributes, Tailwind utilities, semantic CSS variables, and composition.
 
 The starter UI includes its dashboard shell, navigation, feedback states, data display,
 tables, and statistics. Charts use Flint Chart as the declarative compiler and a modular
@@ -52,7 +52,9 @@ See `apps/web/README.md` for secrets and deployment setup.
 
 ```sh
 bun run dev
+bun run storybook
 bun run build
+bun run storybook:build
 bun run lint
 bun run typecheck
 ```

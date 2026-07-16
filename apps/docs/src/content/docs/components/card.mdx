@@ -5,41 +5,41 @@ sidebar:
   order: 3
 ---
 
-import TkButton from "@tokotuku/astro/TkButton.astro";
-import TkCard from "@tokotuku/astro/TkCard.astro";
+import Button from "@tokotuku-starter/ui/Button.astro";
+import Card from "@tokotuku-starter/ui/Card.astro";
 import ComponentPreview from "../../../components/ComponentPreview.astro";
 
-`tk-card` provides structure without imposing business-specific content or interactions.
+`Card` provides semantic `<article>` structure without imposing business-specific interactions.
 
 ## Preview
 
 <ComponentPreview label="Card example">
   <div style="width:min(100%,22rem)">
-    <TkCard>
+    <Card>
       <div slot="media" style="display:grid;place-items:center;min-height:9rem;background:var(--tk-color-bg-subtle);font-weight:700">
         Product image
       </div>
       <strong>Everyday widget</strong>
       <span>Reliable, compact, and ready for daily use.</span>
-      <div slot="footer"><TkButton size="sm">View product</TkButton></div>
-    </TkCard>
+      <div slot="footer"><Button size="sm">View product</Button></div>
+    </Card>
   </div>
 </ComponentPreview>
 
 ```astro
 ---
-import TkButton from "@tokotuku/astro/TkButton.astro";
-import TkCard from "@tokotuku/astro/TkCard.astro";
+import Button from "@tokotuku-starter/ui/Button.astro";
+import Card from "@tokotuku-starter/ui/Card.astro";
 ---
 
-<TkCard>
+<Card>
   <img slot="media" src="/product.jpg" alt="Everyday widget" />
   <h2>Everyday widget</h2>
   <p>Reliable, compact, and ready for daily use.</p>
   <div slot="footer">
-    <TkButton size="sm">View product</TkButton>
+    <Button size="sm">View product</Button>
   </div>
-</TkCard>
+</Card>
 ```
 
 ## Slots
@@ -50,21 +50,8 @@ import TkCard from "@tokotuku/astro/TkCard.astro";
 | default | Main body content |
 | `footer` | Actions, metadata, or supporting content |
 
-The footer is hidden automatically when the `footer` slot is empty.
-
-## CSS parts
-
-| Part | Purpose |
-| --- | --- |
-| `body` | Main padded content container |
-| `footer` | Footer content container |
-
-```css
-tk-card::part(body) {
-  gap: var(--tk-spacing-4);
-}
-```
+The footer is omitted when the `footer` slot is empty.
 
 ## Accessibility
 
-`tk-card` is intentionally neutral and does not assign a landmark or heading role. Use semantic headings, links, and buttons appropriate to the card's content.
+`Card` renders an `<article>` but does not invent a heading. Supply semantic headings, links, and buttons appropriate to its content.

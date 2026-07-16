@@ -1,0 +1,28 @@
+{
+  "name": "@tokotuku-starter/storybook",
+  "private": true,
+  "type": "module",
+  "version": "0.0.1",
+  "engines": {
+    "node": ">=20.16.0 <21 || >=22.19.0 <23 || >=24.0.0"
+  },
+  "scripts": {
+    "dev": "storybook dev -p 6006",
+    "build": "storybook build",
+    "lint": "biome check ."
+  },
+  "dependencies": {
+    "@tokotuku-starter/ui": "workspace:*",
+    "astro": "^7.0.9"
+  },
+  "devDependencies": {
+    "@astrojs/alpinejs": "^1.0.0",
+    "@storybook/addon-a11y": "^10.5.0",
+    "@storybook-astro/framework": "^1.8.0",
+    "@storybook/builder-vite": "^10.5.0",
+    "@tailwindcss/vite": "^4.3.1",
+    "alpinejs": "^3.15.12",
+    "storybook": "^10.5.0",
+    "tailwindcss": "^4.3.1"
+  }
+}

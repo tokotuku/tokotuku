@@ -1,5 +1,5 @@
 ---
-import { themeCss } from "@tokotuku/theme";
+import "@tokotuku-starter/ui/styles.css";
 
 interface Props {
   title: string;
@@ -22,15 +22,6 @@ const { title } = Astro.props;
         document.documentElement.dataset.theme = saved ?? "light";
       })();
     </script>
-    <style is:global set:html={themeCss}></style>
-    <style is:global>
-      body {
-        margin: 0;
-        font-family: var(--tk-font-family-sans);
-        background-color: var(--tk-color-bg);
-        color: var(--tk-color-fg);
-      }
-    </style>
   </head>
   <body>
     <slot />

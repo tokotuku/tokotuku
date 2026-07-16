@@ -5,26 +5,26 @@ sidebar:
   order: 2
 ---
 
-import TkInput from "@tokotuku/astro/TkInput.astro";
+import Input from "@tokotuku-starter/ui/Input.astro";
 import ComponentPreview from "../../../components/ComponentPreview.astro";
 
-`tk-input` combines an optional label with a native text, email, or password field.
+`Input` combines an optional label with a native input field.
 
 ## Preview
 
 <ComponentPreview label="Input examples">
   <div style="display:grid;gap:1rem;width:min(100%,24rem)">
-    <TkInput label="Email" type="email" name="email" placeholder="you@example.com" required />
-    <TkInput label="Disabled field" value="Read only example" disabled />
+    <Input label="Email" type="email" name="email" placeholder="you@example.com" required />
+    <Input label="Disabled field" value="Read only example" disabled />
   </div>
 </ComponentPreview>
 
 ```astro
 ---
-import TkInput from "@tokotuku/astro/TkInput.astro";
+import Input from "@tokotuku-starter/ui/Input.astro";
 ---
 
-<TkInput
+<Input
   label="Email"
   type="email"
   name="email"
@@ -35,46 +35,25 @@ import TkInput from "@tokotuku/astro/TkInput.astro";
 
 ## Properties
 
-| Property | Type | Default | Reflected |
-| --- | --- | --- | --- |
-| `label` | `string` | `""` | No |
-| `type` | `"text" \| "email" \| "password"` | `"text"` | No |
-| `name` | `string` | `""` | No |
-| `value` | `string` | `""` | No |
-| `placeholder` | `string` | `""` | No |
-| `required` | `boolean` | `false` | Yes |
-| `disabled` | `boolean` | `false` | Yes |
+| Property | Type | Default |
+| --- | --- | --- |
+| `label` | `string` | none |
+| Remaining props | native `<input>` attributes | — |
 
 ## Events
 
-The component dispatches a typed, bubbling `tk-change` event whenever the user enters text.
+The rendered input emits native `input` and `change` events.
 
 ```ts
-const input = document.querySelector("tk-input");
+const input = document.querySelector("input[name=email]");
 
-input?.addEventListener("tk-change", (event) => {
-  console.log(event.detail.value);
+input?.addEventListener("input", (event) => {
+  console.log((event.currentTarget as HTMLInputElement).value);
 });
 ```
 
-Event detail:
-
-```ts
-interface TkChangeEventDetail {
-  value: string;
-}
-```
-
-## Methods and CSS parts
-
-| Name | Kind | Purpose |
-| --- | --- | --- |
-| `focus()` | Method | Moves focus to the internal native input |
-| `label` | CSS part | Optional internal `<label>` |
-| `input` | CSS part | Internal native `<input>` |
-
 ## Accessibility
 
-- The generated label is associated with the internal input using `for` and `id`.
-- Required and disabled states are forwarded to the native field.
+- The generated label is associated with the input using `for` and a stable per-render `id`.
+- Required and disabled states use native field semantics.
 - Focus-visible state uses `--tk-color-focus-ring`.

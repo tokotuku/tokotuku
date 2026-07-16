@@ -1,8 +1,10 @@
 # Starter application UI
 
-Product-facing Astro components for the Tokotuku starter. This package owns application
-composition; accessible, reusable primitives remain versioned in `@tokotuku/elements` and
-`@tokotuku/astro`.
+All Astro components and the Tailwind v4 theme for the Tokotuku starter live in this single
+workspace package.
+
+Import `@tokotuku-starter/ui/styles.css` once in the application layout. It provides Tailwind,
+semantic theme utilities, and light, dark, and high-contrast color modes.
 
 ## Included surfaces
 
@@ -39,5 +41,5 @@ enables ECharts ARIA decals, and renders a collapsible data table as an accessib
 Selections bubble as a `chart-select` custom event from the chart root.
 
 The client runtime registers bar, line, pie, scatter, and heatmap series. Add another ECharts
-series or component in `src/charts/client.ts` only when a product screen needs it, preserving
+series or component in `src/components/charts/client.ts` only when a product screen needs it, preserving
 the modular bundle.

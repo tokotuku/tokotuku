@@ -1,6 +1,6 @@
 # Tokotuku UI
 
-A framework-agnostic Web Components design system with first-class Astro support, built on Lit and strict TypeScript.
+An Astro-first component system built with semantic HTML, Tailwind CSS v4, Alpine.js, and strict TypeScript.
 
 ## Workspace layout
 
@@ -8,22 +8,14 @@ A framework-agnostic Web Components design system with first-class Astro support
 apps/
   docs/        Documentation site (Astro + Starlight)
   example/     Runs the complete e-commerce starter from template/
-packages/
-  core/        Framework-agnostic utilities/controllers — zero UI
-  elements/    Web Components (tk-* custom elements, Lit + Shadow DOM)
-  tokens/      Design tokens (spacing, typography, color, radius, shadows, durations, z-index, breakpoints)
-  theme/       Light/dark/high-contrast themes built from tokens (CSS variables only)
-  icons/       Tree-shakeable SVG icon set
-  astro/       Astro wrappers around @tokotuku/elements — no duplicated logic
-  testing/     Shared Vitest/Playwright/accessibility test helpers
-configs/       Shared tsconfig, tsup, and vitest base configs
+configs/       Shared strict TypeScript configuration
 scripts/       Repo maintenance scripts (e.g. commit message validation)
-template/      Standalone Bun + Moon starter source (Astro, Cloudflare, Better Auth, app UI)
+template/      Standalone Bun + Moon starter source, including UI and Storybook
 ```
 
-The root workspace develops and publishes the `@tokotuku/*` primitive packages. The
-`template/` directory is intentionally a separate workspace: generated applications consume
-released `@tokotuku/*` packages and keep product-specific composition in `packages/ui`.
+The Astro UI and Tailwind theme live in one package inside `template/packages`, making the generated starter
+self-contained. Root docs and the example app consume those exact local packages, so component
+development cannot drift from what the starter repository receives.
 
 ## Starter template
 
@@ -33,7 +25,8 @@ released `@tokotuku/*` packages and keep product-specific composition in `packag
 - Astro on Cloudflare Workers
 - D1 and R2 bindings
 - Better Auth with login and registration flows
-- `packages/ui` for application-specific components composed from `@tokotuku/elements`
+- `packages/ui` for the complete Astro component set
+- `apps/storybook` for isolated Astro component development and accessibility checks
 
 Astro's GitHub template argument accepts a repository and optional branch, but not a nested
 directory. The `sync-starter.yml` workflow publishes the contents of `template/` to the root of
@@ -61,27 +54,20 @@ Then open `http://localhost:4400`.
 ## Requirements
 
 - [Bun](https://bun.sh) >= 1.3.0
+- [Node.js](https://nodejs.org) 20.16+, 22.19+, or 24+ for Storybook 10
 - [Moon](https://moonrepo.dev) (task runner / task graph across the workspace)
 - git (Moon needs at least one commit — `HEAD` must resolve — before any `moon run`/`moon check` command will work)
-
-## TypeScript version
-
-Pinned to **5.9.3**, not the `latest` dist-tag (7.0.2, the native/Go compiler). `tsup`'s `.d.ts` bundler (`rollup-plugin-dts`) crashes against TypeScript 7 today (`Cannot read properties of undefined (reading 'useCaseSensitiveFileNames')`). Revisit once that toolchain catches up.
 
 ## Getting started
 
 ```sh
 bun install
 bun run build
-bun run test
 bun run lint
 bun run typecheck
 ```
 
 ## Conventions
 
-- Custom element tag prefix: `tk-` (e.g. `<tk-button>`)
-- Custom event names: `tk-<name>` (e.g. `tk-change`, `tk-open`)
 - npm scope: `@tokotuku/*`
 - Commits follow [Conventional Commits](https://www.conventionalcommits.org/); enforced by a Lefthook `commit-msg` hook
-- Versioning via [Changesets](https://github.com/changesets/changesets)
