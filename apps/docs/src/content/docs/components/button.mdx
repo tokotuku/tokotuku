@@ -5,62 +5,43 @@ sidebar:
   order: 1
 ---
 
-import TkButton from "@tokotuku/astro/TkButton.astro";
+import Button from "@tokotuku-starter/ui/Button.astro";
 import ComponentPreview from "../../../components/ComponentPreview.astro";
 
-`tk-button` wraps a native `<button>` inside Shadow DOM. Use it to initiate an action, submit a form, or reset form state.
+`Button` renders a native `<button>` with scoped Astro styles. Use it to initiate an action, submit a form, or reset form state.
 
 ## Preview
 
 <ComponentPreview label="Button variants">
-  <TkButton variant="primary">Primary</TkButton>
-  <TkButton variant="secondary">Secondary</TkButton>
-  <TkButton variant="ghost">Ghost</TkButton>
-  <TkButton disabled>Disabled</TkButton>
+  <Button variant="primary">Primary</Button>
+  <Button variant="secondary">Secondary</Button>
+  <Button variant="ghost">Ghost</Button>
+  <Button disabled>Disabled</Button>
 </ComponentPreview>
 
 ```astro
 ---
-import TkButton from "@tokotuku/astro/TkButton.astro";
+import Button from "@tokotuku-starter/ui/Button.astro";
 ---
 
-<TkButton variant="primary" size="md">Save changes</TkButton>
+<Button variant="primary" size="md">Save changes</Button>
 ```
 
 ## Properties
 
-| Property | Type | Default | Reflected |
-| --- | --- | --- | --- |
-| `variant` | `"primary" \| "secondary" \| "ghost"` | `"primary"` | Yes |
-| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Yes |
-| `type` | `"button" \| "submit" \| "reset"` | `"button"` | No |
-| `disabled` | `boolean` | `false` | Yes |
-
-## Slots and CSS parts
-
-| Name | Kind | Purpose |
+| Property | Type | Default |
 | --- | --- | --- |
-| default | Slot | Button label or inline content |
-| `button` | CSS part | Internal native `<button>` element |
+| `variant` | `"primary" \| "secondary" \| "ghost"` | `"primary"` |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` |
+| `type` | native button type | `"button"` |
+| Remaining props | native `<button>` attributes | — |
 
-```css
-tk-button::part(button) {
-  text-transform: uppercase;
-}
-```
+## Slots
 
-## Web Component usage
-
-```ts
-import "@tokotuku/elements/button";
-```
-
-```html
-<tk-button variant="secondary" size="lg">Continue</tk-button>
-```
+The default slot accepts the button label or inline content.
 
 ## Accessibility
 
-- Keyboard activation and focus behavior come from the internal native button.
+- Keyboard activation and focus behavior come directly from the native button.
 - Focus-visible state uses `--tk-color-focus-ring`.
-- `disabled` is forwarded to the native button and reflected on the host.
+- Native attributes such as `disabled`, `name`, `value`, and `aria-*` pass through.

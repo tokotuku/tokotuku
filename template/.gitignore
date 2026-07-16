@@ -6,5 +6,6 @@ dist
 .dev.vars.*
 worker-configuration.d.ts
 coverage
+storybook-static
 .moon/cache
 .DS_Store

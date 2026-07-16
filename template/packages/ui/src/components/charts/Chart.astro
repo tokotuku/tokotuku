@@ -1,5 +1,5 @@
 ---
-import type { ChartInput } from "../../charts/types.js";
+import type { ChartInput } from "./types.js";
 
 interface Props {
   input: ChartInput;
@@ -57,7 +57,7 @@ const serialized = JSON.stringify({ input, title, description }).replaceAll("<",
 </figure>
 
 <script>
-  import { disposeCharts, mountCharts } from "../../charts/client.js";
+  import { disposeCharts, mountCharts } from "./client.js";
 
   mountCharts();
   document.addEventListener("astro:page-load", () => mountCharts());

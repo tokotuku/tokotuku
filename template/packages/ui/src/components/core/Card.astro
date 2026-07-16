@@ -1,0 +1,27 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+export interface Props extends HTMLAttributes<"article"> {}
+
+const { class: className, ...attributes } = Astro.props;
+---
+
+<article
+  {...attributes}
+  class:list={[
+    "flex flex-col overflow-hidden rounded-tk-lg border border-border bg-background font-tk-sans text-foreground shadow-tk-sm",
+    className,
+  ]}
+>
+  {
+    Astro.slots.has("media") && (
+      <div class="*:block *:w-full *:object-cover"><slot name="media" /></div>
+    )
+  }
+  <div class="flex flex-col gap-2 p-4"><slot /></div>
+  {
+    Astro.slots.has("footer") && (
+      <div class="px-4 pb-4 font-semibold"><slot name="footer" /></div>
+    )
+  }
+</article>

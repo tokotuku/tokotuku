@@ -6,7 +6,11 @@ interface Props {
 const { current } = Astro.props;
 ---
 
-<header class="store-header">
+<header
+  class="store-header"
+  x-data="{ theme: localStorage.getItem('tokotuku-theme') ?? 'light' }"
+  x-init="document.documentElement.dataset.theme = theme"
+>
   <div class="header-inner">
     <a class="brand" href="/" aria-label="Tokotuku home">
       <span class="brand-mark">T</span>
@@ -22,7 +26,11 @@ const { current } = Astro.props;
     <div class="actions">
       <label>
         <span class="sr-only">Color theme</span>
-        <select data-store-theme aria-label="Color theme">
+        <select
+          x-model="theme"
+          @change="document.documentElement.dataset.theme = theme; localStorage.setItem('tokotuku-theme', theme)"
+          aria-label="Color theme"
+        >
           <option value="light">Light</option>
           <option value="dark">Dark</option>
           <option value="high-contrast">Contrast</option>
@@ -60,16 +68,6 @@ const { current } = Astro.props;
       element.textContent = String(count);
     }
   }
-
-  const themeSelect = document.querySelector<HTMLSelectElement>("[data-store-theme]");
-  const savedTheme = localStorage.getItem("tokotuku-theme") ?? "light";
-  document.documentElement.dataset.theme = savedTheme;
-  if (themeSelect) themeSelect.value = savedTheme;
-
-  themeSelect?.addEventListener("change", () => {
-    document.documentElement.dataset.theme = themeSelect.value;
-    localStorage.setItem("tokotuku-theme", themeSelect.value);
-  });
 
   document.addEventListener("click", (event) => {
     const button = (event.target as HTMLElement).closest<HTMLButtonElement>("[data-add-to-cart]");

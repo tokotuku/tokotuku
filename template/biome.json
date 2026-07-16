@@ -5,6 +5,7 @@
     "includes": [
       "**",
       "!**/dist",
+      "!**/storybook-static",
       "!**/.astro",
       "!**/.moon/cache",
       "!**/.wrangler",
@@ -30,6 +31,11 @@
       "quoteStyle": "double",
       "semicolons": "always",
       "trailingCommas": "all"
+    }
+  },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
     }
   },
   "overrides": [

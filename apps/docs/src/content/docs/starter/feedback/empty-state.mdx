@@ -5,7 +5,7 @@ sidebar:
   order: 2
 ---
 
-import AppButton from "@tokotuku-starter/ui/AppButton.astro";
+import Button from "@tokotuku-starter/ui/Button.astro";
 import EmptyState from "@tokotuku-starter/ui/EmptyState.astro";
 import ComponentPreview from "../../../../components/ComponentPreview.astro";
 
@@ -14,7 +14,7 @@ import ComponentPreview from "../../../../components/ComponentPreview.astro";
 <ComponentPreview label="Empty state example" layout="stack">
   <EmptyState title="No products yet" description="Create your first product to start building the catalog.">
     <span slot="icon">＋</span>
-    <div slot="actions"><AppButton size="sm">Create product</AppButton></div>
+    <div slot="actions"><Button size="sm">Create product</Button></div>
   </EmptyState>
 </ComponentPreview>
 

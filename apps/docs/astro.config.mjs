@@ -1,12 +1,13 @@
 import starlight from "@astrojs/starlight";
+import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "astro/config";
 
 export default defineConfig({
+  vite: { plugins: [tailwindcss()] },
   integrations: [
     starlight({
       title: "Tokotuku UI",
-      description:
-        "A framework-agnostic Web Components design system with first-class Astro support.",
+      description: "An accessible, Astro-first component system for commerce applications.",
       social: [
         { icon: "github", label: "GitHub", href: "https://github.com/tokotuku-ui/tokotuku" },
       ],
@@ -26,7 +27,6 @@ export default defineConfig({
         {
           label: "Starter components",
           items: [
-            { label: "Core wrappers", items: [{ autogenerate: { directory: "starter/core" } }] },
             { label: "Feedback", items: [{ autogenerate: { directory: "starter/feedback" } }] },
             {
               label: "Data display",

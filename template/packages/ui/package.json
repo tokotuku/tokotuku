@@ -4,9 +4,9 @@
   "private": true,
   "type": "module",
   "exports": {
-    "./AppButton.astro": "./src/components/AppButton.astro",
-    "./AppCard.astro": "./src/components/AppCard.astro",
-    "./AppInput.astro": "./src/components/AppInput.astro",
+    "./Button.astro": "./src/components/core/Button.astro",
+    "./Card.astro": "./src/components/core/Card.astro",
+    "./Input.astro": "./src/components/core/Input.astro",
     "./Alert.astro": "./src/components/feedback/Alert.astro",
     "./AppShell.astro": "./src/components/layout/AppShell.astro",
     "./AppSidebar.astro": "./src/components/layout/AppSidebar.astro",
@@ -22,17 +22,17 @@
     "./StatCard.astro": "./src/components/data-display/StatCard.astro",
     "./StoreHeader.astro": "./src/components/layout/StoreHeader.astro",
     "./Tabs.astro": "./src/components/navigation/Tabs.astro",
-    "./chart": "./src/charts/types.ts"
+    "./chart": "./src/components/charts/types.ts",
+    "./styles.css": "./src/styles/global.css"
   },
   "dependencies": {
-    "@tokotuku/astro": "*",
-    "@tokotuku/elements": "*",
     "echarts": "^6.1.0",
     "flint-chart": "0.2.1"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.4",
-    "astro": "^7.0.9"
+    "astro": "^7.0.9",
+    "tailwindcss": "^4.3.1"
   },
   "peerDependencies": {
     "astro": ">=7.0.0"

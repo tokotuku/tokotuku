@@ -7,56 +7,28 @@ sidebar:
 
 ## Install
 
-Choose the package for your application:
+The starter ships its Astro components and Tailwind theme as one local workspace package.
+Install the workspace dependencies once:
 
 ```sh
-bun add @tokotuku/elements @tokotuku/theme
-```
-
-Astro projects can add the typed wrappers as well:
-
-```sh
-bun add @tokotuku/astro @tokotuku/theme
-```
-
-## Web Components
-
-Import only the component modules that a page uses:
-
-```ts
-import "@tokotuku/elements/button";
-import { themeCss } from "@tokotuku/theme";
-
-const style = document.createElement("style");
-style.textContent = themeCss;
-document.head.append(style);
-```
-
-The custom element is then available in HTML:
-
-```html
-<tk-button variant="primary" size="md">Save changes</tk-button>
+bun install
 ```
 
 ## Astro
 
-Astro wrappers register their underlying element automatically:
+Import components directly. They render semantic HTML and static Tailwind CSS without client JavaScript:
 
 ```astro
 ---
-import { themeCss } from "@tokotuku/theme";
-import TkButton from "@tokotuku/astro/TkButton.astro";
+import Button from "@tokotuku-starter/ui/Button.astro";
+import "@tokotuku-starter/ui/styles.css";
 ---
 
-<style is:global set:html={themeCss}></style>
-<TkButton variant="primary">Save changes</TkButton>
+<Button variant="primary">Save changes</Button>
 ```
 
 ## Package roles
 
 | Package | Purpose |
 | --- | --- |
-| `@tokotuku/elements` | Lit-based `tk-*` Web Components |
-| `@tokotuku/astro` | Thin, typed Astro wrappers |
-| `@tokotuku/theme` | Theme palettes and generated CSS custom properties |
-| `@tokotuku/tokens` | Framework-independent design-token values |
+| `@tokotuku-starter/ui` | Astro components plus Tailwind theme and global styles |

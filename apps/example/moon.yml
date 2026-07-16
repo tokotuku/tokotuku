@@ -3,11 +3,6 @@ language: "typescript"
 stack: "frontend"
 layer: "application"
 
-dependsOn:
-  - "astro"
-  - "elements"
-  - "theme"
-
 tasks:
   dev:
     command: "astro dev"
@@ -18,17 +13,11 @@ tasks:
 
   build:
     command: "astro build"
-    deps:
-      - "elements:build"
-      - "theme:build"
     options:
       cache: false
 
   typecheck:
     command: "astro check"
-    deps:
-      - "elements:build"
-      - "theme:build"
     options:
       cache: false
 

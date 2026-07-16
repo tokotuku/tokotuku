@@ -1,0 +1,19 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+export interface Props extends HTMLAttributes<"input"> {
+  label?: string;
+}
+
+const { label, id, class: className, ...attributes } = Astro.props;
+const inputId = id ?? `tk-input-${crypto.randomUUID()}`;
+---
+
+<div class:list={["flex flex-col gap-1 font-tk-sans", className]}>
+  {label && <label class="text-sm font-medium text-foreground" for={inputId}>{label}</label>}
+  <input
+    {...attributes}
+    id={inputId}
+    class="box-border w-full rounded-tk-md border border-border bg-background px-3 py-2 font-[inherit] text-base text-foreground transition-colors duration-100 ease-[var(--tk-easing-standard)] placeholder:text-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:cursor-not-allowed disabled:opacity-50"
+  />
+</div>

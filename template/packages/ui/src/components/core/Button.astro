@@ -1,0 +1,41 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+export interface Props extends Omit<HTMLAttributes<"button">, "size"> {
+  variant?: "primary" | "secondary" | "ghost";
+  size?: "sm" | "md" | "lg";
+}
+
+const {
+  variant = "primary",
+  size = "md",
+  type = "button",
+  class: className,
+  ...attributes
+} = Astro.props;
+
+const variants = {
+  primary: "bg-accent text-accent-foreground enabled:hover:brightness-90",
+  secondary: "border-border bg-subtle text-foreground enabled:hover:bg-border",
+  ghost: "bg-transparent text-foreground enabled:hover:bg-subtle",
+} satisfies Record<NonNullable<Props["variant"]>, string>;
+
+const sizes = {
+  sm: "px-3 py-1 text-sm",
+  md: "px-4 py-2 text-base",
+  lg: "px-5 py-3 text-lg",
+} satisfies Record<NonNullable<Props["size"]>, string>;
+---
+
+<button
+  {...attributes}
+  type={type}
+  class:list={[
+    "inline-flex cursor-pointer items-center justify-center gap-2 rounded-tk-md border border-transparent font-tk-sans font-medium transition-colors duration-100 ease-[var(--tk-easing-standard)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:cursor-not-allowed disabled:opacity-50",
+    variants[variant],
+    sizes[size],
+    className,
+  ]}
+>
+  <slot />
+</button>

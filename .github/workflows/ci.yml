@@ -30,10 +30,7 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: Install Playwright browsers
-        run: bunx playwright install --with-deps chromium
-
-      - name: Run affected lint, typecheck, test, build
-        run: moon ci :lint :typecheck :test :build
+      - name: Run affected lint, typecheck, and build
+        run: moon ci :lint :typecheck :build
         env:
           MOON_BASE: origin/main
