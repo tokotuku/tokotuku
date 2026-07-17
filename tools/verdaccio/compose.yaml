@@ -1,0 +1,13 @@
+services:
+  verdaccio:
+    image: verdaccio/verdaccio:6
+    container_name: tokotuku-verdaccio
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:4873:4873"
+    volumes:
+      - ./config.yaml:/verdaccio/conf/config.yaml:ro
+      - verdaccio-storage:/verdaccio/storage
+
+volumes:
+  verdaccio-storage:
