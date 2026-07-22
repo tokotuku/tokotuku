@@ -26,3 +26,6 @@ blob-report
 # moon
 .moon/cache
 .moon/docker
+
+# verdaccio local auth token
+.npmrc
