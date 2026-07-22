@@ -1,19 +1,86 @@
-ALTER TABLE products ADD COLUMN sku TEXT;
-ALTER TABLE products ADD COLUMN category TEXT NOT NULL DEFAULT 'General';
-ALTER TABLE products ADD COLUMN stock INTEGER NOT NULL DEFAULT 0 CHECK (stock >= 0);
-ALTER TABLE products ADD COLUMN is_active INTEGER NOT NULL DEFAULT 1 CHECK (is_active IN (0, 1));
-ALTER TABLE products ADD COLUMN custom_fields_json TEXT NOT NULL DEFAULT '{}';
-ALTER TABLE products ADD COLUMN updated_at TEXT NOT NULL DEFAULT '';
-
-UPDATE products
-SET
-  sku = 'SKU-' || printf('%04d', id),
-  stock = 20,
-  updated_at = datetime('now')
-WHERE sku IS NULL;
+CREATE TABLE IF NOT EXISTS products (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  description TEXT NOT NULL,
+  price_cents INTEGER NOT NULL,
+  image_key TEXT NOT NULL,
+  sku TEXT NOT NULL,
+  category TEXT NOT NULL DEFAULT 'General',
+  stock INTEGER NOT NULL DEFAULT 0 CHECK (stock >= 0),
+  is_active INTEGER NOT NULL DEFAULT 1 CHECK (is_active IN (0, 1)),
+  custom_fields_json TEXT NOT NULL DEFAULT '{}',
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
 
 CREATE UNIQUE INDEX IF NOT EXISTS products_sku_unique ON products(sku);
 
+-- Better Auth core schema (user/session/account/verification), matching the
+-- installed better-auth@1.6.23 Zod schema in @better-auth/core/src/db/schema.
+-- Default (non-plural, camelCase) model/column naming — see get-default-model-name.ts.
+CREATE TABLE IF NOT EXISTS user (
+  id TEXT PRIMARY KEY,
+  createdAt TEXT NOT NULL,
+  updatedAt TEXT NOT NULL,
+  email TEXT NOT NULL UNIQUE,
+  emailVerified INTEGER NOT NULL DEFAULT 0,
+  name TEXT NOT NULL,
+  image TEXT,
+  role TEXT NOT NULL DEFAULT 'customer' CHECK (role IN ('admin', 'staff', 'customer')),
+  banned INTEGER NOT NULL DEFAULT 0,
+  banReason TEXT,
+  banExpires TEXT
+);
+
+CREATE INDEX IF NOT EXISTS user_role_idx ON user(role);
+
+CREATE TABLE IF NOT EXISTS session (
+  id TEXT PRIMARY KEY,
+  createdAt TEXT NOT NULL,
+  updatedAt TEXT NOT NULL,
+  userId TEXT NOT NULL REFERENCES user(id),
+  expiresAt TEXT NOT NULL,
+  token TEXT NOT NULL UNIQUE,
+  ipAddress TEXT,
+  userAgent TEXT,
+  impersonatedBy TEXT
+);
+
+CREATE TABLE IF NOT EXISTS account (
+  id TEXT PRIMARY KEY,
+  createdAt TEXT NOT NULL,
+  updatedAt TEXT NOT NULL,
+  providerId TEXT NOT NULL,
+  accountId TEXT NOT NULL,
+  userId TEXT NOT NULL REFERENCES user(id),
+  accessToken TEXT,
+  refreshToken TEXT,
+  idToken TEXT,
+  accessTokenExpiresAt TEXT,
+  refreshTokenExpiresAt TEXT,
+  scope TEXT,
+  password TEXT
+);
+
+CREATE TABLE IF NOT EXISTS verification (
+  id TEXT PRIMARY KEY,
+  createdAt TEXT NOT NULL,
+  updatedAt TEXT NOT NULL,
+  value TEXT NOT NULL,
+  expiresAt TEXT NOT NULL,
+  identifier TEXT NOT NULL
+);
+
+-- One-time store setup state (creates the first administrator account)
+CREATE TABLE IF NOT EXISTS setup_state (
+  id INTEGER PRIMARY KEY CHECK (id = 1),
+  status TEXT NOT NULL CHECK (status IN ('in_progress', 'complete')),
+  createdAt TEXT NOT NULL,
+  completedAt TEXT,
+  adminUserId TEXT REFERENCES user(id) ON DELETE SET NULL
+);
+
+-- Commerce: orders, order items, inventory movements
 CREATE TABLE IF NOT EXISTS orders (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   order_number TEXT NOT NULL UNIQUE,
@@ -28,7 +95,8 @@ CREATE TABLE IF NOT EXISTS orders (
   subtotal_cents INTEGER NOT NULL CHECK (subtotal_cents >= 0),
   shipping_cents INTEGER NOT NULL DEFAULT 0 CHECK (shipping_cents >= 0),
   total_cents INTEGER NOT NULL CHECK (total_cents >= 0),
-  payment_method TEXT NOT NULL DEFAULT 'cash' CHECK (payment_method = 'cash'),
+  payment_method TEXT NOT NULL DEFAULT 'cash' CHECK (payment_method IN ('cash', 'transfer')),
+  payment_proof_key TEXT,
   payment_status TEXT NOT NULL DEFAULT 'unpaid' CHECK (payment_status IN ('unpaid', 'paid')),
   status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'confirmed', 'delivered', 'cancelled')),
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
@@ -78,7 +146,7 @@ BEGIN
   WHERE id = NEW.product_id;
 
   INSERT INTO inventory_movements (product_id, order_id, quantity_change, reason, note)
-  VALUES (NEW.product_id, NEW.order_id, -NEW.quantity, 'sale', 'Stock reserved for cash order');
+  VALUES (NEW.product_id, NEW.order_id, -NEW.quantity, 'sale', 'Stock reserved for order');
 END;
 
 CREATE TRIGGER IF NOT EXISTS cancelled_order_restore_stock
