@@ -46,7 +46,10 @@ export interface InventoryMovement {
 
 export interface ListProductsOptions {
   limit?: number;
+  offset?: number;
   activeOnly?: boolean;
+  category?: string;
+  search?: string;
 }
 
 const productColumns =
@@ -81,16 +84,69 @@ function toProduct(row: ProductRow): Product {
   };
 }
 
+function buildProductFilter({
+  activeOnly = true,
+  category,
+  search,
+}: Pick<ListProductsOptions, "activeOnly" | "category" | "search">) {
+  const conditions: string[] = [];
+  const bindings: unknown[] = [];
+  if (activeOnly) conditions.push("is_active = 1");
+  if (category) {
+    conditions.push("category = ?");
+    bindings.push(category);
+  }
+  if (search) {
+    conditions.push("(name LIKE ? OR description LIKE ?)");
+    const like = `%${search}%`;
+    bindings.push(like, like);
+  }
+  const where = conditions.length ? ` WHERE ${conditions.join(" AND ")}` : "";
+  return { where, bindings };
+}
+
 export async function listProducts(
   db: D1Database,
-  { limit, activeOnly = true }: ListProductsOptions = {},
+  { limit, offset, activeOnly = true, category, search }: ListProductsOptions = {},
 ): Promise<Product[]> {
-  const where = activeOnly ? " WHERE is_active = 1" : "";
-  const query = `SELECT ${productColumns} FROM products${where} ORDER BY id DESC${limit === undefined ? "" : " LIMIT ?"}`;
-  const statement = db.prepare(query);
-  const prepared = limit === undefined ? statement : statement.bind(Math.max(0, Math.trunc(limit)));
-  const { results } = await prepared.all<ProductRow>();
+  const { where, bindings } = buildProductFilter({ activeOnly, category, search });
+  let query = `SELECT ${productColumns} FROM products${where} ORDER BY id DESC`;
+  if (limit !== undefined) {
+    query += " LIMIT ?";
+    bindings.push(Math.max(0, Math.trunc(limit)));
+  }
+  if (offset !== undefined) {
+    query += " OFFSET ?";
+    bindings.push(Math.max(0, Math.trunc(offset)));
+  }
+  const { results } = await db
+    .prepare(query)
+    .bind(...bindings)
+    .all<ProductRow>();
   return results.map(toProduct);
+}
+
+export async function countProducts(
+  db: D1Database,
+  {
+    activeOnly = true,
+    category,
+    search,
+  }: Pick<ListProductsOptions, "activeOnly" | "category" | "search"> = {},
+): Promise<number> {
+  const { where, bindings } = buildProductFilter({ activeOnly, category, search });
+  const row = await db
+    .prepare(`SELECT COUNT(*) AS count FROM products${where}`)
+    .bind(...bindings)
+    .first<{ count: number }>();
+  return row?.count ?? 0;
+}
+
+export async function listCategories(db: D1Database): Promise<string[]> {
+  const { results } = await db
+    .prepare("SELECT DISTINCT category FROM products WHERE is_active = 1 ORDER BY category ASC")
+    .all<{ category: string }>();
+  return results.map((row) => row.category);
 }
 
 export async function findProductById(

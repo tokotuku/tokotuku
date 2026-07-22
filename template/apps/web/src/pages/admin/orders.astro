@@ -2,7 +2,13 @@
 import { env } from "cloudflare:workers";
 import AdminLayout from "../../components/AdminLayout.astro";
 import { createAuth } from "../../lib/auth";
-import { listOrders, type OrderStatus, orderStatuses, updateOrderStatus } from "../../lib/orders";
+import {
+  approvePayment,
+  listOrders,
+  type OrderStatus,
+  orderStatuses,
+  updateOrderStatus,
+} from "../../lib/orders";
 import { canAccessBackoffice } from "../../lib/roles";
 
 const auth = createAuth(env, Astro.url.origin);
@@ -15,10 +21,14 @@ if (Astro.request.method === "POST") {
   try {
     const form = await Astro.request.formData();
     const id = Number(form.get("orderId"));
-    const status = String(form.get("status")) as OrderStatus;
-    if (!Number.isInteger(id) || !orderStatuses.includes(status))
-      throw new Error("Status order tidak valid.");
-    await updateOrderStatus(env.DB, id, status);
+    if (!Number.isInteger(id)) throw new Error("Order tidak ditemukan.");
+    if (String(form.get("action") ?? "") === "approve_payment") {
+      await approvePayment(env.DB, id);
+    } else {
+      const status = String(form.get("status")) as OrderStatus;
+      if (!orderStatuses.includes(status)) throw new Error("Status order tidak valid.");
+      await updateOrderStatus(env.DB, id, status);
+    }
     return Astro.redirect("/admin/orders?updated=1");
   } catch (caught) {
     error = caught instanceof Error ? caught.message : "Order gagal diperbarui.";
@@ -67,7 +77,21 @@ const date = new Intl.DateTimeFormat("id-ID", {
               <td><strong>#{order.orderNumber}</strong></td>
               <td><div class="entity"><span class="entity-avatar">{order.customerName.slice(0,2).toUpperCase()}</span><div><strong>{order.customerName}</strong><span>{order.customerEmail}</span></div></div></td>
               <td>{date.format(new Date(`${order.createdAt}Z`))}</td><td class="numeric">{order.itemCount}</td><td class="money">{money.format(order.totalCents / 100)}</td>
-              <td><span class:list={["status", order.paymentStatus === "paid" ? "status--success" : "status--warning"]}>{order.paymentStatus === "paid" ? "Paid cash" : "Cash due"}</span></td>
+              <td>
+                <div class="payment-cell">
+                  <span class:list={["status", order.paymentStatus === "paid" ? "status--success" : "status--warning"]}>{order.paymentMethod === "transfer" ? (order.paymentStatus === "paid" ? "Transfer verified" : "Transfer pending") : (order.paymentStatus === "paid" ? "Paid cash" : "Cash due")}</span>
+                  {order.paymentMethod === "transfer" && order.paymentProofKey && (
+                    <a href={`/api/payment-proofs/${order.paymentProofKey}`} target="_blank" rel="noreferrer">Lihat bukti</a>
+                  )}
+                  {order.paymentMethod === "transfer" && order.paymentStatus === "unpaid" && order.paymentProofKey && (
+                    <form method="post" class="approve-form">
+                      <input type="hidden" name="orderId" value={order.id} />
+                      <input type="hidden" name="action" value="approve_payment" />
+                      <button type="submit">Verifikasi</button>
+                    </form>
+                  )}
+                </div>
+              </td>
               <td><span class={`status status--${statusTone(order.status)}`}>{statusLabel[order.status]}</span></td>
               <td><form method="post" class="status-form"><input type="hidden" name="orderId" value={order.id} /><select name="status" disabled={order.status === "cancelled"}>{orderStatuses.map((status) => <option value={status} selected={status === order.status}>{statusLabel[status]}</option>)}</select><button type="submit" disabled={order.status === "cancelled"}>Save</button></form></td>
             </tr>
@@ -90,5 +114,6 @@ const date = new Intl.DateTimeFormat("id-ID", {
 </script>
 
 <style>
+  .payment-cell{display:flex;flex-direction:column;align-items:flex-start;gap:5px}.payment-cell a{color:var(--admin-blue);font-size:11px}.approve-form button{min-height:26px;padding:0 9px;border:0;border-radius:7px;background:#0b923d;color:#fff;font-size:11px;cursor:pointer}
   .data-panel{overflow:hidden}.admin-table th:first-child,.admin-table td:first-child{padding-left:20px}.admin-table th:last-child,.admin-table td:last-child{padding-right:20px}.admin-table tr[hidden]{display:none}.entity-avatar{background:#2876df}.status--info{background:var(--admin-blue-soft);color:var(--admin-blue)}.status-form{display:flex;gap:6px}.status-form select,.status-form button{min-height:30px;border:1px solid var(--admin-line);border-radius:7px;background:var(--admin-surface);color:var(--tk-color-fg);font-size:11px}.status-form button{padding:0 9px;background:var(--admin-blue);color:white;cursor:pointer}.status-form :disabled{opacity:.5;cursor:not-allowed}.notice{padding:11px 14px;border-radius:10px;background:color-mix(in srgb,#0b923d 10%,var(--admin-surface));color:#087b34}.notice--error{background:color-mix(in srgb,var(--tk-color-danger) 8%,var(--admin-surface));color:var(--tk-color-danger)}.empty-orders{height:110px!important;text-align:center;color:var(--tk-color-fg-muted)!important}
 </style>
