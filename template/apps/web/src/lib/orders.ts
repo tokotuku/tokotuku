@@ -1,6 +1,9 @@
 export const orderStatuses = ["pending", "confirmed", "delivered", "cancelled"] as const;
 export type OrderStatus = (typeof orderStatuses)[number];
 
+export const paymentMethods = ["cash", "transfer"] as const;
+export type PaymentMethod = (typeof paymentMethods)[number];
+
 export interface CheckoutDetails {
   customerName: string;
   customerEmail: string;
@@ -25,7 +28,9 @@ export interface AdminOrder {
   itemCount: number;
   totalCents: number;
   status: OrderStatus;
+  paymentMethod: PaymentMethod;
   paymentStatus: "unpaid" | "paid";
+  paymentProofKey: string | null;
 }
 
 function normalizeCart(cart: CartLineInput[]) {
@@ -40,11 +45,12 @@ function normalizeCart(cart: CartLineInput[]) {
   return [...quantities].map(([id, quantity]) => ({ id, quantity }));
 }
 
-export async function createCashOrder(
+export async function createOrder(
   db: D1Database,
   userId: string,
   details: CheckoutDetails,
   rawCart: CartLineInput[],
+  paymentMethod: PaymentMethod,
 ) {
   const cart = normalizeCart(rawCart);
   if (!cart.length) throw new Error("Keranjang belanja kosong.");
@@ -91,8 +97,8 @@ export async function createCashOrder(
       .prepare(
         `INSERT INTO orders
           (order_number, user_id, customer_name, customer_email, customer_phone, shipping_address,
-           shipping_city, shipping_postal_code, customer_note, subtotal_cents, total_cents)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+           shipping_city, shipping_postal_code, customer_note, subtotal_cents, total_cents, payment_method)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       )
       .bind(
         orderNumber,
@@ -106,6 +112,7 @@ export async function createCashOrder(
         details.note,
         subtotalCents,
         subtotalCents,
+        paymentMethod,
       ),
     ...cart.map((item) => {
       const product = products.get(item.id);
@@ -143,7 +150,9 @@ export async function createCashOrder(
 export async function findCustomerOrder(db: D1Database, orderNumber: string, userId: string) {
   return db
     .prepare(
-      `SELECT order_number AS orderNumber, total_cents AS totalCents, status, payment_status AS paymentStatus
+      `SELECT order_number AS orderNumber, total_cents AS totalCents, status,
+              payment_method AS paymentMethod, payment_status AS paymentStatus,
+              payment_proof_key AS paymentProofKey
        FROM orders WHERE order_number = ? AND user_id = ?`,
     )
     .bind(orderNumber, userId)
@@ -151,7 +160,9 @@ export async function findCustomerOrder(db: D1Database, orderNumber: string, use
       orderNumber: string;
       totalCents: number;
       status: OrderStatus;
+      paymentMethod: PaymentMethod;
       paymentStatus: string;
+      paymentProofKey: string | null;
     }>();
 }
 
@@ -159,7 +170,8 @@ export async function listOrders(db: D1Database): Promise<AdminOrder[]> {
   const { results } = await db
     .prepare(
       `SELECT o.id, o.order_number, o.customer_name, o.customer_email, o.created_at,
-              COALESCE(SUM(oi.quantity), 0) AS item_count, o.total_cents, o.status, o.payment_status
+              COALESCE(SUM(oi.quantity), 0) AS item_count, o.total_cents, o.status,
+              o.payment_method, o.payment_status, o.payment_proof_key
        FROM orders o LEFT JOIN order_items oi ON oi.order_id = o.id
        GROUP BY o.id ORDER BY o.created_at DESC, o.id DESC`,
     )
@@ -172,7 +184,9 @@ export async function listOrders(db: D1Database): Promise<AdminOrder[]> {
       item_count: number;
       total_cents: number;
       status: OrderStatus;
+      payment_method: PaymentMethod;
       payment_status: "unpaid" | "paid";
+      payment_proof_key: string | null;
     }>();
   return results.map((row) => ({
     id: row.id,
@@ -183,7 +197,9 @@ export async function listOrders(db: D1Database): Promise<AdminOrder[]> {
     itemCount: row.item_count,
     totalCents: row.total_cents,
     status: row.status,
+    paymentMethod: row.payment_method,
     paymentStatus: row.payment_status,
+    paymentProofKey: row.payment_proof_key,
   }));
 }
 
@@ -206,4 +222,33 @@ export async function updateOrderStatus(db: D1Database, id: number, status: Orde
     )
     .bind(status, status, id)
     .run();
+}
+
+export async function attachPaymentProof(
+  db: D1Database,
+  orderNumber: string,
+  userId: string,
+  proofKey: string,
+) {
+  const result = await db
+    .prepare(
+      `UPDATE orders SET payment_proof_key = ?, updated_at = datetime('now')
+       WHERE order_number = ? AND user_id = ? AND payment_method = 'transfer' AND payment_status = 'unpaid'`,
+    )
+    .bind(proofKey, orderNumber, userId)
+    .run();
+  if (result.meta.changes === 0)
+    throw new Error("Order tidak ditemukan atau pembayaran sudah diverifikasi.");
+}
+
+export async function approvePayment(db: D1Database, id: number) {
+  const result = await db
+    .prepare(
+      `UPDATE orders SET payment_status = 'paid', updated_at = datetime('now')
+       WHERE id = ? AND payment_method = 'transfer' AND payment_status = 'unpaid'`,
+    )
+    .bind(id)
+    .run();
+  if (result.meta.changes === 0)
+    throw new Error("Order tidak ditemukan atau pembayaran sudah diverifikasi.");
 }
