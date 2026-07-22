@@ -1,11 +1,27 @@
 ---
 import "@tokotuku-starter/ui/styles.css";
+import SEO from "@tokotuku-starter/ui/SEO.astro";
 
 interface Props {
   title: string;
+  description?: string;
+  image?: string;
+  type?: "website" | "product" | "article";
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+  noindex?: boolean;
 }
 
-const { title } = Astro.props;
+const {
+  title,
+  description = "Tokotuku — straightforward products, fair prices, and no unnecessary noise.",
+  image,
+  type = "website",
+  jsonLd,
+  noindex = false,
+} = Astro.props;
+
+const canonicalUrl = new URL(Astro.url.pathname, Astro.url.origin).toString();
+const absoluteImage = image ? new URL(image, Astro.url.origin).toString() : undefined;
 ---
 
 <html lang="en">
@@ -16,6 +32,16 @@ const { title } = Astro.props;
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
+    <SEO
+      title={title}
+      description={description}
+      url={canonicalUrl}
+      image={absoluteImage}
+      type={type}
+      siteName="Tokotuku"
+      noindex={noindex}
+      jsonLd={jsonLd}
+    />
     <script is:inline>
       (() => {
         const saved = localStorage.getItem("tokotuku-theme");

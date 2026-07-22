@@ -1,0 +1,14 @@
+# Tokotuku
+
+> Straightforward products, fair prices, and no unnecessary noise.
+
+## Pages
+
+- [Shop](/products): Browse the full product catalog
+- [Cart](/cart): Review items before checkout
+
+## Policies
+
+- Free shipping on orders over $50
+- 30-day returns, simple and stress-free
+- Cash on delivery supported

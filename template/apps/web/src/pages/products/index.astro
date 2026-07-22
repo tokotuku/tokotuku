@@ -9,7 +9,10 @@ const products = await listProducts(env.DB);
 const currency = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
 ---
 
-<Layout title="Shop — Tokotuku">
+<Layout
+  title="Shop — Tokotuku"
+  description={`Browse ${products.length} products, ready for everyday life.`}
+>
   <StoreHeader current="products" />
   <main>
     <header class="page-header">

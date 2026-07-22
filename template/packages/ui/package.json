@@ -18,6 +18,7 @@
     "./PageHeader.astro": "./src/components/layout/PageHeader.astro",
     "./Pagination.astro": "./src/components/navigation/Pagination.astro",
     "./ProductCard.astro": "./src/components/commerce/ProductCard.astro",
+    "./SEO.astro": "./src/components/seo/SEO.astro",
     "./Skeleton.astro": "./src/components/feedback/Skeleton.astro",
     "./StatCard.astro": "./src/components/data-display/StatCard.astro",
     "./StoreHeader.astro": "./src/components/layout/StoreHeader.astro",
