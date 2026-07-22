@@ -17,9 +17,33 @@ const serialized = JSON.stringify({
   priceCents: product.priceCents,
   imageUrl,
 });
+
+const productJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Product",
+  name: product.name,
+  description: product.description,
+  sku: product.sku,
+  category: product.category,
+  image: new URL(imageUrl, Astro.url.origin).toString(),
+  offers: {
+    "@type": "Offer",
+    url: new URL(Astro.url.pathname, Astro.url.origin).toString(),
+    priceCurrency: "USD",
+    price: (product.priceCents / 100).toFixed(2),
+    availability:
+      product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+  },
+};
 ---
 
-<Layout title={`${product.name} — Tokotuku`}>
+<Layout
+  title={`${product.name} — Tokotuku`}
+  description={product.description}
+  image={imageUrl}
+  type="product"
+  jsonLd={productJsonLd}
+>
   <StoreHeader current="products" />
   <main>
     <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="/">Home</a><span>/</span><a href="/products">Shop</a><span>/</span><span>{product.name}</span></nav>

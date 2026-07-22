@@ -8,9 +8,21 @@ import { listProducts } from "../lib/products";
 const products = await listProducts(env.DB, { limit: 6 });
 
 const currency = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
+
+const homeJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "OnlineStore",
+  name: "Tokotuku",
+  url: Astro.url.origin,
+  description: "Straightforward products, fair prices, and no unnecessary noise.",
+};
 ---
 
-<Layout title="Tokotuku — Useful things, thoughtfully made">
+<Layout
+  title="Tokotuku — Useful things, thoughtfully made"
+  description="Straightforward products, fair prices, and no unnecessary noise. Discover reliable essentials made to earn their place in your day."
+  jsonLd={homeJsonLd}
+>
   <StoreHeader current="home" />
 
   <main>
