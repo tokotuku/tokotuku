@@ -67,6 +67,30 @@ const PUBLISHABLE_PACKAGES = [
 ];
 
 /**
+ * `bun publish` occasionally fails client-side with "missing authentication"
+ * against a registry the same .npmrc just authenticated a prior publish to
+ * in this same loop -- a known class of Bun registry-auth resolution
+ * flakiness in CI environments (see oven-sh/bun#24124), not a real
+ * credentials problem. The failure happens before any network request (no
+ * tarball is ever uploaded), so retrying is safe: there is nothing on the
+ * registry for a retry to collide with.
+ */
+function publishWithRetry(cwd: string, attempts = 3): void {
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+    try {
+      sh("bun", ["publish", "--registry", REGISTRY], cwd);
+      return;
+    } catch (error) {
+      if (attempt === attempts) throw error;
+      console.warn(
+        `bun publish failed in ${path.relative(ROOT, cwd)}, retrying (${attempt}/${attempts})...`,
+      );
+      execFileSync("sleep", ["2"]);
+    }
+  }
+}
+
+/**
  * Registries refuse `private: true` and require every workspace:*
  * dependency to resolve to a real version -- neither is true for these
  * packages as checked in. Stamps both in memory, publishes, and restores
@@ -87,7 +111,7 @@ function publishPackage(dir: string, version: string): void {
       }
     }
     writeJson(pkgPath, pkg);
-    sh("bun", ["publish", "--registry", REGISTRY], path.join(ROOT, dir));
+    publishWithRetry(path.join(ROOT, dir));
   } finally {
     writeFileSync(pkgPath, original);
   }

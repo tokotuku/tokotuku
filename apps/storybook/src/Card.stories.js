@@ -1,4 +1,4 @@
-import Card from "@tokotuku-starter/ui/Card.astro";
+import Card from "@tokotuku/ui/Card.astro";
 
 export default {
   title: "Core/Card",
