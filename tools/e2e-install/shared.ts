@@ -38,17 +38,18 @@ export function writeJson(filePath: string, value: Json): void {
  * Scratch clients live outside the workspace, so they do not inherit the
  * repository's `.npmrc`. Bun can also fall back to its default registry when
  * a project only contains a scope mapping, which makes an e2e prerelease
- * version look missing even though it was just published to Verdaccio. Keep
- * the registry explicit on the command so every gate resolves the same
- * package graph it just published.
+ * version look missing even though it was just published to Verdaccio. Bun
+ * also caches registry manifests by package and registry; every gate publishes
+ * a fresh version, so `--force` is required to refresh that manifest instead
+ * of resolving against the previous gate's version list.
  */
 export function installClient(clientDir: string): void {
-  sh("bun", ["install", "--registry", REGISTRY], clientDir);
+  sh("bun", ["install", "--registry", REGISTRY, "--force"], clientDir);
 }
 
 /** Updates an existing scratch client from the registry used by this E2E run. */
 export function updateClient(clientDir: string): void {
-  sh("bun", ["update", "--registry", REGISTRY], clientDir);
+  sh("bun", ["update", "--registry", REGISTRY, "--force"], clientDir);
 }
 
 // Publish order matters: `bun publish` requires every workspace:*
