@@ -29,3 +29,6 @@ blob-report
 
 # verdaccio local auth token
 .npmrc
+
+# graphify skill output/cache
+graphify-out
