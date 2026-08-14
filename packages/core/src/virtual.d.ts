@@ -9,7 +9,7 @@ declare module "virtual:tokotuku/admin-nav" {
 }
 
 declare module "virtual:tokotuku/config" {
-  const brand: import("./format").FormattersConfig & { name: string };
+  const brand: import("./integration").TokotukuBrand;
   export default brand;
 }
 

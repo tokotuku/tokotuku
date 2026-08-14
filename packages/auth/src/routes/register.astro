@@ -1,19 +1,24 @@
 ---
+import brand from "virtual:tokotuku/config";
+import { createTranslator } from "@tokotuku/core";
 import Icon from "@tokotuku/ui/Icon.astro";
+import { authMessages } from "../messages";
 import AuthFrame from "./AuthFrame.astro";
+
+const t = createTranslator(brand, authMessages);
 ---
 
-<AuthFrame title="Create account">
-  <form class="auth-card" id="register-form" novalidate>
-    <h1>Create an account</h1>
-    <p>Start managing your store with Tokotuku.</p>
-    <div class="field"><label for="name">Name</label><div class="input-wrap"><Icon name="user" size={16}/><input id="name" name="name" autocomplete="name" placeholder="Your name" required /></div></div>
-    <div class="field"><label for="email">Email</label><div class="input-wrap"><Icon name="mail" size={16}/><input id="email" name="email" type="email" autocomplete="email" placeholder="you@tokotuku.com" required /></div></div>
-    <div class="field"><label for="password">Password</label><div class="input-wrap"><Icon name="lock" size={16}/><input id="password" name="password" type="password" autocomplete="new-password" minlength="8" placeholder="At least 8 characters" required /><button class="password-toggle" type="button" data-password-toggle aria-label="Show password"><Icon name="eye" size={16}/></button></div></div>
-    <p class="role-note">New accounts are registered as customers.</p>
+<AuthFrame title={t("auth.register.title")}>
+  <form class="auth-card" id="register-form" data-error-fallback={t("auth.common.error")} novalidate>
+    <h1>{t("auth.register.title")}</h1>
+    <p>{t("auth.register.description", { brand: brand.name })}</p>
+    <div class="field"><label for="name">{t("auth.register.nameLabel")}</label><div class="input-wrap"><Icon name="user" size={16}/><input id="name" name="name" autocomplete="name" placeholder={t("auth.register.namePlaceholder")} required /></div></div>
+    <div class="field"><label for="email">{t("auth.login.emailLabel")}</label><div class="input-wrap"><Icon name="mail" size={16}/><input id="email" name="email" type="email" autocomplete="email" placeholder={t("auth.login.emailPlaceholder")} required /></div></div>
+    <div class="field"><label for="password">{t("auth.register.passwordLabel")}</label><div class="input-wrap"><Icon name="lock" size={16}/><input id="password" name="password" type="password" autocomplete="new-password" minlength="8" placeholder={t("auth.register.passwordPlaceholder")} required /><button class="password-toggle" type="button" data-password-toggle data-show-label={t("auth.common.showPassword")} data-hide-label={t("auth.common.hidePassword")} aria-label={t("auth.common.showPassword")}><Icon name="eye" size={16}/></button></div></div>
+    <p class="role-note">{t("auth.register.roleNote")}</p>
     <p class="auth-message" id="register-error" hidden></p>
-    <button class="auth-submit" type="submit">Create account <Icon name="arrowRight" size={16}/></button>
-    <p class="auth-switch">Already have an account? <a href="/login">Sign in</a></p>
+    <button class="auth-submit" type="submit">{t("auth.register.submit")} <Icon name="arrowRight" size={16}/></button>
+    <p class="auth-switch">{t("auth.register.existing")} <a href="/login">{t("auth.register.signIn")}</a></p>
   </form>
 </AuthFrame>
 
@@ -25,14 +30,14 @@ import AuthFrame from "./AuthFrame.astro";
   const password = form?.querySelector<HTMLInputElement>("#password");
   const error = form?.querySelector<HTMLElement>("#register-error");
   const submit = form?.querySelector<HTMLButtonElement>("[type=submit]");
-  form?.querySelector("[data-password-toggle]")?.addEventListener("click", () => { if (password) password.type = password.type === "password" ? "text" : "password"; });
+  form?.querySelector<HTMLElement>("[data-password-toggle]")?.addEventListener("click", (event) => { if (password) { password.type = password.type === "password" ? "text" : "password"; const button = event.currentTarget as HTMLElement; button.setAttribute("aria-label", password.type === "password" ? (button.dataset["showLabel"] ?? "") : (button.dataset["hideLabel"] ?? "")); } });
   form?.addEventListener("submit", async (event) => {
     event.preventDefault(); error?.setAttribute("hidden", "");
     if (!form.reportValidity() || !name || !email || !password) return;
     if (submit) submit.disabled = true;
     const result = await authClient.signUp.email({ name: name.value, email: email.value, password: password.value });
     if (submit) submit.disabled = false;
-    if (result.error) { if (error) { error.textContent = result.error.message ?? "Could not create account."; error.removeAttribute("hidden"); } return; }
+    if (result.error) { if (error) { error.textContent = result.error.message ?? form.dataset["errorFallback"] ?? ""; error.removeAttribute("hidden"); } return; }
     location.href = "/";
   });
 </script>

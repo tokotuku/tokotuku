@@ -9,7 +9,16 @@ export function catalog(): ModuleDefinition {
       { name: "projects", url: new URL("../migrations/0003_projects.sql", import.meta.url) },
     ],
     mediaPrefixes: ["products/"],
-    adminNav: [{ label: "Products", href: "/admin/products", icon: "products", order: 30 }],
+    adminNav: [
+      {
+        label: "Products",
+        labelByLocale: { id: "Produk", en: "Products" },
+        descriptionByLocale: { id: "Kelola produk dan stok.", en: "Manage products and stock." },
+        href: "/admin/products",
+        icon: "products",
+        order: 30,
+      },
+    ],
     storefrontRoutes: [
       { pattern: "/products", entrypoint: "@tokotuku/catalog/routes/products/index.astro" },
       { pattern: "/products/[id]", entrypoint: "@tokotuku/catalog/routes/products/[id].astro" },
@@ -28,6 +37,7 @@ export function catalog(): ModuleDefinition {
   });
 }
 
+export { catalogMessages } from "./messages";
 export { productInputFromForm } from "./product-form";
 export {
   archiveProduct,

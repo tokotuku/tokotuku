@@ -2,15 +2,24 @@
 /// <reference types="@tokotuku/core/virtual.d.ts" />
 import "@tokotuku/ui/styles.css";
 import brand from "virtual:tokotuku/config";
+import { createTranslator } from "@tokotuku/core";
 import Icon from "@tokotuku/ui/Icon.astro";
+import { authMessages } from "../messages";
 
 interface Props {
   title: string;
 }
+
 const { title } = Astro.props;
+const t = createTranslator(brand, authMessages);
+const authImage = brand.auth?.backgroundImage;
+const requestedPosition = brand.auth?.backgroundPosition ?? "center";
+const authImagePosition = /^[a-z0-9% .,-]+$/i.test(requestedPosition)
+  ? requestedPosition
+  : "center";
 ---
 
-<html lang="en">
+<html lang={brand.locale.toLowerCase().startsWith("id") ? "id" : "en"}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
@@ -24,17 +33,31 @@ const { title } = Astro.props;
     </script>
   </head>
   <body>
-    <main class="auth-shell">
-      <button class="auth-theme" type="button" data-auth-theme aria-label="Toggle color theme"><Icon name="moon" size={17} /></button>
-      <section class="auth-form-side"><slot /></section>
+    <main class:list={["auth-shell", { "auth-shell--image": Boolean(authImage) }]}>
+      <button class="auth-theme" type="button" data-auth-theme aria-label={t("auth.theme")}>
+        <Icon name="moon" size={17} />
+      </button>
+
+      <div class="auth-backdrop" aria-hidden="true">
+        {authImage && <img data-auth-image src={authImage} alt="" loading="eager" fetchpriority="high" style={`object-position:${authImagePosition}`} />}
+      </div>
+
+      <section class="auth-form-side">
+        <a class="auth-form-brand" href="/" aria-label={t("auth.mobile.brandAria", { brand: brand.name })}>
+          <span><Icon name="logo" size={18} /></span>
+          {brand.name}
+        </a>
+        <div class="auth-form-surface"><slot /></div>
+      </section>
+
       <aside class="auth-story">
-        <a class="auth-brand" href="/">
+        <a class="auth-brand" href="/" aria-label={t("auth.mobile.brandAria", { brand: brand.name })}>
           <span><Icon name="logo" size={20} /></span> {brand.name}
         </a>
         <div class="story-copy">
-          <p>Run your</p>
-          <strong>commerce, calmly.</strong>
-          <span>Orders, revenue, and customer intelligence — your whole store observed from one calm dashboard.</span>
+          <p>{t("auth.hero.eyebrow")}</p>
+          <strong>{t("auth.hero.title")}</strong>
+          <span>{t("auth.hero.description")}</span>
         </div>
       </aside>
     </main>
@@ -42,7 +65,12 @@ const { title } = Astro.props;
 </html>
 
 <script>
-  document.querySelector("[data-auth-theme]")?.addEventListener("click", () => {
+  const themeButton = document.querySelector<HTMLButtonElement>("[data-auth-theme]");
+  const authImageElement = document.querySelector<HTMLImageElement>("[data-auth-image]");
+  const removeBrokenImage = (event: Event) => (event.currentTarget as HTMLImageElement).remove();
+  authImageElement?.addEventListener("error", removeBrokenImage, { once: true });
+  if (authImageElement?.complete && authImageElement.naturalWidth === 0) authImageElement.remove();
+  themeButton?.addEventListener("click", () => {
     const next = document.documentElement.dataset["theme"] === "dark" ? "light" : "dark";
     document.documentElement.dataset["theme"] = next;
     localStorage.setItem("tokotuku-theme", next);
@@ -51,43 +79,60 @@ const { title } = Astro.props;
 
 <style is:global>
   *, *::before, *::after { box-sizing: border-box; }
-  .auth-shell { position: relative; display: grid; min-height: 100vh; grid-template-columns: minmax(420px, 1fr) minmax(520px, 1.05fr); gap: 24px; padding: 8px; background: var(--tk-color-bg); }
-  .auth-theme { position: absolute; z-index: 2; top: 25px; left: calc(50% - 42px); display: grid; width: 34px; height: 34px; place-items: center; border: 0; border-radius: 9px; background: transparent; color: var(--tk-color-fg); cursor: pointer; }
-  .auth-form-side { display: grid; place-items: center; padding: 48px; }
-  .auth-story { position: relative; display: flex; min-height: calc(100vh - 16px); flex-direction: column; padding: 40px; border-radius: 31px; overflow: hidden; background: radial-gradient(circle at 70% 20%, #17294c, transparent 36%), linear-gradient(155deg, #14284d, #050912 70%); color: white; }
-  .auth-story::after { content: ""; position: absolute; right: -18%; bottom: -32%; width: 75%; aspect-ratio: 1; border: 1px solid rgb(118 169 247 / 14%); border-radius: 50%; box-shadow: 0 0 0 70px rgb(118 169 247 / 3%), 0 0 0 140px rgb(118 169 247 / 2%); }
-  .auth-brand { position: relative; z-index: 1; display: inline-flex; width: fit-content; align-items: center; gap: 11px; color: white; font-size: 18px; font-weight: 700; text-decoration: none; }
-  .auth-brand > span { display: grid; width: 40px; height: 40px; place-items: center; border-radius: 50%; background: #263b61; color: #bed6fb; }
-  .story-copy { position: relative; z-index: 1; max-width: 540px; margin-top: auto; padding-bottom: 4px; }
-  .story-copy p, .story-copy strong { display: block; margin: 0; font-size: clamp(38px, 4vw, 52px); font-weight: 400; letter-spacing: -0.04em; line-height: 1.05; }
-  .story-copy strong { color: #83b4fb; }
-  .story-copy span { display: block; max-width: 500px; margin-top: 21px; color: #b8bdc7; font-size: 17px; line-height: 1.55; }
-  .auth-card { width: min(100%, 384px); }
-  .auth-card h1 { margin: 0; font-size: 25px; font-weight: 520; letter-spacing: -0.025em; }
-  .auth-card > p { margin: 8px 0 26px; color: var(--tk-color-fg-muted); font-size: 14px; }
+  :focus-visible { outline: 3px solid color-mix(in srgb, var(--tk-color-focus-ring) 70%, transparent); outline-offset: 3px; }
+  .auth-shell { position: relative; display: grid; min-height: 100vh; grid-template-columns: minmax(320px, .88fr) minmax(0, 1.12fr); gap: 16px; padding: 12px; overflow: hidden; background: var(--tk-color-bg); }
+  .auth-backdrop { position: absolute; z-index: 0; top: 12px; right: 12px; bottom: 12px; left: calc(44% + 4px); overflow: hidden; border-radius: 28px; background: radial-gradient(circle at 74% 16%, #f1bd82 0, transparent 31%), linear-gradient(145deg, #9e492c, #3a2019 72%); }
+  .auth-backdrop::after { position: absolute; inset: 0; content: ""; background: linear-gradient(180deg, rgb(34 22 16 / 8%), rgb(34 22 16 / 72%)); }
+  .auth-backdrop img { width: 100%; height: 100%; object-fit: cover; }
+  .auth-form-side, .auth-story { position: relative; z-index: 1; min-width: 0; }
+  .auth-form-side { display: flex; align-items: center; justify-content: center; flex-direction: column; padding: 48px 40px; }
+  .auth-form-surface { width: min(100%, 420px); }
+  .auth-form-brand { display: inline-flex; max-width: 100%; align-items: center; gap: 9px; margin: 0 auto 38px; overflow-wrap: anywhere; color: var(--tk-color-fg); font-size: 16px; font-weight: var(--tk-font-weight-bold); text-decoration: none; }
+  .auth-form-brand > span { display: grid; width: 32px; height: 32px; place-items: center; border-radius: 10px; background: color-mix(in srgb, var(--tk-color-accent) 14%, var(--tk-color-bg)); color: var(--tk-color-accent); }
+  .auth-story { display: flex; min-height: calc(100vh - 24px); flex-direction: column; padding: 40px; color: white; }
+  .auth-brand { position: relative; z-index: 1; display: inline-flex; width: fit-content; max-width: 100%; align-items: center; gap: 11px; overflow-wrap: anywhere; color: white; font-size: 18px; font-weight: var(--tk-font-weight-bold); text-decoration: none; }
+  .auth-brand > span { display: grid; width: 40px; height: 40px; place-items: center; border-radius: 12px; background: rgb(255 239 212 / 16%); color: #ffe6be; }
+  .story-copy { position: relative; z-index: 1; max-width: 540px; margin-top: auto; padding-bottom: 4px; overflow-wrap: anywhere; }
+  .story-copy p, .story-copy strong { display: block; margin: 0; font-size: clamp(36px, 4vw, 54px); font-weight: var(--tk-font-weight-medium); letter-spacing: -0.045em; line-height: 1.03; }
+  .story-copy strong { color: #ffc17e; }
+  .story-copy span { display: block; max-width: 500px; margin-top: 21px; color: #f2d6ba; font-size: 17px; line-height: 1.55; }
+  .auth-theme { position: absolute; z-index: 3; top: 23px; right: 23px; display: grid; width: 40px; height: 40px; place-items: center; border: 1px solid var(--tk-color-border); border-radius: 12px; background: color-mix(in srgb, var(--tk-color-bg) 88%, transparent); color: var(--tk-color-fg); cursor: pointer; }
+  .auth-card { width: 100%; overflow-wrap: anywhere; }
+  .auth-card h1 { margin: 0; color: var(--tk-color-fg); font-size: 28px; font-weight: var(--tk-font-weight-medium); letter-spacing: -0.035em; line-height: 1.1; }
+  .auth-card > p { margin: 9px 0 28px; color: var(--tk-color-fg-muted); font-size: 14px; line-height: 1.5; }
   .field { display: grid; gap: 8px; margin-top: 18px; }
   .field-row { display: flex; align-items: center; justify-content: space-between; }
-  .field label, .field-row label { color: var(--tk-color-fg); font-size: 13px; font-weight: 600; }
-  .field-row a { color: var(--tk-color-accent); font-size: 12px; }
-  .input-wrap { position: relative; display: flex; height: 45px; align-items: center; }
+  .field label, .field-row label { color: var(--tk-color-fg); font-size: 14px; font-weight: var(--tk-font-weight-semibold); }
+  .field-row a { color: var(--tk-color-accent); font-size: 13px; font-weight: var(--tk-font-weight-semibold); }
+  .input-wrap { position: relative; display: flex; height: 47px; align-items: center; }
   .input-wrap > svg { position: absolute; left: 15px; color: var(--tk-color-fg-muted); pointer-events: none; }
-  .input-wrap input { width: 100%; height: 100%; padding: 0 43px; border: 1px solid var(--tk-color-border); border-radius: 13px; outline: 0; background: var(--tk-color-bg); color: var(--tk-color-fg); font: inherit; font-size: 14px; }
-  .input-wrap input:focus { border-color: var(--tk-color-accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--tk-color-accent) 13%, transparent); }
-  .password-toggle { position: absolute; right: 7px; display: grid; width: 34px; height: 34px; place-items: center; border: 0; border-radius: 8px; background: transparent; color: var(--tk-color-fg-muted); cursor: pointer; }
+  .input-wrap input { width: 100%; height: 100%; padding: 0 43px; border: 1px solid var(--tk-color-border); border-radius: 12px; outline: 0; background: var(--tk-color-bg); color: var(--tk-color-fg); font: inherit; font-size: 14px; }
+  .input-wrap input:focus { border-color: var(--tk-color-accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--tk-color-accent) 15%, transparent); }
+  .password-toggle { position: absolute; right: 5px; display: grid; width: 40px; height: 40px; place-items: center; border: 0; border-radius: 9px; background: transparent; color: var(--tk-color-fg-muted); cursor: pointer; }
   .check-row { display: flex; align-items: center; gap: 9px; margin: 18px 0; color: var(--tk-color-fg); font-size: 13px; }
   .check-row input { width: 16px; height: 16px; accent-color: var(--tk-color-accent); }
-  .auth-submit { display: flex; width: 100%; height: 44px; align-items: center; justify-content: center; gap: 9px; border: 1px solid #1765c8; border-radius: 13px; background: linear-gradient(#438be9, #2876df); color: white; font-size: 13px; font-weight: 650; cursor: pointer; }
+  .auth-submit { display: flex; width: 100%; min-height: 47px; align-items: center; justify-content: center; gap: 9px; border: 1px solid var(--tk-color-accent-hover); border-radius: 12px; background: var(--tk-color-accent); color: var(--tk-color-accent-fg); font-size: 14px; font-weight: var(--tk-font-weight-semibold); cursor: pointer; transition: filter var(--tk-duration-fast) var(--tk-easing-standard); }
+  .auth-submit:hover { filter: brightness(.95); }
   .auth-submit:disabled { cursor: wait; opacity: .65; }
   .auth-switch { margin: 24px 0 0 !important; color: var(--tk-color-fg-muted); font-size: 13px !important; text-align: center; }
-  .auth-switch a { color: var(--tk-color-accent); font-weight: 600; }
-  .auth-back { display: inline-flex; align-items: center; gap: 8px; margin-top: 27px; color: var(--tk-color-fg); font-size: 13px; font-weight: 600; text-decoration: none; }
-  .auth-message { margin: 14px 0 0 !important; padding: 10px 12px; border-radius: 10px; background: color-mix(in srgb, var(--tk-color-danger) 10%, var(--tk-color-bg)); color: var(--tk-color-danger) !important; font-size: 12px !important; }
+  .auth-switch a { color: var(--tk-color-accent); font-weight: var(--tk-font-weight-semibold); }
+  .auth-back { display: inline-flex; align-items: center; justify-content: center; gap: 8px; margin-top: 27px; color: var(--tk-color-fg); font-size: 13px; font-weight: var(--tk-font-weight-semibold); text-decoration: none; }
+  .auth-message { margin: 14px 0 0 !important; padding: 11px 13px; border-radius: 10px; background: color-mix(in srgb, var(--tk-color-danger) 10%, var(--tk-color-bg)); color: var(--tk-color-danger) !important; font-size: 12px !important; line-height: 1.45; }
   .auth-message.success { background: color-mix(in srgb, var(--tk-color-success) 12%, var(--tk-color-bg)); color: var(--tk-color-success) !important; }
-
   @media (max-width: 880px) {
-    .auth-shell { display: block; padding: 0; }
+    .auth-shell { display: block; min-height: 100svh; padding: 0; overflow-x: hidden; }
+    .auth-backdrop { position: absolute; inset: 0; border-radius: 0; background: var(--tk-color-bg); }
+    .auth-backdrop img { position: absolute; inset: -5%; width: 110%; height: 75%; filter: blur(14px) saturate(.85); opacity: .72; transform: scale(1.08); }
+    .auth-backdrop::after { background: linear-gradient(180deg, rgb(34 22 16 / 12%) 0%, color-mix(in srgb, var(--tk-color-bg) 20%, transparent) 35%, var(--tk-color-bg) 76%); }
+    .auth-form-side { display: block; min-height: 100svh; padding: clamp(96px, 16vh, 128px) 20px 40px; }
+    .auth-form-brand { max-width: 100%; margin: 0 0 24px 4px; overflow-wrap: anywhere; }
+    .auth-form-surface { padding: 24px; border: 1px solid color-mix(in srgb, var(--tk-color-border) 82%, transparent); border-radius: 24px; background: color-mix(in srgb, var(--tk-color-bg) 84%, transparent); box-shadow: var(--tk-shadow-lg); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); }
     .auth-story { display: none; }
-    .auth-form-side { min-height: 100vh; padding: 72px 24px 40px; }
-    .auth-theme { top: 20px; right: 20px; left: auto; }
+    .auth-theme { top: 20px; right: 20px; }
   }
+  @media (max-width: 380px) {
+    .auth-form-side { padding-inline: 12px; }
+    .auth-form-surface { padding: 20px 16px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .auth-submit { transition: none; } }
 </style>

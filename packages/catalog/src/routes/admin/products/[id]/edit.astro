@@ -1,7 +1,10 @@
 ---
 import { env } from "cloudflare:workers";
+import brand from "virtual:tokotuku/config";
+import { createTranslator } from "@tokotuku/core";
 import { date } from "@tokotuku/core/brand";
 import AdminLayout from "@tokotuku/core/routes/AdminLayout.astro";
+import { catalogMessages, localizeCatalogError } from "../../../../messages";
 import { productInputFromForm } from "../../../../product-form";
 import {
   archiveProduct,
@@ -11,9 +14,13 @@ import {
 } from "../../../../products";
 import ProductForm from "../../../ProductForm.astro";
 
+const t = createTranslator(brand, catalogMessages);
+
+// Astro's generated params type is an index-signature object here.
+// biome-ignore lint/complexity/useLiteralKeys: keep the generated Astro params access explicit
 const id = Number(Astro.params["id"]);
 let product = await findProductById(env.DB, id, { includeInactive: true });
-if (!product) return new Response("Product not found", { status: 404 });
+if (!product) return new Response(t("catalog.products.error.notFound"), { status: 404 });
 let error = "";
 
 if (Astro.request.method === "POST") {
@@ -27,24 +34,26 @@ if (Astro.request.method === "POST") {
     await updateProduct(env.DB, id, input);
     return Astro.redirect(`/admin/products/${id}/edit?saved=1`);
   } catch (caught) {
-    error = caught instanceof Error ? caught.message : "Produk gagal disimpan.";
+    error = localizeCatalogError(caught, t);
     product = (await findProductById(env.DB, id, { includeInactive: true })) ?? product;
   }
 }
 const movements = await listInventoryMovements(env.DB, id);
+const movementReason = (reason: (typeof movements)[number]["reason"]) =>
+  t(`catalog.products.movements.reason.${reason}`);
 ---
 
-<AdminLayout title={`Edit ${product.name}`}>
+<AdminLayout title={`${t("catalog.products.editTitle")} ${product.name}`}>
   <header class="page-heading">
-    <div><h1>Edit product</h1><p>Perbarui informasi dan stok {product.name}.</p></div>
-    <form method="post" onsubmit="return confirm('Nonaktifkan produk ini dari toko?')"><input type="hidden" name="intent" value="archive" /><button class="admin-button danger-button" type="submit">Nonaktifkan produk</button></form>
+    <div><h1>{t("catalog.products.editTitle")}</h1><p>{t("catalog.products.editDescription", { name: product.name })}</p></div>
+    <form method="post" onsubmit={`return confirm(${JSON.stringify(t("catalog.products.archiveConfirm"))})`}><input type="hidden" name="intent" value="archive" /><button class="admin-button danger-button" type="submit">{t("catalog.products.archive")}</button></form>
   </header>
-  {Astro.url.searchParams.has("saved") && <p class="save-notice">Produk berhasil disimpan.</p>}
+  {Astro.url.searchParams.has("saved") && <p class="save-notice">{t("catalog.products.saved")}</p>}
   <ProductForm product={product} error={error} />
   <section class="panel movement-panel">
-    <div><h2>Riwayat stok</h2><p>Mutasi dari penjualan, pembatalan, dan perubahan manual.</p></div>
-    {movements.length ? <table><thead><tr><th>Waktu</th><th>Alasan</th><th>Catatan</th><th>Perubahan</th></tr></thead><tbody>{movements.map((movement) => <tr><td>{date(new Date(`${movement.createdAt}Z`))}</td><td>{movement.reason.replaceAll("_", " ")}</td><td>{movement.note}</td><td class:list={[movement.quantityChange > 0 ? "positive" : "negative"]}>{movement.quantityChange > 0 ? "+" : ""}{movement.quantityChange}</td></tr>)}</tbody></table> : <p class="empty-movements">Belum ada mutasi stok.</p>}
+    <div><h2>{t("catalog.products.movements.title")}</h2><p>{t("catalog.products.movements.description")}</p></div>
+    {movements.length ? <table><thead><tr><th>{t("catalog.products.movements.time")}</th><th>{t("catalog.products.movements.reason")}</th><th>{t("catalog.products.movements.note")}</th><th>{t("catalog.products.movements.change")}</th></tr></thead><tbody>{movements.map((movement) => <tr><td>{date(new Date(`${movement.createdAt}Z`))}</td><td>{movementReason(movement.reason)}</td><td>{movement.note}</td><td class:list={[movement.quantityChange > 0 ? "positive" : "negative"]}>{movement.quantityChange > 0 ? "+" : ""}{movement.quantityChange}</td></tr>)}</tbody></table> : <p class="empty-movements">{t("catalog.products.movements.empty")}</p>}
   </section>
 </AdminLayout>
 
-<style>.save-notice{padding:11px 14px;border-radius:10px;background:color-mix(in srgb,#0b923d 10%,var(--admin-surface));color:#087b34}.danger-button{color:var(--tk-color-danger)}.movement-panel{margin-top:18px;padding:22px;overflow:auto}.movement-panel h2,.movement-panel p{margin:0}.movement-panel>div p{margin-top:5px;color:var(--tk-color-fg-muted);font-size:12px}.movement-panel table{width:100%;margin-top:18px;border-collapse:collapse;font-size:12px}.movement-panel th,.movement-panel td{padding:11px;border-top:1px solid var(--admin-line);text-align:left}.movement-panel th{color:var(--tk-color-fg-muted)}.positive{color:#087b34;font-weight:700}.negative{color:var(--tk-color-danger);font-weight:700}.empty-movements{margin-top:18px!important;color:var(--tk-color-fg-muted)}</style>
+<style>.save-notice{padding:11px 14px;border-radius:10px;background:color-mix(in srgb,var(--tk-color-success) 10%,var(--admin-surface));color:var(--tk-color-success)}.danger-button{color:var(--tk-color-danger)}.movement-panel{margin-top:18px;padding:22px;overflow:auto}.movement-panel h2,.movement-panel p{margin:0}.movement-panel>div p{margin-top:5px;color:var(--tk-color-fg-muted);font-size:12px}.movement-panel table{width:100%;margin-top:18px;border-collapse:collapse;font-size:12px}.movement-panel th,.movement-panel td{padding:11px;border-top:1px solid var(--admin-line);text-align:left}.movement-panel th{color:var(--tk-color-fg-muted)}.positive{color:var(--tk-color-success);font-weight:var(--tk-font-weight-bold)}.negative{color:var(--tk-color-danger);font-weight:var(--tk-font-weight-bold)}.empty-movements{margin-top:18px!important;color:var(--tk-color-fg-muted)}</style>

@@ -9,6 +9,7 @@ interface Props {
   description?: string;
   image?: string;
   type?: "website" | "product" | "article";
+  lang?: string;
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];
   noindex?: boolean;
   siteName?: string;
@@ -22,13 +23,14 @@ const {
   jsonLd,
   noindex = false,
   siteName = "Tokotuku",
+  lang = "en",
 } = Astro.props;
 
 const canonicalUrl = new URL(Astro.url.pathname, Astro.url.origin).toString();
 const absoluteImage = image ? new URL(image, Astro.url.origin).toString() : undefined;
 ---
 
-<html lang="en">
+<html lang={lang}>
   <head>
     <meta charset="utf-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
