@@ -1,10 +1,14 @@
 ---
 import { env } from "cloudflare:workers";
+import brand from "virtual:tokotuku/config";
+import { createTranslator } from "@tokotuku/core";
 import Icon from "@tokotuku/ui/Icon.astro";
 import { createAuth } from "../auth";
+import { authMessages } from "../messages";
 import { claimSetup, completeSetup, isSetupComplete, releaseSetupClaim } from "../setup";
 import AuthFrame from "./AuthFrame.astro";
 
+const t = createTranslator(brand, authMessages);
 let errorMessage = "";
 let values = { name: "", email: "" };
 
@@ -13,7 +17,7 @@ if (await isSetupComplete(env.DB)) return Astro.redirect("/login", 302);
 if (Astro.request.method === "POST") {
   const origin = Astro.request.headers.get("origin");
   if (origin !== Astro.url.origin) {
-    errorMessage = "The setup request did not come from this site.";
+    errorMessage = t("auth.setup.error.origin");
   } else {
     const form = await Astro.request.formData();
     const name = String(form.get("name") ?? "").trim();
@@ -24,13 +28,13 @@ if (Astro.request.method === "POST") {
     const confirmPassword = String(form.get("confirmPassword") ?? "");
     values = { name, email };
 
-    if (name.length < 2) errorMessage = "Enter the administrator's full name.";
-    else if (!email?.includes("@")) errorMessage = "Enter a valid email address.";
-    else if (password.length < 8) errorMessage = "Password must contain at least 8 characters.";
-    else if (password !== confirmPassword) errorMessage = "Passwords do not match.";
+    if (name.length < 2) errorMessage = t("auth.setup.error.name");
+    else if (!email?.includes("@")) errorMessage = t("auth.setup.error.email");
+    else if (password.length < 8) errorMessage = t("auth.setup.error.password");
+    else if (password !== confirmPassword) errorMessage = t("auth.setup.error.confirm");
     else if (await isSetupComplete(env.DB)) return Astro.redirect("/login", 302);
     else if (!(await claimSetup(env.DB))) {
-      errorMessage = "Setup is already running in another window. Try again in a moment.";
+      errorMessage = t("auth.setup.error.running");
     } else {
       let createdUserId: string | undefined;
       try {
@@ -42,30 +46,28 @@ if (Astro.request.method === "POST") {
       } catch (error) {
         await releaseSetupClaim(env.DB, createdUserId);
         errorMessage =
-          error instanceof Error && error.message
-            ? error.message
-            : "Could not create the administrator account.";
+          error instanceof Error && error.message ? error.message : t("auth.setup.error.generic");
       }
     }
   }
 }
 ---
 
-<AuthFrame title="Set up your store">
+<AuthFrame title={t("auth.setup.title")}>
   <form class="auth-card setup-card" method="post" action="/setup" novalidate>
-    <span class="setup-step">One-time setup</span>
-    <h1>Create the store administrator</h1>
-    <p>This account gets full back-office access. Setup closes permanently when it is created.</p>
+    <span class="setup-step">{t("auth.setup.step")}</span>
+    <h1>{t("auth.setup.title")}</h1>
+    <p>{t("auth.setup.description")}</p>
 
     <div class="field">
-      <label for="name">Full name</label>
+      <label for="name">{t("auth.setup.nameLabel")}</label>
       <div class="input-wrap">
         <Icon name="user" size={16} />
         <input id="name" name="name" autocomplete="name" value={values.name} required />
       </div>
     </div>
     <div class="field">
-      <label for="email">Email</label>
+      <label for="email">{t("auth.setup.emailLabel")}</label>
       <div class="input-wrap">
         <Icon name="mail" size={16} />
         <input
@@ -79,7 +81,7 @@ if (Astro.request.method === "POST") {
       </div>
     </div>
     <div class="field">
-      <label for="password">Password</label>
+      <label for="password">{t("auth.setup.passwordLabel")}</label>
       <div class="input-wrap">
         <Icon name="lock" size={16} />
         <input
@@ -90,13 +92,13 @@ if (Astro.request.method === "POST") {
           minlength="8"
           required
         />
-        <button class="password-toggle" type="button" data-password-toggle aria-label="Show password">
+          <button class="password-toggle" type="button" data-password-toggle data-show-label={t("auth.common.showPassword")} data-hide-label={t("auth.common.hidePassword")} aria-label={t("auth.common.showPassword")}>
           <Icon name="eye" size={16} />
         </button>
       </div>
     </div>
     <div class="field">
-      <label for="confirm-password">Confirm password</label>
+      <label for="confirm-password">{t("auth.setup.confirmPasswordLabel")}</label>
       <div class="input-wrap">
         <Icon name="lock" size={16} />
         <input
@@ -112,25 +114,27 @@ if (Astro.request.method === "POST") {
 
     {errorMessage && <p class="auth-message" role="alert">{errorMessage}</p>}
     <button class="auth-submit" type="submit">
-      Create administrator <Icon name="arrowRight" size={16} />
+      {t("auth.setup.submit")} <Icon name="arrowRight" size={16} />
     </button>
-    <p class="setup-note"><Icon name="lock" size={13} /> This page cannot create another admin later.</p>
+    <p class="setup-note"><Icon name="lock" size={13} /> {t("auth.setup.note")}</p>
   </form>
 </AuthFrame>
 
 <script>
   const password = document.querySelector<HTMLInputElement>("#password");
   const confirmation = document.querySelector<HTMLInputElement>("#confirm-password");
-  document.querySelector("[data-password-toggle]")?.addEventListener("click", () => {
+  document.querySelector<HTMLElement>("[data-password-toggle]")?.addEventListener("click", (event) => {
     const nextType = password?.type === "password" ? "text" : "password";
     if (password) password.type = nextType;
     if (confirmation) confirmation.type = nextType;
+    const button = event.currentTarget as HTMLElement;
+    button.setAttribute("aria-label", nextType === "password" ? (button.dataset["showLabel"] ?? "") : (button.dataset["hideLabel"] ?? ""));
   });
 </script>
 
 <style>
   .setup-card { width: min(100%, 410px); }
-  .setup-step { display: inline-flex; margin-bottom: 14px; padding: 6px 9px; border-radius: 999px; background: color-mix(in srgb, var(--tk-color-accent) 11%, var(--tk-color-bg)); color: var(--tk-color-accent); font-size: 10px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }
+  .setup-step { display: inline-flex; margin-bottom: 14px; padding: 6px 9px; border-radius: 999px; background: color-mix(in srgb, var(--tk-color-accent) 11%, var(--tk-color-bg)); color: var(--tk-color-accent); font-size: 10px; font-weight: var(--tk-font-weight-bold); letter-spacing: .08em; text-transform: uppercase; }
   .setup-card .auth-submit { margin-top: 20px; }
   .setup-note { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 14px 0 0 !important; font-size: 10px !important; }
 </style>

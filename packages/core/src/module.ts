@@ -1,5 +1,9 @@
 export interface AdminNavItem {
   label: string;
+  /** Optional package-owned labels for the built-in Indonesian/English dictionaries. */
+  labelByLocale?: Partial<Record<"id" | "en", string>>;
+  /** Optional localized shortcut description shown by the operational dashboard. */
+  descriptionByLocale?: Partial<Record<"id" | "en", string>>;
   href: string;
   /** A key the shell's icon set recognizes, or raw SVG path data for a module shipping its own glyph. */
   icon: string | string[];

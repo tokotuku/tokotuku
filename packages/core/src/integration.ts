@@ -11,8 +11,18 @@ import { tokotukuVirtualModulesPlugin } from "./virtual-modules-plugin";
 
 export { defineModule } from "./module";
 
+export interface TokotukuAuthBrand {
+  /** Public URL (or path) for the decorative auth panel image. */
+  backgroundImage?: string;
+  /** CSS object-position used by the auth panel image. */
+  backgroundPosition?: string;
+}
+
 export interface TokotukuBrand extends FormattersConfig {
   name: string;
+  auth?: TokotukuAuthBrand;
+  /** Optional sparse overrides for package-owned localized dictionaries. */
+  messages?: Record<string, string>;
 }
 
 export interface TokotukuOptions {
@@ -33,7 +43,15 @@ export type TokotukuIntegration = AstroIntegration & { registry: ResolvedRegistr
 const CORE_MODULE: ModuleDefinition = {
   name: "core",
   guardedPrefixes: ["/admin"],
-  adminNav: [{ label: "Dashboard", href: "/admin", icon: "dashboard", order: 0 }],
+  adminNav: [
+    {
+      label: "Dashboard",
+      labelByLocale: { id: "Dashboard", en: "Dashboard" },
+      href: "/admin",
+      icon: "dashboard",
+      order: 0,
+    },
+  ],
   storefrontRoutes: [
     { pattern: "/403", entrypoint: "@tokotuku/core/routes/403.astro" },
     { pattern: "/404", entrypoint: "@tokotuku/core/routes/404.astro" },

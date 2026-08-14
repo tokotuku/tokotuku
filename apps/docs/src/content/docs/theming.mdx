@@ -46,3 +46,35 @@ CSS custom properties cascade through the native HTML rendered by Astro componen
 ```
 
 Prefer semantic variables such as `--tk-color-accent` and `--tk-color-danger`; components intentionally do not depend on raw palette values.
+
+## Branding and auth imagery
+
+The `brand` option is backward-compatible. The `auth` block is optional; when no image is configured (or the image cannot load), auth uses its built-in warm gradient.
+
+```js
+tokotuku({
+  brand: {
+    name: "Kedai Senja",
+    locale: "id-ID",
+    currency: "IDR",
+    timeZone: "Asia/Jakarta",
+    auth: {
+      backgroundImage: "/images/auth-commerce.webp",
+      backgroundPosition: "center 35%",
+    },
+    messages: {
+      "auth.login.title": "Masuk ke ruang kerja {brand}",
+      "admin.nav./admin/orders": "Penjualan",
+    },
+  },
+  modules: [auth(), catalog(), orders()],
+})
+```
+
+`backgroundImage` accepts a public path or absolute URL and is rendered as a decorative image (not interpolated into CSS). On small screens it becomes a blurred, faded backdrop behind the form. `messages` is a sparse override map: defaults are selected from the locale (`id*` uses Indonesian, everything else uses English), and unknown keys are ignored in production (with a development warning). `{brand}`, `{name}`, `{count}`, `{from}`, and `{to}` placeholders are supported.
+
+For the fallback gradient, omit `auth` entirely:
+
+```js
+brand: { name: "Kedai Senja", locale: "id-ID", currency: "IDR" }
+```

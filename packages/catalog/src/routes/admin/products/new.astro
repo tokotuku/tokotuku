@@ -1,22 +1,30 @@
 ---
 import { env } from "cloudflare:workers";
+import brand from "virtual:tokotuku/config";
+import { createTranslator } from "@tokotuku/core";
 import AdminLayout from "@tokotuku/core/routes/AdminLayout.astro";
+import { catalogMessages, localizeCatalogError } from "../../../messages";
 import { productInputFromForm } from "../../../product-form";
 import { createProduct } from "../../../products";
 import ProductForm from "../../ProductForm.astro";
 
+const t = createTranslator(brand, catalogMessages);
+
 let error = "";
 if (Astro.request.method === "POST") {
   try {
-    const input = await productInputFromForm(await Astro.request.formData(), env.MEDIA);
-    return Astro.redirect(`/admin/products/${await createProduct(env.DB, input)}/edit?saved=1`);
+    const formData = await Astro.request.formData();
+    const productInput = await productInputFromForm(formData, env.MEDIA);
+    return Astro.redirect(
+      `/admin/products/${String(await createProduct(env.DB, productInput))}/edit?saved=1`,
+    );
   } catch (caught) {
-    error = caught instanceof Error ? caught.message : "Produk gagal disimpan.";
+    error = localizeCatalogError(caught, t);
   }
 }
 ---
 
-<AdminLayout title="Add product">
-  <header class="page-heading"><div><h1>Add product</h1><p>Buat produk, atur stok, dan tambahkan field yang dibutuhkan.</p></div></header>
+<AdminLayout title={t("catalog.products.newTitle")}>
+  <header class="page-heading"><div><h1>{t("catalog.products.newTitle")}</h1><p>{t("catalog.products.newDescription")}</p></div></header>
   <ProductForm error={error} />
 </AdminLayout>

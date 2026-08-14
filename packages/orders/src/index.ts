@@ -1,5 +1,7 @@
 import { defineModule, type ModuleDefinition } from "@tokotuku/core";
 
+export { orderMessages } from "./messages";
+
 export function orders(): ModuleDefinition {
   return defineModule({
     name: "orders",
@@ -11,7 +13,19 @@ export function orders(): ModuleDefinition {
         url: new URL("../migrations/0002_payments_bank_transfer.sql", import.meta.url),
       },
     ],
-    adminNav: [{ label: "Orders", href: "/admin/orders", icon: "orders", order: 20 }],
+    adminNav: [
+      {
+        label: "Orders",
+        labelByLocale: { id: "Pesanan", en: "Orders" },
+        descriptionByLocale: {
+          id: "Pantau pesanan dan pembayaran.",
+          en: "Track orders and payments.",
+        },
+        href: "/admin/orders",
+        icon: "orders",
+        order: 20,
+      },
+    ],
     ambientScripts: ["@tokotuku/orders/routes/CartScript.astro"],
     storefrontRoutes: [
       { pattern: "/cart", entrypoint: "@tokotuku/orders/routes/cart.astro" },

@@ -13,7 +13,13 @@ export default defineConfig({
   integrations: [
     alpinejs(),
     tokotuku({
-      brand: { name: "Tokotuku", locale: "id-ID", currency: "IDR", timeZone: "Asia/Jakarta" },
+      brand: {
+        name: "Tokotuku",
+        locale: "id-ID",
+        currency: "IDR",
+        timeZone: "Asia/Jakarta",
+        auth: { backgroundImage: "/auth-commerce.webp", backgroundPosition: "center" },
+      },
       modules: [auth(), catalog(), orders()],
     }),
   ],

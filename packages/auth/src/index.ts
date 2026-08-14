@@ -21,5 +21,6 @@ export function auth(): ModuleDefinition {
 }
 
 export { authClient } from "./auth-client";
+export { authMessages } from "./messages";
 export { canAccessBackoffice, type UserRole, userRoles } from "./roles";
 export { claimSetup, completeSetup, isSetupComplete, releaseSetupClaim } from "./setup";

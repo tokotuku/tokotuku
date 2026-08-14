@@ -1,5 +1,5 @@
 import type { Plugin } from "vite";
-import type { FormattersConfig } from "./format";
+import type { TokotukuBrand } from "./integration";
 import type { ResolvedRegistry } from "./registry";
 
 const RESOLVED_PREFIX = "\0";
@@ -12,7 +12,7 @@ function resolveVirtualModuleId(id: string): string {
 /** Vite plugin that exposes the resolved module registry and brand config as virtual modules. */
 export function tokotukuVirtualModulesPlugin(
   registry: ResolvedRegistry,
-  brand: FormattersConfig & { name: string },
+  brand: TokotukuBrand,
 ): Plugin {
   const modules: Record<string, string> = {
     "virtual:tokotuku/registry": `export default ${JSON.stringify(registry)};`,
