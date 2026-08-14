@@ -1,0 +1,9 @@
+{
+  "name": "e2e-install",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "run": "bun run.ts",
+    "lint": "biome check ."
+  }
+}

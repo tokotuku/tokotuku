@@ -1,0 +1,45 @@
+import type { Plugin } from "vite";
+import type { FormattersConfig } from "./format";
+import type { ResolvedRegistry } from "./registry";
+
+const RESOLVED_PREFIX = "\0";
+const MODULE_PREFIX = "virtual:tokotuku/";
+
+function resolveVirtualModuleId(id: string): string {
+  return `${RESOLVED_PREFIX}${id}`;
+}
+
+/** Vite plugin that exposes the resolved module registry and brand config as virtual modules. */
+export function tokotukuVirtualModulesPlugin(
+  registry: ResolvedRegistry,
+  brand: FormattersConfig & { name: string },
+): Plugin {
+  const modules: Record<string, string> = {
+    "virtual:tokotuku/registry": `export default ${JSON.stringify(registry)};`,
+    "virtual:tokotuku/admin-nav": `export default ${JSON.stringify(registry.adminNav)};`,
+    "virtual:tokotuku/config": `export default ${JSON.stringify(brand)};`,
+    "virtual:tokotuku/ambient-scripts": [
+      ...registry.ambientScripts.map(
+        (specifier, index) => `import Ambient${index} from ${JSON.stringify(specifier)};`,
+      ),
+      `export default [${registry.ambientScripts.map((_, index) => `Ambient${index}`).join(", ")}];`,
+    ].join("\n"),
+  };
+
+  const resolutionMap = Object.fromEntries(
+    Object.keys(modules).map((key) => [resolveVirtualModuleId(key), key]),
+  );
+
+  return {
+    name: "vite-plugin-tokotuku-virtual-modules",
+    resolveId(id) {
+      if (id.startsWith(MODULE_PREFIX) && id in modules) return resolveVirtualModuleId(id);
+      return undefined;
+    },
+    load(id) {
+      if (!id.startsWith(RESOLVED_PREFIX)) return undefined;
+      const resolution = resolutionMap[id];
+      return resolution ? modules[resolution] : undefined;
+    },
+  };
+}

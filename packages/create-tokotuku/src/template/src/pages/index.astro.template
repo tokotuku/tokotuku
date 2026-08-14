@@ -1,0 +1,22 @@
+---
+import { brand } from "@tokotuku/core/brand";
+import Layout from "@tokotuku/ui/Layout.astro";
+import StoreHeader from "@tokotuku/ui/StoreHeader.astro";
+---
+
+<Layout title={brand.name} siteName={brand.name}>
+  <StoreHeader current="home" />
+  <main>
+    <h1>{brand.name}</h1>
+    <p>This storefront is ready. Visit <a href="/setup">/setup</a> to create the first
+      administrator, then <a href="/admin">/admin</a> to add products.</p>
+  </main>
+</Layout>
+
+<style>
+  main {
+    width: min(100% - calc(var(--tk-spacing-4) * 2), 76rem);
+    margin-inline: auto;
+    padding-block: var(--tk-spacing-12);
+  }
+</style>

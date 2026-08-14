@@ -1,0 +1,29 @@
+---
+---
+<script>
+  import { addToCart, cartCount, onCartChange, readCart } from "../client/cart";
+
+  function syncCartBadge(): void {
+    const count = cartCount(readCart());
+    for (const element of document.querySelectorAll<HTMLElement>("[data-cart-count]")) {
+      element.textContent = String(count);
+    }
+  }
+
+  // Delegated (not bound per-button) so any page can render a
+  // [data-add-to-cart] button without wiring its own handler.
+  document.addEventListener("click", (event) => {
+    const button = (event.target as HTMLElement).closest<HTMLButtonElement>("[data-add-to-cart]");
+    if (!button?.dataset["product"]) return;
+
+    addToCart(JSON.parse(button.dataset["product"]));
+
+    const original = button.textContent;
+    button.textContent = "Added";
+    window.setTimeout(() => {
+      button.textContent = original;
+    }, 1000);
+  });
+
+  onCartChange(syncCartBadge);
+</script>

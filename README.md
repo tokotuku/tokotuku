@@ -1,49 +1,31 @@
-# Tokotuku UI
+# Tokotuku
 
-An Astro-first component system built with semantic HTML, Tailwind CSS v4, Alpine.js, and strict TypeScript.
+An a-la-carte e-commerce framework built on Astro, Cloudflare (D1 + R2), and Better Auth. The goal
+is a set of installable `@tokotuku/*` packages — storefront, admin, and migrations shipped
+together per feature — so a client project stays a handful of config and theme files instead of a
+forked copy of the whole app.
 
 ## Workspace layout
 
 ```
 apps/
   docs/        Documentation site (Astro + Starlight)
-  example/     Runs the complete e-commerce starter from template/
-configs/       Shared strict TypeScript configuration
+  example/     Reference client app — proves the framework end to end
+  storybook/   Isolated Astro component development and accessibility checks
+packages/
+  ui/          The complete Astro component set (@tokotuku/ui)
+configs/       Shared TypeScript, tsup, and vitest configuration (@tokotuku/config)
 scripts/       Repo maintenance scripts (e.g. commit message validation)
-template/      Standalone Bun + Moon starter source, including UI and Storybook
+tools/         Local dev infrastructure (Verdaccio private registry)
 ```
 
-The Astro UI and Tailwind theme live in one package inside `template/packages`, making the generated starter
-self-contained. Root docs and the example app consume those exact local packages, so component
-development cannot drift from what the starter repository receives.
+`packages/ui` and `apps/example` are consumed as local workspace packages today — component
+development cannot drift from what `apps/example` runs. As feature modules (`@tokotuku/catalog`,
+`@tokotuku/orders`, `@tokotuku/auth`, …) are extracted from `apps/example` into `packages/*`, this
+repository becomes the source for a `create-tokotuku` scaffolding CLI. There is no scaffolding CLI
+yet — `apps/example` is still the one reference app the extraction work is being verified against.
 
-## Starter template
-
-`template/` is the source of the opinionated Tokotuku starter:
-
-- Bun workspaces orchestrated by Moonrepo
-- Astro on Cloudflare Workers
-- D1 and R2 bindings
-- Better Auth with login and registration flows
-- `packages/ui` for the complete Astro component set
-- `apps/storybook` for isolated Astro component development and accessibility checks
-
-Astro's GitHub template argument accepts a repository and optional branch, but not a nested
-directory. The `sync-starter.yml` workflow publishes the contents of `template/` to the root of
-the `tokotuku/starter-template` repository whenever template changes land on `main`. Install it
-with:
-
-```sh
-bun create astro@latest my-app --template tokotuku/starter-template
-```
-
-`template/` in this repository is the source of truth; the generated starter repository should
-not be edited directly. To enable synchronization, initialize `starter-template` with a `main`
-branch and add a `STARTER_REPO_TOKEN` Actions secret to this repository. The token must have
-read/write Contents access to the starter repository.
-
-The root example project is the development entry point for that exact template—there is no
-separate application implementation that can drift from the generated starter:
+Run the reference app:
 
 ```sh
 bun run example

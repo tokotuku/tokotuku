@@ -1,0 +1,40 @@
+---
+import Icon from "@tokotuku/ui/Icon.astro";
+import AuthFrame from "./AuthFrame.astro";
+---
+
+<AuthFrame title="Create account">
+  <form class="auth-card" id="register-form" novalidate>
+    <h1>Create an account</h1>
+    <p>Start managing your store with Tokotuku.</p>
+    <div class="field"><label for="name">Name</label><div class="input-wrap"><Icon name="user" size={16}/><input id="name" name="name" autocomplete="name" placeholder="Your name" required /></div></div>
+    <div class="field"><label for="email">Email</label><div class="input-wrap"><Icon name="mail" size={16}/><input id="email" name="email" type="email" autocomplete="email" placeholder="you@tokotuku.com" required /></div></div>
+    <div class="field"><label for="password">Password</label><div class="input-wrap"><Icon name="lock" size={16}/><input id="password" name="password" type="password" autocomplete="new-password" minlength="8" placeholder="At least 8 characters" required /><button class="password-toggle" type="button" data-password-toggle aria-label="Show password"><Icon name="eye" size={16}/></button></div></div>
+    <p class="role-note">New accounts are registered as customers.</p>
+    <p class="auth-message" id="register-error" hidden></p>
+    <button class="auth-submit" type="submit">Create account <Icon name="arrowRight" size={16}/></button>
+    <p class="auth-switch">Already have an account? <a href="/login">Sign in</a></p>
+  </form>
+</AuthFrame>
+
+<script>
+  import { authClient } from "../auth-client";
+  const form = document.querySelector<HTMLFormElement>("#register-form");
+  const name = form?.querySelector<HTMLInputElement>("#name");
+  const email = form?.querySelector<HTMLInputElement>("#email");
+  const password = form?.querySelector<HTMLInputElement>("#password");
+  const error = form?.querySelector<HTMLElement>("#register-error");
+  const submit = form?.querySelector<HTMLButtonElement>("[type=submit]");
+  form?.querySelector("[data-password-toggle]")?.addEventListener("click", () => { if (password) password.type = password.type === "password" ? "text" : "password"; });
+  form?.addEventListener("submit", async (event) => {
+    event.preventDefault(); error?.setAttribute("hidden", "");
+    if (!form.reportValidity() || !name || !email || !password) return;
+    if (submit) submit.disabled = true;
+    const result = await authClient.signUp.email({ name: name.value, email: email.value, password: password.value });
+    if (submit) submit.disabled = false;
+    if (result.error) { if (error) { error.textContent = result.error.message ?? "Could not create account."; error.removeAttribute("hidden"); } return; }
+    location.href = "/";
+  });
+</script>
+
+<style>.role-note { margin: 13px 0 18px !important; font-size: 11px !important; }</style>

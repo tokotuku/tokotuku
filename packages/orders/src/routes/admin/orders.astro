@@ -1,0 +1,107 @@
+---
+import { env } from "cloudflare:workers";
+import { date, money } from "@tokotuku/core/brand";
+import AdminLayout from "@tokotuku/core/routes/AdminLayout.astro";
+import {
+  approvePayment,
+  listOrders,
+  type OrderStatus,
+  orderStatuses,
+  updateOrderStatus,
+} from "../../orders";
+
+let error = "";
+if (Astro.request.method === "POST") {
+  try {
+    const form = await Astro.request.formData();
+    const id = Number(form.get("orderId"));
+    if (!Number.isInteger(id)) throw new Error("Order tidak ditemukan.");
+    if (String(form.get("action") ?? "") === "approve_payment") {
+      await approvePayment(env.DB, id);
+    } else {
+      const status = String(form.get("status")) as OrderStatus;
+      if (!orderStatuses.includes(status)) throw new Error("Status order tidak valid.");
+      await updateOrderStatus(env.DB, id, status);
+    }
+    return Astro.redirect("/admin/orders?updated=1");
+  } catch (caught) {
+    error = caught instanceof Error ? caught.message : "Order gagal diperbarui.";
+  }
+}
+
+const orders = await listOrders(env.DB);
+const statusLabel: Record<OrderStatus, string> = {
+  pending: "Pending",
+  confirmed: "Confirmed",
+  delivered: "Delivered",
+  cancelled: "Cancelled",
+};
+const statusTone = (status: OrderStatus) =>
+  status === "delivered"
+    ? "success"
+    : status === "pending"
+      ? "warning"
+      : status === "cancelled"
+        ? "danger"
+        : "info";
+---
+
+<AdminLayout title="Orders" orderCount={orders.filter((order) => order.status === "pending").length}>
+  <header class="page-heading"><div><h1>Orders</h1><p>Pesanan Cash on Delivery dari checkout pelanggan.</p></div></header>
+  {error && <p class="notice notice--error" role="alert">{error}</p>}
+  {Astro.url.searchParams.has("updated") && <p class="notice">Status order berhasil diperbarui.</p>}
+
+  <section class="panel data-panel" data-order-table>
+    <div class="table-toolbar">
+      <div class="filter-tabs" role="tablist" aria-label="Order status"><button type="button" aria-selected="true" data-filter="All">All</button>{orderStatuses.map((status) => <button type="button" aria-selected="false" data-filter={status}>{statusLabel[status]}</button>)}</div>
+      <label class="table-search"><span class="sr-only">Search orders</span><input type="search" placeholder="Search orders…" data-table-search /></label>
+    </div>
+    <div class="table-wrap">
+      <table class="admin-table">
+        <thead><tr><th>Order</th><th>Customer</th><th>Date</th><th class="numeric">Items</th><th class="numeric">Total</th><th>Payment</th><th>Status</th><th>Update</th></tr></thead>
+        <tbody>
+          {orders.length ? orders.map((order) => (
+            <tr data-row data-status={order.status} data-search={`${order.orderNumber} ${order.customerName} ${order.customerEmail}`.toLowerCase()}>
+              <td><strong>#{order.orderNumber}</strong></td>
+              <td><div class="entity"><span class="entity-avatar">{order.customerName.slice(0,2).toUpperCase()}</span><div><strong>{order.customerName}</strong><span>{order.customerEmail}</span></div></div></td>
+              <td>{date(new Date(`${order.createdAt}Z`))}</td><td class="numeric">{order.itemCount}</td><td class="money">{money(order.totalCents / 100)}</td>
+              <td>
+                <div class="payment-cell">
+                  <span class:list={["status", order.paymentStatus === "paid" ? "status--success" : "status--warning"]}>{order.paymentMethod === "transfer" ? (order.paymentStatus === "paid" ? "Transfer verified" : "Transfer pending") : (order.paymentStatus === "paid" ? "Paid cash" : "Cash due")}</span>
+                  {order.paymentMethod === "transfer" && order.paymentProofKey && (
+                    <a href={`/api/payment-proofs/${order.paymentProofKey}`} target="_blank" rel="noreferrer">Lihat bukti</a>
+                  )}
+                  {order.paymentMethod === "transfer" && order.paymentStatus === "unpaid" && order.paymentProofKey && (
+                    <form method="post" class="approve-form">
+                      <input type="hidden" name="orderId" value={order.id} />
+                      <input type="hidden" name="action" value="approve_payment" />
+                      <button type="submit">Verifikasi</button>
+                    </form>
+                  )}
+                </div>
+              </td>
+              <td><span class={`status status--${statusTone(order.status)}`}>{statusLabel[order.status]}</span></td>
+              <td><form method="post" class="status-form"><input type="hidden" name="orderId" value={order.id} /><select name="status" disabled={order.status === "cancelled"}>{orderStatuses.map((status) => <option value={status} selected={status === order.status}>{statusLabel[status]}</option>)}</select><button type="submit" disabled={order.status === "cancelled"}>Save</button></form></td>
+            </tr>
+          )) : <tr><td colspan="8" class="empty-orders">Belum ada order. Order COD akan muncul setelah customer checkout.</td></tr>}
+        </tbody>
+      </table>
+    </div>
+    <div class="table-footer"><span data-result-count>{orders.length ? `Showing 1–${orders.length} of ${orders.length}` : "No orders yet"}</span></div>
+  </section>
+</AdminLayout>
+
+<script>
+  const container = document.querySelector("[data-order-table]");
+  const rows = Array.from(container?.querySelectorAll<HTMLElement>("[data-row]") ?? []);
+  const count = container?.querySelector("[data-result-count]");
+  let filter = "All"; let query = "";
+  const update = () => { let visible = 0; for (const row of rows) { const match = (filter === "All" || row.dataset["status"] === filter) && (row.dataset["search"]?.includes(query) ?? false); row.hidden = !match; if (match) visible += 1; } if (count) count.textContent = visible ? `Showing 1–${visible} of ${visible}` : "No matching orders"; };
+  for (const button of container?.querySelectorAll<HTMLButtonElement>("[data-filter]") ?? []) button.addEventListener("click", () => { filter = button.dataset["filter"] ?? "All"; container?.querySelectorAll("[data-filter]").forEach((item) => item.setAttribute("aria-selected", String(item === button))); update(); });
+  container?.querySelector<HTMLInputElement>("[data-table-search]")?.addEventListener("input", (event) => { query = (event.currentTarget as HTMLInputElement).value.trim().toLowerCase(); update(); });
+</script>
+
+<style>
+  .payment-cell{display:flex;flex-direction:column;align-items:flex-start;gap:5px}.payment-cell a{color:var(--admin-blue);font-size:11px}.approve-form button{min-height:26px;padding:0 9px;border:0;border-radius:7px;background:#0b923d;color:#fff;font-size:11px;cursor:pointer}
+  .data-panel{overflow:hidden}.admin-table th:first-child,.admin-table td:first-child{padding-left:20px}.admin-table th:last-child,.admin-table td:last-child{padding-right:20px}.admin-table tr[hidden]{display:none}.entity-avatar{background:#2876df}.status--info{background:var(--admin-blue-soft);color:var(--admin-blue)}.status-form{display:flex;gap:6px}.status-form select,.status-form button{min-height:30px;border:1px solid var(--admin-line);border-radius:7px;background:var(--admin-surface);color:var(--tk-color-fg);font-size:11px}.status-form button{padding:0 9px;background:var(--admin-blue);color:white;cursor:pointer}.status-form :disabled{opacity:.5;cursor:not-allowed}.notice{padding:11px 14px;border-radius:10px;background:color-mix(in srgb,#0b923d 10%,var(--admin-surface));color:#087b34}.notice--error{background:color-mix(in srgb,var(--tk-color-danger) 8%,var(--admin-surface));color:var(--tk-color-danger)}.empty-orders{height:110px!important;text-align:center;color:var(--tk-color-fg-muted)!important}
+</style>

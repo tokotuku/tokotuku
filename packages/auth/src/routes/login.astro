@@ -1,0 +1,59 @@
+---
+import Icon from "@tokotuku/ui/Icon.astro";
+import AuthFrame from "./AuthFrame.astro";
+
+const requestedNext = Astro.url.searchParams.get("next") ?? "/admin";
+const next =
+  requestedNext.startsWith("/") && !requestedNext.startsWith("//") ? requestedNext : "/admin";
+const demoAccounts = import.meta.env.DEV
+  ? [
+      { role: "Admin", email: "admin@example.com", password: "admin12345" },
+      { role: "Staff", email: "staff@example.com", password: "staff12345" },
+      { role: "Customer", email: "customer@example.com", password: "customer12345" },
+    ]
+  : [];
+const setupComplete = Astro.url.searchParams.get("setup") === "complete";
+---
+
+<AuthFrame title="Sign in">
+  <form class="auth-card" id="login-form" data-next={next} novalidate>
+    <h1>Welcome back</h1>
+    <p>Sign in to your Tokotuku dashboard.</p>
+    {setupComplete && <p class="auth-message success">Administrator created. Sign in to continue.</p>}
+
+    <div class="field"><label for="email">Email</label><div class="input-wrap"><Icon name="mail" size={16}/><input id="email" name="email" type="email" autocomplete="email" placeholder="you@tokotuku.com" required /></div></div>
+    <div class="field"><div class="field-row"><label for="password">Password</label><a href="/forgot-password">Forgot?</a></div><div class="input-wrap"><Icon name="lock" size={16}/><input id="password" name="password" type="password" autocomplete="current-password" placeholder="Enter your password" required /><button class="password-toggle" type="button" data-password-toggle aria-label="Show password"><Icon name="eye" size={16}/></button></div></div>
+    <label class="check-row"><input type="checkbox" name="remember" /> Keep me signed in</label>
+    <p class="auth-message" id="login-error" hidden></p>
+    <button class="auth-submit" type="submit">Sign in <Icon name="arrowRight" size={16}/></button>
+    <p class="auth-switch">New to Tokotuku? <a href="/register">Create an account</a></p>
+
+    {demoAccounts.length > 0 && <details class="demo-accounts"><summary>Local demo accounts</summary><div>{demoAccounts.map((account) => <button type="button" data-demo-account data-email={account.email} data-password={account.password}>Use {account.role}</button>)}</div></details>}
+  </form>
+</AuthFrame>
+
+<script>
+  import { authClient } from "../auth-client";
+  const form = document.querySelector<HTMLFormElement>("#login-form");
+  const email = form?.querySelector<HTMLInputElement>("#email");
+  const password = form?.querySelector<HTMLInputElement>("#password");
+  const error = form?.querySelector<HTMLElement>("#login-error");
+  const submit = form?.querySelector<HTMLButtonElement>("[type=submit]");
+
+  form?.querySelector("[data-password-toggle]")?.addEventListener("click", () => { if (password) password.type = password.type === "password" ? "text" : "password"; });
+  for (const button of form?.querySelectorAll<HTMLElement>("[data-demo-account]") ?? []) button.addEventListener("click", () => { if (email) email.value = button.dataset["email"] ?? ""; if (password) password.value = button.dataset["password"] ?? ""; });
+  form?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    error?.setAttribute("hidden", "");
+    if (!form.reportValidity() || !email || !password) return;
+    if (submit) submit.disabled = true;
+    const result = await authClient.signIn.email({ email: email.value, password: password.value });
+    if (submit) submit.disabled = false;
+    if (result.error) { if (error) { error.textContent = result.error.message ?? "Could not sign in."; error.removeAttribute("hidden"); } return; }
+    location.href = form.dataset["next"] ?? "/admin";
+  });
+</script>
+
+<style>
+  .demo-accounts { margin-top: 20px; color: var(--tk-color-fg-muted); font-size: 11px; }.demo-accounts summary { cursor:pointer; text-align:center; }.demo-accounts div { display:flex; justify-content:center; gap:6px; margin-top:9px; }.demo-accounts button { padding:5px 8px; border:1px solid var(--tk-color-border); border-radius:7px; background:var(--tk-color-bg); color:var(--tk-color-fg); font-size:10px; cursor:pointer; }
+</style>

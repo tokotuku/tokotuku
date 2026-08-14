@@ -13,7 +13,8 @@
       "!**/.astro",
       "!**/coverage",
       "!**/playwright-report",
-      "!template"
+      "!**/public/**/*.svg",
+      "!**/seed/**/*.svg"
     ]
   },
   "formatter": {
@@ -57,13 +58,29 @@
       "enabled": true
     }
   },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    }
+  },
   "overrides": [
     {
       "includes": ["**/*.astro"],
       "linter": {
         "rules": {
           "correctness": {
-            "noUnusedVariables": "off"
+            "noUnusedVariables": "off",
+            "noUnusedImports": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["**/src/cli/**", "**/create-tokotuku/src/bin.ts", "tools/e2e-install/*.ts"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noConsole": "off"
           }
         }
       }

@@ -1,0 +1,381 @@
+---
+import { env } from "cloudflare:workers";
+import { listProducts } from "@tokotuku/catalog";
+import { mediaUrl } from "@tokotuku/core";
+import { money } from "@tokotuku/core/brand";
+import Layout from "@tokotuku/ui/Layout.astro";
+import ProductCard from "@tokotuku/ui/ProductCard.astro";
+import StoreHeader from "@tokotuku/ui/StoreHeader.astro";
+
+const products = await listProducts(env.DB, { limit: 6 });
+
+const homeJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "OnlineStore",
+  name: "Tokotuku",
+  url: Astro.url.origin,
+  description: "Straightforward products, fair prices, and no unnecessary noise.",
+};
+---
+
+<Layout
+  title="Tokotuku — Useful things, thoughtfully made"
+  description="Straightforward products, fair prices, and no unnecessary noise. Discover reliable essentials made to earn their place in your day."
+  jsonLd={homeJsonLd}
+>
+  <StoreHeader current="home" />
+
+  <main>
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Built for everyday momentum</p>
+        <h1>Small upgrades.<br /><span>Better days.</span></h1>
+        <p class="hero-description">
+          Straightforward products, fair prices, and no unnecessary noise. Discover reliable
+          essentials made to earn their place in your day.
+        </p>
+        <div class="hero-actions">
+          <a class="primary-action" href="/products">Shop the collection</a>
+          <a class="secondary-action" href="#featured">Explore featured</a>
+        </div>
+        <dl>
+          <div><dt>Free shipping</dt><dd>Orders over $50</dd></div>
+          <div><dt>30-day returns</dt><dd>Simple and stress-free</dd></div>
+          <div><dt>Secure account</dt><dd>Powered by Better Auth</dd></div>
+        </dl>
+      </div>
+      <div class="hero-visual" aria-hidden="true">
+        <div class="visual-card visual-card-main">
+          <span>01</span>
+          <strong>Made useful</strong>
+          <p>Considered essentials for work, home, and everywhere between.</p>
+        </div>
+        <div class="visual-card visual-card-accent"><span>New</span><strong>Simple by design</strong></div>
+        <div class="orb"></div>
+      </div>
+    </section>
+
+    <section class="trust-strip" aria-label="Store benefits">
+      <span>Thoughtful design</span><span>Fair pricing</span><span>Fast fulfillment</span><span>Human support</span>
+    </section>
+
+    <section id="featured" class="featured">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Featured collection</p>
+          <h2>Good choices, made easy.</h2>
+        </div>
+        <a href="/products">View all products →</a>
+      </div>
+
+      <div class="product-grid">
+        {
+          products.map((product) => (
+            <ProductCard
+              id={product.id}
+              name={product.name}
+              description={product.description}
+              price={money(product.priceCents / 100)}
+              priceCents={product.priceCents}
+              imageUrl={mediaUrl(product.imageKey)}
+              stock={product.stock}
+            />
+          ))
+        }
+      </div>
+    </section>
+
+    <section class="story">
+      <p class="eyebrow">The Tokotuku standard</p>
+      <h2>Everything you need.<br />Nothing you don’t.</h2>
+      <p>
+        This storefront is backed by Cloudflare D1 and R2, while the protected commerce
+        workspace lives at <a href="/admin">/admin</a>. The starter is ready to extend with real
+        inventory, orders, and payments.
+      </p>
+    </section>
+  </main>
+
+  <footer>
+    <a href="/" class="footer-brand">Tokotuku</a>
+    <p>Useful things, thoughtfully made.</p>
+    <nav aria-label="Footer navigation"><a href="/products">Shop</a><a href="/cart">Cart</a><a href="/admin">Admin</a></nav>
+  </footer>
+</Layout>
+
+<style>
+  main,
+  footer {
+    width: min(100% - calc(var(--tk-spacing-4) * 2), 76rem);
+    margin-inline: auto;
+  }
+
+  .hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(22rem, 0.95fr);
+    gap: clamp(3rem, 8vw, 7rem);
+    align-items: center;
+    min-height: min(46rem, calc(100vh - 4.5rem));
+    padding-block: var(--tk-spacing-12);
+  }
+
+  .eyebrow {
+    margin: 0;
+    color: var(--tk-color-accent);
+    font-size: var(--tk-font-size-xs);
+    font-weight: var(--tk-font-weight-bold);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    max-width: 12ch;
+    margin: var(--tk-spacing-4) 0;
+    color: var(--tk-color-fg);
+    font-size: clamp(3rem, 7vw, 6.4rem);
+    line-height: 0.92;
+    letter-spacing: -0.06em;
+  }
+
+  h1 span {
+    color: var(--tk-color-accent);
+  }
+
+  .hero-description {
+    max-width: 38rem;
+    margin: 0;
+    color: var(--tk-color-fg-muted);
+    font-size: var(--tk-font-size-lg);
+    line-height: var(--tk-line-height-relaxed);
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--tk-spacing-3);
+    margin-top: var(--tk-spacing-6);
+  }
+
+  .hero-actions a {
+    padding: var(--tk-spacing-3) var(--tk-spacing-5);
+    border-radius: var(--tk-radius-md);
+    font-size: var(--tk-font-size-sm);
+    font-weight: var(--tk-font-weight-semibold);
+    text-decoration: none;
+  }
+
+  .primary-action {
+    background: var(--tk-color-accent);
+    color: var(--tk-color-accent-fg);
+  }
+
+  .secondary-action {
+    border: 1px solid var(--tk-color-border);
+    color: var(--tk-color-fg);
+  }
+
+  dl {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--tk-spacing-3);
+    margin: var(--tk-spacing-8) 0 0;
+  }
+
+  dt {
+    color: var(--tk-color-fg);
+    font-size: var(--tk-font-size-sm);
+    font-weight: var(--tk-font-weight-semibold);
+  }
+
+  dd {
+    margin: var(--tk-spacing-1) 0 0;
+    color: var(--tk-color-fg-muted);
+    font-size: var(--tk-font-size-xs);
+  }
+
+  .hero-visual {
+    position: relative;
+    min-height: 34rem;
+  }
+
+  .visual-card {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: var(--tk-spacing-6);
+    border-radius: var(--tk-radius-2xl);
+    box-shadow: var(--tk-shadow-xl);
+  }
+
+  .visual-card span {
+    position: absolute;
+    top: var(--tk-spacing-5);
+    left: var(--tk-spacing-5);
+    font-size: var(--tk-font-size-xs);
+    font-weight: var(--tk-font-weight-bold);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .visual-card strong {
+    font-size: var(--tk-font-size-2xl);
+  }
+
+  .visual-card p {
+    max-width: 20rem;
+    margin: var(--tk-spacing-2) 0 0;
+    line-height: var(--tk-line-height-relaxed);
+  }
+
+  .visual-card-main {
+    inset: 2rem 3rem 1rem 0;
+    z-index: 2;
+    background: var(--tk-color-fg);
+    color: var(--tk-color-bg);
+    transform: rotate(-3deg);
+  }
+
+  .visual-card-accent {
+    right: 0;
+    bottom: 0;
+    z-index: 3;
+    width: 48%;
+    min-height: 11rem;
+    background: var(--tk-color-accent);
+    color: var(--tk-color-accent-fg);
+    transform: rotate(4deg);
+  }
+
+  .orb {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 15rem;
+    height: 15rem;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--tk-color-accent) 22%, var(--tk-color-bg));
+  }
+
+  .trust-strip {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--tk-spacing-4);
+    padding-block: var(--tk-spacing-5);
+    border-block: 1px solid var(--tk-color-border);
+    color: var(--tk-color-fg-muted);
+    font-size: var(--tk-font-size-xs);
+    font-weight: var(--tk-font-weight-semibold);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .featured {
+    padding-block: var(--tk-spacing-12);
+  }
+
+  .section-heading {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: var(--tk-spacing-5);
+    margin-bottom: var(--tk-spacing-6);
+  }
+
+  .section-heading h2,
+  .story h2 {
+    margin: var(--tk-spacing-2) 0 0;
+    color: var(--tk-color-fg);
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    letter-spacing: -0.04em;
+  }
+
+  .section-heading a,
+  .story a {
+    color: var(--tk-color-accent);
+    font-size: var(--tk-font-size-sm);
+    font-weight: var(--tk-font-weight-semibold);
+  }
+
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--tk-spacing-5);
+  }
+
+  .story {
+    margin-bottom: var(--tk-spacing-12);
+    padding: clamp(2rem, 6vw, 5rem);
+    border-radius: var(--tk-radius-2xl);
+    background: var(--tk-color-bg-subtle);
+  }
+
+  .story > p:last-child {
+    max-width: 45rem;
+    color: var(--tk-color-fg-muted);
+    font-size: var(--tk-font-size-lg);
+    line-height: var(--tk-line-height-relaxed);
+  }
+
+  footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--tk-spacing-5);
+    padding-block: var(--tk-spacing-8);
+    border-top: 1px solid var(--tk-color-border);
+    color: var(--tk-color-fg-muted);
+    font-size: var(--tk-font-size-sm);
+  }
+
+  footer a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .footer-brand {
+    color: var(--tk-color-fg);
+    font-size: var(--tk-font-size-lg);
+    font-weight: var(--tk-font-weight-bold);
+  }
+
+  footer nav {
+    display: flex;
+    gap: var(--tk-spacing-4);
+  }
+
+  @media (max-width: 60rem) {
+    .hero {
+      grid-template-columns: 1fr;
+    }
+
+    .hero-visual {
+      min-height: 25rem;
+    }
+
+    .product-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 42rem) {
+    .hero {
+      min-height: auto;
+    }
+
+    dl,
+    .product-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .trust-strip {
+      flex-wrap: wrap;
+    }
+
+    .section-heading,
+    footer {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+  }
+</style>
