@@ -24,4 +24,22 @@ describe("buildThemeAliases", () => {
   it("returns an empty array for an empty theme directory", () => {
     expect(buildThemeAliases("/app/src/theme", [])).toEqual([]);
   });
+
+  // Vite's alias plugin resolves via `id.replace(find, replacement)`, not
+  // just `find.test(id)` -- a `find` that only anchors the end of the
+  // string (the original bug) leaves the matched specifier's prefix stuck
+  // onto the front of the replacement instead of overwriting the whole id.
+  it("replaces the entire specifier, not just the matched suffix", () => {
+    const [alias] = buildThemeAliases("/app/src/theme", ["ProductCard.astro"]);
+    const id = "@tokotuku/ui/ProductCard.astro";
+    expect(id.replace(alias?.find as RegExp, alias?.replacement as string)).toBe(
+      "/app/src/theme/ProductCard.astro",
+    );
+  });
+
+  it("still does not replace a filename that is only a suffix of another", () => {
+    const [alias] = buildThemeAliases("/app/src/theme", ["Card.astro"]);
+    const id = "@tokotuku/ui/ProductCard.astro";
+    expect(id.replace(alias?.find as RegExp, alias?.replacement as string)).toBe(id);
+  });
 });

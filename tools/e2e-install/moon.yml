@@ -79,6 +79,17 @@ tasks:
     options:
       cache: false
 
+  # The concrete client walkthrough: bare install -> seed -> change the
+  # design. Neither seeding nor theme overrides are exercised by any other
+  # gate -- this is what actually proves both work, not just typecheck.
+  demo:
+    command: "bun demo.ts"
+    inputs:
+      - "demo.ts"
+      - "shared.ts"
+    options:
+      cache: false
+
   lint:
     command: "biome check ."
     inputs:

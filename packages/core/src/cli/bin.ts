@@ -2,6 +2,7 @@
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import type { ResolvedRegistry } from "../registry";
+import { runSeed } from "./db-seed";
 import { syncMigrations } from "./db-sync";
 
 interface AstroIntegrationLike {
@@ -55,13 +56,38 @@ async function runDbSync(): Promise<void> {
   console.log('Review the diff, then run "wrangler d1 migrations apply DB" as usual.');
 }
 
+async function runDbSeed(): Promise<void> {
+  const cwd = process.cwd();
+  const registry = await loadRegistry(cwd);
+  const { sqlFilesRun, mediaFilesUploaded } = await runSeed({
+    cwd,
+    modules: registry.modules,
+    mediaPrefixes: registry.mediaPrefixes,
+  });
+
+  if (sqlFilesRun.length === 0 && mediaFilesUploaded.length === 0) {
+    console.log("No seed data found.");
+    return;
+  }
+  console.log(`Ran ${sqlFilesRun.length} seed SQL file(s):`);
+  for (const entry of sqlFilesRun) console.log(`  ${entry}`);
+  if (mediaFilesUploaded.length > 0) {
+    console.log(`Uploaded ${mediaFilesUploaded.length} seed media file(s):`);
+    for (const key of mediaFilesUploaded) console.log(`  ${key}`);
+  }
+}
+
 async function main(): Promise<void> {
   const [, , command, subcommand] = process.argv;
   if (command === "db" && subcommand === "sync") {
     await runDbSync();
     return;
   }
-  console.error("Usage: tokotuku db sync");
+  if (command === "db" && subcommand === "seed") {
+    await runDbSeed();
+    return;
+  }
+  console.error("Usage: tokotuku db sync | tokotuku db seed");
   process.exitCode = 1;
 }
 

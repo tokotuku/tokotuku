@@ -1,8 +1,15 @@
-import type { AdminNavItem, ModuleDefinition, ModuleMigration, ModuleRoute } from "./module";
+import type {
+  AdminNavItem,
+  ModuleDefinition,
+  ModuleMigration,
+  ModuleRoute,
+  ModuleSeed,
+} from "./module";
 
 export interface ResolvedModule {
   name: string;
   migrations: ModuleMigration[];
+  seeds: ModuleSeed[];
 }
 
 export interface ResolvedRegistry {
@@ -63,6 +70,10 @@ export function resolveModules(modules: ModuleDefinition[]): ResolvedRegistry {
     storefrontRoutes: sorted.flatMap((mod) => mod.storefrontRoutes ?? []),
     adminRoutes: sorted.flatMap((mod) => mod.adminRoutes ?? []),
     ambientScripts: sorted.flatMap((mod) => mod.ambientScripts ?? []),
-    modules: sorted.map((mod) => ({ name: mod.name, migrations: mod.migrations ?? [] })),
+    modules: sorted.map((mod) => ({
+      name: mod.name,
+      migrations: mod.migrations ?? [],
+      seeds: mod.seeds ?? [],
+    })),
   };
 }

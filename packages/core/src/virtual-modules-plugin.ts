@@ -14,8 +14,14 @@ export function tokotukuVirtualModulesPlugin(
   registry: ResolvedRegistry,
   brand: TokotukuBrand,
 ): Plugin {
+  // `registry.modules` carries ModuleMigration/ModuleSeed URLs, which
+  // resolve on the developer's own machine (file://...) -- nothing at
+  // runtime reads it (the CLI reads it directly off the integration
+  // object, not this virtual module), so it's excluded here rather than
+  // bundled into the client and leaking a local filesystem path.
+  const { modules: _modules, ...clientRegistry } = registry;
   const modules: Record<string, string> = {
-    "virtual:tokotuku/registry": `export default ${JSON.stringify(registry)};`,
+    "virtual:tokotuku/registry": `export default ${JSON.stringify(clientRegistry)};`,
     "virtual:tokotuku/admin-nav": `export default ${JSON.stringify(registry.adminNav)};`,
     "virtual:tokotuku/config": `export default ${JSON.stringify(brand)};`,
     "virtual:tokotuku/ambient-scripts": [

@@ -12,6 +12,7 @@
     "db:sync": "tokotuku db sync",
     "db:migrate:local": "wrangler d1 migrations apply DB --local",
     "db:migrate:remote": "wrangler d1 migrations apply DB --remote",
+    "db:seed": "tokotuku db seed",
     "lint": "biome check .",
     "typecheck": "astro check"
   },

@@ -95,8 +95,19 @@ describe("resolveModules", () => {
     const registry = resolveModules([orders, catalog]);
 
     expect(registry.modules).toEqual([
-      { name: "catalog", migrations: catalog.migrations },
-      { name: "orders", migrations: [] },
+      { name: "catalog", migrations: catalog.migrations, seeds: [] },
+      { name: "orders", migrations: [], seeds: [] },
     ]);
+  });
+
+  it("carries each module's seeds through in topo order, defaulting to none", () => {
+    const catalog: ModuleDefinition = {
+      name: "catalog",
+      seeds: [{ name: "demo-catalog", sql: new URL("https://example.test/catalog/demo.sql") }],
+    };
+
+    const registry = resolveModules([catalog]);
+
+    expect(registry.modules).toEqual([{ name: "catalog", migrations: [], seeds: catalog.seeds }]);
   });
 });
