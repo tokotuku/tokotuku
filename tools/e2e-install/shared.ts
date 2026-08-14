@@ -32,6 +32,25 @@ export function writeJson(filePath: string, value: Json): void {
   writeFileSync(filePath, `${JSON.stringify(value, null, 2)}\n`);
 }
 
+/**
+ * Installs a scratch client from the registry used by this E2E run.
+ *
+ * Scratch clients live outside the workspace, so they do not inherit the
+ * repository's `.npmrc`. Bun can also fall back to its default registry when
+ * a project only contains a scope mapping, which makes an e2e prerelease
+ * version look missing even though it was just published to Verdaccio. Keep
+ * the registry explicit on the command so every gate resolves the same
+ * package graph it just published.
+ */
+export function installClient(clientDir: string): void {
+  sh("bun", ["install", "--registry", REGISTRY], clientDir);
+}
+
+/** Updates an existing scratch client from the registry used by this E2E run. */
+export function updateClient(clientDir: string): void {
+  sh("bun", ["update", "--registry", REGISTRY], clientDir);
+}
+
 // Publish order matters: `bun publish` requires every workspace:*
 // reference (including in devDependencies) to resolve to an already-
 // published version, so each entry here must come after everything it
@@ -114,7 +133,10 @@ export function scaffoldClient(
 ): string {
   const clientDir = path.join(scratchParent, clientName);
   sh("node", [path.join(ROOT, "packages/create-tokotuku/dist/bin.js"), clientName], scratchParent);
-  writeFileSync(path.join(clientDir, ".npmrc"), `@tokotuku:registry=${REGISTRY}\n`);
+  writeFileSync(
+    path.join(clientDir, ".npmrc"),
+    `${[`@tokotuku:registry=${REGISTRY}`, `registry=${REGISTRY}`].join("\n")}\n`,
+  );
 
   if (version !== null) {
     const clientPkgPath = path.join(clientDir, "package.json");

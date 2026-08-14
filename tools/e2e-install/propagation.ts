@@ -26,11 +26,13 @@ import path from "node:path";
 import {
   AssertionError,
   assert,
+  installClient,
   publishAll,
   ROOT,
   scaffoldClient,
   setupAndLogIn,
   sh,
+  updateClient,
   waitForServer,
 } from "./shared.ts";
 
@@ -85,7 +87,7 @@ async function main(): Promise<void> {
     `Scaffolded client (dependencies pinned to "latest", like a real client) at ${clientDir}`,
   );
 
-  sh("bun", ["install"], clientDir);
+  installClient(clientDir);
   sh("bunx", ["tokotuku", "db", "sync"], clientDir);
   sh("bunx", ["wrangler", "d1", "migrations", "apply", "DB", "--local"], clientDir);
   sh("bun", ["run", "build"], clientDir);
@@ -111,7 +113,7 @@ async function main(): Promise<void> {
   }
 
   console.log("Running `bun update` in the existing client (not a fresh install)...");
-  sh("bun", ["update"], clientDir);
+  updateClient(clientDir);
   sh("bun", ["run", "build"], clientDir);
 
   const after = await bootAndCheck(clientDir);

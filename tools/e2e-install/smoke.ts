@@ -19,6 +19,7 @@ import path from "node:path";
 import {
   AssertionError,
   assert,
+  installClient,
   publishAll,
   queryD1,
   scaffoldClient,
@@ -172,7 +173,7 @@ async function main(): Promise<void> {
   const clientDir = scaffoldClient(scratchParent, "gate3-smoke", version);
   console.log(`Scaffolded client at ${clientDir}`);
 
-  sh("bun", ["install"], clientDir);
+  installClient(clientDir);
   sh("bunx", ["tokotuku", "db", "sync"], clientDir);
   sh("bunx", ["wrangler", "d1", "migrations", "apply", "DB", "--local"], clientDir);
   const productId = seedProduct(clientDir);

@@ -19,7 +19,7 @@ import { spawn } from "node:child_process";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { publishAll, scaffoldClient, sh, waitForServer } from "./shared.ts";
+import { installClient, publishAll, scaffoldClient, sh, waitForServer } from "./shared.ts";
 
 const BOOT_CHECK_PORT = 8799;
 
@@ -50,7 +50,7 @@ async function main(): Promise<void> {
   const clientDir = scaffoldClient(scratchParent, "e2e-client", version);
   console.log(`Scaffolded client at ${clientDir}`);
 
-  sh("bun", ["install"], clientDir);
+  installClient(clientDir);
   sh("bunx", ["tokotuku", "db", "sync"], clientDir);
   sh("bunx", ["wrangler", "d1", "migrations", "apply", "DB", "--local"], clientDir);
   sh("bun", ["run", "build"], clientDir);
