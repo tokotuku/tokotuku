@@ -27,8 +27,16 @@ jobs:
       - name: Setup moon toolchain
         uses: moonrepo/setup-toolchain@v0
 
+      - name: Validate lockfile registry
+        run: |
+          if grep -Eq 'https?://(localhost|127\.0\.0\.1):4873' bun.lock; then
+            echo "bun.lock contains local Verdaccio URLs; regenerate it against npmjs." >&2
+            exit 1
+          fi
+
       - name: Install dependencies
         run: bun install --frozen-lockfile
+        timeout-minutes: 10
 
       - name: Run affected lint, typecheck, test, and build
         run: moon ci :lint :typecheck :test :build
@@ -57,22 +65,45 @@ jobs:
       - name: Setup moon toolchain
         uses: moonrepo/setup-toolchain@v0
 
+      - name: Validate lockfile registry
+        run: |
+          if grep -Eq 'https?://(localhost|127\.0\.0\.1):4873' bun.lock; then
+            echo "bun.lock contains local Verdaccio URLs; regenerate it against npmjs." >&2
+            exit 1
+          fi
+
       - name: Install dependencies
         run: bun install --frozen-lockfile
+        timeout-minutes: 10
 
       # workspace:* symlinks hide broken exports maps, missing "files"
       # entries, missing peerDependencies, and node_modules module
       # resolution failures -- all of which only surface once packages are
       # actually installed from tarballs. See tools/e2e-install/README.md.
       - name: Create Verdaccio user and configure .npmrc
+        timeout-minutes: 2
         run: |
+          for attempt in {1..30}; do
+            if curl -fsS http://localhost:4873/-/ping >/dev/null; then
+              break
+            fi
+            if [ "$attempt" -eq 30 ]; then
+              echo "Verdaccio did not become ready within 30 seconds." >&2
+              exit 1
+            fi
+            sleep 1
+          done
+
           TOKEN=$(curl -sf -X PUT http://localhost:4873/-/user/org.couchdb.user:ci \
             -H "Content-Type: application/json" \
             -d '{"name":"ci","password":"ci-throwaway-password"}' \
             | jq -r .token)
+          if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
+            echo "Verdaccio did not return an authentication token." >&2
+            exit 1
+          fi
           cat > .npmrc <<EOF
           @tokotuku:registry=http://localhost:4873
-          registry=http://localhost:4873
           //localhost:4873/:_authToken=${TOKEN}
           EOF
 
