@@ -1,0 +1,31 @@
+// @ts-check
+import cloudflare from "@astrojs/cloudflare";
+import tailwindcss from "@tailwindcss/vite";
+import { auth } from "@tokotuku/auth";
+import { catalog } from "@tokotuku/catalog";
+import { tokotuku } from "@tokotuku/core";
+import { orders } from "@tokotuku/orders";
+import { defineConfig } from "astro/config";
+
+// Remove a module here (and its matching import above + middleware.ts
+// register line) to drop it from this client entirely — `bun remove` the
+// package too. Nothing else references an uninstalled module by name.
+export default defineConfig({
+  integrations: [
+    tokotuku({
+      brand: {
+        name: "{{brandName}}",
+        locale: "{{locale}}",
+        currency: "{{currency}}",
+        timeZone: "{{timeZone}}",
+      },
+      modules: [auth(), catalog(), orders()],
+    }),
+  ],
+  // @tokotuku/ui's Layout.astro imports its own CSS, which needs this plugin.
+  vite: { plugins: [tailwindcss()] },
+  output: "server",
+  adapter: cloudflare({
+    persistState: true,
+  }),
+});

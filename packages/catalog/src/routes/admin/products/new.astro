@@ -1,0 +1,22 @@
+---
+import { env } from "cloudflare:workers";
+import AdminLayout from "@tokotuku/core/routes/AdminLayout.astro";
+import { productInputFromForm } from "../../../product-form";
+import { createProduct } from "../../../products";
+import ProductForm from "../../ProductForm.astro";
+
+let error = "";
+if (Astro.request.method === "POST") {
+  try {
+    const input = await productInputFromForm(await Astro.request.formData(), env.MEDIA);
+    return Astro.redirect(`/admin/products/${await createProduct(env.DB, input)}/edit?saved=1`);
+  } catch (caught) {
+    error = caught instanceof Error ? caught.message : "Produk gagal disimpan.";
+  }
+}
+---
+
+<AdminLayout title="Add product">
+  <header class="page-heading"><div><h1>Add product</h1><p>Buat produk, atur stok, dan tambahkan field yang dibutuhkan.</p></div></header>
+  <ProductForm error={error} />
+</AdminLayout>

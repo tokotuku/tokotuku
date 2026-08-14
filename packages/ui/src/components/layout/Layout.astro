@@ -1,0 +1,62 @@
+---
+/// <reference types="../../virtual.d.ts" />
+import "@tokotuku/ui/styles.css";
+import ambientScripts from "virtual:tokotuku/ambient-scripts";
+import SEO from "@tokotuku/ui/SEO.astro";
+
+interface Props {
+  title: string;
+  description?: string;
+  image?: string;
+  type?: "website" | "product" | "article";
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+  noindex?: boolean;
+  siteName?: string;
+}
+
+const {
+  title,
+  description = "Straightforward products, fair prices, and no unnecessary noise.",
+  image,
+  type = "website",
+  jsonLd,
+  noindex = false,
+  siteName = "Tokotuku",
+} = Astro.props;
+
+const canonicalUrl = new URL(Astro.url.pathname, Astro.url.origin).toString();
+const absoluteImage = image ? new URL(image, Astro.url.origin).toString() : undefined;
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+    <SEO
+      title={title}
+      description={description}
+      url={canonicalUrl}
+      image={absoluteImage}
+      type={type}
+      siteName={siteName}
+      noindex={noindex}
+      jsonLd={jsonLd}
+    />
+    <script is:inline>
+      (() => {
+        const saved = localStorage.getItem("tokotuku-theme");
+        document.documentElement.dataset.theme = saved ?? "light";
+      })();
+    </script>
+  </head>
+  <body>
+    <slot />
+    {ambientScripts.map((AmbientScript) => (
+      <AmbientScript />
+    ))}
+  </body>
+</html>

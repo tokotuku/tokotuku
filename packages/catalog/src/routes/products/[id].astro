@@ -1,0 +1,89 @@
+---
+import { env } from "cloudflare:workers";
+import registry from "virtual:tokotuku/registry";
+import { mediaUrl } from "@tokotuku/core";
+import { brand, money } from "@tokotuku/core/brand";
+import Layout from "@tokotuku/ui/Layout.astro";
+import StoreHeader from "@tokotuku/ui/StoreHeader.astro";
+import { findProductById } from "../../products";
+
+const id = Number(Astro.params["id"]);
+const product = await findProductById(env.DB, id);
+
+if (!product) return new Response("Product not found", { status: 404 });
+
+const hasOrders = registry.moduleNames.includes("orders");
+
+const imageUrl = mediaUrl(product.imageKey);
+const serialized = JSON.stringify({
+  id: product.id,
+  name: product.name,
+  priceCents: product.priceCents,
+  imageUrl,
+});
+
+const productJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Product",
+  name: product.name,
+  description: product.description,
+  sku: product.sku,
+  category: product.category,
+  image: new URL(imageUrl, Astro.url.origin).toString(),
+  offers: {
+    "@type": "Offer",
+    url: new URL(Astro.url.pathname, Astro.url.origin).toString(),
+    priceCurrency: brand.currency,
+    price: (product.priceCents / 100).toFixed(2),
+    availability:
+      product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+  },
+};
+---
+
+<Layout
+  title={`${product.name} — Tokotuku`}
+  description={product.description}
+  image={imageUrl}
+  type="product"
+  jsonLd={productJsonLd}
+>
+  <StoreHeader current="products" />
+  <main>
+    <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="/">Home</a><span>/</span><a href="/products">Shop</a><span>/</span><span>{product.name}</span></nav>
+    <div class="product-detail">
+      <div class="media"><img src={imageUrl} alt="" /></div>
+      <section>
+        <p class="eyebrow">{product.category}</p>
+        <h1>{product.name}</h1>
+        <p class="price">{money(product.priceCents / 100)}</p>
+        <p class="description">{product.description}</p>
+        <p class:list={["stock", product.stock < 10 && "stock--low"]}>{product.stock > 0 ? `${product.stock} in stock` : "Out of stock"}</p>
+        {hasOrders && (
+          <button type="button" data-add-to-cart data-product={serialized} disabled={product.stock <= 0}>{product.stock > 0 ? "Add to cart" : "Sold out"}</button>
+        )}
+        {Object.keys(product.customFields).length > 0 && <dl>{Object.entries(product.customFields).map(([key, value]) => <div><dt>{key}</dt><dd>{value}</dd></div>)}</dl>}
+        {hasOrders && (
+          <ul><li>Cash on Delivery</li><li>Pay when your order arrives</li><li>Stock is reserved after checkout</li></ul>
+        )}
+      </section>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  main { width: min(100% - calc(var(--tk-spacing-4) * 2), 76rem); margin-inline: auto; padding-block: var(--tk-spacing-6) var(--tk-spacing-12); }
+  .breadcrumbs { display: flex; gap: var(--tk-spacing-2); margin-bottom: var(--tk-spacing-6); color: var(--tk-color-fg-muted); font-size: var(--tk-font-size-sm); }
+  .breadcrumbs a { color: inherit; }
+  .product-detail { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(20rem, 0.9fr); gap: clamp(2rem, 7vw, 6rem); align-items: center; }
+  .media { overflow: hidden; aspect-ratio: 1; border-radius: var(--tk-radius-2xl); background: var(--tk-color-bg-subtle); }
+  img { width: 100%; height: 100%; object-fit: cover; }
+  .eyebrow { margin: 0; color: var(--tk-color-accent); font-size: var(--tk-font-size-xs); font-weight: var(--tk-font-weight-bold); letter-spacing: 0.1em; text-transform: uppercase; }
+  h1 { margin: var(--tk-spacing-3) 0; color: var(--tk-color-fg); font-size: clamp(3rem, 7vw, 5.5rem); letter-spacing: -0.06em; line-height: 0.95; }
+  .price { color: var(--tk-color-fg); font-size: var(--tk-font-size-2xl); font-weight: var(--tk-font-weight-bold); }
+  .description { color: var(--tk-color-fg-muted); font-size: var(--tk-font-size-lg); line-height: var(--tk-line-height-relaxed); }
+  button { width: 100%; min-height: 3.25rem; margin-top: var(--tk-spacing-4); border: 0; border-radius: var(--tk-radius-md); background: var(--tk-color-accent); color: var(--tk-color-accent-fg); cursor: pointer; font: inherit; font-weight: var(--tk-font-weight-bold); }
+  button:disabled { cursor:not-allowed; opacity:.55; }.stock { margin:var(--tk-spacing-3) 0 0; color:#087b34; font-size:var(--tk-font-size-sm);font-weight:700}.stock--low{color:#b16700} dl{margin:var(--tk-spacing-5) 0 0;border-top:1px solid var(--tk-color-border)}dl div{display:flex;justify-content:space-between;gap:20px;padding:var(--tk-spacing-3) 0;border-bottom:1px solid var(--tk-color-border)}dt{color:var(--tk-color-fg-muted)}dd{margin:0;font-weight:600}
+  ul { display: grid; gap: var(--tk-spacing-2); margin-top: var(--tk-spacing-5); padding: var(--tk-spacing-5) 0 0; border-top: 1px solid var(--tk-color-border); color: var(--tk-color-fg-muted); font-size: var(--tk-font-size-sm); list-style-position: inside; }
+  @media (max-width: 48rem) { .product-detail { grid-template-columns: 1fr; } }
+</style>

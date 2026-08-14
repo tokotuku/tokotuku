@@ -1,0 +1,24 @@
+export interface ThemeAlias {
+  find: RegExp;
+  replacement: string;
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/**
+ * Builds one Vite alias per `.astro` file in the theme directory, redirecting
+ * any import path ending in that filename to the theme's version. Matching
+ * by filename alone (not full package specifier) is the deliberately simple
+ * version — see task 0.4 notes on why a stricter per-package resolver waits
+ * for a second real client that needs it.
+ */
+export function buildThemeAliases(themeDir: string, filenames: string[]): ThemeAlias[] {
+  return filenames
+    .filter((name) => name.endsWith(".astro"))
+    .map((name) => ({
+      find: new RegExp(`/${escapeRegExp(name)}$`),
+      replacement: `${themeDir}/${name}`,
+    }));
+}

@@ -1,0 +1,86 @@
+$schema: "https://moonrepo.dev/schemas/project.json"
+language: "typescript"
+stack: "infrastructure"
+layer: "tool"
+
+tasks:
+  # Gate 1 ("tarball install") from the migration plan. Publishes every
+  # publishable @tokotuku/* package to a real registry (Verdaccio locally,
+  # see tools/verdaccio) and installs them into a scratch client the way a
+  # real client would, catching what workspace:* symlinks hide: broken
+  # exports maps, missing "files" entries, missing peerDependencies, and
+  # node_modules module resolution failures.
+  run:
+    command: "bun run.ts"
+    # Deliberately no `deps:` on the other packages' build tasks: moon's CI
+    # runner treats `deps` bidirectionally for affected-propagation, so
+    # declaring them here would pull this task into every plain
+    # `moon ci :build` sweep (which has no registry running). run.ts builds
+    # its own prerequisites as its first step instead.
+    inputs:
+      - "run.ts"
+      - "shared.ts"
+    options:
+      # Publishes to a registry and boots a real server -- never cache or
+      # skip this as a no-op. Invoked explicitly (`moon run e2e-install:run`)
+      # from its own CI job rather than joining the generic
+      # `:lint :typecheck :test :build` sweep, since it needs a running
+      # registry the fast sweep doesn't have.
+      cache: false
+
+  # Gate 2 ("a-la-carte nyata"): builds a fixture with orders dropped and
+  # asserts its tables, admin nav entry, and storefront affordances are all
+  # absent while catalog and auth keep working on their own.
+  fixtures:
+    command: "bun fixtures.ts"
+    inputs:
+      - "fixtures.ts"
+      - "shared.ts"
+    options:
+      cache: false
+
+  # Gate 2b ("nambah modul belakangan"): migrates a fixture with real data,
+  # adds orders afterward, and asserts already-applied migrations are never
+  # rewritten, new ones get strictly higher sequence numbers, and
+  # pre-existing data survives -- the scenario a real client will actually
+  # hit.
+  upgrade:
+    command: "bun upgrade.ts"
+    inputs:
+      - "upgrade.ts"
+      - "shared.ts"
+    options:
+      cache: false
+
+  # Gate 3 ("runtime smoke"): the golden path a real customer and admin
+  # actually walk -- setup, login, storefront listing, checkout, the order
+  # landing in D1, admin visibility, and a status transition. Gates 1/2/2b
+  # only prove the package graph installs and migrates; none of them click
+  # through the application.
+  smoke:
+    command: "bun smoke.ts"
+    inputs:
+      - "smoke.ts"
+      - "shared.ts"
+    options:
+      cache: false
+
+  # Gate 5 (verification slice, "update propagation"): the actual business
+  # reason this migration exists. Scaffolds a client the way a real one is
+  # actually left (deps pinned to "latest"), patches a package, republishes,
+  # and asserts `bun update` in that same client picks up the change. Does
+  # NOT touch real npm publishing/CI credentials -- see propagation.ts's
+  # header comment.
+  propagation:
+    command: "bun propagation.ts"
+    inputs:
+      - "propagation.ts"
+      - "shared.ts"
+    options:
+      cache: false
+
+  lint:
+    command: "biome check ."
+    inputs:
+      - "*.ts"
+      - "*.json"

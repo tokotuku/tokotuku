@@ -1,0 +1,32 @@
+$schema: "https://moonrepo.dev/schemas/project.json"
+language: "typescript"
+stack: "frontend"
+layer: "library"
+
+tasks:
+  build:
+    command: "tsup"
+    deps: ["core:build", "catalog:build"]
+    inputs:
+      - "src/**/*"
+      - "tsup.config.ts"
+      - "tsconfig.json"
+    outputs:
+      - "dist"
+
+  lint:
+    command: "biome check ."
+    inputs:
+      - "src/**/*"
+      - "*.json"
+
+  typecheck:
+    command: "astro check"
+    # @tokotuku/core and @tokotuku/catalog are consumed via their built
+    # dist/ (not raw source) for runtime values like defineModule and
+    # findProductsByIds — without this, typecheck can race tsup's
+    # clean-then-rebuild and read a briefly-missing dist/index.d.ts.
+    deps: ["core:build", "catalog:build"]
+    inputs:
+      - "src/**/*"
+      - "tsconfig.json"

@@ -1,43 +1,73 @@
 # Tokotuku example
 
-Development entry point for the complete e-commerce starter in `template/`.
+The reference client app: Astro on Cloudflare Workers with D1, R2, Better Auth, and product UI
+composed through `@tokotuku/ui`. This is the in-tree proof that the framework works end to end —
+it currently runs as a single application ahead of the `@tokotuku/*` package extraction; once
+that lands, this app's `src/` collapses down to config + theme, consuming the packages instead of
+containing their source.
 
-This project runs the application source from `template/apps/web` and consumes the local
-`template/packages/ui` workspace. The example therefore exercises
-the same Cloudflare Workers, D1, R2, Better Auth, application UI, and Flint/ECharts integration
-that generated projects receive.
+Run workspace commands (`bun run example`) from the repository root. Run Cloudflare resource
+commands (`wrangler`, `db:*`, `r2:*`) from this directory.
 
-## Run
+## Local setup
 
-From the repository root:
+Create `.dev.vars` with a local Better Auth secret:
+
+```sh
+openssl rand -base64 32
+```
+
+```dotenv
+BETTER_AUTH_SECRET=<generated-value>
+```
+
+Then initialize the local Cloudflare resources:
+
+```sh
+bun run cf-typegen
+bun run db:migrate:local
+bun run db:seed:local
+bun run r2:seed:local
+```
+
+From the repository root, start the app through Moon:
 
 ```sh
 bun run example
 ```
 
-Open `http://localhost:4400` and use one of the seeded local accounts:
+Open `http://localhost:4400/setup` and create the first administrator. This is a one-time
+bootstrap route: after the administrator is created it redirects to login permanently and cannot
+be used to create another administrator.
 
-| Role | Email | Password | Access |
-| --- | --- | --- | --- |
-| Admin | `admin@example.com` | `admin12345` | Storefront and full back-office access |
-| Staff | `staff@example.com` | `staff12345` | Storefront and limited back-office access |
-| Customer | `customer@example.com` | `customer12345` | Storefront and checkout only |
+New registrations receive the `customer` role. To use predefined local demo accounts instead of
+the onboarding flow, run `bun run db:seed:demo`. It creates:
 
-Newly registered accounts receive the `customer` role. Demo credentials are seeded locally only
-and are never included by `db:seed:remote`.
+| Role | Email | Password |
+| --- | --- | --- |
+| Admin | `admin@example.com` | `admin12345` |
+| Staff | `staff@example.com` | `staff12345` |
+| Customer | `customer@example.com` | `customer12345` |
 
-The root route is a public storefront. Use `/admin` for the authenticated dashboard; the
-example shares the template's local D1 and R2 persistence so both surfaces see the same data.
+Only admin and staff accounts can access `/admin`; customers can use the storefront and checkout.
+Demo credentials are local-only and are not included by `db:seed:remote`. Because the demo seed
+already contains an administrator, `/setup` is disabled as expected. Local D1 and R2 state lives
+under `.wrangler/state/`.
 
-Initialize the local Cloudflare resources once if needed:
+## Deploy
+
+Create the remote resources, replace the placeholder D1 ID in `wrangler.jsonc`, and add the
+secret before the first deployment:
 
 ```sh
-cd template/apps/web
-bun run cf-typegen
-bun run db:migrate:local
-bun run db:seed:demo
-bun run r2:seed:local
+wrangler login
+wrangler d1 create tokotuku-starter-products
+wrangler r2 bucket create tokotuku-starter-images
+wrangler secret put BETTER_AUTH_SECRET
+bun run db:migrate:remote
+bun run db:seed:remote
+bun run deploy
 ```
 
-`template/` remains a separate Bun + Moon workspace and the source of truth. This directory
-contains configuration only; do not copy the template application source into it.
+The Better Auth base URL is intentionally derived from each request's origin. Do not replace it
+with a fixed development URL.

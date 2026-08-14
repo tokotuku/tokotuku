@@ -1,0 +1,6 @@
+---
+import ErrorPage from "./ErrorPage.astro";
+
+Astro.response.status = 403;
+---
+<ErrorPage code={403} />

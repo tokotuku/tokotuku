@@ -4,6 +4,20 @@ stack: "frontend"
 layer: "application"
 
 tasks:
+  build:
+    command: "astro build"
+    # astro.config.mjs imports the "." export of all four — each is consumed
+    # via its built dist/, not raw source. Without all four as deps, this can
+    # race a package's tsup clean-then-rebuild and read a briefly-missing dist/.
+    deps: ["core:build", "auth:build", "catalog:build", "orders:build"]
+    inputs:
+      - "src/**/*"
+      - "astro.config.mjs"
+      - "wrangler.jsonc"
+      - "tsconfig.json"
+    outputs:
+      - "dist"
+
   dev:
     command: "astro dev"
     options:
@@ -11,17 +25,17 @@ tasks:
       runInCI: false
       cache: false
 
-  build:
-    command: "astro build"
-    options:
-      cache: false
+  lint:
+    command: "biome check ."
+    inputs:
+      - "src/**/*"
+      - "*.mjs"
+      - "*.json"
 
   typecheck:
     command: "astro check"
-    options:
-      cache: false
-
-  lint:
-    command: "biome check ."
-    options:
-      cache: false
+    deps: ["core:build", "auth:build", "catalog:build", "orders:build"]
+    inputs:
+      - "src/**/*"
+      - "astro.config.mjs"
+      - "tsconfig.json"
