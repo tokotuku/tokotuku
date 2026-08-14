@@ -80,13 +80,12 @@ async function main(): Promise<void> {
   console.log(`  cd ${projectName}`);
   console.log("  bun install");
   console.log(
-    "  wrangler d1 create " +
-      projectName +
-      "-db   # then paste the printed UUID into wrangler.jsonc",
+    `  wrangler d1 create ${projectName}-db   # then paste the printed UUID into wrangler.jsonc`,
   );
-  console.log("  wrangler r2 bucket create " + projectName + "-media");
+  console.log(`  wrangler r2 bucket create ${projectName}-media`);
   console.log("  bunx tokotuku db sync");
   console.log("  wrangler d1 migrations apply DB --local");
+  console.log("  bunx tokotuku db seed   # optional -- populates demo data for local dev");
   console.log("  bun run dev");
   console.log("");
   console.log(

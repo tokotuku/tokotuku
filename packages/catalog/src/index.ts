@@ -9,6 +9,13 @@ export function catalog(): ModuleDefinition {
       { name: "projects", url: new URL("../migrations/0003_projects.sql", import.meta.url) },
     ],
     mediaPrefixes: ["products/"],
+    seeds: [
+      {
+        name: "demo-catalog",
+        sql: new URL("../seeds/demo-catalog.sql", import.meta.url),
+        media: new URL("../seeds/media", import.meta.url),
+      },
+    ],
     adminNav: [
       {
         label: "Products",

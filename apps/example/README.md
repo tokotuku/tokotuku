@@ -26,8 +26,7 @@ Then initialize the local Cloudflare resources:
 ```sh
 bun run cf-typegen
 bun run db:migrate:local
-bun run db:seed:local
-bun run r2:seed:local
+bun run db:seed
 ```
 
 From the repository root, start the app through Moon:
@@ -40,8 +39,8 @@ Open `http://localhost:4400/setup` and create the first administrator. This is a
 bootstrap route: after the administrator is created it redirects to login permanently and cannot
 be used to create another administrator.
 
-New registrations receive the `customer` role. To use predefined local demo accounts instead of
-the onboarding flow, run `bun run db:seed:demo`. It creates:
+New registrations receive the `customer` role. `bun run db:seed` also creates predefined local
+demo accounts (this app's own `seed/demo-users.sql`, not something `@tokotuku/catalog` ships):
 
 | Role | Email | Password |
 | --- | --- | --- |
@@ -50,9 +49,9 @@ the onboarding flow, run `bun run db:seed:demo`. It creates:
 | Customer | `customer@example.com` | `customer12345` |
 
 Only admin and staff accounts can access `/admin`; customers can use the storefront and checkout.
-Demo credentials are local-only and are not included by `db:seed:remote`. Because the demo seed
-already contains an administrator, `/setup` is disabled as expected. Local D1 and R2 state lives
-under `.wrangler/state/`.
+`tokotuku db seed` is local-only by design — there is no remote seeding path, so these credentials
+can never end up in a live database. Because the demo seed already contains an administrator,
+`/setup` is disabled as expected. Local D1 and R2 state lives under `.wrangler/state/`.
 
 ## Deploy
 
@@ -65,9 +64,11 @@ wrangler d1 create tokotuku-starter-products
 wrangler r2 bucket create tokotuku-starter-images
 wrangler secret put BETTER_AUTH_SECRET
 bun run db:migrate:remote
-bun run db:seed:remote
 bun run deploy
 ```
+
+There is no `db:seed:remote` — populate a live store through the admin panel itself, not by
+replaying local demo data onto it.
 
 The Better Auth base URL is intentionally derived from each request's origin. Do not replace it
 with a fixed development URL.

@@ -1,6 +1,6 @@
-# Gates 1-3 + update propagation: tarball install through `bun update`
+# Gates 1-3 + update propagation + demo: tarball install through `bun update`
 
-Five scripts, sharing `shared.ts` for the publish/scaffold/assert mechanics.
+Six scripts, sharing `shared.ts` for the publish/scaffold/assert mechanics.
 
 ## Gate 1 — `run.ts`, "tarball install"
 
@@ -69,6 +69,29 @@ a release-engineering decision with real external consequences, not something to
 unilaterally. This script only proves the update *mechanism* itself works, entirely against the
 local registry.
 
+## Demo walkthrough — `demo.ts`, "bare install, seed, change the design"
+
+The concrete client experience none of the other gates exercise: `create-tokotuku` on its own,
+then `tokotuku db seed`, then a theme override — in that order, on the same client, asserting
+each step's effect before moving to the next.
+
+1. **Bare install.** A fresh scaffold's storefront shows the empty-catalog state — zero products,
+   by design.
+2. **Seed.** `tokotuku db seed` inserts `@tokotuku/catalog`'s 3 demo products (+ stock), uploads
+   their images to R2, the storefront lists them, and the seeded image serves `200` with the
+   right content type.
+3. **Change the design.** Writing `src/theme/ProductCard.astro` and rebuilding replaces the stock
+   product card with the override — proven by asserting the override's markup is present *and*
+   the stock component's markup (`data-add-to-cart`) is gone, not just that the build succeeded.
+
+This script exists because, before it did, neither of these two mechanisms had ever run for real.
+Seeding had no framework mechanism at all — only a manual, hardcoded script in `apps/example`.
+The theme override had a real bug: `buildThemeAliases`' `find` regex only anchored the end of the
+specifier, so Vite's `id.replace(find, replacement)` left the original package prefix stuck onto
+the front of the replacement path. The existing unit test only asserted `find.test(id)`, never
+the actual `.replace()` output, so it passed while the feature was silently broken. See
+`packages/core/src/theme-alias.ts` and `packages/core/src/theme-alias.test.ts`.
+
 ## Running locally
 
 Start a local registry first:
@@ -85,9 +108,10 @@ moon run e2e-install:fixtures      # Gate 2
 moon run e2e-install:upgrade       # Gate 2b
 moon run e2e-install:smoke         # Gate 3
 moon run e2e-install:propagation   # Gate 5 (verification slice)
+moon run e2e-install:demo          # Demo walkthrough
 ```
 
-Each run publishes at a unique version (`0.0.0-e2e.<timestamp>`), so all five are safe to run
+Each run publishes at a unique version (`0.0.0-e2e.<timestamp>`), so all six are safe to run
 repeatedly against a registry that already has earlier runs' packages — reusing a version across
 runs would either be rejected by the registry or, worse, serve a stale tarball from a package
 manager's local cache even after a fresh publish.
@@ -102,6 +126,6 @@ gate, reporting that new version as missing.
 
 ## CI
 
-All five run as one job (`.github/workflows/ci.yml`) with Verdaccio as a service container,
+All six run as one job (`.github/workflows/ci.yml`) with Verdaccio as a service container,
 separate from the fast `lint`/`typecheck`/`test`/`build` sweep — that sweep has no registry
 available, so these tasks are invoked explicitly rather than joining it.

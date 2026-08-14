@@ -34,8 +34,8 @@ design), keep the mockup and the page in sync explicitly instead of eyeballing i
   `public/` unprocessed.
 - Record the prompt used for each generated asset in a manifest next to the assets (filename →
   prompt → model), so it can be regenerated or tweaked later without guessing the original prompt.
-- Product photos are unrelated to this flow — those go through the existing `PRODUCT_IMAGES` R2
-  bucket, not this asset pipeline.
+- Product photos are unrelated to this flow — those go through the existing `MEDIA` R2 bucket, not
+  this asset pipeline.
 
 ## Documentation
 

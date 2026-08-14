@@ -30,6 +30,26 @@ export interface ModuleMigration {
   url: URL;
 }
 
+export interface ModuleSeed {
+  /** Slug identifying this seed within its module, shown in `tokotuku db seed` output. */
+  name: string;
+  /**
+   * Location of the seed's raw SQL, resolved relative to the module's own
+   * source: `new URL("../seeds/demo-catalog.sql", import.meta.url)`. Should
+   * be idempotent (`INSERT OR IGNORE`, matched by a unique column rather
+   * than an explicit id) since `db seed` may run more than once.
+   */
+  sql: URL;
+  /**
+   * A directory whose tree maps 1:1 onto R2 object keys under this seed's
+   * module — `<media>/products/widget.svg` uploads to key
+   * `products/widget.svg`. Every derived key must fall under one of this
+   * module's own `mediaPrefixes`, or `db seed` refuses to run rather than
+   * silently uploading something the media route will 404 on.
+   */
+  media?: URL;
+}
+
 export interface ModuleDefinition {
   name: string;
   /** Names of other modules that must be installed and resolved first. */
@@ -67,6 +87,13 @@ export interface ModuleDefinition {
    * would make catalog un-installable without orders, breaking a-la-carte.
    */
   ambientScripts?: string[];
+  /**
+   * Demo data for `tokotuku db seed` — local-only, never applied to a
+   * remote database. Omit entirely for a module with nothing meaningful to
+   * demo (auth, for instance, has no seed: publishing a working password
+   * hash would ship a known credential in the npm package).
+   */
+  seeds?: ModuleSeed[];
 }
 
 /** Identity function that gives module authors autocomplete and validation. */
