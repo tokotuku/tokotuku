@@ -26,6 +26,7 @@ import {
   AssertionError,
   assert,
   dropOrdersModule,
+  installClient,
   publishAll,
   queryTableNames,
   scaffoldClient,
@@ -86,7 +87,7 @@ async function main(): Promise<void> {
   dropOrdersModule(clientDir);
   console.log(`Scaffolded fixture (auth + catalog, no orders) at ${clientDir}`);
 
-  sh("bun", ["install"], clientDir);
+  installClient(clientDir);
   sh("bunx", ["tokotuku", "db", "sync"], clientDir);
   sh("bunx", ["wrangler", "d1", "migrations", "apply", "DB", "--local"], clientDir);
 
