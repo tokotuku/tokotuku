@@ -96,9 +96,9 @@ Scratch clients are created under the OS temp directory and left in place after 
 for inspection; nothing is written inside this repo.
 
 The helper writes the configured registry into each scratch client's `.npmrc` and passes it
-explicitly to `bun install`/`bun update`. This is intentional: scratch clients are outside the
-workspace, and relying on a scope-only `.npmrc` mapping can make Bun fall back to its default
-registry and report the freshly published e2e version as missing.
+explicitly to `bun install`/`bun update`. It also uses Bun's `--force` flag because every gate
+publishes a fresh version and Bun otherwise may reuse a cached package manifest from the previous
+gate, reporting that new version as missing.
 
 ## CI
 
