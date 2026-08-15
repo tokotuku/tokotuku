@@ -45,7 +45,7 @@ const roleLabel = user.role?.[0] ? user.role[0].toUpperCase() + user.role.slice(
     <aside class="admin-sidebar" id="admin-sidebar" data-sidebar>
       <div class="sidebar-top">
         <a class="admin-brand" href="/admin" aria-label={t("admin.nav.brandDashboard", { brand: brand.name })}>
-          <span class="brand-mark"><Icon name="logo" size={17} /></span>
+          {brand.logo?.src ? <img class="brand-logo" src={brand.logo.src} alt={brand.logo.alt ?? brand.name} /> : <span class="brand-mark"><Icon name="logo" size={17} /></span>}
           <span>{brand.name}</span>
         </a>
         <button class="icon-button sidebar-close" type="button" data-sidebar-close aria-label={t("admin.nav.closeMenu")}>
@@ -77,6 +77,7 @@ const roleLabel = user.role?.[0] ? user.role[0].toUpperCase() + user.role.slice(
         <button class="icon-button menu-button" type="button" data-sidebar-open aria-controls="admin-sidebar" aria-expanded="false" aria-label={t("admin.nav.openMenu")}><Icon name="menu" /></button>
         <div class="topbar-spacer" aria-hidden="true"></div>
         <div class="topbar-actions">
+          <a class="topbar-link" href="/">{brand.locale.toLowerCase().startsWith("id") ? "Lihat toko" : "View store"} ↗</a>
           <button class="icon-button" type="button" data-theme-toggle aria-label={t("admin.nav.theme")}><Icon name="moon" size={17} /></button>
           <div class="profile-chip">
             <span class="profile-copy"><span class="profile-name">{displayName}</span>{roleLabel && <span class="profile-role">{roleLabel}</span>}</span>

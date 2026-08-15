@@ -18,3 +18,21 @@ declare module "virtual:tokotuku/ambient-scripts" {
   const scripts: any[];
   export default scripts;
 }
+
+declare module "virtual:tokotuku/storefront-home-sections" {
+  const sections: Array<
+    import("./module").StorefrontHomeSection & {
+      component: import("astro/runtime/server/index.js").AstroComponentFactory;
+    }
+  >;
+  export default sections;
+}
+
+declare module "virtual:tokotuku/admin-dashboard-widgets" {
+  const widgets: Array<
+    import("./module").AdminDashboardWidget & {
+      component: import("astro/runtime/server/index.js").AstroComponentFactory;
+    }
+  >;
+  export default widgets;
+}

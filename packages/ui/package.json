@@ -27,12 +27,18 @@
     "./Skeleton.astro": "./src/components/feedback/Skeleton.astro",
     "./StatCard.astro": "./src/components/data-display/StatCard.astro",
     "./StoreHeader.astro": "./src/components/layout/StoreHeader.astro",
+    "./StorefrontHero.astro": "./src/components/storefront/StorefrontHero.astro",
+    "./StoreFooter.astro": "./src/components/storefront/StoreFooter.astro",
+    "./StorefrontEmptyCollection.astro": "./src/components/storefront/StorefrontEmptyCollection.astro",
+    "./DashboardMetric.astro": "./src/components/data-display/DashboardMetric.astro",
     "./Tabs.astro": "./src/components/navigation/Tabs.astro",
     "./chart": "./src/components/charts/types.ts",
     "./styles.css": "./src/styles/global.css",
     "./admin.css": "./src/styles/admin.css"
   },
   "dependencies": {
+    "@fontsource-variable/manrope": "^5.2.6",
+    "@fontsource-variable/newsreader": "^5.2.6",
     "echarts": "^6.1.0",
     "flint-chart": "0.2.1"
   },

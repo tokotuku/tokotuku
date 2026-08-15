@@ -30,6 +30,21 @@ export function catalog(): ModuleDefinition {
       { pattern: "/products", entrypoint: "@tokotuku/catalog/routes/products/index.astro" },
       { pattern: "/products/[id]", entrypoint: "@tokotuku/catalog/routes/products/[id].astro" },
     ],
+    storefrontHomeSections: [
+      {
+        id: "catalog-collection",
+        entrypoint: "@tokotuku/catalog/routes/StorefrontCollection.astro",
+        order: 20,
+      },
+    ],
+    adminDashboardWidgets: [
+      {
+        id: "catalog-overview",
+        entrypoint: "@tokotuku/catalog/routes/admin/CatalogDashboardWidget.astro",
+        area: "main",
+        order: 20,
+      },
+    ],
     adminRoutes: [
       { pattern: "/admin/products", entrypoint: "@tokotuku/catalog/routes/admin/products.astro" },
       {

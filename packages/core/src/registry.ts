@@ -1,9 +1,11 @@
 import type {
+  AdminDashboardWidget,
   AdminNavItem,
   ModuleDefinition,
   ModuleMigration,
   ModuleRoute,
   ModuleSeed,
+  StorefrontHomeSection,
 } from "./module";
 
 export interface ResolvedModule {
@@ -20,6 +22,8 @@ export interface ResolvedRegistry {
   storefrontRoutes: ModuleRoute[];
   adminRoutes: ModuleRoute[];
   ambientScripts: string[];
+  storefrontHomeSections: StorefrontHomeSection[];
+  adminDashboardWidgets: AdminDashboardWidget[];
   /** Modules in topo order, carrying just enough for `tokotuku db sync` to plan migrations. */
   modules: ResolvedModule[];
 }
@@ -60,6 +64,53 @@ export function resolveModules(modules: ModuleDefinition[]): ResolvedRegistry {
 
   for (const mod of modules) visit(mod);
 
+  const storefrontHomeSections = sorted.flatMap((mod, dependencyOrder) =>
+    (mod.storefrontHomeSections ?? []).map((section, localOrder) => ({
+      ...section,
+      __dependencyOrder: dependencyOrder,
+      __localOrder: localOrder,
+    })),
+  );
+  const dashboardWidgets = sorted.flatMap((mod, dependencyOrder) =>
+    (mod.adminDashboardWidgets ?? []).map((widget, localOrder) => ({
+      ...widget,
+      __dependencyOrder: dependencyOrder,
+      __localOrder: localOrder,
+    })),
+  );
+  function stableContributions<
+    T extends { id: string; order?: number; __dependencyOrder: number; __localOrder: number },
+  >(contributions: T[], kind: string): T[] {
+    const ids = new Set<string>();
+    for (const contribution of contributions) {
+      if (ids.has(contribution.id)) {
+        throw new Error(
+          "Duplicate " +
+            kind +
+            ' contribution id "' +
+            contribution.id +
+            '". Contribution ids must be unique.',
+        );
+      }
+      ids.add(contribution.id);
+    }
+    return contributions.sort(
+      (a, b) =>
+        (a.order ?? 0) - (b.order ?? 0) ||
+        a.__dependencyOrder - b.__dependencyOrder ||
+        a.__localOrder - b.__localOrder,
+    );
+  }
+  const orderedSections = stableContributions(
+    storefrontHomeSections,
+    "storefront home section",
+  ).map(
+    ({ __dependencyOrder: _dependencyOrder, __localOrder: _localOrder, ...section }) => section,
+  );
+  const orderedWidgets = stableContributions(dashboardWidgets, "admin dashboard widget").map(
+    ({ __dependencyOrder: _dependencyOrder, __localOrder: _localOrder, ...widget }) => widget,
+  );
+
   return {
     moduleNames: sorted.map((mod) => mod.name),
     guardedPrefixes: sorted.flatMap((mod) => mod.guardedPrefixes ?? []),
@@ -70,6 +121,8 @@ export function resolveModules(modules: ModuleDefinition[]): ResolvedRegistry {
     storefrontRoutes: sorted.flatMap((mod) => mod.storefrontRoutes ?? []),
     adminRoutes: sorted.flatMap((mod) => mod.adminRoutes ?? []),
     ambientScripts: sorted.flatMap((mod) => mod.ambientScripts ?? []),
+    storefrontHomeSections: orderedSections,
+    adminDashboardWidgets: orderedWidgets,
     modules: sorted.map((mod) => ({
       name: mod.name,
       migrations: mod.migrations ?? [],

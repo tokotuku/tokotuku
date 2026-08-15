@@ -15,16 +15,14 @@ import {
 } from "../../orders";
 
 const t = createTranslator(brand, orderMessages);
-
 let error = "";
 if (Astro.request.method === "POST") {
   try {
     const form = await Astro.request.formData();
     const id = Number(form.get("orderId"));
     if (!Number.isInteger(id)) throw new Error(t("orders.admin.error.notFound"));
-    if (String(form.get("action") ?? "") === "approve_payment") {
-      await approvePayment(env.DB, id);
-    } else {
+    if (String(form.get("action") ?? "") === "approve_payment") await approvePayment(env.DB, id);
+    else {
       const status = String(form.get("status")) as OrderStatus;
       if (!orderStatuses.includes(status)) throw new Error(t("orders.admin.error.invalidStatus"));
       await updateOrderStatus(env.DB, id, status);
@@ -34,7 +32,6 @@ if (Astro.request.method === "POST") {
     error = caught instanceof Error ? caught.message : t("orders.admin.error.generic");
   }
 }
-
 const orders = await listOrders(env.DB);
 const statusLabel: Record<OrderStatus, string> = {
   pending: t("orders.status.pending"),
@@ -50,66 +47,32 @@ const statusTone = (status: OrderStatus) =>
       : status === "cancelled"
         ? "danger"
         : "info";
+const locale = brand.locale.toLowerCase().startsWith("id") ? "id" : "en";
 ---
 
 <AdminLayout title={t("orders.admin.title")} orderCount={orders.filter((order) => order.status === "pending").length}>
-  <header class="page-heading"><div><h1>{t("orders.admin.title")}</h1><p>{t("orders.admin.description")}</p></div></header>
-  {error && <p class="notice notice--error" role="alert">{error}</p>}
-  {Astro.url.searchParams.has("updated") && <p class="notice">{t("orders.admin.updated")}</p>}
-
-  <section class="panel data-panel" data-order-table data-result-template={t("orders.admin.showing")} data-no-match={t("orders.admin.noMatch")}>
-    <div class="table-toolbar">
-      <div class="filter-tabs" role="tablist" aria-label={t("orders.admin.statusFilter")}><button type="button" aria-selected="true" data-filter="All">{t("orders.admin.all")}</button>{orderStatuses.map((status) => <button type="button" aria-selected="false" data-filter={status}>{statusLabel[status]}</button>)}</div>
-      <label class="table-search"><span class="sr-only">{t("orders.admin.search")}</span><input type="search" placeholder={t("orders.admin.searchPlaceholder")} data-table-search /></label>
-    </div>
-    <div class="table-wrap">
-      <table class="admin-table">
-        <thead><tr><th>{t("orders.admin.order")}</th><th>{t("orders.admin.customer")}</th><th>{t("orders.admin.date")}</th><th class="numeric">{t("orders.admin.items")}</th><th class="numeric">{t("orders.admin.total")}</th><th>{t("orders.admin.payment")}</th><th>{t("orders.admin.status")}</th><th>{t("orders.admin.update")}</th></tr></thead>
-        <tbody>
-          {orders.length ? orders.map((order) => (
-            <tr data-row data-status={order.status} data-search={`${order.orderNumber} ${order.customerName} ${order.customerEmail}`.toLowerCase()}>
-              <td><strong>#{order.orderNumber}</strong></td>
-              <td><div class="entity"><span class="entity-avatar">{order.customerName.slice(0,2).toUpperCase()}</span><div><strong>{order.customerName}</strong><span>{order.customerEmail}</span></div></div></td>
-              <td>{date(new Date(`${order.createdAt}Z`))}</td><td class="numeric">{order.itemCount}</td><td class="money">{money(order.totalCents / 100)}</td>
-              <td>
-                <div class="payment-cell">
-                  <span class:list={["status", order.paymentStatus === "paid" ? "status--success" : "status--warning"]}>{order.paymentMethod === "transfer" ? (order.paymentStatus === "paid" ? t("orders.admin.payment.transferVerified") : t("orders.admin.payment.transferPending")) : (order.paymentStatus === "paid" ? t("orders.admin.payment.paidCash") : t("orders.admin.payment.cashDue"))}</span>
-                  {order.paymentMethod === "transfer" && order.paymentProofKey && (
-                    <a href={`/api/payment-proofs/${order.paymentProofKey}`} target="_blank" rel="noreferrer">{t("orders.admin.viewProof")}</a>
-                  )}
-                  {order.paymentMethod === "transfer" && order.paymentStatus === "unpaid" && order.paymentProofKey && (
-                    <form method="post" class="approve-form">
-                      <input type="hidden" name="orderId" value={order.id} />
-                      <input type="hidden" name="action" value="approve_payment" />
-                      <button type="submit">{t("orders.admin.verify")}</button>
-                    </form>
-                  )}
-                </div>
-              </td>
-              <td><span class={`status status--${statusTone(order.status)}`}>{statusLabel[order.status]}</span></td>
-              <td><form method="post" class="status-form"><input type="hidden" name="orderId" value={order.id} /><select name="status" aria-label={`${t("orders.admin.update")} ${order.orderNumber}`} disabled={order.status === "cancelled"}>{orderStatuses.map((status) => <option value={status} selected={status === order.status}>{statusLabel[status]}</option>)}</select><button type="submit" disabled={order.status === "cancelled"}>{t("orders.admin.save")}</button></form></td>
-            </tr>
-          )) : <tr><td colspan="8"><div class="empty-state"><span class="empty-state-icon"><Icon name="orders" size={22} /></span><strong>{t("orders.admin.empty")}</strong><p>{t("orders.admin.emptyDescription")}</p></div></td></tr>}
-        </tbody>
-      </table>
-    </div>
-    <div class="table-footer"><span data-result-count>{orders.length ? t("orders.admin.showing", { count: orders.length }) : t("orders.admin.empty")}</span></div>
-  </section>
+  {error && <p class="notice notice--error" role="alert">{error}</p>}{Astro.url.searchParams.has("updated") && <p class="notice">{t("orders.admin.updated")}</p>}
+  {orders.length === 0 ? (
+    <section class="standalone-empty" data-orders-empty><div class="empty-symbol"><Icon name="orders" size={27} /></div><p class="eyebrow">{locale === "id" ? "Pesanan" : "Orders"}</p><h1>{t("orders.admin.empty")}</h1><p>{t("orders.admin.emptyDescription")}</p><a class="admin-button admin-button--quiet" href="/">{locale === "id" ? "Lihat toko" : "View store"} ↗</a></section>
+  ) : (
+    <>
+      <header class="page-heading"><div><p class="eyebrow">{locale === "id" ? "Operasional" : "Operations"}</p><h1>{t("orders.admin.title")}</h1><p>{t("orders.admin.description")}</p></div></header>
+      <section class="panel data-panel" data-order-table data-result-template={t("orders.admin.showing")} data-no-match={t("orders.admin.noMatch")}>
+        <div class="table-toolbar"><div class="filter-tabs" role="tablist" aria-label={t("orders.admin.statusFilter")}><button type="button" aria-selected="true" data-filter="All">{t("orders.admin.all")}</button>{orderStatuses.map((status) => <button type="button" aria-selected="false" data-filter={status}>{statusLabel[status]}</button>)}</div><label class="table-search"><span class="sr-only">{t("orders.admin.search")}</span><input type="search" placeholder={t("orders.admin.searchPlaceholder")} data-table-search /></label></div>
+        <div class="table-wrap"><table class="admin-table"><thead><tr><th>{t("orders.admin.order")}</th><th>{t("orders.admin.customer")}</th><th>{t("orders.admin.date")}</th><th class="numeric">{t("orders.admin.items")}</th><th class="numeric">{t("orders.admin.total")}</th><th>{t("orders.admin.payment")}</th><th>{t("orders.admin.status")}</th><th>{t("orders.admin.update")}</th></tr></thead><tbody>{orders.map((order) => <tr data-row data-status={order.status} data-search={(order.orderNumber + " " + order.customerName + " " + order.customerEmail).toLowerCase()}><td><strong>#{order.orderNumber}</strong></td><td><div class="entity"><span class="entity-avatar">{order.customerName.slice(0,2).toUpperCase()}</span><div><strong>{order.customerName}</strong><span>{order.customerEmail}</span></div></div></td><td>{date(new Date(order.createdAt + "Z"))}</td><td class="numeric">{order.itemCount}</td><td class="money">{money(order.totalCents / 100)}</td><td><div class="payment-cell"><span class:list={["status", order.paymentStatus === "paid" ? "status--success" : "status--warning"]}>{order.paymentMethod === "transfer" ? (order.paymentStatus === "paid" ? t("orders.admin.payment.transferVerified") : t("orders.admin.payment.transferPending")) : (order.paymentStatus === "paid" ? t("orders.admin.payment.paidCash") : t("orders.admin.payment.cashDue"))}</span>{order.paymentMethod === "transfer" && order.paymentProofKey && <a href={"/api/payment-proofs/" + order.paymentProofKey} target="_blank" rel="noreferrer">{t("orders.admin.viewProof")}</a>}{order.paymentMethod === "transfer" && order.paymentStatus === "unpaid" && order.paymentProofKey && <form method="post" class="approve-form"><input type="hidden" name="orderId" value={order.id} /><input type="hidden" name="action" value="approve_payment" /><button type="submit">{t("orders.admin.verify")}</button></form>}</div></td><td><span class={"status status--" + statusTone(order.status)}>{statusLabel[order.status]}</span></td><td><form method="post" class="status-form"><input type="hidden" name="orderId" value={order.id} /><select name="status" aria-label={t("orders.admin.update") + " " + order.orderNumber} disabled={order.status === "cancelled"}>{orderStatuses.map((status) => <option value={status} selected={status === order.status}>{statusLabel[status]}</option>)}</select><button type="submit" disabled={order.status === "cancelled"}>{t("orders.admin.save")}</button></form></td></tr>)}</tbody></table></div>
+        <div class="table-footer"><span data-result-count>{t("orders.admin.showing", { count: orders.length })}</span></div>
+      </section>
+    </>
+  )}
 </AdminLayout>
 
-<script>
-  const container = document.querySelector<HTMLElement>("[data-order-table]");
-  const rows = Array.from(container?.querySelectorAll<HTMLElement>("[data-row]") ?? []);
-  const count = container?.querySelector("[data-result-count]");
-  let filter = "All"; let query = "";
-  const resultTemplate = container?.dataset["resultTemplate"] ?? "";
-  const emptyLabel = container?.dataset["noMatch"] ?? "";
+{orders.length > 0 && <script>
+  const container = document.querySelector<HTMLElement>("[data-order-table]"); const rows = Array.from(container?.querySelectorAll<HTMLElement>("[data-row]") ?? []); const count = container?.querySelector("[data-result-count]"); let filter = "All"; let query = ""; const resultTemplate = container?.dataset["resultTemplate"] ?? ""; const emptyLabel = container?.dataset["noMatch"] ?? "";
   const update = () => { let visible = 0; for (const row of rows) { const match = (filter === "All" || row.dataset["status"] === filter) && (row.dataset["search"]?.includes(query) ?? false); row.hidden = !match; if (match) visible += 1; } if (count) count.textContent = visible ? resultTemplate.replace(/\{count\}/g, String(visible)) : emptyLabel; };
   for (const button of container?.querySelectorAll<HTMLButtonElement>("[data-filter]") ?? []) button.addEventListener("click", () => { filter = button.dataset["filter"] ?? "All"; container?.querySelectorAll("[data-filter]").forEach((item) => item.setAttribute("aria-selected", String(item === button))); update(); });
   container?.querySelector<HTMLInputElement>("[data-table-search]")?.addEventListener("input", (event) => { query = (event.currentTarget as HTMLInputElement).value.trim().toLowerCase(); update(); });
-</script>
+</script>}
 
 <style>
-  .payment-cell{display:flex;flex-direction:column;align-items:flex-start;gap:5px}.payment-cell a{display:inline-flex;min-height:40px;align-items:center;color:var(--tk-color-accent);font-size:11px}.approve-form button{min-height:40px;padding:0 9px;border:0;border-radius:7px;background:var(--tk-color-success);color:var(--tk-color-accent-fg);font-size:11px;cursor:pointer}
-  .data-panel{overflow:hidden}.admin-table th:first-child,.admin-table td:first-child{padding-left:20px}.admin-table th:last-child,.admin-table td:last-child{padding-right:20px}.admin-table tr[hidden]{display:none}.entity-avatar{background:var(--tk-color-accent)}.status--info{background:var(--admin-accent-soft);color:var(--admin-accent)}.status-form{display:flex;gap:6px}.status-form select,.status-form button{min-height:40px;border:1px solid var(--admin-line);border-radius:7px;background:var(--admin-surface);color:var(--tk-color-fg);font-size:11px}.status-form button{padding:0 9px;background:var(--tk-color-accent);color:var(--tk-color-accent-fg);cursor:pointer}.status-form :disabled{opacity:.5;cursor:not-allowed}.notice{padding:11px 14px;border-radius:10px;background:color-mix(in srgb,var(--tk-color-success) 10%,var(--admin-surface));color:var(--tk-color-success)}.notice--error{background:color-mix(in srgb,var(--tk-color-danger) 8%,var(--admin-surface));color:var(--tk-color-danger)}.empty-state{display:grid;justify-items:center;gap:8px;padding:42px 20px;text-align:center}.empty-state-icon{display:grid;width:48px;height:48px;place-items:center;border-radius:14px;background:var(--admin-accent-soft);color:var(--admin-accent)}.empty-state strong{font-size:15px}.empty-state p{max-width:34rem;margin:0;color:var(--tk-color-fg-muted);font-size:13px}
+  .standalone-empty { display:grid; min-height:calc(100vh - 13rem); place-items:center; align-content:center; padding:3rem; text-align:center; }.empty-symbol { display:grid; width:4.5rem; height:4.5rem; place-items:center; border:1px solid var(--admin-line); border-radius:50%; background:var(--admin-accent-soft); color:var(--admin-accent); }.standalone-empty .eyebrow { margin:1.5rem 0 .45rem; color:var(--tk-color-accent); font-size:.68rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; }.standalone-empty h1 { margin:0; font-family:var(--tk-font-family-display); font-size:clamp(2.7rem,5vw,4.5rem); font-weight:400; letter-spacing:-.045em; }.standalone-empty > p:not(.eyebrow) { max-width:30rem; margin:.7rem 0 1.4rem; color:var(--tk-color-fg-muted); font-size:.8rem; line-height:1.7; }.data-panel { overflow:hidden; }.admin-table tr[hidden] { display:none; }.payment-cell { display:flex; flex-direction:column; align-items:flex-start; gap:5px; }.payment-cell a { display:inline-flex; min-height:40px; align-items:center; color:var(--tk-color-accent); font-size:11px; }.approve-form button { min-height:40px; padding:0 9px; border:0; border-radius:7px; background:var(--tk-color-success); color:var(--tk-color-accent-fg); font-size:11px; cursor:pointer; }.entity-avatar { background:var(--tk-color-accent); }.status-form { display:flex; gap:6px; }.status-form select,.status-form button { min-height:40px; border:1px solid var(--admin-line); border-radius:7px; background:var(--admin-surface); color:var(--tk-color-fg); font-size:11px; }.status-form button { padding:0 9px; background:var(--tk-color-accent); color:var(--tk-color-accent-fg); cursor:pointer; }.status-form :disabled { opacity:.5; cursor:not-allowed; }.notice { padding:11px 14px; border-radius:10px; background:color-mix(in srgb,var(--tk-color-success) 10%,var(--admin-surface)); color:var(--tk-color-success); }.notice--error { background:color-mix(in srgb,var(--tk-color-danger) 8%,var(--admin-surface)); color:var(--tk-color-danger); }
 </style>

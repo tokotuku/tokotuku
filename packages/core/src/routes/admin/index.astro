@@ -1,92 +1,40 @@
 ---
-import adminNav from "virtual:tokotuku/admin-nav";
-import registry from "virtual:tokotuku/registry";
-import Icon from "@tokotuku/ui/Icon.astro";
+/// <reference path="../../virtual.d.ts" />
+import widgets from "virtual:tokotuku/admin-dashboard-widgets";
+import StorefrontEmptyCollection from "@tokotuku/ui/StorefrontEmptyCollection.astro";
 import { brand } from "../../brand";
 import { coreMessages, createTranslator } from "../../messages";
 import AdminLayout from "../AdminLayout.astro";
 
 const { user } = Astro.locals;
 if (!user) throw new Error("Unreachable: middleware guards /admin/*.");
-
 const t = createTranslator(brand, coreMessages);
 const displayName =
   user.name?.split(" ")[0] || user.email.split("@")[0] || t("admin.nav.defaultUser");
-const workspaceItems = adminNav.filter((item) => item.href !== "/admin");
-const installedModules = registry.moduleNames;
-const messageLocale = brand.locale.toLowerCase().startsWith("id") ? "id" : "en";
-const navLabel = (item: (typeof adminNav)[number]) =>
-  brand.messages?.[`admin.nav.${item.href}`] ?? item.labelByLocale?.[messageLocale] ?? item.label;
-const navDescription = (item: (typeof adminNav)[number], label: string) =>
-  brand.messages?.[`admin.dashboard.${item.href}.description`] ??
-  item.descriptionByLocale?.[messageLocale] ??
-  t("admin.dashboard.moduleDescription", { name: label });
-const installedModuleLabels = [
-  t("admin.dashboard.coreModule"),
-  ...workspaceItems.map(navLabel),
-].join(", ");
+const locale = brand.locale.toLowerCase().startsWith("id") ? "id" : "en";
+const summaryWidgets = widgets.filter((widget) => widget.area === "summary");
+const mainWidgets = widgets.filter((widget) => widget.area === "main");
+const asideWidgets = widgets.filter((widget) => widget.area === "aside");
 ---
 
 <AdminLayout title={t("admin.dashboard.title", { brand: brand.name })}>
-  <header class="page-heading dashboard-heading">
-    <div>
-      <p class="eyebrow">{brand.name}</p>
-      <h1>{t("admin.dashboard.greeting", { name: displayName })}</h1>
-      <p>{t("admin.dashboard.workspaceDescription")}</p>
-    </div>
-    {workspaceItems[0] && <div class="page-actions"><a class="admin-button admin-button--primary" href={workspaceItems[0].href}>{t("admin.dashboard.openModule", { name: navLabel(workspaceItems[0]) })}</a></div>}
+  <header class="dashboard-heading">
+    <div><p class="eyebrow">{brand.name}</p><h1>{t("admin.dashboard.greeting", { name: displayName })}</h1><p>{locale === "id" ? "Ringkasan operasional toko, berdasarkan data yang benar-benar terjadi." : "A clear operational view of what is happening in your store."}</p></div>
+    <div class="page-actions"><a class="admin-button admin-button--quiet" href="/">{locale === "id" ? "Lihat toko" : "View store"} ↗</a></div>
   </header>
-
-  {workspaceItems.length ? (
-    <section class="workspace-section" aria-labelledby="workspace-title">
-      <div class="section-heading"><div><h2 id="workspace-title">{t("admin.dashboard.workspaceTitle")}</h2><p>{t("admin.dashboard.workspaceDescription")}</p></div></div>
-      <div class="workspace-grid">
-        {workspaceItems.map((item) => {
-          const label = navLabel(item);
-          return (
-            <a class="panel workspace-card" href={item.href}>
-              <span class="workspace-icon">{Array.isArray(item.icon) ? <Icon paths={item.icon} size={20} /> : <Icon name={item.icon} size={20} />}</span>
-              <span class="workspace-card-copy"><strong>{label}</strong><span>{navDescription(item, label)}</span></span>
-              <span class="workspace-arrow"><Icon name="arrowRight" size={17} /></span>
-            </a>
-          );
-        })}
-      </div>
-    </section>
+  {widgets.length > 0 ? (
+    <div class="dashboard-layout">
+      {summaryWidgets.length > 0 && <div class="dashboard-widgets dashboard-widgets--summary" data-dashboard-area="summary">{summaryWidgets.map(({ component: Widget }) => <Widget />)}</div>}
+      {mainWidgets.length > 0 && <div class="dashboard-widgets dashboard-widgets--main" data-dashboard-area="main">{mainWidgets.map(({ component: Widget }) => <Widget />)}</div>}
+      {asideWidgets.length > 0 && <aside class="dashboard-widgets dashboard-widgets--aside" data-dashboard-area="aside">{asideWidgets.map(({ component: Widget }) => <Widget />)}</aside>}
+    </div>
   ) : (
-    <section class="panel getting-started" aria-labelledby="getting-started-title">
-      <span class="workspace-icon"><Icon name="plus" size={20} /></span>
-      <div><h2 id="getting-started-title">{t("admin.dashboard.gettingStartedTitle")}</h2><p>{t("admin.dashboard.gettingStartedDescription")}</p></div>
-    </section>
+    <section class="empty-dashboard panel"><StorefrontEmptyCollection eyebrow={locale === "id" ? "Workspace siap" : "Workspace ready"} title={locale === "id" ? "Tambahkan modul untuk mulai bekerja." : "Add a module to start working."} description={locale === "id" ? "Tokotuku akan menampilkan area operasional di sini saat Catalog atau Orders dipasang." : "Tokotuku will place operational workspaces here when Catalog or Orders is installed."} /></section>
   )}
-
-  <section class="panel configuration-panel" aria-labelledby="configuration-title">
-    <div class="panel-heading"><div><h2 id="configuration-title">{t("admin.dashboard.configurationTitle")}</h2><p>{t("admin.dashboard.installedModules")}</p></div><span class="configuration-count">{installedModules.length}</span></div>
-    <dl class="configuration-grid">
-      <div><dt>{t("admin.dashboard.installedModules")}</dt><dd>{installedModuleLabels}</dd></div>
-      <div><dt>{t("admin.dashboard.locale")}</dt><dd>{brand.locale}</dd></div>
-      <div><dt>{t("admin.dashboard.currency")}</dt><dd>{brand.currency}</dd></div>
-      <div><dt>{t("admin.dashboard.timeZone")}</dt><dd>{brand.timeZone ?? "—"}</dd></div>
-      <div><dt>{t("admin.dashboard.role")}</dt><dd>{user.role ?? "—"}</dd></div>
-    </dl>
-  </section>
 </AdminLayout>
 
 <style>
-  .dashboard-heading { margin-bottom: 32px; }
-  .eyebrow { margin: 0 0 8px !important; color: var(--tk-color-accent) !important; font-size: 11px !important; font-weight: var(--tk-font-weight-bold); letter-spacing: .12em; text-transform: uppercase; }
-  .dashboard-heading h1 { font-size: clamp(29px, 3vw, 38px); font-weight: var(--tk-font-weight-medium); }
-  .workspace-section { margin-top: 6px; }
-  .section-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
-  .section-heading h2, .section-heading p { margin: 0; }.section-heading h2 { font-size: 18px; font-weight: var(--tk-font-weight-semibold); }.section-heading p { margin-top: 5px; color: var(--tk-color-fg-muted); font-size: 13px; }
-  .workspace-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; }
-  .workspace-card { display: grid; grid-template-columns: 46px minmax(0, 1fr) 18px; align-items: center; gap: 14px; min-height: 126px; padding: 18px; color: var(--tk-color-fg); text-decoration: none; transition: border-color var(--tk-duration-fast) var(--tk-easing-standard), transform var(--tk-duration-fast) var(--tk-easing-standard); }
-  .workspace-card:hover { border-color: color-mix(in srgb, var(--tk-color-accent) 40%, var(--admin-line)); transform: translateY(-1px); }
-  .workspace-icon { display: grid; width: 46px; height: 46px; place-items: center; border-radius: 14px; background: color-mix(in srgb, var(--tk-color-accent) 13%, var(--admin-surface)); color: var(--tk-color-accent); }
-  .workspace-card-copy strong, .workspace-card-copy span { display: block; }.workspace-card-copy strong { font-size: 15px; font-weight: var(--tk-font-weight-semibold); }.workspace-card-copy span { margin-top: 5px; color: var(--tk-color-fg-muted); font-size: 12px; line-height: 1.45; }.workspace-arrow { color: var(--tk-color-fg-muted); }
-  .getting-started { display: flex; align-items: center; gap: 16px; margin-top: 6px; padding: 24px; }.getting-started h2 { margin: 0; font-size: 18px; }.getting-started p { max-width: 520px; margin: 7px 0 0; color: var(--tk-color-fg-muted); font-size: 13px; line-height: 1.5; }
-  .configuration-panel { margin-top: 22px; overflow: hidden; }.configuration-count { display: grid; min-width: 34px; height: 34px; place-items: center; border-radius: 10px; background: var(--admin-accent-soft); color: var(--admin-accent); font-weight: var(--tk-font-weight-bold); }.configuration-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); margin: 0; border-top: 1px solid var(--admin-line); }.configuration-grid > div { min-width: 0; padding: 16px 20px; border-right: 1px solid var(--admin-line); }.configuration-grid > div:last-child { border-right: 0; }.configuration-grid dt { color: var(--tk-color-fg-muted); font-size: 11px; }.configuration-grid dd { margin: 6px 0 0; overflow-wrap: anywhere; font-size: 13px; font-weight: var(--tk-font-weight-semibold); }
-  @media (max-width: 800px) { .configuration-grid { grid-template-columns: repeat(2, 1fr); }.configuration-grid > div:nth-child(2n) { border-right: 0; }.configuration-grid > div:nth-child(n + 3) { border-top: 1px solid var(--admin-line); } }
-  @media (max-width: 500px) { .getting-started { align-items: flex-start; padding: 18px; }.configuration-grid { grid-template-columns: 1fr; }.configuration-grid > div, .configuration-grid > div:nth-child(2n) { border-right: 0; border-top: 1px solid var(--admin-line); }.configuration-grid > div:first-child { border-top: 0; } }
-  @media (prefers-reduced-motion: reduce) { .workspace-card { transition: none; } }
+  .dashboard-heading { display:flex; align-items:flex-end; justify-content:space-between; gap:1.5rem; margin-bottom:2rem; }.eyebrow { margin:0 0 .5rem; color:var(--tk-color-accent); font-size:.68rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; }.dashboard-heading h1 { margin:0; font-family:var(--tk-font-family-display); font-size:clamp(2.5rem,4.2vw,4.3rem); font-weight:400; letter-spacing:-.045em; line-height:.95; }.dashboard-heading p:last-child { max-width:38rem; margin:.7rem 0 0; color:var(--tk-color-fg-muted); font-size:.8rem; }.page-actions { display:flex; gap:.5rem; }.admin-button { display:inline-flex; min-height:2.75rem; align-items:center; padding-inline:1rem; border-radius:var(--tk-radius-sm); font-size:.75rem; font-weight:700; text-decoration:none; }.admin-button--quiet { border:1px solid var(--admin-line); background:var(--admin-surface); }.dashboard-layout { display:grid; gap:1rem; }.dashboard-widgets { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; }.dashboard-widgets--summary,.dashboard-widgets--aside { grid-template-columns:1fr; }.dashboard-widgets--aside { align-content:start; }.dashboard-widgets :global([data-dashboard-widget="orders"]) { grid-column:span 2; }.panel { border:1px solid var(--admin-line); border-radius:var(--tk-radius-md); background:var(--admin-surface); }.empty-dashboard { overflow:hidden; }.empty-dashboard :global(.empty-collection) { min-height:28rem; }
+  @media (min-width:1000px) { .dashboard-layout:has(.dashboard-widgets--aside) { grid-template-columns:minmax(0,1fr) 20rem; align-items:start; }.dashboard-layout:has(.dashboard-widgets--aside) .dashboard-widgets--summary,.dashboard-layout:has(.dashboard-widgets--aside) .dashboard-widgets--main { grid-column:1; }.dashboard-layout:has(.dashboard-widgets--aside) .dashboard-widgets--aside { grid-column:2; grid-row:1 / span 2; } }
+  @media (max-width:800px) { .dashboard-heading { align-items:flex-start; flex-direction:column; }.dashboard-widgets { grid-template-columns:1fr; }.dashboard-widgets :global([data-dashboard-widget="orders"]) { grid-column:auto; } }
 </style>

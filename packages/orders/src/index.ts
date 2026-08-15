@@ -40,6 +40,14 @@ export function orders(): ModuleDefinition {
     adminRoutes: [
       { pattern: "/admin/orders", entrypoint: "@tokotuku/orders/routes/admin/orders.astro" },
     ],
+    adminDashboardWidgets: [
+      {
+        id: "orders-overview",
+        entrypoint: "@tokotuku/orders/routes/admin/OrdersDashboardWidget.astro",
+        area: "main",
+        order: 30,
+      },
+    ],
   });
 }
 
@@ -48,6 +56,7 @@ export {
   attachPaymentProof,
   createOrder,
   findCustomerOrder,
+  getOrderDashboardSummary,
   listOrders,
   type OrderStatus,
   orderStatuses,

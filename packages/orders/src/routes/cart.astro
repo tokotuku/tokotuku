@@ -1,19 +1,25 @@
 ---
-import { money } from "@tokotuku/core/brand";
+import { createTranslator } from "@tokotuku/core";
+import { brand, money } from "@tokotuku/core/brand";
+import Icon from "@tokotuku/ui/Icon.astro";
 import Layout from "@tokotuku/ui/Layout.astro";
 import StoreHeader from "@tokotuku/ui/StoreHeader.astro";
+import { orderMessages } from "../messages";
+
+const id = brand.locale.toLowerCase().startsWith("id");
+const t = createTranslator(brand, orderMessages);
 ---
 
-<Layout title="Cart — Tokotuku">
-  <StoreHeader current="cart" />
+<Layout title={`${t("orders.cart.pageTitle")} — ${brand.name}`} siteName={brand.name} lang={id ? "id" : "en"}>
+  <StoreHeader current="cart" brand={brand} showCart={true} announcement={brand.storefront?.announcement ?? (id ? "Objek untuk ritual sehari-hari." : "Objects for everyday rituals.")} labels={{ home: id ? "Beranda" : "Home", shop: id ? "Toko" : "Shop", cart: id ? "Keranjang" : "Cart" }} />
   <main>
-    <header><p>Shopping bag</p><h1>Your cart</h1></header>
+    <header><p>{t("orders.cart.eyebrow")}</p><h1>{t("orders.cart.title")}</h1></header>
     <div class="cart-layout">
-      <section class="cart-items" aria-label="Cart items" data-cart-items>
-        <div class="empty" data-cart-empty><h2>Your cart is ready for something useful.</h2><p>Explore the collection and add a product to get started.</p><a href="/products">Shop products</a></div>
+      <section class="cart-items" aria-label={t("orders.cart.itemsLabel")} data-cart-items data-label-remove={t("orders.cart.remove")} data-label-quantity={t("orders.cart.quantity")} data-label-available={t("orders.cart.available")}>
+        <div class="empty" data-cart-empty><div class="empty-mark" aria-hidden="true"><Icon name="cart" size={28} /></div><h2>{t("orders.cart.emptyTitle")}</h2><p>{t("orders.cart.emptyDescription")}</p><a href="/products">{t("orders.cart.emptyAction")}</a></div>
       </section>
       <aside data-cart-summary hidden>
-        <h2>Order summary</h2><div><span>Subtotal</span><strong data-cart-subtotal>{money(0)}</strong></div><p>Shipping and taxes are calculated at checkout.</p><a href="/login?next=/checkout">Continue to checkout</a>
+        <h2>{t("orders.cart.summary")}</h2><div><span>{t("orders.cart.subtotal")}</span><strong data-cart-subtotal>{money(0)}</strong></div><p>{t("orders.cart.calculationNote")}</p><a href="/login?next=/checkout">{t("orders.cart.checkout")}</a>
       </aside>
     </div>
   </main>
@@ -37,6 +43,10 @@ import StoreHeader from "@tokotuku/ui/StoreHeader.astro";
   const emptyState = document.querySelector<HTMLElement>("[data-cart-empty]");
   const summary = document.querySelector<HTMLElement>("[data-cart-summary]");
   const subtotalEl = document.querySelector<HTMLElement>("[data-cart-subtotal]");
+  const labelsRoot = document.querySelector<HTMLElement>("[data-cart-items]");
+  const removeLabel = labelsRoot?.dataset["labelRemove"] ?? "Remove";
+  const quantityLabel = labelsRoot?.dataset["labelQuantity"] ?? "Qty";
+  const availableTemplate = labelsRoot?.dataset["labelAvailable"] ?? "{count} available";
 
   async function fetchLines(ids: number[]): Promise<CartLineProduct[]> {
     if (!ids.length) return [];
@@ -52,7 +62,7 @@ import StoreHeader from "@tokotuku/ui/StoreHeader.astro";
 
     const img = document.createElement("img");
     img.src = product.imageUrl;
-    img.alt = "";
+    img.alt = product.name;
 
     const info = document.createElement("div");
     const heading = document.createElement("h2");
@@ -65,13 +75,13 @@ import StoreHeader from "@tokotuku/ui/StoreHeader.astro";
     const removeButton = document.createElement("button");
     removeButton.type = "button";
     removeButton.dataset["removeItem"] = "";
-    removeButton.textContent = "Remove";
+    removeButton.textContent = removeLabel;
     appendAll(info, heading, description, removeButton);
 
     const quantityBlock = document.createElement("div");
     quantityBlock.className = "quantity";
     const label = document.createElement("label");
-    appendAll(label, "Qty ");
+    appendAll(label, `${quantityLabel} `);
     const input = document.createElement("input");
     input.type = "number";
     input.min = "1";
@@ -80,7 +90,7 @@ import StoreHeader from "@tokotuku/ui/StoreHeader.astro";
     input.dataset["quantity"] = "";
     appendAll(label, input);
     const available = document.createElement("span");
-    available.textContent = `${product.stock} available`;
+    available.textContent = availableTemplate.replace("{count}", String(product.stock));
     const lineTotal = document.createElement("strong");
     lineTotal.dataset["lineTotal"] = "";
     appendAll(quantityBlock, label, available, lineTotal);
@@ -134,9 +144,9 @@ import StoreHeader from "@tokotuku/ui/StoreHeader.astro";
 </script>
 
 <style>
-  main { width: min(100% - calc(var(--tk-spacing-4) * 2), 76rem); margin-inline: auto; padding-block: var(--tk-spacing-10) var(--tk-spacing-12); }
+  main { width: min(100% - 2.5rem, 78rem); margin-inline: auto; padding-block: 4.5rem 5rem; }
   header p { margin: 0; color: var(--tk-color-accent); font-size: var(--tk-font-size-xs); font-weight: var(--tk-font-weight-bold); letter-spacing: 0.1em; text-transform: uppercase; }
-  h1 { margin: var(--tk-spacing-2) 0 var(--tk-spacing-8); font-size: clamp(2.5rem, 6vw, 5rem); letter-spacing: -0.05em; }
+  h1 { margin: var(--tk-spacing-2) 0 2.5rem; font-family:var(--tk-font-family-display); font-size: clamp(3rem, 6vw, 5.4rem); font-weight:400; letter-spacing: -0.05em; line-height:.95; }
   .cart-layout { display: grid; grid-template-columns: minmax(0, 1fr) 22rem; gap: var(--tk-spacing-8); align-items: start; }
   .cart-items { display: grid; gap: var(--tk-spacing-4); }
   .cart-items :global(article) { display: grid; grid-template-columns: 7rem minmax(0, 1fr) auto; gap: var(--tk-spacing-4); align-items: center; padding-bottom: var(--tk-spacing-4); border-bottom: 1px solid var(--tk-color-border); }
@@ -155,9 +165,8 @@ import StoreHeader from "@tokotuku/ui/StoreHeader.astro";
   aside div { display: flex; justify-content: space-between; padding-block: var(--tk-spacing-4); border-block: 1px solid var(--tk-color-border); }
   aside p { color: var(--tk-color-fg-muted); font-size: var(--tk-font-size-xs); }
   aside a, .empty a { display: block; margin-top: var(--tk-spacing-4); padding: var(--tk-spacing-3); border-radius: var(--tk-radius-md); background: var(--tk-color-accent); color: var(--tk-color-accent-fg); font-size: var(--tk-font-size-sm); font-weight: var(--tk-font-weight-bold); text-align: center; text-decoration: none; }
-  .empty { padding: var(--tk-spacing-8); border: 1px dashed var(--tk-color-border); border-radius: var(--tk-radius-xl); text-align: center; }
-  .empty h2 { margin-top: 0; }
+  .empty { display:grid; min-height:20rem; place-items:center; align-content:center; padding:2.5rem; border:1px solid var(--tk-color-border); border-radius:var(--tk-radius-md); background:var(--tk-color-surface); text-align:center; }.empty-mark { display:grid; width:4rem; height:4rem; place-items:center; border:1px solid var(--tk-color-border); border-radius:50%; color:var(--tk-color-accent); font-size:2rem; }.empty h2 { margin:1.25rem 0 .45rem; font-family:var(--tk-font-family-display); font-size:2rem; font-weight:400; }
   .empty p { color: var(--tk-color-fg-muted); }
   .empty a { width: fit-content; margin-inline: auto; }
-  @media (max-width: 48rem) { .cart-layout { grid-template-columns: 1fr; } .cart-items :global(article) { grid-template-columns: 5rem minmax(0, 1fr); } .cart-items :global(article img) { width: 5rem; height: 5rem; } .cart-items :global(.quantity) { grid-column: 2; justify-items: start; } }
+  @media (max-width: 48rem) { main { width:min(100% - 1.5rem,78rem); padding-top:3rem; }.cart-layout { grid-template-columns: 1fr; } .cart-items :global(article) { grid-template-columns: 5rem minmax(0, 1fr); } .cart-items :global(article img) { width: 5rem; height: 5rem; } .cart-items :global(.quantity) { grid-column: 2; justify-items: start; } }
 </style>

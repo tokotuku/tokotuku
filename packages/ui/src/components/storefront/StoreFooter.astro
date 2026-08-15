@@ -1,0 +1,53 @@
+---
+interface FooterLink {
+  label: string;
+  href: string;
+}
+interface Props {
+  brandName: string;
+  tagline?: string;
+  links?: FooterLink[] | undefined;
+  newsletterAction?: string | undefined;
+  newsletterLabel?: string | undefined;
+  newsletterHint?: string | undefined;
+  newsletterEmailLabel?: string | undefined;
+  newsletterSubmit?: string | undefined;
+  navigationLabel?: string | undefined;
+  madeWith?: string | undefined;
+  copyright?: string | undefined;
+}
+
+const {
+  brandName,
+  tagline = "Objects for everyday rituals.",
+  links = [],
+  newsletterAction,
+  newsletterLabel = "Stay in the loop",
+  newsletterHint = "Cerita baru dan koleksi pilihan, sesekali.",
+  newsletterEmailLabel = "Email address",
+  newsletterSubmit = "Subscribe",
+  navigationLabel = "Footer navigation",
+  madeWith = "Made with intention.",
+  copyright = `© ${new Date().getFullYear()} ${brandName}.`,
+} = Astro.props;
+---
+
+{newsletterAction && (
+  <section class="footer-newsletter" aria-labelledby="newsletter-title">
+    <div><p id="newsletter-title" class="newsletter-title">{newsletterLabel}</p><p>{newsletterHint}</p></div>
+    <form action={newsletterAction} method="post"><label class="sr-only" for="footer-email">{newsletterEmailLabel}</label><input id="footer-email" type="email" name="email" placeholder={newsletterEmailLabel} required /><button type="submit">{newsletterSubmit}</button></form>
+  </section>
+)}
+<footer class="store-footer">
+  <div class="footer-brand"><a href="/" class="wordmark">{brandName}</a><p>{tagline}</p></div>
+  {links.length > 0 && <nav aria-label={navigationLabel}>{links.map((link) => <a href={link.href}>{link.label}</a>)}</nav>}
+  <div class="footer-bottom"><span>{copyright}</span><span>{madeWith}</span></div>
+</footer>
+
+<style>
+  .footer-newsletter { display:flex; align-items:center; justify-content:space-between; gap:2rem; padding:2.5rem max(1.25rem,calc((100% - 78rem)/2)); border-block:1px solid var(--tk-color-border); background:color-mix(in srgb,var(--tk-color-bg-subtle) 52%,var(--tk-color-bg)); }
+  .newsletter-title,.footer-newsletter p { margin:0; }.newsletter-title { font-family:var(--tk-font-family-display); font-size:1.6rem; }.footer-newsletter p + p { margin-top:.3rem; color:var(--tk-color-fg-muted); font-size:.8rem; }
+  form { display:flex; width:min(100%,25rem); gap:.5rem; } input { min-width:0; flex:1; min-height:2.8rem; padding:.65rem .8rem; border:1px solid var(--tk-color-border); border-radius:var(--tk-radius-sm); background:var(--tk-color-surface); color:var(--tk-color-fg); } button { min-height:2.8rem; padding-inline:1rem; border:0; border-radius:var(--tk-radius-sm); background:var(--tk-color-accent); color:var(--tk-color-accent-fg); font-size:.8rem; font-weight:700; cursor:pointer; }
+  .store-footer { display:grid; grid-template-columns:1.2fr 2fr; gap:2rem; max-width:78rem; margin:auto; padding:3.5rem max(1.25rem,3vw) 1.5rem; }.wordmark { font-family:var(--tk-font-family-display); font-size:1.8rem; letter-spacing:.12em; text-decoration:none; text-transform:uppercase; }.footer-brand p { margin:.65rem 0 0; color:var(--tk-color-fg-muted); font-size:.8rem; }nav { display:flex; flex-wrap:wrap; align-content:start; justify-content:flex-end; gap:1rem 1.5rem; }nav a { color:var(--tk-color-fg-muted); font-size:.8rem; text-decoration:none; }nav a:hover { color:var(--tk-color-fg); }.footer-bottom { grid-column:1/-1; display:flex; justify-content:space-between; gap:1rem; padding-top:1.2rem; border-top:1px solid var(--tk-color-border); color:var(--tk-color-fg-muted); font-size:.7rem; }
+  @media (max-width:650px) { .footer-newsletter { display:block; padding-block:2rem; }.footer-newsletter form { width:100%; margin-top:1rem; }.store-footer { grid-template-columns:1fr; padding-top:2.5rem; }.store-footer nav { justify-content:flex-start; }.footer-bottom { margin-top:1rem; } }
+</style>

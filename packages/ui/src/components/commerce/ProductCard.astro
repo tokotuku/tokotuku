@@ -1,4 +1,6 @@
 ---
+import Icon from "../core/Icon.astro";
+
 interface Props {
   id: number;
   name: string;
@@ -7,8 +9,10 @@ interface Props {
   priceCents: number;
   imageUrl: string;
   stock?: number;
-  /** Whether a module that can act on `data-add-to-cart` is installed — ui has no notion of "modules" itself, so the caller decides. */
   showAddToCart?: boolean;
+  category?: string;
+  labels?: { view?: string; add?: string; soldOut?: string; lowStock?: string };
+  imageAlt?: string;
 }
 
 const {
@@ -20,138 +24,31 @@ const {
   imageUrl,
   stock = 1,
   showAddToCart = false,
+  category = "Everyday objects",
+  labels = {},
+  imageAlt = name,
 } = Astro.props;
 const serialized = JSON.stringify({ id, name, priceCents, imageUrl });
+const available = stock > 0;
+const stockLabel = !available
+  ? (labels.soldOut ?? "Sold out")
+  : stock <= 5
+    ? (labels.lowStock ?? "Few left")
+    : undefined;
 ---
 
-<article class="product-card">
-  <a class="media" href={`/products/${id}`} aria-label={`View ${name}`}>
-    <img src={imageUrl} alt="" loading="lazy" />
+<article class="product-card" data-product-card>
+  <a class="media" href={"/products/" + id} aria-label={(labels.view ?? "View") + " " + name}>
+    <img src={imageUrl} alt={imageAlt} loading="lazy" />
+    {stockLabel && <span class:list={["stock-pill", !available && "stock-pill--out"]}>{stockLabel}</span>}
   </a>
   <div class="body">
-    <div>
-      <p class="eyebrow">Everyday essential</p>
-      <h2><a href={`/products/${id}`}>{name}</a></h2>
-      <p class="description">{description}</p>
-    </div>
-    <div class="footer">
-      <strong>{price}</strong>
-      {showAddToCart && (
-        <button type="button" data-add-to-cart data-product={serialized} disabled={stock <= 0}>{stock > 0 ? "Add to cart" : "Sold out"}</button>
-      )}
-    </div>
+    <div class="copy"><p class="category">{category}</p><h2><a href={"/products/" + id}>{name}</a></h2><p class="description">{description}</p></div>
+    <div class="footer"><strong>{price}</strong>{showAddToCart && <button type="button" data-add-to-cart data-product={serialized} disabled={!available} aria-label={available ? (labels.add ?? "Add to cart") + " " + name : (labels.soldOut ?? "Sold out")}>{available ? <Icon name="plus" size={16} /> : <span>{labels.soldOut ?? "Sold out"}</span>}</button>}</div>
   </div>
 </article>
 
 <style>
-  .product-card {
-    display: flex;
-    min-width: 0;
-    flex-direction: column;
-    overflow: hidden;
-    border: 1px solid var(--tk-color-border);
-    border-radius: var(--tk-radius-xl);
-    background: var(--tk-color-bg);
-    box-shadow: var(--tk-shadow-sm);
-    transition:
-      transform var(--tk-duration-normal) var(--tk-easing-standard),
-      box-shadow var(--tk-duration-normal) var(--tk-easing-standard);
-  }
-
-  .product-card:hover {
-    transform: translateY(-0.2rem);
-    box-shadow: var(--tk-shadow-md);
-  }
-
-  .media {
-    display: block;
-    aspect-ratio: 4 / 3;
-    overflow: hidden;
-    background: var(--tk-color-bg-subtle);
-  }
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform var(--tk-duration-slow) var(--tk-easing-standard);
-  }
-
-  .product-card:hover img {
-    transform: scale(1.03);
-  }
-
-  .body {
-    display: flex;
-    min-height: 12rem;
-    flex: 1;
-    flex-direction: column;
-    justify-content: space-between;
-    gap: var(--tk-spacing-5);
-    padding: var(--tk-spacing-5);
-  }
-
-  h2,
-  p {
-    margin: 0;
-  }
-
-  h2 {
-    margin-top: var(--tk-spacing-1);
-    font-size: var(--tk-font-size-xl);
-  }
-
-  h2 a {
-    color: var(--tk-color-fg);
-    text-decoration: none;
-  }
-
-  .eyebrow {
-    color: var(--tk-color-accent);
-    font-size: var(--tk-font-size-xs);
-    font-weight: var(--tk-font-weight-semibold);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-  }
-
-  .description {
-    display: -webkit-box;
-    margin-top: var(--tk-spacing-2);
-    overflow: hidden;
-    color: var(--tk-color-fg-muted);
-    font-size: var(--tk-font-size-sm);
-    line-height: var(--tk-line-height-relaxed);
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-  }
-
-  .footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--tk-spacing-3);
-  }
-
-  strong {
-    color: var(--tk-color-fg);
-    font-size: var(--tk-font-size-lg);
-  }
-
-  button {
-    min-height: 2.5rem;
-    padding-inline: var(--tk-spacing-4);
-    border: 0;
-    border-radius: var(--tk-radius-md);
-    background: var(--tk-color-accent);
-    color: var(--tk-color-accent-fg);
-    cursor: pointer;
-    font: inherit;
-    font-size: var(--tk-font-size-sm);
-    font-weight: var(--tk-font-weight-semibold);
-  }
-
-  button:focus-visible {
-    outline: 2px solid var(--tk-color-focus-ring);
-    outline-offset: 2px;
-  }
+  .product-card { display:flex; min-width:0; flex-direction:column; overflow:hidden; border:1px solid var(--tk-color-border); border-radius:var(--tk-radius-md); background:var(--tk-color-surface); transition:transform var(--tk-duration-normal) var(--tk-easing-standard),box-shadow var(--tk-duration-normal) var(--tk-easing-standard); }.product-card:hover { transform:translateY(-2px); box-shadow:var(--tk-shadow-md); }.media { position:relative; display:block; aspect-ratio:1/1; overflow:hidden; background:var(--tk-color-bg-subtle); }.media img { display:block; width:100%; height:100%; object-fit:cover; transition:transform var(--tk-duration-slow) var(--tk-easing-standard); }.product-card:hover .media img { transform:scale(1.025); }.stock-pill { position:absolute; top:.75rem; left:.75rem; padding:.3rem .5rem; border-radius:var(--tk-radius-full); background:color-mix(in srgb,var(--tk-color-surface) 88%,transparent); color:var(--tk-color-success); font-size:.62rem; font-weight:700; }.stock-pill--out { color:var(--tk-color-danger); }
+  .body { display:flex; flex:1; flex-direction:column; justify-content:space-between; gap:1.25rem; padding:1rem; }.copy p,.copy h2 { margin:0; }.category { color:var(--tk-color-fg-muted); font-size:.65rem; letter-spacing:.03em; }.copy h2 { margin-top:.25rem; font-family:var(--tk-font-family-display); font-size:1.25rem; font-weight:500; line-height:1.05; }.copy h2 a { text-decoration:none; }.description { display:-webkit-box; margin-top:.45rem !important; overflow:hidden; color:var(--tk-color-fg-muted); font-size:.76rem; line-height:1.5; -webkit-box-orient:vertical; -webkit-line-clamp:2; }.footer { display:flex; align-items:center; justify-content:space-between; gap:.75rem; }.footer strong { font-size:.9rem; font-weight:700; }.footer button { display:grid; min-width:2.4rem; min-height:2.4rem; padding:.35rem; place-items:center; border:1px solid var(--tk-color-border); border-radius:50%; background:transparent; color:var(--tk-color-fg); font-size:1.1rem; cursor:pointer; }.footer button:hover:not(:disabled) { border-color:var(--tk-color-accent); color:var(--tk-color-accent); }.footer button:disabled { min-width:auto; padding-inline:.55rem; border-radius:var(--tk-radius-sm); color:var(--tk-color-fg-muted); font-size:.62rem; cursor:not-allowed; }
 </style>

@@ -31,8 +31,9 @@ bun run db:seed
 ```
 
 `db:seed` is the one extra step versus `example-bare`. It runs every installed module's own seed —
-here, `@tokotuku/catalog`'s three demo products (Widget/Gadget/Gizmo) with stock rows and product
-images — then uploads the images to the local R2 bucket. It is local-only by design: there is no
+here, `@tokotuku/catalog`'s six premium demo products (Cangkir Stoneware, Tas Linen, Lampu Meja
+Arc, Jurnal Linen, Nampan Walnut, and Karaf Kaca) with stock rows and optimized WebP product
+images — then uploads the images to the local R2 bucket. It creates no orders or sales metrics. It is local-only by design: there is no
 `--remote` path, so demo data can never land in a live database by accident.
 
 From the repository root:
@@ -42,9 +43,9 @@ bun run example-seeded
 ```
 
 Open `http://localhost:4420/setup` and create the first administrator, same as `example-bare`.
-Then open `/products`: three products render, and `/api/images/products/widget.svg` (etc.) serves
-the seeded images. Re-running `bun run db:seed` is safe — it's idempotent (`INSERT OR IGNORE`
-keyed on SKU), so it won't duplicate rows if you run it again.
+Then open `/products`: six products render, and `/api/images/products/cangkir-stoneware.webp`
+(etc.) serves the seeded images. Re-running `bun run db:seed` is safe — it is idempotent and
+preserves customized legacy rows, so it will not duplicate the catalog.
 
 ## Deploy
 

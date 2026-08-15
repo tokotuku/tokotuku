@@ -39,8 +39,9 @@ Open `http://localhost:4400/setup` and create the first administrator. This is a
 bootstrap route: after the administrator is created it redirects to login permanently and cannot
 be used to create another administrator.
 
-New registrations receive the `customer` role. `bun run db:seed` also creates predefined local
-demo accounts (this app's own `seed/demo-users.sql`, not something `@tokotuku/catalog` ships):
+New registrations receive the `customer` role. `bun run db:seed` adds the six premium catalog
+products from `@tokotuku/catalog` (and no orders or sales), plus predefined local demo accounts
+(this app's own `seed/demo-users.sql`, not something `@tokotuku/catalog` ships):
 
 | Role | Email | Password |
 | --- | --- | --- |

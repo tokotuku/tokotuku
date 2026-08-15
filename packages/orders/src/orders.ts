@@ -42,6 +42,13 @@ export interface AdminOrder {
   paymentProofKey: string | null;
 }
 
+export interface OrderDashboardSummary {
+  todaySalesCents: number;
+  thirtyDayRevenueCents: number;
+  pendingCount: number;
+  recentOrders: AdminOrder[];
+}
+
 function normalizeCart(cart: CartLineInput[]) {
   const quantities = new Map<number, number>();
   for (const item of cart) {
@@ -215,6 +222,32 @@ export async function listOrders(db: D1Database): Promise<AdminOrder[]> {
     paymentStatus: row.payment_status,
     paymentProofKey: row.payment_proof_key,
   }));
+}
+
+/** Operational dashboard values derived only from orders that actually exist. */
+export async function getOrderDashboardSummary(db: D1Database): Promise<OrderDashboardSummary> {
+  const [sales, revenue, pending, recentOrders] = await Promise.all([
+    db
+      .prepare(
+        "SELECT COALESCE(SUM(total_cents), 0) AS value FROM orders WHERE status != 'cancelled' AND date(created_at) = date('now')",
+      )
+      .first<{ value: number }>(),
+    db
+      .prepare(
+        "SELECT COALESCE(SUM(total_cents), 0) AS value FROM orders WHERE status != 'cancelled' AND created_at >= datetime('now', '-30 day')",
+      )
+      .first<{ value: number }>(),
+    db
+      .prepare("SELECT COUNT(*) AS value FROM orders WHERE status = 'pending'")
+      .first<{ value: number }>(),
+    listOrders(db),
+  ]);
+  return {
+    todaySalesCents: sales?.value ?? 0,
+    thirtyDayRevenueCents: revenue?.value ?? 0,
+    pendingCount: pending?.value ?? 0,
+    recentOrders: recentOrders.slice(0, 5),
+  };
 }
 
 export async function updateOrderStatus(db: D1Database, id: number, status: OrderStatus) {

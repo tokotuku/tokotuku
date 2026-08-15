@@ -1,8 +1,11 @@
 ---
 import { env } from "cloudflare:workers";
-import { money } from "@tokotuku/core/brand";
+import { createTranslator } from "@tokotuku/core";
+import { brand, money } from "@tokotuku/core/brand";
+import Icon from "@tokotuku/ui/Icon.astro";
 import Layout from "@tokotuku/ui/Layout.astro";
 import StoreHeader from "@tokotuku/ui/StoreHeader.astro";
+import { orderMessages } from "../messages";
 import {
   type CartLineInput,
   createOrder,
@@ -12,6 +15,8 @@ import {
 } from "../orders";
 
 const bankAccount = { bank: "BCA", accountNumber: "1234567890", accountName: "Tokotuku" };
+const id = brand.locale.toLowerCase().startsWith("id");
+const t = createTranslator(brand, orderMessages);
 
 const { user } = Astro.locals;
 if (!user) return Astro.redirect("/login?next=/checkout");
@@ -23,18 +28,19 @@ if (Astro.request.method === "POST") {
     const form = await Astro.request.formData();
     const required = (name: string, label: string) => {
       const value = String(form.get(name) ?? "").trim();
-      if (!value) throw new Error(`${label} wajib diisi.`);
+      if (!value) throw new Error(t("orders.checkout.error.required", { label }));
       return value;
     };
     let cart: CartLineInput[] = [];
     try {
       cart = JSON.parse(String(form.get("cart") ?? "[]"));
     } catch {
-      throw new Error("Data keranjang tidak valid.");
+      throw new Error(t("orders.checkout.error.invalidCart"));
     }
-    if (!Array.isArray(cart)) throw new Error("Data keranjang tidak valid.");
+    if (!Array.isArray(cart)) throw new Error(t("orders.checkout.error.invalidCart"));
     const paymentMethod = String(form.get("paymentMethod") ?? "cash") as PaymentMethod;
-    if (!paymentMethods.includes(paymentMethod)) throw new Error("Metode pembayaran tidak valid.");
+    if (!paymentMethods.includes(paymentMethod))
+      throw new Error(t("orders.checkout.error.invalidPayment"));
     return Astro.redirect(
       `/checkout?order=${encodeURIComponent(
         (
@@ -42,12 +48,12 @@ if (Astro.request.method === "POST") {
             env.DB,
             user.id,
             {
-              customerName: required("customerName", "Nama lengkap"),
+              customerName: required("customerName", t("orders.checkout.fullName")),
               customerEmail: user.email,
-              customerPhone: required("customerPhone", "Nomor telepon"),
-              address: required("address", "Alamat"),
-              city: required("city", "Kota"),
-              postalCode: required("postalCode", "Kode pos"),
+              customerPhone: required("customerPhone", t("orders.checkout.phone")),
+              address: required("address", t("orders.checkout.address")),
+              city: required("city", t("orders.checkout.city")),
+              postalCode: required("postalCode", t("orders.checkout.postalCode")),
               note: String(form.get("note") ?? "").trim(),
             },
             cart,
@@ -57,7 +63,7 @@ if (Astro.request.method === "POST") {
       )}`,
     );
   } catch (caught) {
-    error = caught instanceof Error ? caught.message : "Checkout gagal diproses.";
+    error = caught instanceof Error ? caught.message : t("orders.checkout.error.generic");
   }
 }
 
@@ -68,62 +74,62 @@ const completedOrder = requestedOrder
 const proofError = Astro.url.searchParams.get("proofError");
 ---
 
-<Layout title="Checkout — Tokotuku">
-  <StoreHeader />
+<Layout title={(id ? "Checkout" : "Checkout") + " — " + brand.name} siteName={brand.name} lang={id ? "id" : "en"}>
+  <StoreHeader brand={brand} showCart={true} current="cart" announcement={brand.storefront?.announcement ?? (id ? "Objek untuk ritual sehari-hari." : "Objects for everyday rituals.")} labels={{ home: id ? "Beranda" : "Home", shop: id ? "Toko" : "Shop", cart: id ? "Keranjang" : "Cart" }} />
   <main>
     {completedOrder ? (
       <section class="success-card">
-        <span class="success-icon">✓</span><p class="eyebrow">Order berhasil dibuat</p><h1>Terima kasih.</h1>
-        <p>Order <strong>#{completedOrder.orderNumber}</strong> sudah kami terima.</p>
+        <span class="success-icon"><Icon name="check" size={22} /></span><p class="eyebrow">{t("orders.checkout.successEyebrow")}</p><h1>{t("orders.checkout.successTitle")}</h1>
+        <p>{t("orders.checkout.successDescription", { order: completedOrder.orderNumber })}</p>
         {completedOrder.paymentMethod === "cash" ? (
-          <div class="cash-note"><strong>Bayar tunai saat pesanan tiba</strong><span>Siapkan uang sebesar {money(completedOrder.totalCents / 100)}. Status pembayaran saat ini: belum dibayar.</span></div>
+          <div class="cash-note"><strong>{t("orders.checkout.cashTitle")}</strong><span>{t("orders.checkout.cashDueDescription", { total: money(completedOrder.totalCents / 100) })}</span></div>
         ) : completedOrder.paymentStatus === "paid" ? (
-          <div class="cash-note"><strong>Pembayaran terverifikasi</strong><span>Terima kasih, transfer kamu sudah kami konfirmasi.</span></div>
+          <div class="cash-note"><strong>{t("orders.checkout.paidTitle")}</strong><span>{t("orders.checkout.paidDescription")}</span></div>
         ) : completedOrder.paymentProofKey ? (
-          <div class="cash-note"><strong>Bukti transfer terkirim</strong><span>Menunggu verifikasi dari admin/CS kami, biasanya diproses dalam 1x24 jam.</span></div>
+          <div class="cash-note"><strong>{t("orders.checkout.proofSentTitle")}</strong><span>{t("orders.checkout.proofSentDescription")}</span></div>
         ) : (
           <div class="cash-note">
-            <strong>Transfer ke rekening berikut</strong>
-            <span>{bankAccount.bank} {bankAccount.accountNumber} a.n. {bankAccount.accountName} — total {money(completedOrder.totalCents / 100)}</span>
+            <strong>{t("orders.checkout.transferTitle")}</strong>
+            <span>{t("orders.checkout.transferAccount", { bank: bankAccount.bank, account: bankAccount.accountNumber, name: bankAccount.accountName, total: money(completedOrder.totalCents / 100) })}</span>
             {proofError && <p class="checkout-error" role="alert">{proofError}</p>}
             <form method="post" action="/api/orders/proof" enctype="multipart/form-data" class="proof-form">
               <input type="hidden" name="orderNumber" value={completedOrder.orderNumber} />
-              <label>Unggah bukti transfer<input type="file" name="proof" accept="image/*,application/pdf" required /></label>
-              <button type="submit">Kirim bukti transfer</button>
+              <label>{t("orders.checkout.uploadProof")}<input type="file" name="proof" accept="image/*,application/pdf" required /></label>
+              <button type="submit">{t("orders.checkout.sendProof")}</button>
             </form>
           </div>
         )}
-        <a class="primary-link" href="/products">Lanjut belanja</a>
+        <a class="primary-link" href="/products">{t("orders.checkout.continueShopping")}</a>
       </section>
     ) : (
       <>
-        <p class="eyebrow">Cash on Delivery</p><h1>Checkout.</h1>
+        <p class="eyebrow">{t("orders.checkout.eyebrow")}</p><h1>{t("orders.checkout.title")}</h1>
         {error && <p class="checkout-error" role="alert">{error}</p>}
         <form method="post" data-checkout-form>
           <input type="hidden" name="cart" data-cart-payload />
           <div class="checkout-grid">
             <section>
-              <h2>Kontak</h2>
-              <div class="fields"><label>Email<input type="email" value={user.email} readonly /></label><label>Nomor telepon<input name="customerPhone" type="tel" required autocomplete="tel" /></label></div>
-              <h2>Alamat pengiriman</h2>
+              <h2>{t("orders.checkout.contact")}</h2>
+              <div class="fields"><label>{t("auth.login.emailLabel")}<input type="email" value={user.email} readonly /></label><label>{t("orders.checkout.phone")}<input name="customerPhone" type="tel" required autocomplete="tel" /></label></div>
+              <h2>{t("orders.checkout.shipping")}</h2>
               <div class="fields">
-                <label>Nama lengkap<input name="customerName" required value={user.name} autocomplete="name" /></label>
-                <label>Kota<input name="city" required autocomplete="address-level2" /></label>
-                <label class="wide">Alamat lengkap<textarea name="address" required rows="3" autocomplete="street-address"></textarea></label>
-                <label>Kode pos<input name="postalCode" required autocomplete="postal-code" /></label>
-                <label>Catatan<input name="note" placeholder="Opsional" /></label>
+                <label>{t("orders.checkout.fullName")}<input name="customerName" required value={user.name} autocomplete="name" /></label>
+                <label>{t("orders.checkout.city")}<input name="city" required autocomplete="address-level2" /></label>
+                <label class="wide">{t("orders.checkout.address")}<textarea name="address" required rows="3" autocomplete="street-address"></textarea></label>
+                <label>{t("orders.checkout.postalCode")}<input name="postalCode" required autocomplete="postal-code" /></label>
+                <label>{t("orders.checkout.note")}<input name="note" placeholder={t("orders.checkout.optional")} /></label>
               </div>
             </section>
             <aside>
-              <h2>Ringkasan pesanan</h2><div class="order-lines" data-order-lines></div>
-              <div class="total"><span>Total</span><strong data-order-total>{money(0)}</strong></div>
+              <h2>{t("orders.checkout.summary")}</h2><div class="order-lines" data-order-lines data-empty-label={t("orders.checkout.emptyCart")}></div>
+              <div class="total"><span>{t("orders.checkout.total")}</span><strong data-order-total>{money(0)}</strong></div>
               <fieldset class="payment-methods">
-                <legend>Metode pembayaran</legend>
-                <label class="payment-option"><input type="radio" name="paymentMethod" value="cash" checked />💵 Bayar tunai <span>Dibayar ke kurir saat pesanan tiba.</span></label>
-                <label class="payment-option"><input type="radio" name="paymentMethod" value="transfer" />🏦 Transfer bank <span>Transfer manual, diverifikasi admin/CS.</span></label>
+                <legend>{t("orders.checkout.payment")}</legend>
+                <label class="payment-option"><input type="radio" name="paymentMethod" value="cash" checked />{t("orders.checkout.cash")} <span>{t("orders.checkout.cashDescription")}</span></label>
+                <label class="payment-option"><input type="radio" name="paymentMethod" value="transfer" />{t("orders.checkout.transfer")} <span>{t("orders.checkout.transferDescription")}</span></label>
               </fieldset>
-              <button type="submit" data-place-order disabled>Buat pesanan</button>
-              <a href="/cart">← Kembali ke keranjang</a>
+              <button type="submit" data-place-order disabled>{t("orders.checkout.submit")}</button>
+              <a href="/cart">← {t("orders.checkout.back")}</a>
             </aside>
           </div>
         </form>
@@ -147,6 +153,7 @@ const proofError = Astro.url.searchParams.get("proofError");
   const lines = document.querySelector<HTMLElement>("[data-order-lines]");
   const total = document.querySelector<HTMLElement>("[data-order-total]");
   const button = document.querySelector<HTMLButtonElement>("[data-place-order]");
+  const emptyCartLabel = lines?.dataset["emptyLabel"] ?? "Your cart is empty.";
 
   async function render(): Promise<void> {
     const cart = readCart().map((item) => ({
@@ -177,7 +184,7 @@ const proofError = Astro.url.searchParams.get("proofError");
       appendAll(row, name, price);
       if (lines) appendAll(lines, row);
     }
-    if (!validCart.length && lines) lines.textContent = "Keranjang kosong.";
+    if (!validCart.length && lines) lines.textContent = emptyCartLabel;
     if (total) total.textContent = money(totalCents / 100);
     if (button) button.disabled = validCart.length === 0;
   }

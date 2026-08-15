@@ -6,6 +6,7 @@ export {
   type TokotukuBrand,
   type TokotukuIntegration,
   type TokotukuOptions,
+  type TokotukuStorefrontBrand,
   tokotuku,
 } from "./integration";
 export * from "./media";

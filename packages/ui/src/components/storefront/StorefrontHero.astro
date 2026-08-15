@@ -1,0 +1,56 @@
+---
+import { Image } from "astro:assets";
+import type { ImageMetadata } from "astro";
+import defaultHero from "../../assets/hero-still-life.webp";
+
+interface Props {
+  eyebrow?: string;
+  title: string;
+  description: string;
+  primaryHref?: string | undefined;
+  primaryLabel?: string | undefined;
+  image?: string | ImageMetadata | undefined;
+  imagePosition?: string | undefined;
+}
+
+const {
+  eyebrow = "Tokotuku · objects for everyday rituals",
+  title,
+  description,
+  primaryHref,
+  primaryLabel = "Jelajahi koleksi",
+  image = defaultHero,
+  imagePosition = "center",
+} = Astro.props;
+const imageSrc = typeof image === "string" ? image : image;
+---
+
+<section class="storefront-hero" data-storefront-hero>
+  <div class="hero-copy">
+    <p class="hero-eyebrow">{eyebrow}</p>
+    <h1>{title}</h1>
+    <span class="hero-rule" aria-hidden="true"></span>
+    <p class="hero-description">{description}</p>
+    {primaryHref && <a class="hero-cta" href={primaryHref}>{primaryLabel}<span aria-hidden="true">↗</span></a>}
+  </div>
+  <div class="hero-media">
+    {typeof imageSrc === "string" ? (
+      <img src={imageSrc} alt="" style={`object-position:${imagePosition}`} fetchpriority="high" />
+    ) : (
+      <Image src={imageSrc} alt="" style={`object-position:${imagePosition}`} widths={[640, 960, 1400]} sizes="(max-width: 720px) 100vw, 55vw" loading="eager" />
+    )}
+  </div>
+</section>
+
+<style>
+  .storefront-hero { display:grid; grid-template-columns:minmax(0,.88fr) minmax(0,1.12fr); min-height:clamp(28rem,58vw,42rem); overflow:hidden; background:var(--tk-color-surface); }
+  .hero-copy { display:flex; flex-direction:column; justify-content:center; padding:clamp(2rem,6vw,6.5rem); padding-right:clamp(2rem,5vw,5rem); }
+  .hero-eyebrow { margin:0 0 1.25rem; color:var(--tk-color-accent); font-size:.7rem; font-weight:700; letter-spacing:.16em; line-height:1.4; text-transform:uppercase; }
+  h1 { max-width:11ch; margin:0; font-family:var(--tk-font-family-display); font-size:clamp(3.4rem,6.8vw,6.8rem); font-weight:400; letter-spacing:-.045em; line-height:.9; }
+  .hero-rule { width:2.25rem; height:2px; margin:2rem 0 1.25rem; background:var(--tk-color-accent); }
+  .hero-description { max-width:29rem; margin:0; color:var(--tk-color-fg-muted); font-size:clamp(.95rem,1.4vw,1.1rem); line-height:1.7; }
+  .hero-cta { display:inline-flex; width:fit-content; align-items:center; gap:.8rem; min-height:3rem; margin-top:2rem; padding:.7rem 1.2rem; border-radius:var(--tk-radius-sm); background:var(--tk-color-accent); color:var(--tk-color-accent-fg); font-size:.85rem; font-weight:700; text-decoration:none; transition:background var(--tk-duration-fast) var(--tk-easing-standard), transform var(--tk-duration-fast) var(--tk-easing-standard); }
+  .hero-cta:hover { background:var(--tk-color-accent-hover); transform:translateY(-1px); }
+  .hero-media { min-height:24rem; }.hero-media img { display:block; width:100%; height:100%; object-fit:cover; }
+  @media (max-width:720px) { .storefront-hero { grid-template-columns:1fr; }.hero-copy { order:2; padding:2.5rem 1.25rem 3rem; }.hero-media { order:1; min-height:17rem; max-height:22rem; } h1 { max-width:12ch; font-size:clamp(3rem,15vw,5rem); } }
+</style>

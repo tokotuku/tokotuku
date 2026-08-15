@@ -19,7 +19,9 @@
     addToCart(JSON.parse(button.dataset["product"]));
 
     const original = button.textContent;
-    button.textContent = "Added";
+    button.textContent = document.documentElement.lang.toLowerCase().startsWith("id")
+      ? "Ditambahkan"
+      : "Added";
     window.setTimeout(() => {
       button.textContent = original;
     }, 1000);

@@ -18,8 +18,6 @@ export default defineConfig({
         locale: "id-ID",
         currency: "IDR",
         timeZone: "Asia/Jakarta",
-        // Optional: use a local public asset or an absolute CDN/R2 URL.
-        // auth: { backgroundImage: "/images/auth-commerce.webp", backgroundPosition: "center" },
       },
       modules: [auth(), catalog(), orders()],
     }),

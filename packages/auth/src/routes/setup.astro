@@ -54,7 +54,7 @@ if (Astro.request.method === "POST") {
 ---
 
 <AuthFrame title={t("auth.setup.title")}>
-  <form class="auth-card setup-card" method="post" action="/setup" novalidate>
+  <form class="auth-card setup-card" method="post" action="/setup" novalidate data-auth-form>
     <span class="setup-step">{t("auth.setup.step")}</span>
     <h1>{t("auth.setup.title")}</h1>
     <p>{t("auth.setup.description")}</p>
@@ -113,7 +113,7 @@ if (Astro.request.method === "POST") {
     </div>
 
     {errorMessage && <p class="auth-message" role="alert">{errorMessage}</p>}
-    <button class="auth-submit" type="submit">
+    <button class="auth-submit" type="submit" data-auth-submit data-loading-label={t("auth.setup.loading")}>
       {t("auth.setup.submit")} <Icon name="arrowRight" size={16} />
     </button>
     <p class="setup-note"><Icon name="lock" size={13} /> {t("auth.setup.note")}</p>
@@ -129,6 +129,14 @@ if (Astro.request.method === "POST") {
     if (confirmation) confirmation.type = nextType;
     const button = event.currentTarget as HTMLElement;
     button.setAttribute("aria-label", nextType === "password" ? (button.dataset["showLabel"] ?? "") : (button.dataset["hideLabel"] ?? ""));
+  });
+  document.querySelector<HTMLFormElement>("[data-auth-form]")?.addEventListener("submit", () => {
+    const form = document.querySelector<HTMLFormElement>("[data-auth-form]");
+    const button = form?.querySelector<HTMLButtonElement>("button[type=submit]");
+    if (!button) return;
+    button.disabled = true;
+    button.setAttribute("aria-busy", "true");
+    button.textContent = button.dataset["loadingLabel"] ?? button.textContent;
   });
 </script>
 

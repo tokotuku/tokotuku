@@ -5,7 +5,7 @@ sidebar:
   order: 3
 ---
 
-`AppTopbar` renders a compact workspace heading, a light/dark/high-contrast selector, and a default slot for actions.
+`AppTopbar` renders a compact workspace heading, a light/dark toggle, and a default slot for actions.
 
 ```astro
 ---
@@ -27,4 +27,4 @@ import AppTopbar from "@tokotuku/ui/AppTopbar.astro";
 
 ## Theme behavior
 
-The selector writes `light`, `dark`, or `high-contrast` to `document.documentElement.dataset.theme` and persists the choice under `tokotuku-theme` in local storage. Because that behavior intentionally controls the entire document, this docs page does not mount an interactive instance inside Starlight.
+The toggle writes light or dark to document.documentElement.dataset.theme and persists the choice under tokotuku-theme in local storage. OS accessibility modes remain available.

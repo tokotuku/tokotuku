@@ -79,10 +79,13 @@ async function main(): Promise<void> {
   const bareHtml = await bareResponses.get("/products")?.text();
   assert(bareHtml !== undefined, "expected /products to respond on the bare install");
   assert(
-    bareHtml.includes("Tidak ada produk yang cocok dengan pencarian/filter ini."),
+    bareHtml.includes("Koleksi segera hadir") && bareHtml.includes('data-catalog-empty="true"'),
     "a bare install should show the empty-catalog state",
   );
-  assert(!bareHtml.includes("Widget"), "a bare install should have zero seeded products");
+  assert(
+    !bareHtml.includes("Cangkir Stoneware"),
+    "a bare install should have zero seeded products",
+  );
   console.log("Step 1 (bare install): storefront is empty, as expected.");
 
   // --- Step 2: seed ---------------------------------------------------------
@@ -90,33 +93,41 @@ async function main(): Promise<void> {
 
   const catalogCount = queryD1(clientDir, "SELECT COUNT(*) as count FROM catalog_items");
   assert(
-    catalogCount[0]?.count === 3,
-    `expected 3 seeded catalog_items, got ${catalogCount[0]?.count}`,
+    catalogCount[0]?.count === 6,
+    `expected 6 seeded catalog_items, got ${catalogCount[0]?.count}`,
   );
   const stockCount = queryD1(clientDir, "SELECT COUNT(*) as count FROM inventory_item_stock");
   assert(
-    stockCount[0]?.count === 3,
-    `expected 3 seeded inventory_item_stock rows, got ${stockCount[0]?.count}`,
+    stockCount[0]?.count === 6,
+    `expected 6 seeded inventory_item_stock rows, got ${stockCount[0]?.count}`,
+  );
+  const orderCount = queryD1(clientDir, "SELECT COUNT(*) as count FROM orders");
+  assert(
+    orderCount[0]?.count === 0,
+    `db:seed must not create fake orders, got ${orderCount[0]?.count}`,
   );
 
   const seededResponses = await bootAndFetch(clientDir, [
     "/products",
-    "/api/images/products/widget.svg",
+    "/api/images/products/cangkir-stoneware.webp",
   ]);
   const seededHtml = await seededResponses.get("/products")?.text();
-  assert(seededHtml?.includes("Widget"), "storefront should list the seeded Widget after db seed");
-  const imageResponse = seededResponses.get("/api/images/products/widget.svg");
+  assert(
+    seededHtml?.includes("Cangkir Stoneware"),
+    "storefront should list the seeded catalog after db seed",
+  );
+  const imageResponse = seededResponses.get("/api/images/products/cangkir-stoneware.webp");
   assert(imageResponse !== undefined, "expected a response for the seeded product image");
   assert(
     imageResponse.status === 200,
     `expected the seeded image to be servable, got ${imageResponse.status}`,
   );
   assert(
-    imageResponse.headers.get("content-type") === "image/svg+xml",
-    `expected image/svg+xml, got "${imageResponse.headers.get("content-type")}"`,
+    imageResponse.headers.get("content-type") === "image/webp",
+    `expected image/webp, got "${imageResponse.headers.get("content-type")}"`,
   );
   console.log(
-    "Step 2 (seed): 3 catalog rows + stock, storefront lists them, seeded image serves 200.",
+    "Step 2 (seed): 6 catalog rows + stock, storefront lists them, seeded WebP serves 200.",
   );
 
   // --- Step 3: change the design (theme override) ---------------------------

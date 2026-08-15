@@ -47,4 +47,27 @@ describe("tokotuku virtual config modules", () => {
     expect(readDefault(load(configId))).toEqual(brand);
     expect(readDefault(load(navId))).toEqual(registry.adminNav);
   });
+
+  it("emits importable component virtual modules for contributions", () => {
+    const registry = resolveModules([
+      {
+        name: "catalog",
+        storefrontHomeSections: [{ id: "collection", entrypoint: "@demo/Collection.astro" }],
+        adminDashboardWidgets: [
+          { id: "catalog", entrypoint: "@demo/CatalogWidget.astro", area: "main" },
+        ],
+      },
+    ]);
+    const plugin = tokotukuVirtualModulesPlugin(registry, {
+      name: "Demo",
+      locale: "en-US",
+      currency: "USD",
+    });
+    const resolveId = plugin.resolveId as (id: string) => string;
+    const load = plugin.load as (id: string) => string;
+    const storefrontSource = load(resolveId("virtual:tokotuku/storefront-home-sections"));
+    const dashboardSource = load(resolveId("virtual:tokotuku/admin-dashboard-widgets"));
+    expect(storefrontSource).toContain('import Section0 from "@demo/Collection.astro";');
+    expect(dashboardSource).toContain('import Widget0 from "@demo/CatalogWidget.astro";');
+  });
 });

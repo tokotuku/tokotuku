@@ -14,54 +14,41 @@ const t = createTranslator(brand, catalogMessages);
 const statusKeyFor = (stock: number, active: boolean) =>
   !active ? "inactive" : stock === 0 ? "outOfStock" : stock < 10 ? "lowStock" : "inStock";
 const statusFor = (stock: number, active: boolean) =>
-  t(`catalog.products.status.${statusKeyFor(stock, active)}`);
+  t("catalog.products.status." + statusKeyFor(stock, active));
 const initialResult = products.length
   ? t("catalog.products.showing", { count: products.length })
   : t("catalog.products.empty");
 ---
 
 <AdminLayout title={t("catalog.products.title")}>
-  <header class="page-heading">
-    <div><h1>{t("catalog.products.title")}</h1><p>{t("catalog.products.description", { count: products.length, categories: categories.length })}</p></div>
-    <div class="page-actions"><a class="admin-button admin-button--primary" href="/admin/products/new"><Icon name="plus" size={16} /> {t("catalog.products.add")}</a></div>
-  </header>
-
-  <section class="panel data-panel" data-product-table data-result-template={t("catalog.products.showing")} data-no-match={t("catalog.products.noMatch")}>
-    <div class="table-toolbar">
-      <div class="filter-tabs" role="tablist" aria-label={t("catalog.products.categoryFilter")}><button type="button" aria-selected="true" data-filter="All">{t("catalog.products.all")}</button>{categories.map((category) => <button type="button" aria-selected="false" data-filter={category}>{category}</button>)}</div>
-      <label class="table-search"><Icon name="search" size={16} /><span class="sr-only">{t("catalog.products.search")}</span><input type="search" placeholder={t("catalog.products.searchPlaceholder")} data-table-search /></label>
-    </div>
-    <div class="table-wrap">
-      <table class="admin-table">
-        <thead><tr><th>{t("catalog.products.product")}</th><th>{t("catalog.products.category")}</th><th class="numeric">{t("catalog.products.price")}</th><th class="numeric">{t("catalog.products.stock")}</th><th>{t("catalog.products.status")}</th><th><span class="sr-only">{t("catalog.products.actions")}</span></th></tr></thead>
-        <tbody>
-          {products.length ? products.map((product) => (
-            <tr data-row data-category={product.category} data-search={`${product.name} ${product.description} ${product.category}`.toLowerCase()}>
-              <td><div class="entity"><img src={mediaUrl(product.imageKey)} alt="" /><div><strong>{product.name}</strong><span>{t("catalog.products.form.sku")}: {product.sku}</span></div></div></td>
-              <td>{product.category}</td><td class="money">{money(product.priceCents / 100)}</td><td class="numeric">{product.stock}</td><td><span class:list={["status", statusKeyFor(product.stock, product.isActive) === "inStock" ? "status--success" : statusKeyFor(product.stock, product.isActive) === "lowStock" ? "status--warning" : "status--danger"]}>{statusFor(product.stock, product.isActive)}</span></td>
-              <td><div class="row-actions"><a aria-label={t("catalog.products.edit", { name: product.name })} href={`/admin/products/${product.id}/edit`}><Icon name="edit" size={16} /></a></div></td>
-            </tr>
-          )) : <tr><td colspan="6"><div class="empty-state"><span class="empty-state-icon"><Icon name="products" size={22} /></span><strong>{t("catalog.products.empty")}</strong><p>{t("catalog.products.emptyDescription")}</p><a class="admin-button admin-button--primary" href="/admin/products/new"><Icon name="plus" size={16} /> {t("catalog.products.add")}</a></div></td></tr>}
-        </tbody>
-      </table>
-    </div>
-    <div class="table-footer"><span data-result-count>{initialResult}</span></div>
-  </section>
+  {products.length === 0 ? (
+    <section class="standalone-empty" data-products-empty>
+      <div class="empty-symbol"><Icon name="products" size={27} /></div><p class="eyebrow">{t("catalog.products.catalogEyebrow")}</p><h1>{t("catalog.products.empty")}</h1><p>{t("catalog.products.emptyDescription")}</p><a class="admin-button admin-button--primary" href="/admin/products/new"><Icon name="plus" size={16} /> {t("catalog.products.add")}</a>{import.meta.env.DEV && <span class="seed-hint">{t("catalog.products.localDemo")} <code>bun run db:seed</code></span>}
+    </section>
+  ) : (
+    <>
+      <header class="page-heading"><div><p class="eyebrow">{t("catalog.products.catalogEyebrow")}</p><h1>{t("catalog.products.title")}</h1><p>{t("catalog.products.description", { count: products.length, categories: categories.length })}</p></div><div class="page-actions"><a class="admin-button admin-button--primary" href="/admin/products/new"><Icon name="plus" size={16} /> {t("catalog.products.add")}</a></div></header>
+      <section class="panel data-panel" data-product-table data-result-template={t("catalog.products.showing")} data-no-match={t("catalog.products.noMatch")}>
+        <div class="table-toolbar"><div class="filter-tabs" role="tablist" aria-label={t("catalog.products.categoryFilter")}><button type="button" aria-selected="true" data-filter="All">{t("catalog.products.all")}</button>{categories.map((category) => <button type="button" aria-selected="false" data-filter={category}>{category}</button>)}</div><label class="table-search"><Icon name="search" size={16} /><span class="sr-only">{t("catalog.products.search")}</span><input type="search" placeholder={t("catalog.products.searchPlaceholder")} data-table-search /></label></div>
+        <div class="table-wrap"><table class="admin-table"><thead><tr><th>{t("catalog.products.product")}</th><th>{t("catalog.products.category")}</th><th class="numeric">{t("catalog.products.price")}</th><th class="numeric">{t("catalog.products.stock")}</th><th>{t("catalog.products.status")}</th><th><span class="sr-only">{t("catalog.products.actions")}</span></th></tr></thead><tbody>{products.map((product) => <tr data-row data-category={product.category} data-search={(product.name + " " + product.description + " " + product.category).toLowerCase()}><td><div class="entity"><img src={mediaUrl(product.imageKey)} alt={product.name} /><div><strong>{product.name}</strong><span>{t("catalog.products.form.sku")}: {product.sku}</span></div></div></td><td>{product.category}</td><td class="money">{money(product.priceCents / 100)}</td><td class="numeric">{product.stock}</td><td><span class:list={["status", statusKeyFor(product.stock, product.isActive) === "inStock" ? "status--success" : statusKeyFor(product.stock, product.isActive) === "lowStock" ? "status--warning" : "status--danger"]}>{statusFor(product.stock, product.isActive)}</span></td><td><div class="row-actions"><a aria-label={t("catalog.products.edit", { name: product.name })} href={"/admin/products/" + product.id + "/edit"}><Icon name="edit" size={16} /></a></div></td></tr>)}</tbody></table></div>
+        <div class="table-footer"><span data-result-count>{initialResult}</span></div>
+      </section>
+    </>
+  )}
 </AdminLayout>
 
-<script>
+{products.length > 0 && <script>
   const container = document.querySelector<HTMLElement>("[data-product-table]");
   const rows = Array.from(container?.querySelectorAll<HTMLElement>("[data-row]") ?? []);
   const count = container?.querySelector("[data-result-count]");
-  let filter = "All";
-  let query = "";
-  const resultTemplate = container?.dataset["resultTemplate"] ?? "";
-  const emptyLabel = container?.dataset["noMatch"] ?? "";
+  let filter = "All"; let query = "";
+  const resultTemplate = container?.dataset["resultTemplate"] ?? ""; const emptyLabel = container?.dataset["noMatch"] ?? "";
   const update = () => { let visible = 0; for (const row of rows) { const match = (filter === "All" || row.dataset["category"] === filter) && (row.dataset["search"]?.includes(query) ?? false); row.hidden = !match; if (match) visible += 1; } if (count) count.textContent = visible ? resultTemplate.replace(/\{count\}/g, String(visible)) : emptyLabel; };
   for (const button of container?.querySelectorAll<HTMLButtonElement>("[data-filter]") ?? []) button.addEventListener("click", () => { filter = button.dataset["filter"] ?? "All"; container?.querySelectorAll("[data-filter]").forEach((item) => item.setAttribute("aria-selected", String(item === button))); update(); });
   container?.querySelector<HTMLInputElement>("[data-table-search]")?.addEventListener("input", (event) => { query = (event.currentTarget as HTMLInputElement).value.trim().toLowerCase(); update(); });
-</script>
+</script>}
 
 <style>
-  .data-panel { overflow: hidden; }.admin-table th:last-child,.admin-table td:last-child { padding-right: 20px; }.admin-table tr[hidden] { display: none; }.row-actions a{display:grid;width:40px;height:40px;place-items:center;border-radius:7px;color:var(--tk-color-fg);text-decoration:none}.empty-state{display:grid;justify-items:center;gap:8px;padding:42px 20px;text-align:center}.empty-state-icon{display:grid;width:48px;height:48px;place-items:center;border-radius:14px;background:var(--admin-accent-soft);color:var(--admin-accent)}.empty-state strong{font-size:15px}.empty-state p{max-width:34rem;margin:0;color:var(--tk-color-fg-muted);font-size:13px}.empty-state .admin-button{margin-top:6px}
+  .standalone-empty { display:grid; min-height:calc(100vh - 13rem); place-items:center; align-content:center; padding:3rem; text-align:center; }.empty-symbol { display:grid; width:4.5rem; height:4.5rem; place-items:center; border:1px solid var(--admin-line); border-radius:50%; background:var(--admin-accent-soft); color:var(--admin-accent); }.standalone-empty .eyebrow { margin:1.5rem 0 .45rem; color:var(--tk-color-accent); font-size:.68rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; }.standalone-empty h1 { margin:0; font-family:var(--tk-font-family-display); font-size:clamp(2.7rem,5vw,4.5rem); font-weight:400; letter-spacing:-.045em; }.standalone-empty > p:not(.eyebrow) { max-width:30rem; margin:.7rem 0 1.4rem; color:var(--tk-color-fg-muted); font-size:.8rem; line-height:1.7; }.seed-hint { margin-top:1rem; color:var(--tk-color-fg-muted); font-size:.65rem; }.seed-hint code { padding:.2rem .35rem; border-radius:4px; background:var(--tk-color-bg-subtle); font-family:var(--tk-font-family-mono); }.data-panel { overflow:hidden; }.admin-table tr[hidden] { display:none; }.row-actions a { display:grid; width:40px; height:40px; place-items:center; border-radius:7px; color:var(--tk-color-fg); text-decoration:none; }
+  @media (max-width:640px) { .standalone-empty { min-height:calc(100vh - 9rem); padding-inline:1rem; } }
 </style>

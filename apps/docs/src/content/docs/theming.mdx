@@ -1,6 +1,6 @@
 ---
 title: Theming
-description: Apply light, dark, high-contrast, or custom Tokotuku themes.
+description: Apply light, dark, or custom Tokotuku accent themes.
 sidebar:
   order: 2
 ---
@@ -28,10 +28,10 @@ Set `data-theme` on an ancestor, normally the root element:
 ```html
 <html data-theme="light">...</html>
 <html data-theme="dark">...</html>
-<html data-theme="high-contrast">...</html>
+
 ```
 
-When `data-theme` is absent, the theme follows `prefers-color-scheme`.
+Tokotuku exposes light and dark choices. When `data-theme` is absent, the inline bootstrap follows `prefers-color-scheme`; a saved choice is kept in `localStorage`. OS forced-colors and prefers-contrast remain supported for accessibility.
 
 ## Override tokens
 
@@ -49,7 +49,7 @@ Prefer semantic variables such as `--tk-color-accent` and `--tk-color-danger`; c
 
 ## Branding and auth imagery
 
-The `brand` option is backward-compatible. The `auth` block is optional; when no image is configured (or the image cannot load), auth uses its built-in warm gradient.
+The `brand` option is backward-compatible. New logo, palette, storefront, and auth fields are additive. When no auth image is configured, AuthFrame uses its package-owned editorial visual.
 
 ```js
 tokotuku({
@@ -71,9 +71,9 @@ tokotuku({
 })
 ```
 
-`backgroundImage` accepts a public path or absolute URL and is rendered as a decorative image (not interpolated into CSS). On small screens it becomes a blurred, faded backdrop behind the form. `messages` is a sparse override map: defaults are selected from the locale (`id*` uses Indonesian, everything else uses English), and unknown keys are ignored in production (with a development warning). `{brand}`, `{name}`, `{count}`, `{from}`, and `{to}` placeholders are supported.
+`backgroundImage` accepts a public path or absolute URL and is rendered as a decorative image (not interpolated into CSS). On small screens it becomes a compact editorial backdrop behind the solid form panel. `messages` is a sparse override map: defaults are selected from the locale (`id*` uses Indonesian, everything else uses English), and unknown keys are ignored in production (with a development warning). `{brand}`, `{name}`, `{count}`, `{from}`, and `{to}` placeholders are supported.
 
-For the fallback gradient, omit `auth` entirely:
+For the package-owned fallback, omit `auth` entirely:
 
 ```js
 brand: { name: "Kedai Senja", locale: "id-ID", currency: "IDR" }
