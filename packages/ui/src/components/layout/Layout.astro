@@ -6,13 +6,19 @@ import SEO from "@tokotuku/ui/SEO.astro";
 
 interface Props {
   title: string;
-  description?: string;
-  image?: string;
-  type?: "website" | "product" | "article";
-  lang?: string;
-  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
-  noindex?: boolean;
-  siteName?: string;
+  description?: string | undefined;
+  image?: string | undefined;
+  type?: "website" | "product" | "article" | undefined;
+  lang?: string | undefined;
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[] | undefined;
+  noindex?: boolean | undefined;
+  siteName?: string | undefined;
+  palette?:
+    | {
+        light?: { accent?: string; accentForeground?: string };
+        dark?: { accent?: string; accentForeground?: string };
+      }
+    | undefined;
 }
 
 const {
@@ -24,13 +30,23 @@ const {
   noindex = false,
   siteName = "Tokotuku",
   lang = "en",
+  palette,
 } = Astro.props;
 
 const canonicalUrl = new URL(Astro.url.pathname, Astro.url.origin).toString();
 const absoluteImage = image ? new URL(image, Astro.url.origin).toString() : undefined;
+const locale = lang.toLowerCase().startsWith("id") ? "id" : "en";
+const paletteVars = [
+  palette?.light?.accent ? `--tk-color-accent:${palette.light.accent}` : "",
+  palette?.light?.accentForeground ? `--tk-color-accent-fg:${palette.light.accentForeground}` : "",
+  palette?.dark?.accent ? `--tk-dark-accent:${palette.dark.accent}` : "",
+  palette?.dark?.accentForeground ? `--tk-dark-accent-fg:${palette.dark.accentForeground}` : "",
+]
+  .filter(Boolean)
+  .join(";");
 ---
 
-<html lang={lang}>
+<html lang={locale} style={paletteVars || undefined}>
   <head>
     <meta charset="utf-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -51,7 +67,8 @@ const absoluteImage = image ? new URL(image, Astro.url.origin).toString() : unde
     <script is:inline>
       (() => {
         const saved = localStorage.getItem("tokotuku-theme");
-        document.documentElement.dataset.theme = saved ?? "light";
+        const theme = saved === "light" || saved === "dark" ? saved : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        document.documentElement.dataset.theme = theme;
       })();
     </script>
   </head>

@@ -1,79 +1,29 @@
 ---
+import Icon from "../core/Icon.astro";
+
 interface Props {
   title?: string;
+  themeLabel?: string;
 }
-
-const { title = "Workspace" } = Astro.props;
+const { title = "Workspace", themeLabel = "Toggle color theme" } = Astro.props;
 ---
 
-<div
-  class="topbar-inner"
-  x-data="{ theme: localStorage.getItem('tokotuku-theme') ?? 'light' }"
-  x-init="document.documentElement.dataset.theme = theme"
->
+<div class="topbar-inner">
   <span class="title">{title}</span>
   <div class="actions">
-    <label>
-      <span class="sr-only">Color theme</span>
-      <select
-        x-model="theme"
-        @change="document.documentElement.dataset.theme = theme; localStorage.setItem('tokotuku-theme', theme)"
-        aria-label="Color theme"
-      >
-        <option value="light">Light</option>
-        <option value="dark">Dark</option>
-        <option value="high-contrast">High contrast</option>
-      </select>
-    </label>
+    <button class="theme-toggle" type="button" data-app-theme-toggle aria-label={themeLabel}><Icon name="moon" size={17} /></button>
     <slot />
   </div>
 </div>
 
+<script>
+  document.querySelector<HTMLButtonElement>("[data-app-theme-toggle]")?.addEventListener("click", () => {
+    const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    document.documentElement.dataset.theme = next;
+    localStorage.setItem("tokotuku-theme", next);
+  });
+</script>
+
 <style>
-  .topbar-inner {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    min-height: 4rem;
-    padding-inline: var(--tk-spacing-5);
-  }
-
-  .title {
-    color: var(--tk-color-fg);
-    font-size: var(--tk-font-size-sm);
-    font-weight: var(--tk-font-weight-semibold);
-  }
-
-  .actions {
-    display: flex;
-    align-items: center;
-    gap: var(--tk-spacing-3);
-  }
-
-  select {
-    min-height: 2.25rem;
-    padding-inline: var(--tk-spacing-3);
-    border: 1px solid var(--tk-color-border);
-    border-radius: var(--tk-radius-md);
-    background: var(--tk-color-bg);
-    color: var(--tk-color-fg);
-    font: inherit;
-  }
-
-  select:focus-visible {
-    outline: 2px solid var(--tk-color-focus-ring);
-    outline-offset: 2px;
-  }
-
-  .sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
-  }
+  .topbar-inner { display:flex; align-items:center; justify-content:space-between; min-height:4rem; padding-inline:var(--tk-spacing-5); }.title { color:var(--tk-color-fg); font-size:var(--tk-font-size-sm); font-weight:var(--tk-font-weight-semibold); }.actions { display:flex; align-items:center; gap:var(--tk-spacing-3); }.theme-toggle { display:grid; width:2.75rem; height:2.75rem; place-items:center; border:1px solid var(--tk-color-border); border-radius:50%; background:var(--tk-color-surface); color:var(--tk-color-fg); cursor:pointer; }
 </style>

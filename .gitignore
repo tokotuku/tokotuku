@@ -6,6 +6,15 @@ node_modules
 dist
 .astro
 
+# cloudflare / wrangler local dev (belt-and-suspenders: each client app also
+# ships this in its own .gitignore via create-tokotuku, but a repo-root rule
+# means it's excluded even for a path that temporarily has no app of its own,
+# e.g. mid-restructure)
+.wrangler/
+.dev.vars
+.dev.vars.*
+worker-configuration.d.ts
+
 # testing
 coverage
 playwright-report

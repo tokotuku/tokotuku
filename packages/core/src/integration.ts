@@ -18,8 +18,27 @@ export interface TokotukuAuthBrand {
   backgroundPosition?: string;
 }
 
+export interface TokotukuStorefrontBrand {
+  announcement?: string | false;
+  hero?: {
+    eyebrow?: string;
+    title?: string;
+    description?: string;
+    image?: string;
+    imagePosition?: string;
+  };
+  links?: Array<{ label: string; href: string }>;
+  newsletter?: { action: string };
+}
+
 export interface TokotukuBrand extends FormattersConfig {
   name: string;
+  logo?: { src: string; alt?: string };
+  palette?: {
+    light?: { accent: string; accentForeground: string };
+    dark?: { accent: string; accentForeground: string };
+  };
+  storefront?: TokotukuStorefrontBrand;
   auth?: TokotukuAuthBrand;
   /** Optional sparse overrides for package-owned localized dictionaries. */
   messages?: Record<string, string>;

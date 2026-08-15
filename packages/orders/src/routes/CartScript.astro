@@ -1,5 +1,7 @@
 ---
+import Icon from "@tokotuku/ui/Icon.astro";
 ---
+<template data-added-icon><Icon name="check" size={16} /></template>
 <script>
   import { addToCart, cartCount, onCartChange, readCart } from "../client/cart";
 
@@ -10,6 +12,8 @@
     }
   }
 
+  const addedIconTemplate = document.querySelector<HTMLTemplateElement>("[data-added-icon]");
+
   // Delegated (not bound per-button) so any page can render a
   // [data-add-to-cart] button without wiring its own handler.
   document.addEventListener("click", (event) => {
@@ -18,11 +22,29 @@
 
     addToCart(JSON.parse(button.dataset["product"]));
 
-    const original = button.textContent;
-    button.textContent = "Added";
-    window.setTimeout(() => {
-      button.textContent = original;
-    }, 1000);
+    const addedLabel = document.documentElement.lang.toLowerCase().startsWith("id")
+      ? "Ditambahkan"
+      : "Added";
+    const originalAriaLabel = button.getAttribute("aria-label");
+
+    // Icon-only buttons (e.g. the product-card "+" button) get the SVG
+    // swapped for a check mark instead of text, which would overflow their
+    // fixed circular size.
+    if (button.querySelector("svg") && addedIconTemplate) {
+      const originalContent = button.innerHTML;
+      button.replaceChildren(addedIconTemplate.content.cloneNode(true));
+      if (originalAriaLabel) button.setAttribute("aria-label", addedLabel);
+      window.setTimeout(() => {
+        button.innerHTML = originalContent;
+        if (originalAriaLabel) button.setAttribute("aria-label", originalAriaLabel);
+      }, 1000);
+    } else {
+      const originalText = button.textContent;
+      button.textContent = addedLabel;
+      window.setTimeout(() => {
+        button.textContent = originalText;
+      }, 1000);
+    }
   });
 
   onCartChange(syncCartBadge);

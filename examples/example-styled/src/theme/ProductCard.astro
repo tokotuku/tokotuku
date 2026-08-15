@@ -1,0 +1,34 @@
+---
+import Icon from "@tokotuku/ui/Icon.astro";
+
+interface Props {
+  id: number;
+  name: string;
+  description: string;
+  price: string;
+  priceCents: number;
+  imageUrl: string;
+  stock?: number;
+  showAddToCart?: boolean;
+}
+const {
+  id,
+  name,
+  description,
+  price,
+  priceCents,
+  imageUrl,
+  stock = 1,
+  showAddToCart = false,
+} = Astro.props;
+const serialized = JSON.stringify({ id, name, priceCents, imageUrl });
+---
+
+<article class="editorial-card" data-theme-override="true">
+  <a class="editorial-media" href={"/products/" + id} aria-label={"Lihat " + name}><img src={imageUrl} alt={name} loading="lazy" /><span>{stock > 0 ? "Ready" : "Habis"}</span></a>
+  <div class="editorial-body"><p>Tokotuku edition</p><h2><a href={"/products/" + id}>{name}</a></h2><div><strong>{price}</strong>{showAddToCart && <button type="button" data-add-to-cart data-product={serialized} disabled={stock <= 0}>{stock > 0 ? <Icon name="plus" size={15} /> : "Habis"}</button>}</div><small>{description}</small></div>
+</article>
+
+<style>
+  .editorial-card { display:flex; flex-direction:column; overflow:hidden; border:1px solid #c9bba8; border-radius:6px; background:#f1e8dc; color:#2b241e; }.editorial-card:hover { box-shadow:0 12px 30px -18px rgb(60 37 20 / 45%); }.editorial-media { position:relative; display:block; aspect-ratio:1; overflow:hidden; background:#e7dccd; }.editorial-media img { width:100%; height:100%; object-fit:cover; transition:transform .2s ease; }.editorial-card:hover img { transform:scale(1.035); }.editorial-media span { position:absolute; top:12px; left:12px; padding:4px 8px; border-radius:999px; background:#1d2b25; color:#f6f1e9; font-size:10px; letter-spacing:.09em; text-transform:uppercase; }.editorial-body { display:grid; gap:8px; padding:16px; }.editorial-body p,.editorial-body small { margin:0; color:#756456; font-size:10px; letter-spacing:.12em; text-transform:uppercase; }.editorial-body h2 { margin:0; font-family:Georgia,serif; font-size:22px; font-weight:400; }.editorial-body h2 a { color:inherit; text-decoration:none; }.editorial-body > div { display:flex; align-items:center; justify-content:space-between; gap:12px; }.editorial-body strong { font-size:15px; }.editorial-body button { display:grid; width:32px; height:32px; place-items:center; border:1px solid #a99580; border-radius:50%; background:transparent; color:#2b241e; cursor:pointer; }.editorial-body button:disabled { cursor:not-allowed; opacity:.6; }.editorial-body small { letter-spacing:0; line-height:1.5; text-transform:none; }
+</style>

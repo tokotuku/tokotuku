@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@import "@fontsource-variable/manrope";
+@import "@fontsource-variable/newsreader";
 
 @source "../components";
 @source "../../../../apps/example/src";
@@ -18,6 +20,7 @@
   --color-success: var(--tk-color-success);
   --color-focus: var(--tk-color-focus-ring);
   --font-tk-sans: var(--tk-font-family-sans);
+  --font-tk-display: var(--tk-font-family-display);
   --font-tk-mono: var(--tk-font-family-mono);
   --radius-tk-sm: var(--tk-radius-sm);
   --radius-tk-md: var(--tk-radius-md);
@@ -46,25 +49,26 @@
   --tk-spacing-20: 5rem;
   --tk-spacing-24: 6rem;
   --tk-radius-none: 0px;
-  --tk-radius-sm: 0.375rem;
-  --tk-radius-md: 0.625rem;
-  --tk-radius-lg: 0.75rem;
-  --tk-radius-xl: 1rem;
-  --tk-radius-2xl: 1.5rem;
+  --tk-radius-sm: 6px;
+  --tk-radius-md: 10px;
+  --tk-radius-lg: 14px;
+  --tk-radius-xl: 14px;
+  --tk-radius-2xl: 20px;
   --tk-radius-full: 9999px;
-  --tk-shadow-sm: 0 1px 2px 0 rgb(61 42 25 / 6%);
-  --tk-shadow-md: 0 4px 10px -3px rgb(61 42 25 / 10%), 0 2px 5px -3px rgb(61 42 25 / 8%);
-  --tk-shadow-lg: 0 12px 24px -8px rgb(61 42 25 / 14%), 0 4px 10px -5px rgb(61 42 25 / 8%);
-  --tk-shadow-xl: 0 24px 42px -15px rgb(61 42 25 / 18%), 0 8px 16px -8px rgb(61 42 25 / 10%);
+  --tk-shadow-sm: 0 1px 2px rgb(36 28 18 / 5%);
+  --tk-shadow-md: 0 8px 24px -16px rgb(36 28 18 / 22%);
+  --tk-shadow-lg: 0 20px 44px -24px rgb(36 28 18 / 28%);
+  --tk-shadow-xl: 0 28px 60px -28px rgb(36 28 18 / 30%);
   --tk-duration-instant: 0ms;
-  --tk-duration-fast: 100ms;
-  --tk-duration-normal: 200ms;
-  --tk-duration-slow: 300ms;
-  --tk-duration-slower: 500ms;
+  --tk-duration-fast: 120ms;
+  --tk-duration-normal: 180ms;
+  --tk-duration-slow: 220ms;
+  --tk-duration-slower: 420ms;
   --tk-easing-standard: cubic-bezier(0.2, 0, 0, 1);
   --tk-easing-decelerate: cubic-bezier(0, 0, 0, 1);
   --tk-easing-accelerate: cubic-bezier(0.3, 0, 1, 1);
-  --tk-font-family-sans: system-ui, -apple-system, "Segoe UI", roboto, sans-serif;
+  --tk-font-family-sans: "Manrope Variable", Manrope, ui-sans-serif, system-ui, sans-serif;
+  --tk-font-family-display: "Newsreader Variable", Newsreader, Georgia, serif;
   --tk-font-family-mono: ui-monospace, "SFMono-Regular", menlo, consolas, monospace;
   --tk-font-size-xs: 0.75rem;
   --tk-font-size-sm: 0.875rem;
@@ -78,80 +82,142 @@
   --tk-font-weight-medium: 500;
   --tk-font-weight-semibold: 600;
   --tk-font-weight-bold: 700;
-  --tk-line-height-tight: 1.25;
-  --tk-line-height-snug: 1.375;
+  --tk-line-height-tight: 1.12;
+  --tk-line-height-snug: 1.3;
   --tk-line-height-normal: 1.5;
-  --tk-line-height-relaxed: 1.625;
-  --tk-color-bg: #f7f5f0;
-  --tk-color-surface: #fffefb;
-  --tk-color-bg-subtle: #f0ece5;
-  --tk-color-fg: #27241f;
-  --tk-color-fg-muted: #6f6a61;
-  --tk-color-border: #e5e0d6;
-  --tk-color-accent: #b9552b;
-  --tk-color-accent-hover: #933b1c;
-  --tk-color-accent-fg: #fff;
-  --tk-color-danger: #b42318;
-  --tk-color-warning: #8a4b08;
-  --tk-color-success: #237649;
-  --tk-color-focus-ring: #b9552b;
+  --tk-line-height-relaxed: 1.7;
+  --tk-color-bg: #f4f0e8;
+  --tk-color-surface: #fbf9f4;
+  --tk-color-bg-subtle: #ebe5da;
+  --tk-color-fg: #171714;
+  --tk-color-fg-muted: #6c685f;
+  --tk-color-border: #d9d2c5;
+  --tk-color-accent: #b65c3a;
+  --tk-color-accent-hover: #914328;
+  --tk-color-accent-fg: #fffaf3;
+  --tk-color-danger: #a43e35;
+  --tk-color-warning: #94631d;
+  --tk-color-success: #58735c;
+  --tk-color-focus-ring: #b65c3a;
+  color-scheme: light;
 }
 
 [data-theme="dark"] {
-  --tk-color-bg: #181613;
-  --tk-color-surface: #211e1a;
-  --tk-color-bg-subtle: #211e1a;
-  --tk-color-fg: #f5f0e8;
-  --tk-color-fg-muted: #afa79b;
-  --tk-color-border: #3a352f;
-  --tk-color-accent: #e58a59;
-  --tk-color-accent-hover: #f0a579;
+  --tk-color-bg: #171714;
+  --tk-color-surface: #211f1b;
+  --tk-color-bg-subtle: #2b2822;
+  --tk-color-fg: #f6f0e7;
+  --tk-color-fg-muted: #b7aea0;
+  --tk-color-border: #413c34;
+  --tk-color-accent: #e28b63;
+  --tk-color-accent-hover: #f0a47c;
   --tk-color-accent-fg: #21150f;
-  --tk-color-danger: #ff9d9d;
-  --tk-color-warning: #ffd166;
-  --tk-color-success: #7fe3a0;
-  --tk-color-focus-ring: #f0a579;
+  --tk-color-danger: #ffaaa0;
+  --tk-color-warning: #edc275;
+  --tk-color-success: #9fca9e;
+  --tk-color-focus-ring: #f0a47c;
+  color-scheme: dark;
 }
 
-[data-theme="high-contrast"] {
-  --tk-color-bg: #fff;
-  --tk-color-surface: #fff;
-  --tk-color-bg-subtle: #fff;
-  --tk-color-fg: #000;
-  --tk-color-fg-muted: #000;
-  --tk-color-border: #000;
-  --tk-color-accent: #000;
-  --tk-color-accent-hover: #000;
-  --tk-color-accent-fg: #fff;
-  --tk-color-danger: #c00000;
-  --tk-color-warning: #946f00;
-  --tk-color-success: #006400;
-  --tk-color-focus-ring: #000;
+[data-theme="dark"] {
+  --tk-color-accent: var(--tk-dark-accent, #e28b63);
+  --tk-color-accent-fg: var(--tk-dark-accent-fg, #21150f);
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme]) {
-    --tk-color-bg: #181613;
-    --tk-color-surface: #211e1a;
-    --tk-color-bg-subtle: #211e1a;
-    --tk-color-fg: #f5f0e8;
-    --tk-color-fg-muted: #afa79b;
-    --tk-color-border: #3a352f;
-    --tk-color-accent: #e58a59;
-    --tk-color-accent-hover: #f0a579;
+    --tk-color-bg: #171714;
+    --tk-color-surface: #211f1b;
+    --tk-color-bg-subtle: #2b2822;
+    --tk-color-fg: #f6f0e7;
+    --tk-color-fg-muted: #b7aea0;
+    --tk-color-border: #413c34;
+    --tk-color-accent: #e28b63;
+    --tk-color-accent-hover: #f0a47c;
     --tk-color-accent-fg: #21150f;
-    --tk-color-danger: #ff9d9d;
-    --tk-color-warning: #ffd166;
-    --tk-color-success: #7fe3a0;
-    --tk-color-focus-ring: #f0a579;
+    --tk-color-danger: #ffaaa0;
+    --tk-color-warning: #edc275;
+    --tk-color-success: #9fca9e;
+    --tk-color-focus-ring: #f0a47c;
+    color-scheme: dark;
   }
 }
 
 @layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+  html {
+    background: var(--tk-color-bg);
+  }
   body {
+    min-width: 320px;
     margin: 0;
-    background-color: var(--tk-color-bg);
+    background: var(--tk-color-bg);
     color: var(--tk-color-fg);
     font-family: var(--tk-font-family-sans);
+    font-size: var(--tk-font-size-base);
+    line-height: var(--tk-line-height-normal);
+    text-rendering: optimizeLegibility;
   }
+  a {
+    color: inherit;
+  }
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+  button,
+  a {
+    -webkit-tap-highlight-color: transparent;
+  }
+  :focus-visible {
+    outline: 2px solid var(--tk-color-focus-ring);
+    outline-offset: 3px;
+  }
+  ::selection {
+    background: color-mix(in srgb, var(--tk-color-accent) 24%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (forced-colors: active) {
+  :root {
+    --tk-color-focus-ring: Highlight;
+  }
+  * {
+    forced-color-adjust: auto;
+  }
+}
+
+@media (prefers-contrast: more) {
+  :root {
+    --tk-color-border: color-mix(in srgb, var(--tk-color-fg) 45%, var(--tk-color-bg));
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }

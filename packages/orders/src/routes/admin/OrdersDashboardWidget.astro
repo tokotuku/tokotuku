@@ -1,0 +1,28 @@
+---
+import { env } from "cloudflare:workers";
+import { createTranslator } from "@tokotuku/core";
+import { brand, money } from "@tokotuku/core/brand";
+import DashboardMetric from "@tokotuku/ui/DashboardMetric.astro";
+import Icon from "@tokotuku/ui/Icon.astro";
+import { orderMessages } from "../../messages";
+import { getOrderDashboardSummary } from "../../orders";
+
+const summary = await getOrderDashboardSummary(env.DB);
+const t = createTranslator(brand, orderMessages);
+---
+<section class="orders-widget panel" data-dashboard-widget="orders" aria-labelledby="orders-widget-title">
+  <div class="widget-heading"><div><p class="eyebrow">{t("orders.dashboard.eyebrow")}</p><h2 id="orders-widget-title">{t("orders.dashboard.title")}</h2></div><a href="/admin/orders">{t("orders.dashboard.viewAll")} ↗</a></div>
+  {summary.recentOrders.length === 0 ? (
+    <div class="zero-state"><div class="zero-icon"><Icon name="orders" size={23} /></div><h3>{t("orders.dashboard.empty")}</h3><p>{t("orders.dashboard.emptyDescription")}</p></div>
+  ) : (
+    <>
+      <div class="metrics"><DashboardMetric label={t("orders.dashboard.today")} value={money(summary.todaySalesCents / 100)} /><DashboardMetric label={t("orders.dashboard.thirtyDays")} value={money(summary.thirtyDayRevenueCents / 100)} /><DashboardMetric label={t("orders.dashboard.pending")} value={String(summary.pendingCount)} tone={summary.pendingCount ? "warning" : "default"} /></div>
+      <div class="recent-list"><h3>{t("orders.dashboard.recent")}</h3>{summary.recentOrders.map((order) => <a href={"/admin/orders#" + order.id} class="order-row"><span><strong>{order.orderNumber}</strong><small>{order.customerName}</small></span><span><strong>{money(order.totalCents / 100)}</strong><small class:list={["status", "status--" + order.status]}>{order.status}</small></span></a>)}</div>
+    </>
+  )}
+</section>
+
+<style>
+  .orders-widget { padding:1.25rem; }.widget-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; }.widget-heading h2,.widget-heading p { margin:0; }.eyebrow { color:var(--tk-color-accent); font-size:.65rem; font-weight:700; letter-spacing:.13em; text-transform:uppercase; }.widget-heading h2 { margin-top:.3rem; font-family:var(--tk-font-family-display); font-size:1.75rem; font-weight:400; }.widget-heading a { color:var(--tk-color-fg-muted); font-size:.7rem; text-decoration:none; }.metrics { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.65rem; margin-top:1.5rem; }.zero-state { display:grid; place-items:center; margin-top:1.5rem; padding:2.2rem 1rem; border:1px dashed var(--tk-color-border); border-radius:var(--tk-radius-md); text-align:center; }.zero-icon { display:grid; width:2.5rem; height:2.5rem; place-items:center; border:1px solid var(--tk-color-border); border-radius:50%; color:var(--tk-color-fg-muted); font-size:1.6rem; }.zero-state h3 { margin:1rem 0 .3rem; font-size:.9rem; }.zero-state p { max-width:25rem; margin:0; color:var(--tk-color-fg-muted); font-size:.74rem; }.recent-list { margin-top:1.5rem; padding-top:1.2rem; border-top:1px solid var(--tk-color-border); }.recent-list h3 { margin:0 0 .55rem; font-size:.8rem; }.order-row { display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:.7rem 0; border-bottom:1px solid var(--tk-color-border); text-decoration:none; }.order-row:last-child { border-bottom:0; }.order-row span:last-child { text-align:right; }.order-row strong,.order-row small { display:block; }.order-row strong { font-size:.74rem; }.order-row small { margin-top:.15rem; color:var(--tk-color-fg-muted); font-size:.64rem; }.status { text-transform:capitalize; }.status--pending { color:var(--tk-color-warning); }.status--delivered { color:var(--tk-color-success); }.status--cancelled { color:var(--tk-color-danger); }
+  @media (max-width:560px) { .metrics { grid-template-columns:1fr; } }
+</style>

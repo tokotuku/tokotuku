@@ -24,6 +24,28 @@ export function tokotukuVirtualModulesPlugin(
     "virtual:tokotuku/registry": `export default ${JSON.stringify(clientRegistry)};`,
     "virtual:tokotuku/admin-nav": `export default ${JSON.stringify(registry.adminNav)};`,
     "virtual:tokotuku/config": `export default ${JSON.stringify(brand)};`,
+    "virtual:tokotuku/storefront-home-sections": [
+      ...registry.storefrontHomeSections.map(
+        (section, index) =>
+          "import Section" + index + " from " + JSON.stringify(section.entrypoint) + ";",
+      ),
+      "export default " +
+        JSON.stringify(registry.storefrontHomeSections) +
+        ".map((section, index) => ({ ...section, component: [" +
+        registry.storefrontHomeSections.map((_, index) => "Section" + index).join(", ") +
+        "][index] }));",
+    ].join("\n"),
+    "virtual:tokotuku/admin-dashboard-widgets": [
+      ...registry.adminDashboardWidgets.map(
+        (widget, index) =>
+          "import Widget" + index + " from " + JSON.stringify(widget.entrypoint) + ";",
+      ),
+      "export default " +
+        JSON.stringify(registry.adminDashboardWidgets) +
+        ".map((widget, index) => ({ ...widget, component: [" +
+        registry.adminDashboardWidgets.map((_, index) => "Widget" + index).join(", ") +
+        "][index] }));",
+    ].join("\n"),
     "virtual:tokotuku/ambient-scripts": [
       ...registry.ambientScripts.map(
         (specifier, index) => `import Ambient${index} from ${JSON.stringify(specifier)};`,

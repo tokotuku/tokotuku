@@ -1,19 +1,18 @@
 ---
 import { env } from "cloudflare:workers";
 import registry from "virtual:tokotuku/registry";
-import { mediaUrl } from "@tokotuku/core";
+import { createTranslator, mediaUrl } from "@tokotuku/core";
 import { brand, money } from "@tokotuku/core/brand";
 import Layout from "@tokotuku/ui/Layout.astro";
 import StoreHeader from "@tokotuku/ui/StoreHeader.astro";
+import { catalogMessages } from "../../messages";
 import { findProductById } from "../../products";
 
 const id = Number(Astro.params["id"]);
 const product = await findProductById(env.DB, id);
-
 if (!product) return new Response("Product not found", { status: 404 });
-
+const t = createTranslator(brand, catalogMessages);
 const hasOrders = registry.moduleNames.includes("orders");
-
 const imageUrl = mediaUrl(product.imageKey);
 const serialized = JSON.stringify({
   id: product.id,
@@ -21,7 +20,7 @@ const serialized = JSON.stringify({
   priceCents: product.priceCents,
   imageUrl,
 });
-
+const locale = brand.locale.toLowerCase().startsWith("id") ? "id" : "en";
 const productJsonLd = {
   "@context": "https://schema.org",
   "@type": "Product",
@@ -41,49 +40,18 @@ const productJsonLd = {
 };
 ---
 
-<Layout
-  title={`${product.name} — Tokotuku`}
-  description={product.description}
-  image={imageUrl}
-  type="product"
-  jsonLd={productJsonLd}
->
-  <StoreHeader current="products" />
+<Layout title={product.name + " — " + brand.name} description={product.description} image={imageUrl} type="product" jsonLd={productJsonLd} siteName={brand.name} lang={locale}>
+  <StoreHeader current="products" brand={brand} showCart={hasOrders} announcement={brand.storefront?.announcement ?? (locale === "id" ? "Objek untuk ritual sehari-hari." : "Objects for everyday rituals.")} labels={{ home: t("catalog.detail.home"), shop: t("catalog.detail.shop"), cart: locale === "id" ? "Keranjang" : "Cart" }} />
   <main>
-    <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="/">Home</a><span>/</span><a href="/products">Shop</a><span>/</span><span>{product.name}</span></nav>
+    <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="/">{t("catalog.detail.home")}</a><span>/</span><a href="/products">{t("catalog.detail.shop")}</a><span>/</span><span>{product.name}</span></nav>
     <div class="product-detail">
-      <div class="media"><img src={imageUrl} alt="" /></div>
-      <section>
-        <p class="eyebrow">{product.category}</p>
-        <h1>{product.name}</h1>
-        <p class="price">{money(product.priceCents / 100)}</p>
-        <p class="description">{product.description}</p>
-        <p class:list={["stock", product.stock < 10 && "stock--low"]}>{product.stock > 0 ? `${product.stock} in stock` : "Out of stock"}</p>
-        {hasOrders && (
-          <button type="button" data-add-to-cart data-product={serialized} disabled={product.stock <= 0}>{product.stock > 0 ? "Add to cart" : "Sold out"}</button>
-        )}
-        {Object.keys(product.customFields).length > 0 && <dl>{Object.entries(product.customFields).map(([key, value]) => <div><dt>{key}</dt><dd>{value}</dd></div>)}</dl>}
-        {hasOrders && (
-          <ul><li>Cash on Delivery</li><li>Pay when your order arrives</li><li>Stock is reserved after checkout</li></ul>
-        )}
-      </section>
+      <div class="media"><img src={imageUrl} alt={product.name} /></div>
+      <section class="product-copy"><p class="eyebrow">{product.category}</p><h1>{product.name}</h1><p class="price">{money(product.priceCents / 100)}</p><p class="description">{product.description}</p><p class:list={["stock", product.stock <= 5 && "stock--low"]}>{product.stock > 0 ? t("catalog.detail.inStock", { count: product.stock }) : t("catalog.detail.outOfStock")}</p>{hasOrders && <button type="button" data-add-to-cart data-product={serialized} disabled={product.stock <= 0}>{product.stock > 0 ? t("catalog.detail.add") : t("catalog.detail.soldOut")}</button>}{Object.keys(product.customFields).length > 0 && <dl>{Object.entries(product.customFields).map(([key, value]) => <div><dt>{key}</dt><dd>{value}</dd></div>)}</dl>}{hasOrders && <ul><li>{t("catalog.detail.cash")}</li><li>{t("catalog.detail.reassurance")}</li></ul>}</section>
     </div>
   </main>
 </Layout>
 
 <style>
-  main { width: min(100% - calc(var(--tk-spacing-4) * 2), 76rem); margin-inline: auto; padding-block: var(--tk-spacing-6) var(--tk-spacing-12); }
-  .breadcrumbs { display: flex; gap: var(--tk-spacing-2); margin-bottom: var(--tk-spacing-6); color: var(--tk-color-fg-muted); font-size: var(--tk-font-size-sm); }
-  .breadcrumbs a { color: inherit; }
-  .product-detail { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(20rem, 0.9fr); gap: clamp(2rem, 7vw, 6rem); align-items: center; }
-  .media { overflow: hidden; aspect-ratio: 1; border-radius: var(--tk-radius-2xl); background: var(--tk-color-bg-subtle); }
-  img { width: 100%; height: 100%; object-fit: cover; }
-  .eyebrow { margin: 0; color: var(--tk-color-accent); font-size: var(--tk-font-size-xs); font-weight: var(--tk-font-weight-bold); letter-spacing: 0.1em; text-transform: uppercase; }
-  h1 { margin: var(--tk-spacing-3) 0; color: var(--tk-color-fg); font-size: clamp(3rem, 7vw, 5.5rem); letter-spacing: -0.06em; line-height: 0.95; }
-  .price { color: var(--tk-color-fg); font-size: var(--tk-font-size-2xl); font-weight: var(--tk-font-weight-bold); }
-  .description { color: var(--tk-color-fg-muted); font-size: var(--tk-font-size-lg); line-height: var(--tk-line-height-relaxed); }
-  button { width: 100%; min-height: 3.25rem; margin-top: var(--tk-spacing-4); border: 0; border-radius: var(--tk-radius-md); background: var(--tk-color-accent); color: var(--tk-color-accent-fg); cursor: pointer; font: inherit; font-weight: var(--tk-font-weight-bold); }
-  button:disabled { cursor:not-allowed; opacity:.55; }.stock { margin:var(--tk-spacing-3) 0 0; color:var(--tk-color-success); font-size:var(--tk-font-size-sm);font-weight:var(--tk-font-weight-bold)}.stock--low{color:var(--tk-color-warning)} dl{margin:var(--tk-spacing-5) 0 0;border-top:1px solid var(--tk-color-border)}dl div{display:flex;justify-content:space-between;gap:20px;padding:var(--tk-spacing-3) 0;border-bottom:1px solid var(--tk-color-border)}dt{color:var(--tk-color-fg-muted)}dd{margin:0;font-weight:var(--tk-font-weight-semibold)}
-  ul { display: grid; gap: var(--tk-spacing-2); margin-top: var(--tk-spacing-5); padding: var(--tk-spacing-5) 0 0; border-top: 1px solid var(--tk-color-border); color: var(--tk-color-fg-muted); font-size: var(--tk-font-size-sm); list-style-position: inside; }
-  @media (max-width: 48rem) { .product-detail { grid-template-columns: 1fr; } }
+  main { width:min(100% - 2.5rem,78rem); margin:auto; padding-block:2rem 5rem; }.breadcrumbs { display:flex; flex-wrap:wrap; gap:.55rem; margin-bottom:2rem; color:var(--tk-color-fg-muted); font-size:.72rem; }.breadcrumbs a { text-decoration:none; }.product-detail { display:grid; grid-template-columns:minmax(0,1.1fr) minmax(20rem,.9fr); gap:clamp(2rem,7vw,6rem); align-items:center; }.media { aspect-ratio:1; overflow:hidden; border-radius:var(--tk-radius-md); background:var(--tk-color-bg-subtle); }.media img { display:block; width:100%; height:100%; object-fit:cover; }.eyebrow { margin:0; color:var(--tk-color-accent); font-size:.68rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; }.product-copy h1 { max-width:10ch; margin:.55rem 0 .8rem; font-family:var(--tk-font-family-display); font-size:clamp(3rem,7vw,6.2rem); font-weight:400; letter-spacing:-.05em; line-height:.9; }.price { margin:0; font-size:1.25rem; font-weight:700; }.description { max-width:32rem; margin:1.2rem 0 0; color:var(--tk-color-fg-muted); font-size:1rem; line-height:1.7; }.stock { margin:1.2rem 0 0; color:var(--tk-color-success); font-size:.8rem; font-weight:700; }.stock--low { color:var(--tk-color-warning); }.product-copy button { width:100%; min-height:3.2rem; margin-top:1.2rem; border:0; border-radius:var(--tk-radius-sm); background:var(--tk-color-accent); color:var(--tk-color-accent-fg); font-size:.8rem; font-weight:700; cursor:pointer; }.product-copy button:disabled { opacity:.55; cursor:not-allowed; }dl { margin:1.5rem 0 0; border-top:1px solid var(--tk-color-border); }dl div { display:flex; justify-content:space-between; gap:1.5rem; padding:.75rem 0; border-bottom:1px solid var(--tk-color-border); font-size:.75rem; }dt { color:var(--tk-color-fg-muted); }dd { margin:0; font-weight:700; }ul { display:grid; gap:.45rem; margin:1.5rem 0 0; padding:1.2rem 0 0 1rem; border-top:1px solid var(--tk-color-border); color:var(--tk-color-fg-muted); font-size:.75rem; }
+  @media (max-width:760px) { main { width:min(100% - 1.5rem,78rem); padding-top:1.25rem; }.product-detail { grid-template-columns:1fr; }.product-copy h1 { max-width:12ch; } }
 </style>

@@ -1,0 +1,37 @@
+---
+import { env } from "cloudflare:workers";
+import registry from "virtual:tokotuku/registry";
+import { createTranslator, mediaUrl } from "@tokotuku/core";
+import { brand, money } from "@tokotuku/core/brand";
+import ProductCard from "@tokotuku/ui/ProductCard.astro";
+import StorefrontEmptyCollection from "@tokotuku/ui/StorefrontEmptyCollection.astro";
+import { catalogMessages } from "../messages";
+import { listProducts } from "../products";
+
+const products = await listProducts(env.DB, { limit: 6 });
+const hasOrders = registry.moduleNames.includes("orders");
+const canManage = Astro.locals.canAccessBackoffice;
+const t = createTranslator(brand, catalogMessages);
+---
+
+{products.length === 0 ? (
+  <StorefrontEmptyCollection
+    eyebrow={t("catalog.storefront.eyebrow")}
+    title={t("catalog.storefront.emptyTitle")}
+    description={canManage ? t("catalog.storefront.emptyStaffDescription") : t("catalog.storefront.emptyDescription")}
+    actionHref={canManage ? "/admin/products/new" : undefined}
+    actionLabel={canManage ? t("catalog.storefront.addFirst") : undefined}
+  />
+) : (
+  <section class="collection-section" aria-labelledby="collection-title">
+    <div class="collection-heading"><div><p class="eyebrow">{t("catalog.storefront.collectionEyebrow")}</p><h2 id="collection-title">{t("catalog.storefront.collectionHeading")}</h2></div><a href="/products">{t("catalog.storefront.viewAll")} <span aria-hidden="true">↗</span></a></div>
+    <div class="product-grid">
+      {products.map((product) => <ProductCard id={product.id} name={product.name} description={product.description} price={money(product.priceCents / 100)} priceCents={product.priceCents} imageUrl={mediaUrl(product.imageKey)} stock={product.stock} showAddToCart={hasOrders} category={product.category} labels={{ view: t("catalog.products.view"), add: t("catalog.products.addToCart"), soldOut: t("catalog.products.status.outOfStock"), lowStock: t("catalog.products.fewLeft") }} />)}
+    </div>
+  </section>
+)}
+
+<style>
+  .collection-section { max-width:78rem; margin:auto; padding:4.5rem max(1.25rem,3vw) 4rem; }.collection-heading { display:flex; align-items:end; justify-content:space-between; gap:1rem; margin-bottom:1.5rem; }.eyebrow { margin:0 0 .4rem; color:var(--tk-color-accent); font-size:.68rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; }.collection-heading h2 { margin:0; font-family:var(--tk-font-family-display); font-size:clamp(2.2rem,4vw,3.5rem); font-weight:400; letter-spacing:-.035em; }.collection-heading a { color:var(--tk-color-fg-muted); font-size:.75rem; text-decoration:none; }.collection-heading a:hover { color:var(--tk-color-accent); }.product-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1rem; }.product-grid :global(.product-card) { min-width:0; }
+  @media (max-width:900px) { .product-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } } @media (max-width:560px) { .collection-section { padding-top:3rem; }.collection-heading { align-items:start; flex-direction:column; }.product-grid { grid-template-columns:1fr; } }
+</style>

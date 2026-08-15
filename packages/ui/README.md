@@ -4,7 +4,7 @@ All Astro components and the Tailwind v4 theme for the Tokotuku starter live in 
 workspace package.
 
 Import `@tokotuku/ui/styles.css` once in the application layout. It provides Tailwind,
-semantic theme utilities, and light, dark, and high-contrast color modes.
+semantic theme utilities, and light/dark color modes with OS accessibility support.
 
 ## Included surfaces
 
