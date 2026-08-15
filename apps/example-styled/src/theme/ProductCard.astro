@@ -1,0 +1,128 @@
+---
+// Overrides @tokotuku/ui's stock ProductCard.astro -- any file dropped in
+// src/theme/ matching a component's filename replaces it everywhere that
+// component is used, no fork of @tokotuku/ui required. See
+// packages/core/src/theme-alias.ts for the mechanism.
+interface Props {
+  id: number;
+  name: string;
+  description: string;
+  price: string;
+  priceCents: number;
+  imageUrl: string;
+  stock?: number;
+  showAddToCart?: boolean;
+}
+
+const { id, name, description, price, imageUrl, stock = 1, showAddToCart = false } = Astro.props;
+const serialized = JSON.stringify({ id, name, priceCents: Astro.props.priceCents, imageUrl });
+---
+
+<article class="dark-store-card">
+  <a href={`/products/${id}`} class="dark-store-card__media" aria-label={`Lihat ${name}`}>
+    <img src={imageUrl} alt={name} loading="lazy" />
+    <span class="dark-store-card__badge">{stock > 0 ? "Ready" : "Habis"}</span>
+  </a>
+  <div class="dark-store-card__body">
+    <h3><a href={`/products/${id}`}>{name}</a></h3>
+    <p class="dark-store-card__desc">{description}</p>
+    <div class="dark-store-card__footer">
+      <strong>{price}</strong>
+      {showAddToCart && (
+        <button type="button" data-add-to-cart data-product={serialized} disabled={stock <= 0}>
+          {stock > 0 ? "+ Keranjang" : "Habis"}
+        </button>
+      )}
+    </div>
+  </div>
+</article>
+
+<style>
+  .dark-store-card {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 22px;
+    background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+    color: #f1f1f6;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  .dark-store-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 16px 40px rgba(233, 69, 96, 0.25);
+  }
+  .dark-store-card__media {
+    position: relative;
+    display: block;
+    aspect-ratio: 1;
+    background: #0f172a;
+  }
+  .dark-store-card__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .dark-store-card__badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: #e94560;
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .dark-store-card__body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 20px;
+  }
+  .dark-store-card__body h3 {
+    margin: 0;
+    font-size: 19px;
+    font-weight: 700;
+  }
+  .dark-store-card__body h3 a {
+    color: #f1f1f6;
+    text-decoration: none;
+  }
+  .dark-store-card__desc {
+    margin: 0;
+    color: #9a9ab8;
+    font-size: 13px;
+    line-height: 1.5;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+  .dark-store-card__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 4px;
+  }
+  .dark-store-card__footer strong {
+    font-size: 18px;
+    color: #e94560;
+  }
+  .dark-store-card__footer button {
+    border: 0;
+    border-radius: 999px;
+    background: #e94560;
+    color: white;
+    padding: 9px 18px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .dark-store-card__footer button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+</style>

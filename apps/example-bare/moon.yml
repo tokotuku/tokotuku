@@ -1,0 +1,38 @@
+$schema: "https://moonrepo.dev/schemas/project.json"
+language: "typescript"
+stack: "frontend"
+layer: "application"
+
+tasks:
+  build:
+    command: "astro build"
+    deps: ["core:build", "auth:build", "catalog:build", "orders:build"]
+    inputs:
+      - "src/**/*"
+      - "astro.config.mjs"
+      - "wrangler.jsonc"
+      - "tsconfig.json"
+    outputs:
+      - "dist"
+
+  dev:
+    command: "astro dev"
+    options:
+      persistent: true
+      runInCI: false
+      cache: false
+
+  lint:
+    command: "biome check ."
+    inputs:
+      - "src/**/*"
+      - "*.mjs"
+      - "*.json"
+
+  typecheck:
+    command: "astro check"
+    deps: ["core:build", "auth:build", "catalog:build", "orders:build"]
+    inputs:
+      - "src/**/*"
+      - "astro.config.mjs"
+      - "tsconfig.json"

@@ -9,21 +9,26 @@ forked copy of the whole app.
 
 ```
 apps/
-  docs/        Documentation site (Astro + Starlight)
-  example/     Reference client app — proves the framework end to end
-  storybook/   Isolated Astro component development and accessibility checks
+  docs/             Documentation site (Astro + Starlight)
+  example/          Reference client app — full feature set, port 4400
+  example-bare/     Example: fresh `create-tokotuku` install, no data, port 4410
+  example-seeded/   Example: bare install + `tokotuku db seed`, port 4420
+  example-styled/   Example: seeded install + a theme override, port 4430
+  storybook/        Isolated Astro component development and accessibility checks
 packages/
-  ui/          The complete Astro component set (@tokotuku/ui)
-configs/       Shared TypeScript, tsup, and vitest configuration (@tokotuku/config)
-scripts/       Repo maintenance scripts (e.g. commit message validation)
-tools/         Local dev infrastructure (Verdaccio private registry)
+  core/             Integration, registry, middleware, admin shell (@tokotuku/core)
+  auth/             Better Auth + roles (@tokotuku/auth)
+  ui/               The complete Astro component set (@tokotuku/ui)
+  catalog/          Product catalog + admin + demo seed (@tokotuku/catalog)
+  orders/           Orders lifecycle + checkout + cart (@tokotuku/orders)
+  create-tokotuku/  `bunx create-tokotuku` scaffolding CLI
+configs/            Shared TypeScript, tsup, and vitest configuration (@tokotuku/config)
+scripts/            Repo maintenance scripts (e.g. commit message validation)
+tools/              Local dev infrastructure (Verdaccio private registry, e2e install gates)
 ```
 
-`packages/ui` and `apps/example` are consumed as local workspace packages today — component
-development cannot drift from what `apps/example` runs. As feature modules (`@tokotuku/catalog`,
-`@tokotuku/orders`, `@tokotuku/auth`, …) are extracted from `apps/example` into `packages/*`, this
-repository becomes the source for a `create-tokotuku` scaffolding CLI. There is no scaffolding CLI
-yet — `apps/example` is still the one reference app the extraction work is being verified against.
+Every `@tokotuku/*` package is consumed by the `apps/*` clients as a local workspace package
+(`workspace:*`) — nothing here needs Verdaccio or a real npm publish to install and run.
 
 Run the reference app:
 
@@ -32,6 +37,23 @@ bun run example
 ```
 
 Then open `http://localhost:4400`.
+
+## Examples
+
+Three small client apps under `apps/` exist purely to demonstrate the framework's three core
+claims, each independently runnable (distinct dev ports, so all three can run at once):
+
+| App | Demonstrates | Dev port |
+| --- | --- | --- |
+| [`apps/example-bare`](apps/example-bare) | What `bunx create-tokotuku` produces on its own — no demo data | 4410 |
+| [`apps/example-seeded`](apps/example-seeded) | The same bare install, after running `bun run db:seed` | 4420 |
+| [`apps/example-styled`](apps/example-styled) | Overriding a stock `@tokotuku/ui` component from client code (`src/theme/`) | 4430 |
+
+Each app's own README has exact setup commands. `example-bare` and `example-seeded` start from
+identical source — the only difference is the runtime action of running the seed command, so diff
+them if you want to confirm that directly. `example-styled` adds one file,
+[`src/theme/ProductCard.astro`](apps/example-styled/src/theme/ProductCard.astro), which replaces
+`@tokotuku/ui`'s stock product card everywhere it's used — nothing else in the app changes.
 
 ## Requirements
 
