@@ -72,11 +72,12 @@ const t = createTranslator(brand, orderMessages);
     appendAll(heading, link);
     const description = document.createElement("p");
     description.textContent = product.description;
+    appendAll(info, heading, description);
+
     const removeButton = document.createElement("button");
     removeButton.type = "button";
     removeButton.dataset["removeItem"] = "";
     removeButton.textContent = removeLabel;
-    appendAll(info, heading, description, removeButton);
 
     const quantityBlock = document.createElement("div");
     quantityBlock.className = "quantity";
@@ -89,11 +90,14 @@ const t = createTranslator(brand, orderMessages);
     input.value = String(quantity);
     input.dataset["quantity"] = "";
     appendAll(label, input);
+    const qtyRow = document.createElement("div");
+    qtyRow.className = "qty-row";
+    appendAll(qtyRow, label, removeButton);
     const available = document.createElement("span");
     available.textContent = availableTemplate.replace("{count}", String(product.stock));
     const lineTotal = document.createElement("strong");
     lineTotal.dataset["lineTotal"] = "";
-    appendAll(quantityBlock, label, available, lineTotal);
+    appendAll(quantityBlock, qtyRow, available, lineTotal);
 
     appendAll(article, img, info, quantityBlock);
     return article;
@@ -155,8 +159,9 @@ const t = createTranslator(brand, orderMessages);
   .cart-items :global(article h2) { font-size: var(--tk-font-size-lg); }
   .cart-items :global(article h2 a) { color: var(--tk-color-fg); text-decoration: none; }
   .cart-items :global(article p) { margin-top: var(--tk-spacing-1); color: var(--tk-color-fg-muted); font-size: var(--tk-font-size-sm); }
-  .cart-items :global(article button) { margin-top: var(--tk-spacing-2); padding: 0; border: 0; background: transparent; color: var(--tk-color-danger); cursor: pointer; font: inherit; font-size: var(--tk-font-size-xs); }
+  .cart-items :global(article button) { padding: 0; border: 0; background: transparent; color: var(--tk-color-danger); cursor: pointer; font: inherit; font-size: var(--tk-font-size-xs); }
   .cart-items :global(.quantity) { display: grid; justify-items: end; gap: var(--tk-spacing-3); }
+  .cart-items :global(.quantity .qty-row) { display: flex; align-items: center; gap: var(--tk-spacing-3); }
   .cart-items :global(.quantity label) { color: var(--tk-color-fg-muted); font-size: var(--tk-font-size-xs); }
   .cart-items :global(.quantity span) { color: var(--tk-color-fg-muted); font-size:10px; }
   .cart-items :global(input) { width: 3.5rem; margin-left: var(--tk-spacing-1); padding: var(--tk-spacing-2); border: 1px solid var(--tk-color-border); border-radius: var(--tk-radius-md); background: var(--tk-color-bg); color: var(--tk-color-fg); }
