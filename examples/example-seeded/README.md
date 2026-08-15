@@ -1,9 +1,10 @@
 # example-seeded
 
 **What this proves:** what `tokotuku db seed` does to a bare install. This app's source is
-**identical** to [`apps/example-bare`](../example-bare) — diff the two `src/` directories yourself
-to confirm there is no hidden file. The only difference is a runtime action taken after setup: one
-extra command. This is one of three example apps under the repo root's `apps/` directory — see the
+**identical** to [`examples/example-bare`](../example-bare) — diff the two `src/` directories
+yourself to confirm there is no hidden file. The only difference is a runtime action taken after
+setup: one extra command. This is one of three example apps under the repo root's `examples/`
+directory — see the
 [root README's Examples section](../../README.md#examples) for how the three relate.
 
 Run Cloudflare resource commands (`wrangler`, `db:*`) from this directory. Run it through Moon from

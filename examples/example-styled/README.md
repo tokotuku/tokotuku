@@ -2,10 +2,10 @@
 
 **What this proves:** a client can override a stock `@tokotuku/ui` component from its own source
 tree, without forking the package. This app starts from the same bare scaffold as
-[`apps/example-bare`](../example-bare) and [`apps/example-seeded`](../example-seeded), plus exactly
-one added file:
+[`examples/example-bare`](../example-bare) and [`examples/example-seeded`](../example-seeded), plus
+exactly one added file:
 [`src/theme/ProductCard.astro`](src/theme/ProductCard.astro). This is one of three example apps
-under the repo root's `apps/` directory — see the
+under the repo root's `examples/` directory — see the
 [root README's Examples section](../../README.md#examples) for how the three relate.
 
 ## How the override works
@@ -55,11 +55,11 @@ bun run example-styled
 ```
 
 Open `http://localhost:4430/setup` and create the first administrator, same as the other two
-example apps. Then open `/products`: the same three seeded products render, but as dark cards
-(`.dark-store-card`) instead of `@tokotuku/ui`'s stock `.product-card` — confirm by comparing
-against `example-seeded` running at the same time on port 4420, or by inspecting the rendered
-class names directly (`curl -s localhost:4430/products | grep -o 'dark-store-card\|product-card'`
-should only ever print `dark-store-card`).
+example apps. Then open `/products`: the same six seeded products render, but through this app's
+own card design instead of `@tokotuku/ui`'s stock `.product-card` — confirm by comparing against
+`example-seeded` running at the same time on port 4420, or by inspecting the rendered class names
+directly (`curl -s localhost:4430/products | grep -o 'product-card'` should print nothing here,
+while the same command against `example-seeded` on port 4420 does).
 
 To try your own design: edit `src/theme/ProductCard.astro` directly, or copy the pattern to
 override a different `@tokotuku/ui` component by matching its filename under `src/theme/`.

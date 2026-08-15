@@ -10,11 +10,11 @@ forked copy of the whole app.
 ```
 apps/
   docs/             Documentation site (Astro + Starlight)
-  example/          Reference client app — full feature set, port 4400
+  storybook/        Isolated Astro component development and accessibility checks
+examples/
   example-bare/     Example: fresh `create-tokotuku` install, no data, port 4410
   example-seeded/   Example: bare install + `tokotuku db seed`, port 4420
   example-styled/   Example: seeded install + a theme override, port 4430
-  storybook/        Isolated Astro component development and accessibility checks
 packages/
   core/             Integration, registry, middleware, admin shell (@tokotuku/core)
   auth/             Better Auth + roles (@tokotuku/auth)
@@ -27,33 +27,27 @@ scripts/            Repo maintenance scripts (e.g. commit message validation)
 tools/              Local dev infrastructure (Verdaccio private registry, e2e install gates)
 ```
 
-Every `@tokotuku/*` package is consumed by the `apps/*` clients as a local workspace package
-(`workspace:*`) — nothing here needs Verdaccio or a real npm publish to install and run.
-
-Run the reference app:
-
-```sh
-bun run example
-```
-
-Then open `http://localhost:4400`.
+Every `@tokotuku/*` package is consumed by the `apps/*` and `examples/*` clients as a local
+workspace package (`workspace:*`) — nothing here needs Verdaccio or a real npm publish to install
+and run.
 
 ## Examples
 
-Three small client apps under `apps/` exist purely to demonstrate the framework's three core
+Three small client apps under `examples/` exist purely to demonstrate the framework's three core
 claims, each independently runnable (distinct dev ports, so all three can run at once):
 
 | App | Demonstrates | Dev port |
 | --- | --- | --- |
-| [`apps/example-bare`](apps/example-bare) | What `bunx create-tokotuku` produces on its own — no demo data | 4410 |
-| [`apps/example-seeded`](apps/example-seeded) | The same bare install, after running `bun run db:seed` | 4420 |
-| [`apps/example-styled`](apps/example-styled) | Overriding a stock `@tokotuku/ui` component from client code (`src/theme/`) | 4430 |
+| [`examples/example-bare`](examples/example-bare) | What `bunx create-tokotuku` produces on its own — no demo data | 4410 |
+| [`examples/example-seeded`](examples/example-seeded) | The same bare install, after running `bun run db:seed` | 4420 |
+| [`examples/example-styled`](examples/example-styled) | Overriding a stock `@tokotuku/ui` component from client code (`src/theme/`) | 4430 |
 
 Each app's own README has exact setup commands. `example-bare` and `example-seeded` start from
 identical source — the only difference is the runtime action of running the seed command, so diff
 them if you want to confirm that directly. `example-styled` adds one file,
-[`src/theme/ProductCard.astro`](apps/example-styled/src/theme/ProductCard.astro), which replaces
-`@tokotuku/ui`'s stock product card everywhere it's used — nothing else in the app changes.
+[`src/theme/ProductCard.astro`](examples/example-styled/src/theme/ProductCard.astro), which
+replaces `@tokotuku/ui`'s stock product card everywhere it's used — nothing else in the app
+changes.
 
 ## Requirements
 

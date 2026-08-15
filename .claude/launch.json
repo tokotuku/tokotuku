@@ -2,10 +2,22 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "example",
+      "name": "example-bare",
       "runtimeExecutable": "moon",
-      "runtimeArgs": ["run", "example:dev"],
-      "port": 4400
+      "runtimeArgs": ["run", "example-bare:dev"],
+      "port": 4410
+    },
+    {
+      "name": "example-seeded",
+      "runtimeExecutable": "moon",
+      "runtimeArgs": ["run", "example-seeded:dev"],
+      "port": 4420
+    },
+    {
+      "name": "example-styled",
+      "runtimeExecutable": "moon",
+      "runtimeArgs": ["run", "example-styled:dev"],
+      "port": 4430
     }
   ]
 }

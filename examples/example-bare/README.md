@@ -1,7 +1,7 @@
 # example-bare
 
 **What this proves:** what `bunx create-tokotuku` gives you, unmodified. No demo data, no theme
-overrides. This is one of three example apps under the repo root's `apps/` directory — see the
+overrides. This is one of three example apps under the repo root's `examples/` directory — see the
 [root README's Examples section](../../README.md#examples) for how the three relate.
 
 The only differences from a real `create-tokotuku` scaffold are cosmetic, so this stays
@@ -43,7 +43,7 @@ that redirects to login permanently once an administrator exists.
 
 At this point `/products` renders the empty state: zero products, because nothing has been
 seeded. That emptiness is the point of this app — compare it against
-[`apps/example-seeded`](../example-seeded) running at the same time to see exactly what
+[`examples/example-seeded`](../example-seeded) running at the same time to see exactly what
 `tokotuku db seed` adds.
 
 ## Deploy
