@@ -24,6 +24,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import {
   AssertionError,
+  addCatalogModule,
   addOrdersModule,
   assert,
   installClient,
@@ -31,7 +32,6 @@ import {
   queryD1,
   queryTableNames,
   readJson,
-  removeOrdersModule,
   scaffoldClient,
   sh,
 } from "./shared.ts";
@@ -56,13 +56,12 @@ async function main(): Promise<void> {
 
   const scratchParent = mkdtempSync(path.join(tmpdir(), "takontuku-e2e-upgrade-"));
   const clientDir = scaffoldClient(scratchParent, "gate2b-fixture", version);
-  console.log(`Scaffolded client (auth + catalog + orders) at ${clientDir}`);
+  console.log(`Scaffolded client (public-only default: auth) at ${clientDir}`);
 
   installClient(clientDir);
-  removeOrdersModule(clientDir);
-  installClient(clientDir);
+  addCatalogModule(clientDir);
   console.log(
-    "Removed the orders module via `takontuku remove` -- fixture is now auth + catalog only.",
+    "Added the catalog module via `takontuku add` -- fixture is now auth + catalog only.",
   );
 
   sh("bunx", ["takontuku", "db", "sync"], clientDir);
@@ -86,9 +85,8 @@ async function main(): Promise<void> {
   assert(productBefore !== undefined, "expected the test product to be inserted");
   console.log(`Inserted product: ${JSON.stringify(productBefore)}`);
 
-  console.log("Adding the orders module back via `takontuku add` and re-syncing...");
+  console.log("Adding the orders module via `takontuku add` and re-syncing...");
   addOrdersModule(clientDir);
-  installClient(clientDir);
   sh("bunx", ["takontuku", "db", "sync"], clientDir);
   sh("bunx", ["wrangler", "d1", "migrations", "apply", "DB", "--local"], clientDir);
 

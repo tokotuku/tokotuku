@@ -10,6 +10,10 @@
 //
 // Prerequisite: a registry reachable at REGISTRY_URL (defaults to Verdaccio
 // on http://localhost:4873). Start one locally with `moon run verdaccio:up`.
+//
+// The default scaffold is public-only (auth + core + ui), so this adds
+// `catalog` via `takontuku add` before step 1 -- there's nothing to seed or
+// theme without a storefront module installed.
 
 import { spawn } from "node:child_process";
 import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
@@ -17,6 +21,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import {
   AssertionError,
+  addCatalogModule,
   assert,
   installClient,
   publishAll,
@@ -67,10 +72,15 @@ async function main(): Promise<void> {
 
   const scratchParent = mkdtempSync(path.join(tmpdir(), "takontuku-e2e-demo-"));
   const clientDir = scaffoldClient(scratchParent, "demo-walkthrough", version);
-  console.log(`Scaffolded client at ${clientDir}`);
+  console.log(`Scaffolded client (public-only default: auth) at ${clientDir}`);
+
+  installClient(clientDir);
+  addCatalogModule(clientDir);
+  console.log(
+    "Added the catalog module via `takontuku add`, so there's a storefront to seed and theme.",
+  );
 
   // --- Step 1: bare install -----------------------------------------------
-  installClient(clientDir);
   sh("bunx", ["takontuku", "db", "sync"], clientDir);
   sh("bunx", ["wrangler", "d1", "migrations", "apply", "DB", "--local"], clientDir);
   sh("bun", ["run", "build"], clientDir);
@@ -100,11 +110,6 @@ async function main(): Promise<void> {
   assert(
     stockCount[0]?.count === 6,
     `expected 6 seeded inventory_item_stock rows, got ${stockCount[0]?.count}`,
-  );
-  const orderCount = queryD1(clientDir, "SELECT COUNT(*) as count FROM orders");
-  assert(
-    orderCount[0]?.count === 0,
-    `db:seed must not create fake orders, got ${orderCount[0]?.count}`,
   );
 
   const seededResponses = await bootAndFetch(clientDir, [

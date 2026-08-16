@@ -29,6 +29,7 @@ export function catalog(): ModuleDefinition {
     storefrontRoutes: [
       { pattern: "/products", entrypoint: "@takontuku/catalog/routes/products/index.astro" },
       { pattern: "/products/[id]", entrypoint: "@takontuku/catalog/routes/products/[id].astro" },
+      { pattern: "/sitemap.xml", entrypoint: "@takontuku/catalog/routes/sitemap.xml.ts" },
     ],
     storefrontHomeSections: [
       {

@@ -2,9 +2,7 @@
 import cloudflare from "@astrojs/cloudflare";
 import tailwindcss from "@tailwindcss/vite";
 import { auth } from "@takontuku/auth";
-import { catalog } from "@takontuku/catalog";
 import { takontuku } from "@takontuku/core";
-import { orders } from "@takontuku/orders";
 import { defineConfig } from "astro/config";
 
 // Run "takontuku add <module>" or "takontuku remove <module>" to change
@@ -19,7 +17,7 @@ export default defineConfig({
         currency: "IDR",
         timeZone: "Asia/Jakarta",
       },
-      modules: [auth(), catalog(), orders()],
+      modules: [auth()],
     }),
   ],
   // @takontuku/ui's Layout.astro imports its own CSS, which needs this plugin.

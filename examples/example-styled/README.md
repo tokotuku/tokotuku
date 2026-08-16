@@ -1,9 +1,9 @@
 # example-styled
 
 **What this proves:** a client can override a stock `@takontuku/ui` component from its own source
-tree, without forking the package. This app starts from the same bare scaffold as
-[`examples/example-bare`](../example-bare) and [`examples/example-seeded`](../example-seeded), plus
-exactly one added file:
+tree, without forking the package. This app starts from the same `catalog`+`orders`-installed
+source as [`examples/example-seeded`](../example-seeded) (both build on the public-only scaffold
+[`examples/example-bare`](../example-bare) also starts from), plus exactly one added file:
 [`src/theme/ProductCard.astro`](src/theme/ProductCard.astro). This is one of three example apps
 under the repo root's `examples/` directory — see the
 [root README's Examples section](../../README.md#examples) for how the three relate.
@@ -38,9 +38,8 @@ openssl rand -base64 32
 BETTER_AUTH_SECRET=<generated-value>
 ```
 
-Then initialize the local Cloudflare resources and seed (seeding is optional for `example-bare`
-and `example-seeded`, but here it's what gives you products to actually see the new card design
-on):
+Then initialize the local Cloudflare resources and seed (seeding is optional for `example-seeded`,
+but here it's what gives you products to actually see the new card design on):
 
 ```sh
 bun run cf-typegen

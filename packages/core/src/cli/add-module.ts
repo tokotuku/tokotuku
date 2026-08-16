@@ -59,7 +59,16 @@ async function ensureDependencyDeclared(
   }
 
   if (install && !monorepoMember) {
-    addDependency(cwd, manager, versionRange ? `${packageName}@${versionRange}` : packageName);
+    try {
+      addDependency(cwd, manager, versionRange ? `${packageName}@${versionRange}` : packageName);
+    } catch (error) {
+      throw new Error(
+        `Could not install ${packageName} with "${manager} add". If this is a private module, ` +
+          `your .npmrc needs to route its scope to the registry that hosts it, and you need to be ` +
+          `authenticated there -- a public "npm create takontuku" scaffold won't have this configured.`,
+        { cause: error },
+      );
+    }
   } else {
     const versionSpec = versionRange ?? siblingTakontukuSpecifier(pkgJson);
     pkgJson.dependencies = { ...pkgJson.dependencies, [packageName]: versionSpec };

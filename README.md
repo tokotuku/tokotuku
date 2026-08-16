@@ -16,11 +16,11 @@ examples/
   example-seeded/   Example: bare install + `takontuku db seed`, port 4420
   example-styled/   Example: seeded install + a theme override, port 4430
 packages/
-  core/             Integration, registry, middleware, admin shell (@takontuku/core)
-  auth/             Better Auth + roles (@takontuku/auth)
-  ui/               The complete Astro component set (@takontuku/ui)
-  catalog/          Product catalog + admin + demo seed (@takontuku/catalog)
-  orders/           Orders lifecycle + checkout + cart (@takontuku/orders)
+  core/             Integration, registry, middleware, admin shell (@takontuku/core, public)
+  auth/             Better Auth + roles (@takontuku/auth, public)
+  ui/               The complete Astro component set (@takontuku/ui, public)
+  catalog/          Product catalog + admin + demo seed (@takontuku/catalog, private)
+  orders/           Orders lifecycle + checkout + cart (@takontuku/orders, private)
   create-takontuku/  `bunx create-takontuku` scaffolding CLI
 configs/            Shared TypeScript, tsup, and vitest configuration (@takontuku/config)
 scripts/            Repo maintenance scripts (e.g. commit message validation)
@@ -38,13 +38,11 @@ claims, each independently runnable (distinct dev ports, so all three can run at
 
 | App | Demonstrates | Dev port |
 | --- | --- | --- |
-| [`examples/example-bare`](examples/example-bare) | What `bunx create-takontuku` produces on its own — no demo data | 4410 |
-| [`examples/example-seeded`](examples/example-seeded) | The same bare install, after running `bun run db:seed` | 4420 |
+| [`examples/example-bare`](examples/example-bare) | What `bunx create-takontuku` produces on its own — public-only (`auth`+`core`+`ui`), no demo data | 4410 |
+| [`examples/example-seeded`](examples/example-seeded) | `example-bare` plus `catalog`+`orders` added, then seeded with `bun run db:seed` | 4420 |
 | [`examples/example-styled`](examples/example-styled) | Overriding a stock `@takontuku/ui` component from client code (`src/theme/`) | 4430 |
 
-Each app's own README has exact setup commands. `example-bare` and `example-seeded` start from
-identical source — the only difference is the runtime action of running the seed command, so diff
-them if you want to confirm that directly. `example-styled` adds one file,
+Each app's own README has exact setup commands. `example-styled` adds one file,
 [`src/theme/ProductCard.astro`](examples/example-styled/src/theme/ProductCard.astro), which
 replaces `@takontuku/ui`'s stock product card everywhere it's used — nothing else in the app
 changes.

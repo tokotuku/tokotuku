@@ -194,13 +194,61 @@ export function removeOrdersModule(clientDir: string): void {
 }
 
 /**
- * Adds @takontuku/orders back via the real `takontuku add` command --
- * `--no-sync` so the caller's own explicit `db sync` step stays the one
- * place migrations get materialized, and `--no-install` for the same
- * pinned-version reason as `removeOrdersModule`.
+ * Adds a @takontuku/* module this scratch client has never had before --
+ * the default scaffold is public-only (auth + core + ui), so catalog and
+ * orders always start out genuinely absent, not just removed.
+ *
+ * `takontuku add --no-install` alone can't do this: it only writes
+ * package.json, and the CLI's own inspection step needs the package
+ * already resolvable in node_modules to read its export shape and
+ * `requires`. So this fetches the package for real first -- with the same
+ * `--registry`/`--force` flags `installClient` uses, and for the same
+ * reason: the client's own `.npmrc` already routes the scope correctly,
+ * but Bun's registry-manifest cache would otherwise serve a stale "latest"
+ * left over from an earlier e2e run against this same registry -- then
+ * runs `takontuku add --no-install --no-sync`, which at that point is a
+ * pure config/middleware wiring step against an already-correct
+ * package.json and already-populated node_modules. For a module like
+ * orders, whose own package.json depends on catalog, that dependency rides
+ * along transitively from the same `bun add`, so a caller adding orders
+ * fresh never needs to add catalog first.
+ */
+function addFreshModule(clientDir: string, moduleName: string): void {
+  sh("bun", ["add", `@takontuku/${moduleName}`, "--registry", REGISTRY, "--force"], clientDir);
+  sh("bunx", ["takontuku", "add", moduleName, "--no-install", "--no-sync"], clientDir);
+}
+
+/** Adds @takontuku/catalog for the first time. See addFreshModule. */
+export function addCatalogModule(clientDir: string): void {
+  addFreshModule(clientDir, "catalog");
+}
+
+/**
+ * Adds @takontuku/orders for the first time, pulling in catalog
+ * transitively (orders' own package.json depends on it). See
+ * addFreshModule.
  */
 export function addOrdersModule(clientDir: string): void {
-  sh("bunx", ["takontuku", "add", "orders", "--no-install", "--no-sync"], clientDir);
+  addFreshModule(clientDir, "orders");
+}
+
+/**
+ * Pins an already-added @takontuku/* dependency to the literal "latest"
+ * specifier, matching the rest of a client scaffolded with
+ * `scaffoldClient`'s `version: null` -- needed because the raw `bun add`
+ * inside `addFreshModule` writes a resolved version range instead, and
+ * propagation.ts's whole premise depends on every @takontuku/* dependency
+ * being pinned to "latest" so `bun update` has something to re-resolve.
+ * Re-installs afterward so node_modules/bun.lock reconcile with the
+ * rewritten manifest.
+ */
+export function pinModuleToLatest(clientDir: string, moduleName: string): void {
+  const pkgPath = path.join(clientDir, "package.json");
+  const pkg = readJson(pkgPath);
+  const deps = pkg.dependencies as Record<string, string>;
+  deps[`@takontuku/${moduleName}`] = "latest";
+  writeJson(pkgPath, pkg);
+  installClient(clientDir);
 }
 
 interface D1QueryResult {

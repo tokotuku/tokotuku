@@ -8,6 +8,11 @@
 //
 // Prerequisite: a registry reachable at REGISTRY_URL (defaults to Verdaccio
 // on http://localhost:4873). Start one locally with `moon run verdaccio:up`.
+//
+// The default scaffold is public-only (auth + core + ui), so this adds
+// `orders` (pulling in catalog) before it can remove it -- the opposite
+// order from before this module existed as a private one, but it exercises
+// the same two commands either way.
 
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -26,17 +31,16 @@ async function main(): Promise<void> {
 
   const scratchParent = mkdtempSync(path.join(tmpdir(), "takontuku-e2e-modules-"));
   const clientDir = scaffoldClient(scratchParent, "gate-modules", version);
-  console.log(`Scaffolded client (auth + catalog + orders) at ${clientDir}`);
+  console.log(`Scaffolded client (public-only default: auth) at ${clientDir}`);
 
   installClient(clientDir);
+
+  addOrdersModule(clientDir);
+  console.log("Added the orders module via `takontuku add` (pulls in catalog).");
 
   removeOrdersModule(clientDir);
   installClient(clientDir);
   console.log("Removed the orders module.");
-
-  addOrdersModule(clientDir);
-  installClient(clientDir);
-  console.log("Added the orders module back.");
 
   // astro check needs worker-configuration.d.ts (env.d.ts references it),
   // which only `wrangler types` generates -- no other gate calls typecheck
