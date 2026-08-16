@@ -45,7 +45,28 @@ without passing `--registry` on every command:
 //localhost:4873/:_authToken=<token from npm adduser>
 ```
 
-Publish a package to the local registry:
+## Publishing catalog/orders for real
+
+`@takontuku/catalog` and `@takontuku/orders` never go through CI (see
+`.github/workflows/ci.yml`, which only ever publishes the public packages) — release them manually
+from a machine with publish credentials here, after `bun run version` (`changeset version`) has
+given them a real version:
+
+```sh
+bun run release:private
+```
+
+That runs [`scripts/publish-private.ts`](../../scripts/publish-private.ts), which rebuilds both
+packages, resolves their `workspace:*` dependencies (including on the now-public `core`/`ui`/
+`config`) to whatever version is currently checked into each one's own `package.json`, publishes,
+and restores both `package.json` files to their checked-in state afterward regardless of outcome.
+Add `--dry-run` to check what would be published without actually publishing.
+
+It defaults to `http://localhost:4873`; once the Cloudflare Tunnel below is live, export
+`PRIVATE_REGISTRY_URL=https://npm.<your-domain>` first so publishes go through the real hostname
+instead of only working from this machine.
+
+To publish a single package by hand instead (debugging, or a package the script doesn't cover):
 
 ```sh
 bun publish --registry http://localhost:4873

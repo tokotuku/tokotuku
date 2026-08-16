@@ -26,6 +26,7 @@
     "changeset": "changeset",
     "version": "changeset version",
     "release": "bun run build && changeset publish",
+    "release:private": "bun scripts/publish-private.ts",
     "prepare": "lefthook install"
   },
   "devDependencies": {
