@@ -10,7 +10,7 @@ uplinks:
     url: https://registry.npmjs.org/
 
 packages:
-  "@tokotuku/*":
+  "@takontuku/*":
     access: $all
     publish: $authenticated
     unpublish: $authenticated

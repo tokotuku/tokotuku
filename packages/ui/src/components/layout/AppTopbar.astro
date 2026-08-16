@@ -20,7 +20,7 @@ const { title = "Workspace", themeLabel = "Toggle color theme" } = Astro.props;
   document.querySelector<HTMLButtonElement>("[data-app-theme-toggle]")?.addEventListener("click", () => {
     const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
     document.documentElement.dataset.theme = next;
-    localStorage.setItem("tokotuku-theme", next);
+    localStorage.setItem("takontuku-theme", next);
   });
 </script>
 

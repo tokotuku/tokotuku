@@ -7,18 +7,18 @@ import type { FormattersConfig } from "./format";
 import type { ModuleDefinition } from "./module";
 import { type ResolvedRegistry, resolveModules } from "./registry";
 import { buildThemeAliases } from "./theme-alias";
-import { tokotukuVirtualModulesPlugin } from "./virtual-modules-plugin";
+import { takontukuVirtualModulesPlugin } from "./virtual-modules-plugin";
 
 export { defineModule } from "./module";
 
-export interface TokotukuAuthBrand {
+export interface TakontukuAuthBrand {
   /** Public URL (or path) for the decorative auth panel image. */
   backgroundImage?: string;
   /** CSS object-position used by the auth panel image. */
   backgroundPosition?: string;
 }
 
-export interface TokotukuStorefrontBrand {
+export interface TakontukuStorefrontBrand {
   announcement?: string | false;
   hero?: {
     eyebrow?: string;
@@ -31,26 +31,26 @@ export interface TokotukuStorefrontBrand {
   newsletter?: { action: string };
 }
 
-export interface TokotukuBrand extends FormattersConfig {
+export interface TakontukuBrand extends FormattersConfig {
   name: string;
   logo?: { src: string; alt?: string };
   palette?: {
     light?: { accent: string; accentForeground: string };
     dark?: { accent: string; accentForeground: string };
   };
-  storefront?: TokotukuStorefrontBrand;
-  auth?: TokotukuAuthBrand;
+  storefront?: TakontukuStorefrontBrand;
+  auth?: TakontukuAuthBrand;
   /** Optional sparse overrides for package-owned localized dictionaries. */
   messages?: Record<string, string>;
 }
 
-export interface TokotukuOptions {
-  brand: TokotukuBrand;
+export interface TakontukuOptions {
+  brand: TakontukuBrand;
   modules: ModuleDefinition[];
 }
 
-/** An AstroIntegration, plus the resolved registry `tokotuku db sync` reads directly off the config's integrations array. */
-export type TokotukuIntegration = AstroIntegration & { registry: ResolvedRegistry };
+/** An AstroIntegration, plus the resolved registry `takontuku db sync` reads directly off the config's integrations array. */
+export type TakontukuIntegration = AstroIntegration & { registry: ResolvedRegistry };
 
 /**
  * The admin shell (layout, dashboard, error pages, media proxy) is not
@@ -72,18 +72,21 @@ const CORE_MODULE: ModuleDefinition = {
     },
   ],
   storefrontRoutes: [
-    { pattern: "/403", entrypoint: "@tokotuku/core/routes/403.astro" },
-    { pattern: "/404", entrypoint: "@tokotuku/core/routes/404.astro" },
-    { pattern: "/api/images/[...key]", entrypoint: "@tokotuku/core/routes/api/images/[...key].ts" },
+    { pattern: "/403", entrypoint: "@takontuku/core/routes/403.astro" },
+    { pattern: "/404", entrypoint: "@takontuku/core/routes/404.astro" },
+    {
+      pattern: "/api/images/[...key]",
+      entrypoint: "@takontuku/core/routes/api/images/[...key].ts",
+    },
   ],
-  adminRoutes: [{ pattern: "/admin", entrypoint: "@tokotuku/core/routes/admin/index.astro" }],
+  adminRoutes: [{ pattern: "/admin", entrypoint: "@takontuku/core/routes/admin/index.astro" }],
 };
 
-export function tokotuku(options: TokotukuOptions): TokotukuIntegration {
+export function takontuku(options: TakontukuOptions): TakontukuIntegration {
   const registry = resolveModules([CORE_MODULE, ...options.modules]);
 
   return {
-    name: "@tokotuku/core",
+    name: "@takontuku/core",
     registry,
     hooks: {
       "astro:config:setup": ({
@@ -101,12 +104,12 @@ export function tokotuku(options: TokotukuOptions): TokotukuIntegration {
 
         updateConfig({
           vite: {
-            plugins: [tokotukuVirtualModulesPlugin(registry, options.brand)],
+            plugins: [takontukuVirtualModulesPlugin(registry, options.brand)],
             ...(alias.length ? { resolve: { alias } } : {}),
           },
         });
 
-        addMiddleware({ entrypoint: "@tokotuku/core/middleware", order: "pre" });
+        addMiddleware({ entrypoint: "@takontuku/core/middleware", order: "pre" });
 
         for (const route of registry.storefrontRoutes) {
           injectRoute({

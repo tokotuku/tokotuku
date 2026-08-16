@@ -1,11 +1,11 @@
 # example-bare
 
-**What this proves:** what `bunx create-tokotuku` gives you, unmodified. No demo data, no theme
+**What this proves:** what `bunx create-takontuku` gives you, unmodified. No demo data, no theme
 overrides. This is one of three example apps under the repo root's `examples/` directory — see the
 [root README's Examples section](../../README.md#examples) for how the three relate.
 
-The only differences from a real `create-tokotuku` scaffold are cosmetic, so this stays
-reproducible without a registry: `@tokotuku/*` dependencies point at `workspace:*` here instead of
+The only differences from a real `create-takontuku` scaffold are cosmetic, so this stays
+reproducible without a registry: `@takontuku/*` dependencies point at `workspace:*` here instead of
 a published version (this repo's own packages, not a separate install), and `.npmrc` was removed
 since nothing needs to be fetched from Verdaccio.
 
@@ -44,7 +44,7 @@ that redirects to login permanently once an administrator exists.
 At this point `/products` renders the empty state: zero products, because nothing has been
 seeded. That emptiness is the point of this app — compare it against
 [`examples/example-seeded`](../example-seeded) running at the same time to see exactly what
-`tokotuku db seed` adds.
+`takontuku db seed` adds.
 
 ## Deploy
 

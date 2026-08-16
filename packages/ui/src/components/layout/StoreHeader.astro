@@ -32,7 +32,7 @@ interface Props {
 
 const {
   current,
-  brand = { name: "Tokotuku" },
+  brand = { name: "Takontuku" },
   labels = {},
   showShop = true,
   showCart = false,
@@ -42,7 +42,7 @@ const {
   announcement = "Objects for everyday rituals.",
   links = [],
 } = Astro.props;
-const name = brand.name ?? "Tokotuku";
+const name = brand.name ?? "Takontuku";
 const l = {
   home: labels.home ?? "Home",
   shop: labels.shop ?? "Shop",
@@ -99,7 +99,7 @@ const l = {
   header?.querySelector("[data-theme-toggle]")?.addEventListener("click", () => {
     const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
     document.documentElement.dataset.theme = next;
-    localStorage.setItem("tokotuku-theme", next);
+    localStorage.setItem("takontuku-theme", next);
   });
 </script>
 

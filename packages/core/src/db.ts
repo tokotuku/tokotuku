@@ -30,7 +30,7 @@ const statusChangeHooks = new Set<OrderStatusChangeHook>();
  * Registers a hook that contributes extra statements to the same atomic
  * batch as an order's creation (e.g. decrementing stock). A module that
  * isn't installed never calls this, so its statements are simply absent —
- * no flag, no branching in @tokotuku/orders.
+ * no flag, no branching in @takontuku/orders.
  */
 export function onOrderCreate(hook: OrderCreateHook): void {
   createHooks.add(hook);

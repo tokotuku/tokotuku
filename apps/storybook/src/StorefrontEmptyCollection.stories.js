@@ -1,4 +1,4 @@
-import StorefrontEmptyCollection from "@tokotuku/ui/StorefrontEmptyCollection.astro";
+import StorefrontEmptyCollection from "@takontuku/ui/StorefrontEmptyCollection.astro";
 
 export default {
   title: "Storefront/EmptyCollection",

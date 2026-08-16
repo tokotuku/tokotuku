@@ -53,17 +53,17 @@ function migrationSequence(fileName: string): number {
 async function main(): Promise<void> {
   const version = publishAll();
 
-  const scratchParent = mkdtempSync(path.join(tmpdir(), "tokotuku-e2e-upgrade-"));
+  const scratchParent = mkdtempSync(path.join(tmpdir(), "takontuku-e2e-upgrade-"));
   const clientDir = scaffoldClient(scratchParent, "gate2b-fixture", version);
   const { configPath, pkgPath, originalConfig, originalPkg } = dropOrdersModule(clientDir);
   console.log(`Scaffolded fixture (auth + catalog, no orders) at ${clientDir}`);
 
   installClient(clientDir);
-  sh("bunx", ["tokotuku", "db", "sync"], clientDir);
+  sh("bunx", ["takontuku", "db", "sync"], clientDir);
   sh("bunx", ["wrangler", "d1", "migrations", "apply", "DB", "--local"], clientDir);
 
   const filesBefore = readMigrationFiles(clientDir);
-  const lockfileBefore = readJson(path.join(clientDir, "tokotuku.migrations.json"));
+  const lockfileBefore = readJson(path.join(clientDir, "takontuku.migrations.json"));
   console.log(`Migrations before upgrade: ${[...filesBefore.keys()].sort().join(", ")}`);
   console.log(`Lockfile before upgrade: ${JSON.stringify(lockfileBefore)}`);
   assert(filesBefore.size > 0, "expected at least one migration file before the upgrade");
@@ -84,11 +84,11 @@ async function main(): Promise<void> {
   writeFileSync(configPath, originalConfig);
   writeFileSync(pkgPath, originalPkg);
   installClient(clientDir);
-  sh("bunx", ["tokotuku", "db", "sync"], clientDir);
+  sh("bunx", ["takontuku", "db", "sync"], clientDir);
   sh("bunx", ["wrangler", "d1", "migrations", "apply", "DB", "--local"], clientDir);
 
   const filesAfter = readMigrationFiles(clientDir);
-  const lockfileAfter = readJson(path.join(clientDir, "tokotuku.migrations.json"));
+  const lockfileAfter = readJson(path.join(clientDir, "takontuku.migrations.json"));
   console.log(`Migrations after upgrade: ${[...filesAfter.keys()].sort().join(", ")}`);
   console.log(`Lockfile after upgrade: ${JSON.stringify(lockfileAfter)}`);
 

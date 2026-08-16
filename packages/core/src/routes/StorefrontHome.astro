@@ -1,12 +1,12 @@
 ---
 /// <reference path="../virtual.d.ts" />
-import registry from "virtual:tokotuku/registry";
-import homeSections from "virtual:tokotuku/storefront-home-sections";
-import Icon from "@tokotuku/ui/Icon.astro";
-import Layout from "@tokotuku/ui/Layout.astro";
-import StoreFooter from "@tokotuku/ui/StoreFooter.astro";
-import StorefrontHero from "@tokotuku/ui/StorefrontHero.astro";
-import StoreHeader from "@tokotuku/ui/StoreHeader.astro";
+import registry from "virtual:takontuku/registry";
+import homeSections from "virtual:takontuku/storefront-home-sections";
+import Icon from "@takontuku/ui/Icon.astro";
+import Layout from "@takontuku/ui/Layout.astro";
+import StoreFooter from "@takontuku/ui/StoreFooter.astro";
+import StorefrontHero from "@takontuku/ui/StorefrontHero.astro";
+import StoreHeader from "@takontuku/ui/StoreHeader.astro";
 import { brand } from "../brand";
 import { coreMessages, createTranslator } from "../messages";
 
@@ -55,7 +55,7 @@ const footerLinks = [
       imagePosition={hero?.imagePosition}
     />
     {homeSections.map(({ component: HomeSection }) => <HomeSection />)}
-    <section class="value-strip" aria-label="Tokotuku values">
+    <section class="value-strip" aria-label="Takontuku values">
       <article><Icon name="leaf" size={24} /><div><strong>{t("storefront.values.materials")}</strong><span>{t("storefront.values.materialsHint")}</span></div></article>
       <article><Icon name="heart" size={24} /><div><strong>{t("storefront.values.care")}</strong><span>{t("storefront.values.careHint")}</span></div></article>
       <article><Icon name="box" size={24} /><div><strong>{t("storefront.values.simple")}</strong><span>{t("storefront.values.simpleHint")}</span></div></article>

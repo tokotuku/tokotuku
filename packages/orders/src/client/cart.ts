@@ -6,8 +6,8 @@ export interface CartItem {
   quantity: number;
 }
 
-const CART_KEY = "tokotuku-cart";
-const CART_CHANGED_EVENT = "tokotuku:cart-changed";
+const CART_KEY = "takontuku-cart";
+const CART_CHANGED_EVENT = "takontuku:cart-changed";
 
 export function readCart(): CartItem[] {
   try {

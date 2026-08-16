@@ -1,8 +1,8 @@
 ---
-import "@tokotuku/ui/admin.css";
-import adminNav from "virtual:tokotuku/admin-nav";
-import Icon from "@tokotuku/ui/Icon.astro";
-import Layout from "@tokotuku/ui/Layout.astro";
+import "@takontuku/ui/admin.css";
+import adminNav from "virtual:takontuku/admin-nav";
+import Icon from "@takontuku/ui/Icon.astro";
+import Layout from "@takontuku/ui/Layout.astro";
 import { brand } from "../brand";
 import { coreMessages, createTranslator } from "../messages";
 
@@ -114,11 +114,11 @@ const roleLabel = user.role?.[0] ? user.role[0].toUpperCase() + user.role.slice(
   document.querySelector("[data-theme-toggle]")?.addEventListener("click", () => {
     const next = document.documentElement.dataset["theme"] === "dark" ? "light" : "dark";
     document.documentElement.dataset["theme"] = next;
-    localStorage.setItem("tokotuku-theme", next);
+    localStorage.setItem("takontuku-theme", next);
   });
 
   document.querySelector("[data-sign-out]")?.addEventListener("click", async () => {
-    // A plain POST rather than importing @tokotuku/auth's client SDK — the
+    // A plain POST rather than importing @takontuku/auth's client SDK — the
     // admin shell is core, and core doesn't depend on auth (a client could
     // in principle ship its own auth). Better Auth's sign-out is just this
     // one request under the hood, but it needs an actual (even empty) JSON

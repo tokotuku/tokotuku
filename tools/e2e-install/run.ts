@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 // Gate 1 from the migration plan ("tarball install"): publishes every
-// publishable @tokotuku/* package to a real registry, scaffolds a client
-// with create-tokotuku in a scratch directory OUTSIDE this repo, and runs
-// the exact flow a real client would: bun install -> tokotuku db sync ->
+// publishable @takontuku/* package to a real registry, scaffolds a client
+// with create-takontuku in a scratch directory OUTSIDE this repo, and runs
+// the exact flow a real client would: bun install -> takontuku db sync ->
 // wrangler d1 migrations apply --local -> astro build -> a wrangler dev
 // boot check.
 //
@@ -46,12 +46,12 @@ async function bootCheck(clientDir: string): Promise<void> {
 async function main(): Promise<void> {
   const version = publishAll();
 
-  const scratchParent = mkdtempSync(path.join(tmpdir(), "tokotuku-e2e-"));
+  const scratchParent = mkdtempSync(path.join(tmpdir(), "takontuku-e2e-"));
   const clientDir = scaffoldClient(scratchParent, "e2e-client", version);
   console.log(`Scaffolded client at ${clientDir}`);
 
   installClient(clientDir);
-  sh("bunx", ["tokotuku", "db", "sync"], clientDir);
+  sh("bunx", ["takontuku", "db", "sync"], clientDir);
   sh("bunx", ["wrangler", "d1", "migrations", "apply", "DB", "--local"], clientDir);
   sh("bun", ["run", "build"], clientDir);
   await bootCheck(clientDir);

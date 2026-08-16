@@ -1,4 +1,4 @@
-import { defineModule, type ModuleDefinition } from "@tokotuku/core";
+import { defineModule, type ModuleDefinition } from "@takontuku/core";
 
 export { orderMessages } from "./messages";
 
@@ -26,24 +26,24 @@ export function orders(): ModuleDefinition {
         order: 20,
       },
     ],
-    ambientScripts: ["@tokotuku/orders/routes/CartScript.astro"],
+    ambientScripts: ["@takontuku/orders/routes/CartScript.astro"],
     storefrontRoutes: [
-      { pattern: "/cart", entrypoint: "@tokotuku/orders/routes/cart.astro" },
-      { pattern: "/checkout", entrypoint: "@tokotuku/orders/routes/checkout.astro" },
-      { pattern: "/api/orders/proof", entrypoint: "@tokotuku/orders/routes/api/orders/proof.ts" },
+      { pattern: "/cart", entrypoint: "@takontuku/orders/routes/cart.astro" },
+      { pattern: "/checkout", entrypoint: "@takontuku/orders/routes/checkout.astro" },
+      { pattern: "/api/orders/proof", entrypoint: "@takontuku/orders/routes/api/orders/proof.ts" },
       {
         pattern: "/api/payment-proofs/[...key]",
-        entrypoint: "@tokotuku/orders/routes/api/payment-proofs/[...key].ts",
+        entrypoint: "@takontuku/orders/routes/api/payment-proofs/[...key].ts",
       },
-      { pattern: "/api/cart/lines", entrypoint: "@tokotuku/orders/routes/api/cart/lines.ts" },
+      { pattern: "/api/cart/lines", entrypoint: "@takontuku/orders/routes/api/cart/lines.ts" },
     ],
     adminRoutes: [
-      { pattern: "/admin/orders", entrypoint: "@tokotuku/orders/routes/admin/orders.astro" },
+      { pattern: "/admin/orders", entrypoint: "@takontuku/orders/routes/admin/orders.astro" },
     ],
     adminDashboardWidgets: [
       {
         id: "orders-overview",
-        entrypoint: "@tokotuku/orders/routes/admin/OrdersDashboardWidget.astro",
+        entrypoint: "@takontuku/orders/routes/admin/OrdersDashboardWidget.astro",
         area: "main",
         order: 30,
       },

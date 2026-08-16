@@ -1,4 +1,4 @@
-import DashboardMetric from "@tokotuku/ui/DashboardMetric.astro";
+import DashboardMetric from "@takontuku/ui/DashboardMetric.astro";
 
 export default { title: "Admin/DashboardMetric", component: DashboardMetric };
 export const Default = {

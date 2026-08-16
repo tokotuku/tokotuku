@@ -24,7 +24,7 @@ export interface ResolvedRegistry {
   ambientScripts: string[];
   storefrontHomeSections: StorefrontHomeSection[];
   adminDashboardWidgets: AdminDashboardWidget[];
-  /** Modules in topo order, carrying just enough for `tokotuku db sync` to plan migrations. */
+  /** Modules in topo order, carrying just enough for `takontuku db sync` to plan migrations. */
   modules: ResolvedModule[];
 }
 
@@ -52,7 +52,7 @@ export function resolveModules(modules: ModuleDefinition[]): ResolvedRegistry {
       const dep = byName.get(depName);
       if (!dep) {
         throw new Error(
-          `"${mod.name}" requires "${depName}", which is not installed. Run: bun add @tokotuku/${depName}`,
+          `"${mod.name}" requires "${depName}", which is not installed. Run: bun add @takontuku/${depName}`,
         );
       }
       visit(dep);

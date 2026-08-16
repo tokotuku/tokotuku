@@ -22,7 +22,7 @@ tasks:
 
   typecheck:
     command: "astro check"
-    # @tokotuku/core and @tokotuku/catalog are consumed via their built
+    # @takontuku/core and @takontuku/catalog are consumed via their built
     # dist/ (not raw source) for runtime values like defineModule and
     # findProductsByIds — without this, typecheck can race tsup's
     # clean-then-rebuild and read a briefly-missing dist/index.d.ts.

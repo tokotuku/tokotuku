@@ -1,10 +1,10 @@
 ---
-/// <reference types="@tokotuku/core/virtual.d.ts" />
-import "@tokotuku/ui/styles.css";
+/// <reference types="@takontuku/core/virtual.d.ts" />
+import "@takontuku/ui/styles.css";
 import { Image } from "astro:assets";
-import brand from "virtual:tokotuku/config";
-import { createTranslator } from "@tokotuku/core";
-import Icon from "@tokotuku/ui/Icon.astro";
+import brand from "virtual:takontuku/config";
+import { createTranslator } from "@takontuku/core";
+import Icon from "@takontuku/ui/Icon.astro";
 import defaultAuthImage from "../auth-background.webp";
 import { authMessages } from "../messages";
 
@@ -29,7 +29,7 @@ const authImagePosition = /^[a-z0-9% .,-]+$/i.test(requestedPosition)
     <title>{title} — {brand.name}</title>
     <script is:inline>
       (() => {
-        const saved = localStorage.getItem("tokotuku-theme");
+        const saved = localStorage.getItem("takontuku-theme");
         document.documentElement.dataset.theme = saved === "dark" ? "dark" : (saved === "light" ? "light" : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"));
       })();
     </script>
@@ -79,7 +79,7 @@ const authImagePosition = /^[a-z0-9% .,-]+$/i.test(requestedPosition)
   themeButton?.addEventListener("click", () => {
     const next = document.documentElement.dataset["theme"] === "dark" ? "light" : "dark";
     document.documentElement.dataset["theme"] = next;
-    localStorage.setItem("tokotuku-theme", next);
+    localStorage.setItem("takontuku-theme", next);
   });
 </script>
 

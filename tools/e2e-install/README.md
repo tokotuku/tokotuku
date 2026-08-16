@@ -4,8 +4,8 @@ Six scripts, sharing `shared.ts` for the publish/scaffold/assert mechanics.
 
 ## Gate 1 — `run.ts`, "tarball install"
 
-Publishes every publishable `@tokotuku/*` package to a real registry and installs them into a
-scratch client the way a real client would — `create-tokotuku` → `bun install` → `tokotuku db
+Publishes every publishable `@takontuku/*` package to a real registry and installs them into a
+scratch client the way a real client would — `create-takontuku` → `bun install` → `takontuku db
 sync` → `wrangler d1 migrations apply --local` → `astro build` → a `wrangler dev` boot check.
 
 This exists because `workspace:*` symlinks hide problems that only surface once packages are
@@ -57,27 +57,27 @@ that step is skipped.
 ## Gate 5 (verification slice) — `propagation.ts`, "update propagation"
 
 The actual business reason this migration exists: "framework harus jadi package supaya perbaikan
-bisa didorong lewat `bun update`." Scaffolds a client the way `create-tokotuku` actually leaves
-one — `@tokotuku/*` dependencies pinned to the literal `"latest"` specifier, not a fixed version
+bisa didorong lewat `bun update`." Scaffolds a client the way `create-takontuku` actually leaves
+one — `@takontuku/*` dependencies pinned to the literal `"latest"` specifier, not a fixed version
 — confirms a baseline, patches a string in `catalog`'s product listing, republishes, and asserts
 `bun update` **in that same client directory** (not a fresh install) picks up the change.
 
 This is a verification slice, not the plan's full Gate 5. The rest of Gate 5 calls for wiring
 `changeset version` + publish into CI — Verdaccio on `dev`, real npm on `main`. That means
-claiming the `@tokotuku` scope on the public npm registry and putting publish credentials in CI:
+claiming the `@takontuku` scope on the public npm registry and putting publish credentials in CI:
 a release-engineering decision with real external consequences, not something to set up
 unilaterally. This script only proves the update *mechanism* itself works, entirely against the
 local registry.
 
 ## Demo walkthrough — `demo.ts`, "bare install, seed, change the design"
 
-The concrete client experience none of the other gates exercise: `create-tokotuku` on its own,
-then `tokotuku db seed`, then a theme override — in that order, on the same client, asserting
+The concrete client experience none of the other gates exercise: `create-takontuku` on its own,
+then `takontuku db seed`, then a theme override — in that order, on the same client, asserting
 each step's effect before moving to the next.
 
 1. **Bare install.** A fresh scaffold's storefront shows the empty-catalog state — zero products,
    by design.
-2. **Seed.** `tokotuku db seed` inserts `@tokotuku/catalog`'s 3 demo products (+ stock), uploads
+2. **Seed.** `takontuku db seed` inserts `@takontuku/catalog`'s 3 demo products (+ stock), uploads
    their images to R2, the storefront lists them, and the seeded image serves `200` with the
    right content type.
 3. **Change the design.** Writing `src/theme/ProductCard.astro` and rebuilding replaces the stock

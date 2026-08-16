@@ -80,7 +80,7 @@ interface RawWranglerConfig {
   r2_buckets?: { binding?: string; bucket_name?: string }[];
 }
 
-/** Reads just enough of a client's wrangler.jsonc for `tokotuku db seed` to target the right D1 binding and R2 bucket -- everything else in the file is irrelevant here. */
+/** Reads just enough of a client's wrangler.jsonc for `takontuku db seed` to target the right D1 binding and R2 bucket -- everything else in the file is irrelevant here. */
 export function parseWranglerConfig(source: string): WranglerConfig {
   const raw = JSON.parse(stripJsonComments(source)) as RawWranglerConfig;
 

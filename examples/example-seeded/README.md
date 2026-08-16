@@ -1,6 +1,6 @@
 # example-seeded
 
-**What this proves:** what `tokotuku db seed` does to a bare install. This app's source is
+**What this proves:** what `takontuku db seed` does to a bare install. This app's source is
 **identical** to [`examples/example-bare`](../example-bare) — diff the two `src/` directories
 yourself to confirm there is no hidden file. The only difference is a runtime action taken after
 setup: one extra command. This is one of three example apps under the repo root's `examples/`
@@ -32,7 +32,7 @@ bun run db:seed
 ```
 
 `db:seed` is the one extra step versus `example-bare`. It runs every installed module's own seed —
-here, `@tokotuku/catalog`'s six premium demo products (Cangkir Stoneware, Tas Linen, Lampu Meja
+here, `@takontuku/catalog`'s six premium demo products (Cangkir Stoneware, Tas Linen, Lampu Meja
 Arc, Jurnal Linen, Nampan Walnut, and Karaf Kaca) with stock rows and optimized WebP product
 images — then uploads the images to the local R2 bucket. It creates no orders or sales metrics. It is local-only by design: there is no
 `--remote` path, so demo data can never land in a live database by accident.

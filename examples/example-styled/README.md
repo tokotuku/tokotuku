@@ -1,6 +1,6 @@
 # example-styled
 
-**What this proves:** a client can override a stock `@tokotuku/ui` component from its own source
+**What this proves:** a client can override a stock `@takontuku/ui` component from its own source
 tree, without forking the package. This app starts from the same bare scaffold as
 [`examples/example-bare`](../example-bare) and [`examples/example-seeded`](../example-seeded), plus
 exactly one added file:
@@ -10,11 +10,11 @@ under the repo root's `examples/` directory — see the
 
 ## How the override works
 
-`@tokotuku/core`'s Astro integration scans `<root>/src/theme/*.astro` once at
-`astro:config:setup`. Any file there whose name matches a component `@tokotuku/ui` exports (here,
+`@takontuku/core`'s Astro integration scans `<root>/src/theme/*.astro` once at
+`astro:config:setup`. Any file there whose name matches a component `@takontuku/ui` exports (here,
 `ProductCard.astro`) becomes a Vite `resolve.alias` redirect: every import of
-`@tokotuku/ui/ProductCard.astro`, from any package, transparently resolves to this file instead.
-No fork of `@tokotuku/ui`, no changes anywhere else in this app — `packages/catalog`'s product
+`@takontuku/ui/ProductCard.astro`, from any package, transparently resolves to this file instead.
+No fork of `@takontuku/ui`, no changes anywhere else in this app — `packages/catalog`'s product
 listing page imports `ProductCard` exactly the way it always does and has no idea it's been
 overridden. See [`packages/core/src/theme-alias.ts`](../../packages/core/src/theme-alias.ts) for
 the mechanism itself.
@@ -56,13 +56,13 @@ bun run example-styled
 
 Open `http://localhost:4430/setup` and create the first administrator, same as the other two
 example apps. Then open `/products`: the same six seeded products render, but through this app's
-own card design instead of `@tokotuku/ui`'s stock `.product-card` — confirm by comparing against
+own card design instead of `@takontuku/ui`'s stock `.product-card` — confirm by comparing against
 `example-seeded` running at the same time on port 4420, or by inspecting the rendered class names
 directly (`curl -s localhost:4430/products | grep -o 'product-card'` should print nothing here,
 while the same command against `example-seeded` on port 4420 does).
 
 To try your own design: edit `src/theme/ProductCard.astro` directly, or copy the pattern to
-override a different `@tokotuku/ui` component by matching its filename under `src/theme/`.
+override a different `@takontuku/ui` component by matching its filename under `src/theme/`.
 
 ## Deploy
 

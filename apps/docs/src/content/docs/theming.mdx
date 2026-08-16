@@ -1,11 +1,11 @@
 ---
 title: Theming
-description: Apply light, dark, or custom Tokotuku accent themes.
+description: Apply light, dark, or custom Takontuku accent themes.
 sidebar:
   order: 2
 ---
 
-Tokotuku uses Tailwind CSS v4 theme variables plus semantic `--tk-*` CSS custom properties for
+Takontuku uses Tailwind CSS v4 theme variables plus semantic `--tk-*` CSS custom properties for
 runtime color modes.
 
 ## Load the global stylesheet
@@ -14,11 +14,11 @@ Import the UI stylesheet once from the application layout:
 
 ```astro
 ---
-import "@tokotuku/ui/styles.css";
+import "@takontuku/ui/styles.css";
 ---
 ```
 
-The stylesheet imports Tailwind, defines its `@theme` utilities, and contains all Tokotuku color
+The stylesheet imports Tailwind, defines its `@theme` utilities, and contains all Takontuku color
 modes. Components remain zero-runtime; Tailwind generates static CSS during the Vite build.
 
 ## Select a palette
@@ -31,7 +31,7 @@ Set `data-theme` on an ancestor, normally the root element:
 
 ```
 
-Tokotuku exposes light and dark choices. When `data-theme` is absent, the inline bootstrap follows `prefers-color-scheme`; a saved choice is kept in `localStorage`. OS forced-colors and prefers-contrast remain supported for accessibility.
+Takontuku exposes light and dark choices. When `data-theme` is absent, the inline bootstrap follows `prefers-color-scheme`; a saved choice is kept in `localStorage`. OS forced-colors and prefers-contrast remain supported for accessibility.
 
 ## Override tokens
 
@@ -52,7 +52,7 @@ Prefer semantic variables such as `--tk-color-accent` and `--tk-color-danger`; c
 The `brand` option is backward-compatible. New logo, palette, storefront, and auth fields are additive. When no auth image is configured, AuthFrame uses its package-owned editorial visual.
 
 ```js
-tokotuku({
+takontuku({
   brand: {
     name: "Kedai Senja",
     locale: "id-ID",

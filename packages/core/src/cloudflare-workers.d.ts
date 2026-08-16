@@ -5,7 +5,7 @@
 // the framework already uses, instead of excluding every file that touches
 // it from typecheck entirely.
 declare module "cloudflare:workers" {
-  const env: import("./env").TokotukuEnv;
+  const env: import("./env").TakontukuEnv;
 
   export { env };
 }

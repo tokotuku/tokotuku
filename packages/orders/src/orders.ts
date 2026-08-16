@@ -1,11 +1,11 @@
 import type { D1Database } from "@cloudflare/workers-types";
-import { findProductsByIds } from "@tokotuku/catalog";
+import { findProductsByIds } from "@takontuku/catalog";
 import {
   ConstraintViolationError,
   collectOrderCreateStatements,
   collectOrderStatusChangeStatements,
   mapD1Error,
-} from "@tokotuku/core";
+} from "@takontuku/core";
 
 export const orderStatuses = ["pending", "confirmed", "delivered", "cancelled"] as const;
 export type OrderStatus = (typeof orderStatuses)[number];

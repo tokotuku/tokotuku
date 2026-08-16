@@ -3,8 +3,8 @@
 
 import { defineMiddleware } from "astro:middleware";
 import { env } from "cloudflare:workers";
-import brand from "virtual:tokotuku/config";
-import registry from "virtual:tokotuku/registry";
+import brand from "virtual:takontuku/config";
+import registry from "virtual:takontuku/registry";
 // Imported from the package's own main specifier, not a relative path: this
 // file ships as raw source (it needs the consumer's own astro:middleware /
 // cloudflare:workers resolution), while callers like an app's session-resolver
@@ -13,7 +13,7 @@ import registry from "virtual:tokotuku/registry";
 // of session.ts's module-scope resolver, so a registration made against one
 // would be invisible to the other. Importing through the same package
 // specifier here keeps everyone on the one instance.
-import { checkSetupGate, type ResolvedSession, resolveSession } from "@tokotuku/core";
+import { checkSetupGate, type ResolvedSession, resolveSession } from "@takontuku/core";
 import type { APIContext } from "astro";
 
 type Redirect = APIContext["redirect"];

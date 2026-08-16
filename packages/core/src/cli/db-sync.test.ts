@@ -8,7 +8,7 @@ import { readLockfile, syncMigrations } from "./db-sync";
 let dir: string;
 
 beforeEach(async () => {
-  dir = await mkdtemp(path.join(tmpdir(), "tokotuku-db-sync-"));
+  dir = await mkdtemp(path.join(tmpdir(), "takontuku-db-sync-"));
 });
 
 afterEach(async () => {
@@ -28,7 +28,7 @@ describe("syncMigrations", () => {
       "CREATE TABLE catalog_items (id INTEGER PRIMARY KEY);\n",
     );
     const migrationsDir = path.join(dir, "migrations");
-    const lockfilePath = path.join(dir, "tokotuku.migrations.json");
+    const lockfilePath = path.join(dir, "takontuku.migrations.json");
 
     const result = await syncMigrations({
       modules: [{ name: "catalog", migrations: [{ name: "init", url: catalogUrl }] }],
@@ -52,7 +52,7 @@ describe("syncMigrations", () => {
   it("does nothing on a second run with the same modules", async () => {
     const catalogUrl = await writeSourceMigration("catalog-init.sql", "CREATE TABLE x (id INT);\n");
     const migrationsDir = path.join(dir, "migrations");
-    const lockfilePath = path.join(dir, "tokotuku.migrations.json");
+    const lockfilePath = path.join(dir, "takontuku.migrations.json");
     const modules = [{ name: "catalog", migrations: [{ name: "init", url: catalogUrl }] }];
 
     await syncMigrations({ modules, lockfilePath, migrationsDir });
@@ -64,7 +64,7 @@ describe("syncMigrations", () => {
   it("adds a later module's migration without rewriting the first module's file", async () => {
     const catalogUrl = await writeSourceMigration("catalog-init.sql", "-- catalog\n");
     const migrationsDir = path.join(dir, "migrations");
-    const lockfilePath = path.join(dir, "tokotuku.migrations.json");
+    const lockfilePath = path.join(dir, "takontuku.migrations.json");
 
     await syncMigrations({
       modules: [{ name: "catalog", migrations: [{ name: "init", url: catalogUrl }] }],

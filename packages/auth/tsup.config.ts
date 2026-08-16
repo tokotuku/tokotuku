@@ -1,4 +1,4 @@
-import { createTsupConfig } from "@tokotuku/config/tsup";
+import { createTsupConfig } from "@takontuku/config/tsup";
 
 export default createTsupConfig({
   // Only index.ts is bundled — see packages/catalog/tsup.config.ts for why.

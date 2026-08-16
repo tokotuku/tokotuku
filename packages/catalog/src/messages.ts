@@ -1,4 +1,4 @@
-import type { MessageDictionaries, Translator } from "@tokotuku/core";
+import type { MessageDictionaries, Translator } from "@takontuku/core";
 
 export const catalogMessages: MessageDictionaries = {
   id: {

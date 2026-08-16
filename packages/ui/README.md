@@ -1,9 +1,9 @@
 # Starter application UI
 
-All Astro components and the Tailwind v4 theme for the Tokotuku starter live in this single
+All Astro components and the Tailwind v4 theme for the Takontuku starter live in this single
 workspace package.
 
-Import `@tokotuku/ui/styles.css` once in the application layout. It provides Tailwind,
+Import `@takontuku/ui/styles.css` once in the application layout. It provides Tailwind,
 semantic theme utilities, and light/dark color modes with OS accessibility support.
 
 ## Included surfaces
@@ -20,8 +20,8 @@ Components are exported individually so an application only imports the surfaces
 
 ```astro
 ---
-import Chart from "@tokotuku/ui/Chart.astro";
-import type { ChartInput } from "@tokotuku/ui/chart";
+import Chart from "@takontuku/ui/Chart.astro";
+import type { ChartInput } from "@takontuku/ui/chart";
 
 const input: ChartInput = {
   data: { values: [{ product: "Widget", revenue: 1200 }] },
@@ -36,7 +36,7 @@ const input: ChartInput = {
 <Chart input={input} title="Revenue by product" />
 ```
 
-The chart component follows the active Tokotuku theme, respects reduced-motion preferences,
+The chart component follows the active Takontuku theme, respects reduced-motion preferences,
 enables ECharts ARIA decals, and renders a collapsible data table as an accessible fallback.
 Selections bubble as a `chart-select` custom event from the chart root.
 
