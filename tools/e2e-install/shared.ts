@@ -78,6 +78,48 @@ const PUBLISHABLE_PACKAGES = [
   "packages/create-takontuku",
 ];
 
+const NPMRC_PATH = path.join(ROOT, ".npmrc");
+
+/**
+ * `bun publish`'s auth-token lookup for an UNSCOPED package name (only
+ * create-takontuku, of PUBLISHABLE_PACKAGES) needs an actual default
+ * `registry=` line in .npmrc to anchor to -- verified empirically that
+ * neither `--registry` on the command line nor `npm_config_registry` /
+ * `npm_config__authtoken` env vars are enough on their own. Scoped
+ * @takontuku/* packages don't have this problem: `@takontuku:registry=`
+ * already gives bun that anchor by itself.
+ *
+ * The persistent repo .npmrc deliberately has no default `registry=` line
+ * -- one there routes every OTHER package's `bun install` through
+ * Verdaccio too, which is exactly what silently filled bun.lock with local
+ * tarball URLs for ordinary third-party dependencies like astro until this
+ * was caught. So this adds the line back only for the duration of
+ * publishing, then restores the file exactly (or removes it, if it didn't
+ * exist before), regardless of outcome.
+ */
+function withDefaultRegistryForPublish<T>(fn: () => T): T {
+  let original: string | null;
+  try {
+    original = readFileSync(NPMRC_PATH, "utf8");
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+    original = null;
+  }
+  if (original?.split("\n").some((line) => line.startsWith("registry="))) {
+    return fn();
+  }
+  try {
+    writeFileSync(NPMRC_PATH, `${original ?? ""}registry=${REGISTRY}\n`);
+    return fn();
+  } finally {
+    if (original === null) {
+      execFileSync("rm", [NPMRC_PATH]);
+    } else {
+      writeFileSync(NPMRC_PATH, original);
+    }
+  }
+}
+
 /**
  * `bun publish` occasionally fails client-side with "missing authentication"
  * against a registry the same .npmrc just authenticated a prior publish to
@@ -150,9 +192,11 @@ export function publishAll(): string {
 
   const version = `0.0.0-e2e.${Date.now()}`;
   console.log(`Publishing at ${version} to ${REGISTRY}`);
-  for (const dir of PUBLISHABLE_PACKAGES) {
-    publishPackage(dir, version);
-  }
+  withDefaultRegistryForPublish(() => {
+    for (const dir of PUBLISHABLE_PACKAGES) {
+      publishPackage(dir, version);
+    }
+  });
   return version;
 }
 
