@@ -1,4 +1,4 @@
-import Button from "@tokotuku/ui/Button.astro";
+import Button from "@takontuku/ui/Button.astro";
 
 export default {
   title: "Core/Button",

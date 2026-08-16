@@ -65,13 +65,13 @@ async function bootAndFetch(clientDir: string, paths: string[]): Promise<Map<str
 async function main(): Promise<void> {
   const version = publishAll();
 
-  const scratchParent = mkdtempSync(path.join(tmpdir(), "tokotuku-e2e-demo-"));
+  const scratchParent = mkdtempSync(path.join(tmpdir(), "takontuku-e2e-demo-"));
   const clientDir = scaffoldClient(scratchParent, "demo-walkthrough", version);
   console.log(`Scaffolded client at ${clientDir}`);
 
   // --- Step 1: bare install -----------------------------------------------
   installClient(clientDir);
-  sh("bunx", ["tokotuku", "db", "sync"], clientDir);
+  sh("bunx", ["takontuku", "db", "sync"], clientDir);
   sh("bunx", ["wrangler", "d1", "migrations", "apply", "DB", "--local"], clientDir);
   sh("bun", ["run", "build"], clientDir);
 
@@ -89,7 +89,7 @@ async function main(): Promise<void> {
   console.log("Step 1 (bare install): storefront is empty, as expected.");
 
   // --- Step 2: seed ---------------------------------------------------------
-  sh("bunx", ["tokotuku", "db", "seed"], clientDir);
+  sh("bunx", ["takontuku", "db", "seed"], clientDir);
 
   const catalogCount = queryD1(clientDir, "SELECT COUNT(*) as count FROM catalog_items");
   assert(

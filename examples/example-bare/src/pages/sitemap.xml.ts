@@ -1,5 +1,5 @@
 import { env } from "cloudflare:workers";
-import { listProducts } from "@tokotuku/catalog";
+import { listProducts } from "@takontuku/catalog";
 import type { APIRoute } from "astro";
 
 export const GET: APIRoute = async ({ url }) => {

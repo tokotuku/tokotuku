@@ -1,9 +1,9 @@
 ---
-import { createTranslator } from "@tokotuku/core";
-import { brand, money } from "@tokotuku/core/brand";
-import Icon from "@tokotuku/ui/Icon.astro";
-import Layout from "@tokotuku/ui/Layout.astro";
-import StoreHeader from "@tokotuku/ui/StoreHeader.astro";
+import { createTranslator } from "@takontuku/core";
+import { brand, money } from "@takontuku/core/brand";
+import Icon from "@takontuku/ui/Icon.astro";
+import Layout from "@takontuku/ui/Layout.astro";
+import StoreHeader from "@takontuku/ui/StoreHeader.astro";
 import { orderMessages } from "../messages";
 
 const id = brand.locale.toLowerCase().startsWith("id");
@@ -26,7 +26,7 @@ const t = createTranslator(brand, orderMessages);
 </Layout>
 
 <script>
-  import { money } from "@tokotuku/core/brand";
+  import { money } from "@takontuku/core/brand";
   import { onCartChange, readCart, removeFromCart, setQuantity } from "../client/cart";
   import { appendAll } from "../client/dom";
 

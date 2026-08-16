@@ -1,7 +1,7 @@
 ---
 /// <reference path="../../virtual.d.ts" />
-import widgets from "virtual:tokotuku/admin-dashboard-widgets";
-import StorefrontEmptyCollection from "@tokotuku/ui/StorefrontEmptyCollection.astro";
+import widgets from "virtual:takontuku/admin-dashboard-widgets";
+import StorefrontEmptyCollection from "@takontuku/ui/StorefrontEmptyCollection.astro";
 import { brand } from "../../brand";
 import { coreMessages, createTranslator } from "../../messages";
 import AdminLayout from "../AdminLayout.astro";
@@ -29,7 +29,7 @@ const asideWidgets = widgets.filter((widget) => widget.area === "aside");
       {asideWidgets.length > 0 && <aside class="dashboard-widgets dashboard-widgets--aside" data-dashboard-area="aside">{asideWidgets.map(({ component: Widget }) => <Widget />)}</aside>}
     </div>
   ) : (
-    <section class="empty-dashboard panel"><StorefrontEmptyCollection eyebrow={locale === "id" ? "Workspace siap" : "Workspace ready"} title={locale === "id" ? "Tambahkan modul untuk mulai bekerja." : "Add a module to start working."} description={locale === "id" ? "Tokotuku akan menampilkan area operasional di sini saat Catalog atau Orders dipasang." : "Tokotuku will place operational workspaces here when Catalog or Orders is installed."} /></section>
+    <section class="empty-dashboard panel"><StorefrontEmptyCollection eyebrow={locale === "id" ? "Workspace siap" : "Workspace ready"} title={locale === "id" ? "Tambahkan modul untuk mulai bekerja." : "Add a module to start working."} description={locale === "id" ? "Takontuku akan menampilkan area operasional di sini saat Catalog atau Orders dipasang." : "Takontuku will place operational workspaces here when Catalog or Orders is installed."} /></section>
   )}
 </AdminLayout>
 

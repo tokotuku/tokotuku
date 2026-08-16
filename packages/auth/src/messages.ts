@@ -1,4 +1,4 @@
-import type { MessageDictionaries } from "@tokotuku/core";
+import type { MessageDictionaries } from "@takontuku/core";
 
 export const authMessages: MessageDictionaries = {
   id: {
@@ -10,7 +10,7 @@ export const authMessages: MessageDictionaries = {
     "auth.login.title": "Selamat datang kembali",
     "auth.login.description": "Masuk ke dashboard {brand}.",
     "auth.login.emailLabel": "Email",
-    "auth.login.emailPlaceholder": "kamu@tokotuku.com",
+    "auth.login.emailPlaceholder": "kamu@takontuku.com",
     "auth.login.passwordLabel": "Password",
     "auth.login.passwordPlaceholder": "Masukkan password",
     "auth.login.forgot": "Lupa password?",
@@ -70,7 +70,7 @@ export const authMessages: MessageDictionaries = {
     "auth.login.title": "Welcome back",
     "auth.login.description": "Sign in to your {brand} dashboard.",
     "auth.login.emailLabel": "Email",
-    "auth.login.emailPlaceholder": "you@tokotuku.com",
+    "auth.login.emailPlaceholder": "you@takontuku.com",
     "auth.login.passwordLabel": "Password",
     "auth.login.passwordPlaceholder": "Enter your password",
     "auth.login.forgot": "Forgot password?",

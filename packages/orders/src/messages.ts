@@ -1,4 +1,4 @@
-import type { MessageDictionaries } from "@tokotuku/core";
+import type { MessageDictionaries } from "@takontuku/core";
 
 export const orderMessages: MessageDictionaries = {
   id: {

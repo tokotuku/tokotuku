@@ -5,7 +5,7 @@ layer: "tool"
 
 tasks:
   # Gate 1 ("tarball install") from the migration plan. Publishes every
-  # publishable @tokotuku/* package to a real registry (Verdaccio locally,
+  # publishable @takontuku/* package to a real registry (Verdaccio locally,
   # see tools/verdaccio) and installs them into a scratch client the way a
   # real client would, catching what workspace:* symlinks hide: broken
   # exports maps, missing "files" entries, missing peerDependencies, and

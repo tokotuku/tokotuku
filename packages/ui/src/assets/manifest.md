@@ -1,4 +1,4 @@
-# Tokotuku generated visual assets
+# Takontuku generated visual assets
 
 Generated with ImageGen (built-in model) on 2026-08-15 for the premium editorial UI overhaul.
 

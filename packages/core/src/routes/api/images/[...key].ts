@@ -1,5 +1,5 @@
 import { env } from "cloudflare:workers";
-import registry from "virtual:tokotuku/registry";
+import registry from "virtual:takontuku/registry";
 import type { APIRoute } from "astro";
 
 export const GET: APIRoute = async ({ params }) => {

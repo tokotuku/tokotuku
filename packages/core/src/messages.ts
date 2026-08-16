@@ -40,7 +40,7 @@ export function createTranslator(
       (packageNamespaces.has(`${key.split(".")[0] ?? key}.`) ||
         !knownNamespaces.some((namespace) => key.startsWith(namespace)))
     ) {
-      console.warn(`[tokotuku] Unknown message override: ${key}`);
+      console.warn(`[takontuku] Unknown message override: ${key}`);
     }
   }
 
@@ -58,7 +58,7 @@ export function createTranslator(
 export const coreMessages: MessageDictionaries = {
   id: {
     "storefront.announcement": "Objek untuk ritual sehari-hari.",
-    "storefront.hero.eyebrow": "Tokotuku · objek untuk ritual sehari-hari",
+    "storefront.hero.eyebrow": "Takontuku · objek untuk ritual sehari-hari",
     "storefront.hero.title": "Benda yang membuat hari terasa pulang.",
     "storefront.hero.description":
       "Pilihan kecil yang dibuat dengan bahan jujur, niat baik, dan ruang untuk dipakai setiap hari.",
@@ -93,7 +93,7 @@ export const coreMessages: MessageDictionaries = {
     "admin.nav.defaultUser": "Admin",
     "admin.nav.dashboardAria": "Navigasi toko",
     "admin.nav.brandDashboard": "Dashboard {brand}",
-    "admin.nav.attribution": "Dibuat dengan Tokotuku UI",
+    "admin.nav.attribution": "Dibuat dengan Takontuku UI",
     "admin.dashboard.title": "Kelola {brand}",
     "admin.dashboard.greeting": "Selamat datang, {name}",
     "admin.dashboard.workspaceTitle": "Workspace toko",
@@ -122,7 +122,7 @@ export const coreMessages: MessageDictionaries = {
   },
   en: {
     "storefront.announcement": "Objects for everyday rituals.",
-    "storefront.hero.eyebrow": "Tokotuku · objects for everyday rituals",
+    "storefront.hero.eyebrow": "Takontuku · objects for everyday rituals",
     "storefront.hero.title": "Objects that make a day feel like home.",
     "storefront.hero.description":
       "Small choices made with honest materials, good intent, and room to be used every day.",
@@ -157,7 +157,7 @@ export const coreMessages: MessageDictionaries = {
     "admin.nav.defaultUser": "Admin",
     "admin.nav.dashboardAria": "Store navigation",
     "admin.nav.brandDashboard": "{brand} dashboard",
-    "admin.nav.attribution": "Built with Tokotuku UI",
+    "admin.nav.attribution": "Built with Takontuku UI",
     "admin.dashboard.title": "Manage {brand}",
     "admin.dashboard.greeting": "Welcome back, {name}",
     "admin.dashboard.workspaceTitle": "Store workspace",

@@ -103,7 +103,7 @@ jobs:
             exit 1
           fi
           cat > .npmrc <<EOF
-          @tokotuku:registry=http://localhost:4873
+          @takontuku:registry=http://localhost:4873
           registry=http://localhost:4873
           //localhost:4873/:_authToken=${TOKEN}
           EOF
@@ -140,7 +140,7 @@ jobs:
 
       # The verification slice of Gate 5: proves `bun update` actually
       # propagates a patch to a client, without touching real npm
-      # publishing or claiming the @tokotuku scope on the public registry.
+      # publishing or claiming the @takontuku scope on the public registry.
       # See tools/e2e-install/README.md.
       - name: Run Gate 5 (update propagation)
         run: moon run e2e-install:propagation

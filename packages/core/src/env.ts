@@ -8,7 +8,7 @@ import type { D1Database, R2Bucket } from "@cloudflare/workers-types";
  * `IMAGES` — that collides with @astrojs/cloudflare's own default
  * Cloudflare Images binding.
  */
-export interface TokotukuEnv {
+export interface TakontukuEnv {
   DB: D1Database;
   MEDIA: R2Bucket;
   BETTER_AUTH_SECRET: string;

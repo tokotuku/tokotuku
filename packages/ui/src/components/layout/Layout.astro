@@ -1,8 +1,8 @@
 ---
 /// <reference types="../../virtual.d.ts" />
-import "@tokotuku/ui/styles.css";
-import ambientScripts from "virtual:tokotuku/ambient-scripts";
-import SEO from "@tokotuku/ui/SEO.astro";
+import "@takontuku/ui/styles.css";
+import ambientScripts from "virtual:takontuku/ambient-scripts";
+import SEO from "@takontuku/ui/SEO.astro";
 
 interface Props {
   title: string;
@@ -28,7 +28,7 @@ const {
   type = "website",
   jsonLd,
   noindex = false,
-  siteName = "Tokotuku",
+  siteName = "Takontuku",
   lang = "en",
   palette,
 } = Astro.props;
@@ -66,7 +66,7 @@ const paletteVars = [
     />
     <script is:inline>
       (() => {
-        const saved = localStorage.getItem("tokotuku-theme");
+        const saved = localStorage.getItem("takontuku-theme");
         const theme = saved === "light" || saved === "dark" ? saved : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
         document.documentElement.dataset.theme = theme;
       })();

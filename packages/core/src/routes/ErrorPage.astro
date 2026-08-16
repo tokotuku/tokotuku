@@ -1,6 +1,6 @@
 ---
-import Icon from "@tokotuku/ui/Icon.astro";
-import Layout from "@tokotuku/ui/Layout.astro";
+import Icon from "@takontuku/ui/Icon.astro";
+import Layout from "@takontuku/ui/Layout.astro";
 import { brand } from "../brand";
 import { coreMessages, createTranslator } from "../messages";
 
@@ -23,7 +23,7 @@ const t = createTranslator(brand, coreMessages);
       <h1>{t(forbidden ? "admin.error.forbiddenTitle" : "admin.error.notFoundTitle")}</h1>
       <p>{t(forbidden ? "admin.error.forbiddenDescription" : "admin.error.notFoundDescription")}</p>
       <a class="error-primary" href={forbidden ? "/admin" : "/"}><Icon name="dashboard" size={16} /> {t(forbidden ? "admin.error.backDashboard" : "admin.error.backHome")}</a>
-      <a class="error-secondary" href={forbidden ? "/login" : "mailto:support@tokotuku.dev"}>{t(forbidden ? "admin.error.switchAccount" : "admin.error.contactSupport")}</a>
+      <a class="error-secondary" href={forbidden ? "/login" : "mailto:support@takontuku.dev"}>{t(forbidden ? "admin.error.switchAccount" : "admin.error.contactSupport")}</a>
     </section>
   </main>
 </Layout>
@@ -32,7 +32,7 @@ const t = createTranslator(brand, coreMessages);
   document.querySelector("[data-error-theme]")?.addEventListener("click", () => {
     const next = document.documentElement.dataset["theme"] === "dark" ? "light" : "dark";
     document.documentElement.dataset["theme"] = next;
-    localStorage.setItem("tokotuku-theme", next);
+    localStorage.setItem("takontuku-theme", next);
   });
 </script>
 

@@ -1,5 +1,5 @@
 ---
-import Icon from "@tokotuku/ui/Icon.astro";
+import Icon from "@takontuku/ui/Icon.astro";
 
 interface Props {
   id: number;
@@ -26,7 +26,7 @@ const serialized = JSON.stringify({ id, name, priceCents, imageUrl });
 
 <article class="editorial-card" data-theme-override="true">
   <a class="editorial-media" href={"/products/" + id} aria-label={"Lihat " + name}><img src={imageUrl} alt={name} loading="lazy" /><span>{stock > 0 ? "Ready" : "Habis"}</span></a>
-  <div class="editorial-body"><p>Tokotuku edition</p><h2><a href={"/products/" + id}>{name}</a></h2><div><strong>{price}</strong>{showAddToCart && <button type="button" data-add-to-cart data-product={serialized} disabled={stock <= 0}>{stock > 0 ? <Icon name="plus" size={15} /> : "Habis"}</button>}</div><small>{description}</small></div>
+  <div class="editorial-body"><p>Takontuku edition</p><h2><a href={"/products/" + id}>{name}</a></h2><div><strong>{price}</strong>{showAddToCart && <button type="button" data-add-to-cart data-product={serialized} disabled={stock <= 0}>{stock > 0 ? <Icon name="plus" size={15} /> : "Habis"}</button>}</div><small>{description}</small></div>
 </article>
 
 <style>

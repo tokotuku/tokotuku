@@ -2,7 +2,7 @@
 // Gate 5 (verification slice) from the migration plan: proves the actual
 // business reason this migration exists -- "framework harus jadi package
 // supaya perbaikan bisa didorong lewat bun update." Publishes a baseline,
-// scaffolds a client the way create-tokotuku actually leaves it
+// scaffolds a client the way create-takontuku actually leaves it
 // (dependencies pinned to the literal "latest" specifier, not a fixed
 // version -- see scaffoldClient's `version: null`), makes a real code
 // change, republishes, and asserts `bun update` in that SAME client picks
@@ -11,7 +11,7 @@
 // This deliberately stops short of the plan's full Gate 5, which also
 // calls for wiring `changeset version` + publish into CI (Verdaccio on
 // `dev`, real npm on `main`). That's a release-engineering decision with
-// real external consequences -- claiming the @tokotuku scope on the public
+// real external consequences -- claiming the @takontuku scope on the public
 // registry, npm publish credentials in CI -- not something to set up
 // unilaterally. This script only proves the update mechanism itself works,
 // entirely against the local registry.
@@ -43,13 +43,15 @@ const ADMIN = {
   password: "gate5proppass123",
 };
 
-const MARKER_FILE = path.join(ROOT, "packages/catalog/src/routes/products/index.astro");
-// Matched against rendered text content, not raw tag markup -- Astro's
-// scoped-style compiler injects a data-astro-cid-* attribute onto <h1>
-// (this component has a <style> block), so the literal opening tag never
-// appears as "<h1>" in the output.
-const ORIGINAL_HEADING = "Useful by nature.";
-const PATCHED_HEADING = "Useful by nature. (patched)";
+const MARKER_FILE = path.join(ROOT, "packages/catalog/src/messages.ts");
+// This client is never seeded (no `db seed` call below), so /products
+// renders the empty-catalog state (StorefrontEmptyCollection via
+// t("catalog.storefront.emptyTitle")), not the listing heading -- that one
+// only renders once catalogCount > 0. create-takontuku scaffolds clients
+// with locale "id-ID" by default, so the "id" dictionary entry is what
+// actually renders and is what this patches.
+const ORIGINAL_HEADING = "Koleksi segera hadir";
+const PATCHED_HEADING = "Koleksi segera hadir (patched)";
 
 async function fetchProductsHeading(origin: string): Promise<string> {
   const html = await (await fetch(`${origin}/products`)).text();
@@ -81,14 +83,14 @@ async function bootAndCheck(clientDir: string): Promise<string> {
 async function main(): Promise<void> {
   publishAll();
 
-  const scratchParent = mkdtempSync(path.join(tmpdir(), "tokotuku-e2e-propagation-"));
+  const scratchParent = mkdtempSync(path.join(tmpdir(), "takontuku-e2e-propagation-"));
   const clientDir = scaffoldClient(scratchParent, "gate5-client", null);
   console.log(
     `Scaffolded client (dependencies pinned to "latest", like a real client) at ${clientDir}`,
   );
 
   installClient(clientDir);
-  sh("bunx", ["tokotuku", "db", "sync"], clientDir);
+  sh("bunx", ["takontuku", "db", "sync"], clientDir);
   sh("bunx", ["wrangler", "d1", "migrations", "apply", "DB", "--local"], clientDir);
   sh("bun", ["run", "build"], clientDir);
 

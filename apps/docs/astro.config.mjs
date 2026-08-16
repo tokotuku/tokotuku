@@ -6,10 +6,10 @@ export default defineConfig({
   vite: { plugins: [tailwindcss()] },
   integrations: [
     starlight({
-      title: "Tokotuku UI",
+      title: "Takontuku UI",
       description: "An accessible, Astro-first component system for commerce applications.",
       social: [
-        { icon: "github", label: "GitHub", href: "https://github.com/tokotuku-ui/tokotuku" },
+        { icon: "github", label: "GitHub", href: "https://github.com/takontuku-ui/takontuku" },
       ],
       sidebar: [
         {

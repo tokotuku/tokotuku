@@ -17,7 +17,7 @@ async function loadRegistry(cwd: string): Promise<ResolvedRegistry> {
     loaded = await import(pathToFileURL(configPath).href);
   } catch (error) {
     throw new Error(
-      `Could not load ${configPath}. Run "tokotuku db sync" from your project root.\n${
+      `Could not load ${configPath}. Run "takontuku db sync" from your project root.\n${
         error instanceof Error ? error.message : String(error)
       }`,
     );
@@ -26,16 +26,16 @@ async function loadRegistry(cwd: string): Promise<ResolvedRegistry> {
   const integrations = ((loaded.default?.integrations ?? []) as unknown[])
     .flat()
     .filter((integration): integration is AstroIntegrationLike => Boolean(integration));
-  const tokotukuIntegration = integrations.find(
-    (integration) => integration.name === "@tokotuku/core",
+  const takontukuIntegration = integrations.find(
+    (integration) => integration.name === "@takontuku/core",
   );
 
-  if (!tokotukuIntegration?.registry) {
+  if (!takontukuIntegration?.registry) {
     throw new Error(
-      `Could not find the tokotuku() integration in ${configPath}. Is @tokotuku/core listed in "integrations"?`,
+      `Could not find the takontuku() integration in ${configPath}. Is @takontuku/core listed in "integrations"?`,
     );
   }
-  return tokotukuIntegration.registry;
+  return takontukuIntegration.registry;
 }
 
 async function runDbSync(): Promise<void> {
@@ -43,7 +43,7 @@ async function runDbSync(): Promise<void> {
   const registry = await loadRegistry(cwd);
   const { written } = await syncMigrations({
     modules: registry.modules,
-    lockfilePath: path.join(cwd, "tokotuku.migrations.json"),
+    lockfilePath: path.join(cwd, "takontuku.migrations.json"),
     migrationsDir: path.join(cwd, "migrations"),
   });
 
@@ -87,7 +87,7 @@ async function main(): Promise<void> {
     await runDbSeed();
     return;
   }
-  console.error("Usage: tokotuku db sync | tokotuku db seed");
+  console.error("Usage: takontuku db sync | takontuku db seed");
   process.exitCode = 1;
 }
 

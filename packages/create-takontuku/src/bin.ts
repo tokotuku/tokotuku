@@ -52,7 +52,7 @@ async function copyTemplate(srcDir: string, destDir: string, placeholders: Place
 async function main(): Promise<void> {
   const projectName = process.argv[2];
   if (!projectName) {
-    console.error("Usage: create-tokotuku <project-name>");
+    console.error("Usage: create-takontuku <project-name>");
     process.exitCode = 1;
     return;
   }
@@ -83,9 +83,9 @@ async function main(): Promise<void> {
     `  wrangler d1 create ${projectName}-db   # then paste the printed UUID into wrangler.jsonc`,
   );
   console.log(`  wrangler r2 bucket create ${projectName}-media`);
-  console.log("  bunx tokotuku db sync");
+  console.log("  bunx takontuku db sync");
   console.log("  wrangler d1 migrations apply DB --local");
-  console.log("  bunx tokotuku db seed   # optional -- populates demo data for local dev");
+  console.log("  bunx takontuku db seed   # optional -- populates demo data for local dev");
   console.log("  bun run dev");
   console.log("");
   console.log(

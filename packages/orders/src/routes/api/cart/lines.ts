@@ -1,6 +1,6 @@
 import { env } from "cloudflare:workers";
-import { findProductsByIds } from "@tokotuku/catalog";
-import { mediaUrl } from "@tokotuku/core";
+import { findProductsByIds } from "@takontuku/catalog";
+import { mediaUrl } from "@takontuku/core";
 import type { APIRoute } from "astro";
 
 export const GET: APIRoute = async ({ url }) => {

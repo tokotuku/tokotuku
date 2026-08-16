@@ -2,12 +2,12 @@ export * from "./db";
 export * from "./env";
 export * from "./format";
 export {
-  type TokotukuAuthBrand,
-  type TokotukuBrand,
-  type TokotukuIntegration,
-  type TokotukuOptions,
-  type TokotukuStorefrontBrand,
-  tokotuku,
+  type TakontukuAuthBrand,
+  type TakontukuBrand,
+  type TakontukuIntegration,
+  type TakontukuOptions,
+  type TakontukuStorefrontBrand,
+  takontuku,
 } from "./integration";
 export * from "./media";
 export * from "./messages";

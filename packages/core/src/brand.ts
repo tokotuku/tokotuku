@@ -1,5 +1,5 @@
 /// <reference path="./virtual.d.ts" />
-import brandConfig from "virtual:tokotuku/config";
+import brandConfig from "virtual:takontuku/config";
 import { createFormatters } from "./format";
 
 export const brand = brandConfig;

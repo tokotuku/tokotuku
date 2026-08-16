@@ -169,12 +169,12 @@ async function runSmokeTest(clientDir: string, productId: number): Promise<void>
 async function main(): Promise<void> {
   const version = publishAll();
 
-  const scratchParent = mkdtempSync(path.join(tmpdir(), "tokotuku-e2e-smoke-"));
+  const scratchParent = mkdtempSync(path.join(tmpdir(), "takontuku-e2e-smoke-"));
   const clientDir = scaffoldClient(scratchParent, "gate3-smoke", version);
   console.log(`Scaffolded client at ${clientDir}`);
 
   installClient(clientDir);
-  sh("bunx", ["tokotuku", "db", "sync"], clientDir);
+  sh("bunx", ["takontuku", "db", "sync"], clientDir);
   sh("bunx", ["wrangler", "d1", "migrations", "apply", "DB", "--local"], clientDir);
   const productId = seedProduct(clientDir);
   sh("bun", ["run", "build"], clientDir);

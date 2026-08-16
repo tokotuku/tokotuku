@@ -1,5 +1,5 @@
 import { env } from "cloudflare:workers";
-import { registerSessionResolver, registerSetupGate } from "@tokotuku/core";
+import { registerSessionResolver, registerSetupGate } from "@takontuku/core";
 import { createAuth } from "./auth";
 import { canAccessBackoffice } from "./roles";
 import { isSetupComplete } from "./setup";

@@ -5,7 +5,7 @@ sidebar:
   order: 2
 ---
 
-import Chart from "@tokotuku/ui/Chart.astro";
+import Chart from "@takontuku/ui/Chart.astro";
 import ComponentPreview from "../../../../components/ComponentPreview.astro";
 
 ## Preview
@@ -37,8 +37,8 @@ import ComponentPreview from "../../../../components/ComponentPreview.astro";
 
 ```astro
 ---
-import Chart from "@tokotuku/ui/Chart.astro";
-import type { ChartInput } from "@tokotuku/ui/chart";
+import Chart from "@takontuku/ui/Chart.astro";
+import type { ChartInput } from "@takontuku/ui/chart";
 
 const input: ChartInput = {
   data: { values: [{ product: "Widget", price: 19.99 }] },
@@ -70,7 +70,7 @@ const input: ChartInput = {
 ## Behavior and accessibility
 
 - Registers only bar, line, pie, scatter, and heatmap ECharts series.
-- Uses the SVG renderer and Tokotuku semantic theme tokens.
+- Uses the SVG renderer and Takontuku semantic theme tokens.
 - Re-renders when the document theme changes and resizes through `ResizeObserver`.
 - Enables ECharts ARIA descriptions and decals.
 - Renders a collapsible data table when inline values are available.

@@ -1,17 +1,17 @@
 {
-  "name": "create-tokotuku",
+  "name": "create-takontuku",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "bin": {
-    "create-tokotuku": "./dist/bin.js"
+    "create-takontuku": "./dist/bin.js"
   },
   "files": [
     "dist",
     "src/template"
   ],
   "devDependencies": {
-    "@tokotuku/config": "workspace:*",
+    "@takontuku/config": "workspace:*",
     "@types/bun": "latest"
   },
   "scripts": {

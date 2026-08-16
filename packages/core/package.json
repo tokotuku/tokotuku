@@ -1,5 +1,5 @@
 {
-  "name": "@tokotuku/core",
+  "name": "@takontuku/core",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -12,7 +12,7 @@
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "tokotuku": "./dist/cli/bin.js"
+    "takontuku": "./dist/cli/bin.js"
   },
   "exports": {
     ".": {
@@ -28,12 +28,12 @@
     "./package.json": "./package.json"
   },
   "dependencies": {
-    "@tokotuku/ui": "workspace:*"
+    "@takontuku/ui": "workspace:*"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.4",
     "@cloudflare/workers-types": "^5.20260710.1",
-    "@tokotuku/config": "workspace:*",
+    "@takontuku/config": "workspace:*",
     "astro": "^7.0.9",
     "vite": "^8.1.4"
   },

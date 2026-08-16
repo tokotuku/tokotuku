@@ -1,18 +1,18 @@
 import type { Plugin } from "vite";
-import type { TokotukuBrand } from "./integration";
+import type { TakontukuBrand } from "./integration";
 import type { ResolvedRegistry } from "./registry";
 
 const RESOLVED_PREFIX = "\0";
-const MODULE_PREFIX = "virtual:tokotuku/";
+const MODULE_PREFIX = "virtual:takontuku/";
 
 function resolveVirtualModuleId(id: string): string {
   return `${RESOLVED_PREFIX}${id}`;
 }
 
 /** Vite plugin that exposes the resolved module registry and brand config as virtual modules. */
-export function tokotukuVirtualModulesPlugin(
+export function takontukuVirtualModulesPlugin(
   registry: ResolvedRegistry,
-  brand: TokotukuBrand,
+  brand: TakontukuBrand,
 ): Plugin {
   // `registry.modules` carries ModuleMigration/ModuleSeed URLs, which
   // resolve on the developer's own machine (file://...) -- nothing at
@@ -21,10 +21,10 @@ export function tokotukuVirtualModulesPlugin(
   // bundled into the client and leaking a local filesystem path.
   const { modules: _modules, ...clientRegistry } = registry;
   const modules: Record<string, string> = {
-    "virtual:tokotuku/registry": `export default ${JSON.stringify(clientRegistry)};`,
-    "virtual:tokotuku/admin-nav": `export default ${JSON.stringify(registry.adminNav)};`,
-    "virtual:tokotuku/config": `export default ${JSON.stringify(brand)};`,
-    "virtual:tokotuku/storefront-home-sections": [
+    "virtual:takontuku/registry": `export default ${JSON.stringify(clientRegistry)};`,
+    "virtual:takontuku/admin-nav": `export default ${JSON.stringify(registry.adminNav)};`,
+    "virtual:takontuku/config": `export default ${JSON.stringify(brand)};`,
+    "virtual:takontuku/storefront-home-sections": [
       ...registry.storefrontHomeSections.map(
         (section, index) =>
           "import Section" + index + " from " + JSON.stringify(section.entrypoint) + ";",
@@ -35,7 +35,7 @@ export function tokotukuVirtualModulesPlugin(
         registry.storefrontHomeSections.map((_, index) => "Section" + index).join(", ") +
         "][index] }));",
     ].join("\n"),
-    "virtual:tokotuku/admin-dashboard-widgets": [
+    "virtual:takontuku/admin-dashboard-widgets": [
       ...registry.adminDashboardWidgets.map(
         (widget, index) =>
           "import Widget" + index + " from " + JSON.stringify(widget.entrypoint) + ";",
@@ -46,7 +46,7 @@ export function tokotukuVirtualModulesPlugin(
         registry.adminDashboardWidgets.map((_, index) => "Widget" + index).join(", ") +
         "][index] }));",
     ].join("\n"),
-    "virtual:tokotuku/ambient-scripts": [
+    "virtual:takontuku/ambient-scripts": [
       ...registry.ambientScripts.map(
         (specifier, index) => `import Ambient${index} from ${JSON.stringify(specifier)};`,
       ),
@@ -59,7 +59,7 @@ export function tokotukuVirtualModulesPlugin(
   );
 
   return {
-    name: "vite-plugin-tokotuku-virtual-modules",
+    name: "vite-plugin-takontuku-virtual-modules",
     resolveId(id) {
       if (id.startsWith(MODULE_PREFIX) && id in modules) return resolveVirtualModuleId(id);
       return undefined;

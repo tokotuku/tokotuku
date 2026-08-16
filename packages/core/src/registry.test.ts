@@ -14,7 +14,7 @@ describe("resolveModules", () => {
 
   it("throws naming the missing package when a dependency is not installed", () => {
     const orders: ModuleDefinition = { name: "orders", requires: ["catalog"] };
-    expect(() => resolveModules([orders])).toThrow(/requires "catalog".*@tokotuku\/catalog/s);
+    expect(() => resolveModules([orders])).toThrow(/requires "catalog".*@takontuku\/catalog/s);
   });
 
   it("throws on a circular dependency instead of hanging", () => {
@@ -28,10 +28,13 @@ describe("resolveModules", () => {
       name: "catalog",
       guardedPrefixes: ["/admin/products"],
       storefrontRoutes: [
-        { pattern: "/products", entrypoint: "@tokotuku/catalog/routes/products.astro" },
+        { pattern: "/products", entrypoint: "@takontuku/catalog/routes/products.astro" },
       ],
       adminRoutes: [
-        { pattern: "/admin/products", entrypoint: "@tokotuku/catalog/routes/admin/products.astro" },
+        {
+          pattern: "/admin/products",
+          entrypoint: "@takontuku/catalog/routes/admin/products.astro",
+        },
       ],
     };
     const orders: ModuleDefinition = {

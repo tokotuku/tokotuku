@@ -1,7 +1,7 @@
 services:
   verdaccio:
     image: verdaccio/verdaccio:6
-    container_name: tokotuku-verdaccio
+    container_name: takontuku-verdaccio
     restart: unless-stopped
     ports:
       - "127.0.0.1:4873:4873"

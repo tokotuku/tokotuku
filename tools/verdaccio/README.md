@@ -18,12 +18,12 @@ npm adduser --registry http://localhost:4873
 `.npmrc` is gitignored, so add the token there instead by appending the line it prints
 (`//localhost:4873/:_authToken=...`) — do not commit it.
 
-The `@tokotuku/*` scope has no `npmjs` proxy configured (see `config.yaml`), so it never falls
+The `@takontuku/*` scope has no `npmjs` proxy configured (see `config.yaml`), so it never falls
 through to the public registry. Map the scope explicitly in `.npmrc` so `bun install` / `bun
 publish` route it to Verdaccio without passing `--registry` on every command:
 
 ```
-@tokotuku:registry=http://localhost:4873
+@takontuku:registry=http://localhost:4873
 //localhost:4873/:_authToken=<token from npm adduser>
 ```
 

@@ -82,13 +82,13 @@ async function bootAndAssert(clientDir: string): Promise<void> {
 async function main(): Promise<void> {
   const version = publishAll();
 
-  const scratchParent = mkdtempSync(path.join(tmpdir(), "tokotuku-e2e-fixture-"));
+  const scratchParent = mkdtempSync(path.join(tmpdir(), "takontuku-e2e-fixture-"));
   const clientDir = scaffoldClient(scratchParent, "gate2-fixture", version);
   dropOrdersModule(clientDir);
   console.log(`Scaffolded fixture (auth + catalog, no orders) at ${clientDir}`);
 
   installClient(clientDir);
-  sh("bunx", ["tokotuku", "db", "sync"], clientDir);
+  sh("bunx", ["takontuku", "db", "sync"], clientDir);
   sh("bunx", ["wrangler", "d1", "migrations", "apply", "DB", "--local"], clientDir);
 
   const tables = queryTableNames(clientDir);

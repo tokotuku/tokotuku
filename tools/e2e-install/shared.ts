@@ -1,7 +1,7 @@
 // Shared helpers for the e2e scripts in this directory (Gate 1's run.ts,
 // Gate 2's fixtures.ts, Gate 2b's upgrade.ts): publishing every publishable
-// @tokotuku/* package to a real registry, scaffolding a client with
-// create-tokotuku, and driving/asserting against a booted client.
+// @takontuku/* package to a real registry, scaffolding a client with
+// create-takontuku, and driving/asserting against a booted client.
 
 import { execFileSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
@@ -63,7 +63,7 @@ const PUBLISHABLE_PACKAGES = [
   "packages/auth",
   "packages/catalog",
   "packages/orders",
-  "packages/create-tokotuku",
+  "packages/create-takontuku",
 ];
 
 /**
@@ -118,7 +118,7 @@ function publishPackage(dir: string, version: string): void {
 }
 
 /**
- * Publishes every publishable @tokotuku/* package at a fresh, unique
+ * Publishes every publishable @takontuku/* package at a fresh, unique
  * version and returns it. Rebuilds dist/ first so a stale or missing build
  * doesn't silently get published.
  *
@@ -132,7 +132,7 @@ function publishPackage(dir: string, version: string): void {
 export function publishAll(): string {
   sh(
     "moon",
-    ["run", "core:build", "auth:build", "catalog:build", "orders:build", "create-tokotuku:build"],
+    ["run", "core:build", "auth:build", "catalog:build", "orders:build", "create-takontuku:build"],
     ROOT,
   );
 
@@ -145,7 +145,7 @@ export function publishAll(): string {
 }
 
 /**
- * Scaffolds a client with create-tokotuku and points its @tokotuku/* deps
+ * Scaffolds a client with create-takontuku and points its @takontuku/* deps
  * at `version` instead of the template's "latest". Pass `null` to leave the
  * template's literal "latest" specifiers untouched -- the state a real
  * client's package.json is actually in, needed for testing that `bun
@@ -157,10 +157,10 @@ export function scaffoldClient(
   version: string | null,
 ): string {
   const clientDir = path.join(scratchParent, clientName);
-  sh("node", [path.join(ROOT, "packages/create-tokotuku/dist/bin.js"), clientName], scratchParent);
+  sh("node", [path.join(ROOT, "packages/create-takontuku/dist/bin.js"), clientName], scratchParent);
   writeFileSync(
     path.join(clientDir, ".npmrc"),
-    `${[`@tokotuku:registry=${REGISTRY}`, `registry=${REGISTRY}`].join("\n")}\n`,
+    `${[`@takontuku:registry=${REGISTRY}`, `registry=${REGISTRY}`].join("\n")}\n`,
   );
 
   if (version !== null) {
@@ -168,7 +168,7 @@ export function scaffoldClient(
     const clientPkg = readJson(clientPkgPath);
     const deps = clientPkg.dependencies as Record<string, string>;
     for (const name of Object.keys(deps)) {
-      if (name.startsWith("@tokotuku/")) deps[name] = version;
+      if (name.startsWith("@takontuku/")) deps[name] = version;
     }
     writeJson(clientPkgPath, clientPkg);
   }
@@ -176,7 +176,7 @@ export function scaffoldClient(
   return clientDir;
 }
 
-/** Drops @tokotuku/orders from a scaffolded client -- the exact edits astro.config.mjs's own "Remove a module here" comment documents. Returns the pre-edit file contents so a caller that wants to add the module back later doesn't have to reconstruct them. */
+/** Drops @takontuku/orders from a scaffolded client -- the exact edits astro.config.mjs's own "Remove a module here" comment documents. Returns the pre-edit file contents so a caller that wants to add the module back later doesn't have to reconstruct them. */
 export function dropOrdersModule(clientDir: string): {
   configPath: string;
   pkgPath: string;
@@ -185,7 +185,7 @@ export function dropOrdersModule(clientDir: string): {
 } {
   const configPath = path.join(clientDir, "astro.config.mjs");
   const originalConfig = readFileSync(configPath, "utf8");
-  let config = originalConfig.replace('import { orders } from "@tokotuku/orders";\n', "");
+  let config = originalConfig.replace('import { orders } from "@takontuku/orders";\n', "");
   config = config.replace(/,\s*orders\(\)/, "");
   assert(
     config !== originalConfig,
@@ -197,8 +197,8 @@ export function dropOrdersModule(clientDir: string): {
   const originalPkg = readFileSync(pkgPath, "utf8");
   const pkg = readJson(pkgPath);
   const deps = pkg.dependencies as Record<string, string>;
-  assert("@tokotuku/orders" in deps, "expected @tokotuku/orders in the scaffolded dependencies");
-  delete deps["@tokotuku/orders"];
+  assert("@takontuku/orders" in deps, "expected @takontuku/orders in the scaffolded dependencies");
+  delete deps["@takontuku/orders"];
   writeJson(pkgPath, pkg);
 
   return { configPath, pkgPath, originalConfig, originalPkg };

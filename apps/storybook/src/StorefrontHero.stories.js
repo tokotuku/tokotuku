@@ -1,4 +1,4 @@
-import StorefrontHero from "@tokotuku/ui/StorefrontHero.astro";
+import StorefrontHero from "@takontuku/ui/StorefrontHero.astro";
 
 export default {
   title: "Storefront/StorefrontHero",

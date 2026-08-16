@@ -1,4 +1,4 @@
-import Input from "@tokotuku/ui/Input.astro";
+import Input from "@takontuku/ui/Input.astro";
 
 export default {
   title: "Core/Input",

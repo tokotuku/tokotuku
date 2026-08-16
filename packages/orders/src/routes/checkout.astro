@@ -1,10 +1,10 @@
 ---
 import { env } from "cloudflare:workers";
-import { createTranslator } from "@tokotuku/core";
-import { brand, money } from "@tokotuku/core/brand";
-import Icon from "@tokotuku/ui/Icon.astro";
-import Layout from "@tokotuku/ui/Layout.astro";
-import StoreHeader from "@tokotuku/ui/StoreHeader.astro";
+import { createTranslator } from "@takontuku/core";
+import { brand, money } from "@takontuku/core/brand";
+import Icon from "@takontuku/ui/Icon.astro";
+import Layout from "@takontuku/ui/Layout.astro";
+import StoreHeader from "@takontuku/ui/StoreHeader.astro";
 import { orderMessages } from "../messages";
 import {
   type CartLineInput,
@@ -14,7 +14,7 @@ import {
   paymentMethods,
 } from "../orders";
 
-const bankAccount = { bank: "BCA", accountNumber: "1234567890", accountName: "Tokotuku" };
+const bankAccount = { bank: "BCA", accountNumber: "1234567890", accountName: "Takontuku" };
 const id = brand.locale.toLowerCase().startsWith("id");
 const t = createTranslator(brand, orderMessages);
 
@@ -143,7 +143,7 @@ const proofError = Astro.url.searchParams.get("proofError");
   clearCart();
 </script>}
 {!completedOrder && <script>
-  import { money } from "@tokotuku/core/brand";
+  import { money } from "@takontuku/core/brand";
   import { readCart } from "../client/cart";
   import { appendAll } from "../client/dom";
 
