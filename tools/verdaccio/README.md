@@ -62,10 +62,23 @@ To delete the persistent package data as well, append `--volumes` to the
 
 ## Exposing this beyond localhost
 
-The registry binds to `127.0.0.1` only, on purpose — reachable from this machine alone. For a
-team-wide private registry, put a Cloudflare Tunnel (`cloudflared`) in front of it rather than
-opening the port; see the root plan/architecture notes for the exact compose service and the
-tradeoffs of self-registration + anonymous read access once something is actually reachable from
-the internet. Do not change the port binding or add `cloudflared` without also confirming
-`max_users: -1` and the private-package `access: $authenticated` rules above are actually the
-config the running container has loaded.
+The registry itself still binds to `127.0.0.1` only, on purpose — reachable from this machine
+alone even with the tunnel running, since the tunnel connects to Verdaccio over the compose
+network (`http://verdaccio:4873`), not through the published port.
+
+`compose.yaml` includes a `cloudflared` service for this, off by default (it does nothing without
+a token):
+
+1. In the Cloudflare dashboard: Networking → Tunnels → Create a tunnel → pick "Cloudflared" as the
+   connector → copy the **token value** shown (not the whole install command).
+2. Add a Public Hostname for the tunnel pointing at `http://verdaccio:4873` — the compose service
+   name, not `localhost`.
+3. `cp tools/verdaccio/.env.example tools/verdaccio/.env` and paste the token in as
+   `CLOUDFLARE_TUNNEL_TOKEN`.
+4. `docker compose -f tools/verdaccio/compose.yaml up -d` — `cloudflared` waits for Verdaccio's
+   healthcheck before it starts.
+
+Before doing any of this, confirm `max_users: -1` and the private-package `access: $authenticated`
+rules above are actually the config the running container has loaded (`docker compose up -d`
+after editing `config.yaml`, if you haven't already) — a self-registration-open, anonymous-read
+registry is a very different thing to put on the public internet than one that isn't.
