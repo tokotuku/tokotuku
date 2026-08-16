@@ -10,6 +10,18 @@ import { fileURLToPath } from "node:url";
 
 export const ROOT = fileURLToPath(new URL("../../", import.meta.url));
 export const REGISTRY = process.env.REGISTRY_URL ?? "http://localhost:4873";
+/**
+ * Auth token for REGISTRY, needed now that @takontuku/catalog and
+ * @takontuku/orders require authentication just to read, not only to
+ * publish (tools/verdaccio/config.yaml). CI's Verdaccio service container
+ * runs stock, unauthenticated-read defaults (no custom config mounted), so
+ * this stays unset there and every .npmrc write below just omits the auth
+ * line -- only a local run against the real locked-down registry needs it.
+ * Get one with `npm adduser --registry http://localhost:4873` and export
+ * the token `npm adduser` prints, or copy the `_authToken` line already in
+ * this repo's own gitignored .npmrc.
+ */
+export const REGISTRY_AUTH_TOKEN = process.env.REGISTRY_AUTH_TOKEN;
 
 export type Json = Record<string, unknown>;
 
@@ -158,10 +170,11 @@ export function scaffoldClient(
 ): string {
   const clientDir = path.join(scratchParent, clientName);
   sh("node", [path.join(ROOT, "packages/create-takontuku/dist/bin.js"), clientName], scratchParent);
-  writeFileSync(
-    path.join(clientDir, ".npmrc"),
-    `${[`@takontuku:registry=${REGISTRY}`, `registry=${REGISTRY}`].join("\n")}\n`,
-  );
+  const npmrcLines = [`@takontuku:registry=${REGISTRY}`, `registry=${REGISTRY}`];
+  if (REGISTRY_AUTH_TOKEN) {
+    npmrcLines.push(`//${new URL(REGISTRY).host}/:_authToken=${REGISTRY_AUTH_TOKEN}`);
+  }
+  writeFileSync(path.join(clientDir, ".npmrc"), `${npmrcLines.join("\n")}\n`);
 
   if (version !== null) {
     const clientPkgPath = path.join(clientDir, "package.json");

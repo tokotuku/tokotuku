@@ -8,6 +8,15 @@ services:
     volumes:
       - ./config.yaml:/verdaccio/conf/config.yaml:ro
       - verdaccio-storage:/verdaccio/storage
+    healthcheck:
+      # 127.0.0.1, not localhost -- this image's wget resolves "localhost"
+      # to ::1 first and fails to connect there even though Verdaccio is
+      # listening fine on IPv4, since it never falls back.
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:4873/-/ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
 volumes:
   verdaccio-storage:

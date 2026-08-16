@@ -117,6 +117,18 @@ Start a local registry first:
 moon run verdaccio:up
 ```
 
+`@takontuku/catalog` and `@takontuku/orders` require authentication to even read
+(`tools/verdaccio/config.yaml`), so every gate that adds one now needs `REGISTRY_AUTH_TOKEN` set to
+an account's token -- self-registration is closed (`max_users: -1`), so create one first if you
+haven't (see `tools/verdaccio/README.md`):
+
+```sh
+export REGISTRY_AUTH_TOKEN=<token from npm adduser, or the _authToken line in this repo's own .npmrc>
+```
+
+Gates that never touch catalog/orders (Gate 1) don't need it, but setting it doesn't hurt them
+either -- set it once per shell and forget about it.
+
 Then:
 
 ```sh
