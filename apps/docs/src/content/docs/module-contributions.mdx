@@ -16,3 +16,7 @@ together when a module is removed.
 
 The dashboard never invents sales. With no real orders, the Orders widget shows a complete
 zero state. Running db:seed creates six local catalog products and inventory only.
+
+Add or drop a module with `bunx takontuku add <module>` / `bunx takontuku remove <module>` --
+it edits `astro.config.mjs` and `src/middleware.ts` for you and, on remove, refuses if another
+installed module still depends on the one you're dropping.

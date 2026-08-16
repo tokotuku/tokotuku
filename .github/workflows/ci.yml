@@ -154,3 +154,11 @@ jobs:
         run: moon run e2e-install:demo
         env:
           REGISTRY_URL: http://localhost:4873
+
+      # Proves takontuku add/remove's rewritten files survive real Biome
+      # lint, real astro check, and a real build -- not just this repo's
+      # own unit tests' expectations.
+      - name: Run modules gate (takontuku add / remove)
+        run: moon run e2e-install:modules
+        env:
+          REGISTRY_URL: http://localhost:4873

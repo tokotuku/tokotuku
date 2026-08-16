@@ -49,6 +49,23 @@ them if you want to confirm that directly. `example-styled` adds one file,
 replaces `@takontuku/ui`'s stock product card everywhere it's used — nothing else in the app
 changes.
 
+## Modules
+
+A client changes which `@takontuku/*` modules it has installed with the `takontuku` CLI, which
+ships on `@takontuku/core`:
+
+```sh
+bunx takontuku add orders      # installs the package, wires astro.config.mjs and
+                                # src/middleware.ts, pulls in modules it requires, then
+                                # runs `db sync`
+bunx takontuku remove orders   # reverses the above -- refuses if another installed
+                                # module still requires it, and never touches
+                                # migrations/ or the lockfile
+```
+
+Both edit `astro.config.mjs` and `src/middleware.ts` in place rather than asking for a manual
+edit; see [`packages/core/src/cli/astro-config.ts`](packages/core/src/cli/astro-config.ts) for how.
+
 ## Requirements
 
 - [Bun](https://bun.sh) >= 1.3.0
@@ -69,3 +86,4 @@ bun run typecheck
 
 - npm scope: `@takontuku/*`
 - Commits follow [Conventional Commits](https://www.conventionalcommits.org/); enforced by a Lefthook `commit-msg` hook
+- Never rebase `dev` after it has been merged into `main` -- pull `main` back into `dev` with a merge commit instead. Rebasing after the fact gives the same commits different SHAs on each branch, so a later `dev` → `main` merge sees every shared file as changed on both sides and conflicts everywhere even when the trees agree

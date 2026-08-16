@@ -19,18 +19,19 @@
 // Prerequisite: a registry reachable at REGISTRY_URL (defaults to Verdaccio
 // on http://localhost:4873). Start one locally with `moon run verdaccio:up`.
 
-import { mkdtempSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readdirSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import {
   AssertionError,
+  addOrdersModule,
   assert,
-  dropOrdersModule,
   installClient,
   publishAll,
   queryD1,
   queryTableNames,
   readJson,
+  removeOrdersModule,
   scaffoldClient,
   sh,
 } from "./shared.ts";
@@ -55,10 +56,15 @@ async function main(): Promise<void> {
 
   const scratchParent = mkdtempSync(path.join(tmpdir(), "takontuku-e2e-upgrade-"));
   const clientDir = scaffoldClient(scratchParent, "gate2b-fixture", version);
-  const { configPath, pkgPath, originalConfig, originalPkg } = dropOrdersModule(clientDir);
-  console.log(`Scaffolded fixture (auth + catalog, no orders) at ${clientDir}`);
+  console.log(`Scaffolded client (auth + catalog + orders) at ${clientDir}`);
 
   installClient(clientDir);
+  removeOrdersModule(clientDir);
+  installClient(clientDir);
+  console.log(
+    "Removed the orders module via `takontuku remove` -- fixture is now auth + catalog only.",
+  );
+
   sh("bunx", ["takontuku", "db", "sync"], clientDir);
   sh("bunx", ["wrangler", "d1", "migrations", "apply", "DB", "--local"], clientDir);
 
@@ -80,9 +86,8 @@ async function main(): Promise<void> {
   assert(productBefore !== undefined, "expected the test product to be inserted");
   console.log(`Inserted product: ${JSON.stringify(productBefore)}`);
 
-  console.log("Adding the orders module and re-syncing...");
-  writeFileSync(configPath, originalConfig);
-  writeFileSync(pkgPath, originalPkg);
+  console.log("Adding the orders module back via `takontuku add` and re-syncing...");
+  addOrdersModule(clientDir);
   installClient(clientDir);
   sh("bunx", ["takontuku", "db", "sync"], clientDir);
   sh("bunx", ["wrangler", "d1", "migrations", "apply", "DB", "--local"], clientDir);

@@ -90,6 +90,18 @@ tasks:
     options:
       cache: false
 
+  # Proves `takontuku add`/`remove`'s rewritten astro.config.mjs and
+  # src/middleware.ts survive real Biome lint/format, real `astro check`,
+  # and a real build -- no unit test can prove that, only running the
+  # client's own tooling against the CLI's actual output can.
+  modules:
+    command: "bun modules.ts"
+    inputs:
+      - "modules.ts"
+      - "shared.ts"
+    options:
+      cache: false
+
   lint:
     command: "biome check ."
     inputs:

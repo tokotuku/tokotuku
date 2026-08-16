@@ -131,8 +131,8 @@ describe("resolveModules", () => {
     const registry = resolveModules([orders, catalog]);
 
     expect(registry.modules).toEqual([
-      { name: "catalog", migrations: catalog.migrations, seeds: [] },
-      { name: "orders", migrations: [], seeds: [] },
+      { name: "catalog", requires: [], migrations: catalog.migrations, seeds: [] },
+      { name: "orders", requires: ["catalog"], migrations: [], seeds: [] },
     ]);
   });
 
@@ -144,6 +144,8 @@ describe("resolveModules", () => {
 
     const registry = resolveModules([catalog]);
 
-    expect(registry.modules).toEqual([{ name: "catalog", migrations: [], seeds: catalog.seeds }]);
+    expect(registry.modules).toEqual([
+      { name: "catalog", requires: [], migrations: [], seeds: catalog.seeds },
+    ]);
   });
 });

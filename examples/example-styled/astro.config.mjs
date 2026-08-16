@@ -7,9 +7,9 @@ import { takontuku } from "@takontuku/core";
 import { orders } from "@takontuku/orders";
 import { defineConfig } from "astro/config";
 
-// Remove a module here (and its matching import above + middleware.ts
-// register line) to drop it from this client entirely — `bun remove` the
-// package too. Nothing else references an uninstalled module by name.
+// Run "takontuku add <module>" or "takontuku remove <module>" to change
+// what this client has installed -- it edits this file, src/middleware.ts,
+// and package.json for you.
 export default defineConfig({
   integrations: [
     takontuku({
