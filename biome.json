@@ -76,7 +76,12 @@
       }
     },
     {
-      "includes": ["**/src/cli/**", "**/create-takontuku/src/bin.ts", "tools/e2e-install/*.ts"],
+      "includes": [
+        "**/src/cli/**",
+        "**/create-takontuku/src/bin.ts",
+        "tools/e2e-install/*.ts",
+        "scripts/publish-private.ts"
+      ],
       "linter": {
         "rules": {
           "suspicious": {
