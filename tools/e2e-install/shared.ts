@@ -176,32 +176,31 @@ export function scaffoldClient(
   return clientDir;
 }
 
-/** Drops @takontuku/orders from a scaffolded client -- the exact edits astro.config.mjs's own "Remove a module here" comment documents. Returns the pre-edit file contents so a caller that wants to add the module back later doesn't have to reconstruct them. */
-export function dropOrdersModule(clientDir: string): {
-  configPath: string;
-  pkgPath: string;
-  originalConfig: string;
-  originalPkg: string;
-} {
-  const configPath = path.join(clientDir, "astro.config.mjs");
-  const originalConfig = readFileSync(configPath, "utf8");
-  let config = originalConfig.replace('import { orders } from "@takontuku/orders";\n', "");
-  config = config.replace(/,\s*orders\(\)/, "");
-  assert(
-    config !== originalConfig,
-    "expected astro.config.mjs to reference orders() before editing",
-  );
-  writeFileSync(configPath, config);
+/**
+ * Removes @takontuku/orders from an already-installed scaffolded client via
+ * the real `takontuku remove` command, rather than hand-editing files --
+ * this is what actually proves the CLI's rewriter works against a client
+ * `create-takontuku` produced for real, not just against fixtures. Must run
+ * after `installClient`: `bunx takontuku` doesn't resolve before that.
+ * `--no-install` is mandatory, not optional -- a bare `bun remove` here
+ * would still work, but a subsequent `takontuku add orders` in the same
+ * gate would run a bare `bun add` that resolves "latest" from the registry
+ * and silently overwrites the pinned e2e version `scaffoldClient` wrote
+ * into package.json. Callers that need node_modules actually pruned
+ * afterward should call `installClient` again themselves.
+ */
+export function removeOrdersModule(clientDir: string): void {
+  sh("bunx", ["takontuku", "remove", "orders", "--no-install"], clientDir);
+}
 
-  const pkgPath = path.join(clientDir, "package.json");
-  const originalPkg = readFileSync(pkgPath, "utf8");
-  const pkg = readJson(pkgPath);
-  const deps = pkg.dependencies as Record<string, string>;
-  assert("@takontuku/orders" in deps, "expected @takontuku/orders in the scaffolded dependencies");
-  delete deps["@takontuku/orders"];
-  writeJson(pkgPath, pkg);
-
-  return { configPath, pkgPath, originalConfig, originalPkg };
+/**
+ * Adds @takontuku/orders back via the real `takontuku add` command --
+ * `--no-sync` so the caller's own explicit `db sync` step stays the one
+ * place migrations get materialized, and `--no-install` for the same
+ * pinned-version reason as `removeOrdersModule`.
+ */
+export function addOrdersModule(clientDir: string): void {
+  sh("bunx", ["takontuku", "add", "orders", "--no-install", "--no-sync"], clientDir);
 }
 
 interface D1QueryResult {

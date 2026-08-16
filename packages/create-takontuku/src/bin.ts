@@ -79,6 +79,7 @@ async function main(): Promise<void> {
   console.log("Next steps:");
   console.log(`  cd ${projectName}`);
   console.log("  bun install");
+  console.log("  bun run cf-typegen   # generates worker-configuration.d.ts, needed for typecheck");
   console.log(
     `  wrangler d1 create ${projectName}-db   # then paste the printed UUID into wrangler.jsonc`,
   );
@@ -88,8 +89,9 @@ async function main(): Promise<void> {
   console.log("  bunx takontuku db seed   # optional -- populates demo data for local dev");
   console.log("  bun run dev");
   console.log("");
+  console.log("Edit astro.config.mjs's brand{} to change locale/currency.");
   console.log(
-    "Edit astro.config.mjs's brand{} and modules[] to change locale/currency or drop a module.",
+    "Run `bunx takontuku add <module>` or `bunx takontuku remove <module>` to change what's installed.",
   );
 }
 

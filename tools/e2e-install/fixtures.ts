@@ -25,10 +25,10 @@ import path from "node:path";
 import {
   AssertionError,
   assert,
-  dropOrdersModule,
   installClient,
   publishAll,
   queryTableNames,
+  removeOrdersModule,
   scaffoldClient,
   setupAndLogIn,
   sh,
@@ -84,10 +84,15 @@ async function main(): Promise<void> {
 
   const scratchParent = mkdtempSync(path.join(tmpdir(), "takontuku-e2e-fixture-"));
   const clientDir = scaffoldClient(scratchParent, "gate2-fixture", version);
-  dropOrdersModule(clientDir);
-  console.log(`Scaffolded fixture (auth + catalog, no orders) at ${clientDir}`);
+  console.log(`Scaffolded client (auth + catalog + orders) at ${clientDir}`);
 
   installClient(clientDir);
+  removeOrdersModule(clientDir);
+  installClient(clientDir);
+  console.log(
+    "Removed the orders module via `takontuku remove` -- fixture is now auth + catalog only.",
+  );
+
   sh("bunx", ["takontuku", "db", "sync"], clientDir);
   sh("bunx", ["wrangler", "d1", "migrations", "apply", "DB", "--local"], clientDir);
 

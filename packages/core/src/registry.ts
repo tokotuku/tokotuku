@@ -10,6 +10,8 @@ import type {
 
 export interface ResolvedModule {
   name: string;
+  /** Names of other modules this one requires -- carried through so `takontuku remove` can refuse when a still-installed module depends on the one being dropped. */
+  requires: string[];
   migrations: ModuleMigration[];
   seeds: ModuleSeed[];
 }
@@ -52,7 +54,7 @@ export function resolveModules(modules: ModuleDefinition[]): ResolvedRegistry {
       const dep = byName.get(depName);
       if (!dep) {
         throw new Error(
-          `"${mod.name}" requires "${depName}", which is not installed. Run: bun add @takontuku/${depName}`,
+          `"${mod.name}" requires "${depName}", which is not installed. Run: takontuku add @takontuku/${depName}`,
         );
       }
       visit(dep);
@@ -125,6 +127,7 @@ export function resolveModules(modules: ModuleDefinition[]): ResolvedRegistry {
     adminDashboardWidgets: orderedWidgets,
     modules: sorted.map((mod) => ({
       name: mod.name,
+      requires: mod.requires ?? [],
       migrations: mod.migrations ?? [],
       seeds: mod.seeds ?? [],
     })),
