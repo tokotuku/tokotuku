@@ -1,7 +1,10 @@
 {
   "name": "create-takontuku",
-  "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
+  },
   "type": "module",
   "bin": {
     "create-takontuku": "./dist/bin.js"
