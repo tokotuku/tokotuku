@@ -1,14 +1,17 @@
+/// <reference types="@takontuku/core/virtual.d.ts" />
+
+import registry from "virtual:takontuku/registry";
 import type { APIRoute } from "astro";
 
 export const GET: APIRoute = ({ url }) => {
+  const hasOrders = registry.moduleNames.includes("orders");
+  const hasCatalog = registry.moduleNames.includes("catalog");
   const body = [
     "User-agent: *",
     "Allow: /",
     "Disallow: /admin",
-    "Disallow: /cart",
-    "Disallow: /checkout",
-    "",
-    `Sitemap: ${url.origin}/sitemap.xml`,
+    ...(hasOrders ? ["Disallow: /cart", "Disallow: /checkout"] : []),
+    ...(hasCatalog ? ["", `Sitemap: ${url.origin}/sitemap.xml`] : []),
   ].join("\n");
 
   return new Response(body, {

@@ -1,13 +1,15 @@
 # example-bare
 
-**What this proves:** what `bunx create-takontuku` gives you, unmodified. No demo data, no theme
-overrides. This is one of three example apps under the repo root's `examples/` directory — see the
-[root README's Examples section](../../README.md#examples) for how the three relate.
+**What this proves:** what `bunx create-takontuku` gives you, unmodified — `core` + `ui` + `auth`
+only, the exact public-only shape a stranger with no registry access gets from real npm. No
+`catalog`, no `orders`, no demo data, no theme overrides. This is one of three example apps under
+the repo root's `examples/` directory — see the [root README's Examples section](../../README.md#examples)
+for how the three relate.
 
 The only differences from a real `create-takontuku` scaffold are cosmetic, so this stays
 reproducible without a registry: `@takontuku/*` dependencies point at `workspace:*` here instead of
 a published version (this repo's own packages, not a separate install), and `.npmrc` was removed
-since nothing needs to be fetched from Verdaccio.
+since nothing needs to be fetched from a registry at all.
 
 Run Cloudflare resource commands (`wrangler`, `db:*`) from this directory. Run it through Moon from
 the repository root with `bun run example-bare` (dev server on port 4410, distinct from
@@ -41,10 +43,12 @@ bun run example-bare
 Open `http://localhost:4410/setup` and create the first administrator — a one-time bootstrap route
 that redirects to login permanently once an administrator exists.
 
-At this point `/products` renders the empty state: zero products, because nothing has been
-seeded. That emptiness is the point of this app — compare it against
-[`examples/example-seeded`](../example-seeded) running at the same time to see exactly what
-`takontuku db seed` adds.
+At this point the storefront has no shop at all — no `/products`, no cart, just the admin-guarded
+shell `core` + `auth` provide. That's the point of this app: it's what anyone installing from public
+npm actually gets. Run `bunx takontuku add catalog` (needs access to the private registry catalog
+lives on) to see the same app grow a storefront — compare against
+[`examples/example-seeded`](../example-seeded), which starts from that fuller shape and adds demo
+data with `takontuku db seed`.
 
 ## Deploy
 

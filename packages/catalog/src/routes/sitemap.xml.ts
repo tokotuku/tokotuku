@@ -1,6 +1,6 @@
 import { env } from "cloudflare:workers";
-import { listProducts } from "@takontuku/catalog";
 import type { APIRoute } from "astro";
+import { listProducts } from "../products";
 
 export const GET: APIRoute = async ({ url }) => {
   const products = await listProducts(env.DB);

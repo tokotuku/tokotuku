@@ -18,6 +18,10 @@
 //
 // Prerequisite: a registry reachable at REGISTRY_URL (defaults to Verdaccio
 // on http://localhost:4873). Start one locally with `moon run verdaccio:up`.
+//
+// The default scaffold is public-only (auth + core + ui), so this adds
+// `catalog` via `takontuku add` right after install -- the patch below
+// targets catalog's own source, so the gate needs it installed either way.
 
 import { spawn } from "node:child_process";
 import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
@@ -25,8 +29,10 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import {
   AssertionError,
+  addCatalogModule,
   assert,
   installClient,
+  pinModuleToLatest,
   publishAll,
   ROOT,
   scaffoldClient,
@@ -90,6 +96,12 @@ async function main(): Promise<void> {
   );
 
   installClient(clientDir);
+  addCatalogModule(clientDir);
+  pinModuleToLatest(clientDir, "catalog");
+  console.log(
+    'Added the catalog module via `takontuku add`, pinned to "latest" like its siblings.',
+  );
+
   sh("bunx", ["takontuku", "db", "sync"], clientDir);
   sh("bunx", ["wrangler", "d1", "migrations", "apply", "DB", "--local"], clientDir);
   sh("bun", ["run", "build"], clientDir);

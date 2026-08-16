@@ -11,9 +11,11 @@
 // exist as separate packages yet (inventory and projects tables currently
 // live inside catalog's own migrations; payments-bank-transfer inside
 // orders'). This is the version of that gate achievable with today's actual
-// module set: a client with {auth, catalog} only, built by scaffolding
-// normally and then dropping the orders module -- the exact steps
-// astro.config.mjs's own comment documents for a real client to follow.
+// module set: a client with {auth, catalog} only, built by scaffolding the
+// public-only default (auth + core + ui -- catalog and orders are private
+// and never ship in the scaffold) and adding just the catalog module via
+// `takontuku add` -- proving both that an a-la-carte install pulls in
+// nothing extra and that `add` itself works end to end.
 //
 // Prerequisite: a registry reachable at REGISTRY_URL (defaults to Verdaccio
 // on http://localhost:4873). Start one locally with `moon run verdaccio:up`.
@@ -24,11 +26,11 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import {
   AssertionError,
+  addCatalogModule,
   assert,
   installClient,
   publishAll,
   queryTableNames,
-  removeOrdersModule,
   scaffoldClient,
   setupAndLogIn,
   sh,
@@ -84,13 +86,12 @@ async function main(): Promise<void> {
 
   const scratchParent = mkdtempSync(path.join(tmpdir(), "takontuku-e2e-fixture-"));
   const clientDir = scaffoldClient(scratchParent, "gate2-fixture", version);
-  console.log(`Scaffolded client (auth + catalog + orders) at ${clientDir}`);
+  console.log(`Scaffolded client (public-only default: auth) at ${clientDir}`);
 
   installClient(clientDir);
-  removeOrdersModule(clientDir);
-  installClient(clientDir);
+  addCatalogModule(clientDir);
   console.log(
-    "Removed the orders module via `takontuku remove` -- fixture is now auth + catalog only.",
+    "Added the catalog module via `takontuku add` -- fixture is now auth + catalog only.",
   );
 
   sh("bunx", ["takontuku", "db", "sync"], clientDir);

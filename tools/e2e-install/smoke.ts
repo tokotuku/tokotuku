@@ -9,6 +9,10 @@
 // The plan's original Gate 3 also includes "submit inquiry" -- there's no
 // `inquiry` package yet, so that step is skipped here.
 //
+// The default scaffold is public-only (auth + core + ui), so this adds
+// `orders` via `takontuku add` right after install -- which pulls in
+// `catalog` too, since orders' own package.json depends on it.
+//
 // Prerequisite: a registry reachable at REGISTRY_URL (defaults to Verdaccio
 // on http://localhost:4873). Start one locally with `moon run verdaccio:up`.
 
@@ -18,6 +22,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import {
   AssertionError,
+  addOrdersModule,
   assert,
   installClient,
   publishAll,
@@ -171,9 +176,12 @@ async function main(): Promise<void> {
 
   const scratchParent = mkdtempSync(path.join(tmpdir(), "takontuku-e2e-smoke-"));
   const clientDir = scaffoldClient(scratchParent, "gate3-smoke", version);
-  console.log(`Scaffolded client at ${clientDir}`);
+  console.log(`Scaffolded client (public-only default: auth) at ${clientDir}`);
 
   installClient(clientDir);
+  addOrdersModule(clientDir);
+  console.log("Added the orders module via `takontuku add` (pulls in catalog).");
+
   sh("bunx", ["takontuku", "db", "sync"], clientDir);
   sh("bunx", ["wrangler", "d1", "migrations", "apply", "DB", "--local"], clientDir);
   const productId = seedProduct(clientDir);
