@@ -80,7 +80,8 @@
         "**/src/cli/**",
         "**/create-takontuku/src/bin.ts",
         "tools/e2e-install/*.ts",
-        "scripts/publish-private.ts"
+        "scripts/publish-private.ts",
+        "scripts/publish-local.ts"
       ],
       "linter": {
         "rules": {
