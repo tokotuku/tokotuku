@@ -7,7 +7,10 @@ tasks:
   build:
     command: "tsup"
     inputs:
-      - "src/bin.ts"
+      # bin.ts is the tsup entry, but it imports args.ts/environment.ts/
+      # report.ts/setup.ts/template.ts/wizard.ts -- scoping this to bin.ts
+      # alone left moon serving a cached build after editing any of them.
+      - "src/**/*.ts"
       - "tsup.config.ts"
       - "tsconfig.json"
     outputs:
@@ -16,8 +19,14 @@ tasks:
   typecheck:
     command: "tsc --noEmit -p tsconfig.json"
     inputs:
-      - "src/bin.ts"
+      - "src/**/*.ts"
       - "tsconfig.json"
+
+  test:
+    command: "vitest run"
+    inputs:
+      - "src/**/*.ts"
+      - "vitest.config.ts"
 
   lint:
     command: "biome check ."

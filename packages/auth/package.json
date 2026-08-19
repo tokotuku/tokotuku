@@ -26,7 +26,7 @@
   "dependencies": {
     "@takontuku/core": "workspace:*",
     "@takontuku/ui": "workspace:*",
-    "better-auth": "^1.6.23"
+    "better-auth": ">=1.6.23 <1.7.0"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.4",

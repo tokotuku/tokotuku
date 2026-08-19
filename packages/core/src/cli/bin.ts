@@ -7,6 +7,7 @@ import { runSeed } from "./db-seed";
 import { syncMigrations } from "./db-sync";
 import { normalizeModuleSpec } from "./module-package";
 import { removeModule } from "./remove-module";
+import { installSkills } from "./skills-install";
 
 interface AstroIntegrationLike {
   name?: string;
@@ -173,8 +174,15 @@ async function main(): Promise<void> {
     await runRemove(rest);
     return;
   }
+  if (command === "skills" && rest[0] === "install") {
+    const { skills, targets } = installSkills(process.cwd());
+    console.log(`Installed ${skills.join(", ")} into ${targets.join(" and ")}.`);
+    console.log("Re-run this after upgrading @takontuku/core to pick up skill updates.");
+    return;
+  }
   console.error(
-    "Usage: takontuku add <module> | takontuku remove <module> | takontuku db sync | takontuku db seed",
+    "Usage: takontuku add <module> | takontuku remove <module> | takontuku db sync | " +
+      "takontuku db seed | takontuku skills install",
   );
   process.exitCode = 1;
 }

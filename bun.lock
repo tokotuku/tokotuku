@@ -120,7 +120,7 @@
       "dependencies": {
         "@takontuku/core": "workspace:*",
         "@takontuku/ui": "workspace:*",
-        "better-auth": "^1.6.23",
+        "better-auth": ">=1.6.23 <1.7.0",
       },
       "devDependencies": {
         "@astrojs/check": "^0.9.4",
@@ -138,7 +138,7 @@
     },
     "packages/catalog": {
       "name": "@takontuku/catalog",
-      "version": "0.0.0",
+      "version": "0.1.0",
       "dependencies": {
         "@takontuku/core": "workspace:*",
         "@takontuku/ui": "workspace:*",
@@ -187,6 +187,9 @@
       "bin": {
         "create-takontuku": "./dist/bin.js",
       },
+      "dependencies": {
+        "@clack/prompts": "^1.7.0",
+      },
       "devDependencies": {
         "@takontuku/config": "workspace:*",
         "@types/bun": "latest",
@@ -194,7 +197,7 @@
     },
     "packages/orders": {
       "name": "@takontuku/orders",
-      "version": "0.0.0",
+      "version": "0.1.0",
       "dependencies": {
         "@takontuku/catalog": "workspace:*",
         "@takontuku/core": "workspace:*",

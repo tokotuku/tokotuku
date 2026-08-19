@@ -7,24 +7,14 @@
  * the public packages) so a release never depends on that registry's
  * uptime.
  *
- * Mirrors the publish pattern in tools/e2e-install/shared.ts
- * (publishPackage/publishWithRetry): stamp `private` off and workspace:*
- * deps to real versions in memory, publish, restore the file from disk
- * in a `finally` regardless of outcome. Differs from that e2e version in
- * two ways: the version published is the real one left by `changeset
- * version` (not a throwaway 0.0.0-e2e.<timestamp>), and each workspace:*
- * dependency resolves to whatever version is currently checked into
- * *that* package's own package.json -- core/ui/config are public
- * packages that may not share catalog/orders' version number, so there
- * is no single shared version to substitute everywhere.
+ * The version published is whatever `changeset version` last left in each
+ * package's package.json -- never a throwaway. See publish-local.ts for the
+ * local-rehearsal counterpart that publishes every package, public ones
+ * included, to a throwaway registry.
  */
 
-import { execFileSync } from "node:child_process";
-import { readFileSync, writeFileSync } from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { publishPackage, ROOT, sh } from "./publish-shared";
 
-const ROOT = fileURLToPath(new URL("..", import.meta.url));
 const DRY_RUN = process.argv.includes("--dry-run");
 
 /**
@@ -35,76 +25,32 @@ const DRY_RUN = process.argv.includes("--dry-run");
  * PRIVATE_REGISTRY_URL=https://npm.<your-domain> instead of relying on
  * this default.
  */
-const REGISTRY = process.env.PRIVATE_REGISTRY_URL ?? "http://localhost:4873";
+const { PRIVATE_REGISTRY_URL } = process.env;
+const REGISTRY = PRIVATE_REGISTRY_URL ?? "http://localhost:4873";
 
+// Publish order matters: orders' workspace:* on catalog must resolve to an
+// already-published version.
 const PRIVATE_PACKAGES = ["packages/catalog", "packages/orders"];
-
-// Publish order matters here too: orders' workspace:* on catalog must
-// resolve to an already-published version.
-const DIR_BY_PACKAGE_NAME: Record<string, string> = {
-  "@takontuku/core": "packages/core",
-  "@takontuku/ui": "packages/ui",
-  "@takontuku/auth": "packages/auth",
-  "@takontuku/config": "configs",
-  "@takontuku/catalog": "packages/catalog",
-  "@takontuku/orders": "packages/orders",
-};
-
-function sh(command: string, args: string[], cwd: string): void {
-  console.log(`+ ${command} ${args.join(" ")}  (in ${path.relative(ROOT, cwd) || "."})`);
-  execFileSync(command, args, { cwd, stdio: "inherit" });
-}
-
-type Json = Record<string, unknown>;
-
-function readJson(filePath: string): Json {
-  return JSON.parse(readFileSync(filePath, "utf8"));
-}
-
-function writeJson(filePath: string, value: Json): void {
-  writeFileSync(filePath, `${JSON.stringify(value, null, 2)}\n`);
-}
-
-function versionOf(packageName: string): string {
-  const dir = DIR_BY_PACKAGE_NAME[packageName];
-  if (!dir) throw new Error(`Don't know which directory ${packageName} lives in`);
-  const pkg = readJson(path.join(ROOT, dir, "package.json"));
-  return pkg.version as string;
-}
-
-function publishPrivatePackage(dir: string): void {
-  const pkgPath = path.join(ROOT, dir, "package.json");
-  const original = readFileSync(pkgPath, "utf8");
-  try {
-    const pkg = readJson(pkgPath);
-    const version = pkg.version as string;
-    if (version === "0.0.0") {
-      throw new Error(
-        `${dir}/package.json is still at 0.0.0 -- run \`bun run version\` (changeset version) first.`,
-      );
-    }
-    delete pkg.private;
-    for (const depField of ["dependencies", "devDependencies", "peerDependencies"]) {
-      const deps = pkg[depField] as Record<string, string> | undefined;
-      if (!deps) continue;
-      for (const name of Object.keys(deps)) {
-        if (deps[name] === "workspace:*") deps[name] = versionOf(name);
-      }
-    }
-    writeJson(pkgPath, pkg);
-    const args = ["publish", "--registry", REGISTRY, ...(DRY_RUN ? ["--dry-run"] : [])];
-    sh("bun", args, path.join(ROOT, dir));
-    console.log(`${DRY_RUN ? "[dry-run] " : ""}Published ${pkg.name}@${version} to ${REGISTRY}`);
-  } finally {
-    writeFileSync(pkgPath, original);
-  }
-}
 
 function main(): void {
   console.log(`Publishing private modules to ${REGISTRY}${DRY_RUN ? " (dry run)" : ""}`);
   sh("moon", ["run", "catalog:build", "orders:build"], ROOT);
+  // Both packages are scoped (@takontuku/catalog, @takontuku/orders), so
+  // neither hits the unscoped-name auth problem withDefaultRegistryForPublish
+  // exists for -- @takontuku:registry= in .npmrc anchors them by itself.
   for (const dir of PRIVATE_PACKAGES) {
-    publishPrivatePackage(dir);
+    publishPackage({
+      dir,
+      registry: REGISTRY,
+      dryRun: DRY_RUN,
+      guard: (pkg) => {
+        if (pkg.version === "0.0.0") {
+          throw new Error(
+            `${dir}/package.json is still at 0.0.0 -- run \`bun run version\` (changeset version) first.`,
+          );
+        }
+      },
+    });
   }
 }
 

@@ -1,0 +1,96 @@
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { installSkills } from "./skills-install";
+
+let sourceDir: string;
+let cwd: string;
+
+beforeEach(async () => {
+  sourceDir = await mkdtemp(path.join(tmpdir(), "takontuku-skills-source-"));
+  cwd = await mkdtemp(path.join(tmpdir(), "takontuku-skills-cwd-"));
+});
+
+afterEach(async () => {
+  await rm(sourceDir, { recursive: true, force: true });
+  await rm(cwd, { recursive: true, force: true });
+});
+
+async function writeSkill(name: string, description = "A test skill."): Promise<void> {
+  const dir = path.join(sourceDir, name);
+  await mkdir(dir, { recursive: true });
+  await writeFile(
+    path.join(dir, "SKILL.md"),
+    `---\nname: ${name}\ndescription: ${description}\n---\n`,
+  );
+}
+
+describe("installSkills", () => {
+  it("copies every bundled skill into both agent-skill directories", async () => {
+    await writeSkill("takontuku-modules");
+    await writeSkill("takontuku-data");
+
+    const result = installSkills(cwd, sourceDir);
+
+    expect(result.skills).toEqual(["takontuku-data", "takontuku-modules"]);
+    expect(result.targets).toEqual([".agents/skills", ".claude/skills"]);
+    for (const target of result.targets) {
+      for (const skill of result.skills) {
+        const content = await readFile(path.join(cwd, target, skill, "SKILL.md"), "utf8");
+        expect(content).toContain(`name: ${skill}`);
+      }
+    }
+  });
+
+  it("ignores entries in the source directory that aren't skills", async () => {
+    await writeSkill("takontuku-modules");
+    await mkdir(path.join(sourceDir, "not-a-skill"), { recursive: true });
+    await writeFile(path.join(sourceDir, "README.md"), "not a skill either");
+
+    const result = installSkills(cwd, sourceDir);
+
+    expect(result.skills).toEqual(["takontuku-modules"]);
+  });
+
+  it("replaces an existing installed skill wholesale rather than merging", async () => {
+    await writeSkill("takontuku-modules");
+    installSkills(cwd, sourceDir);
+
+    // Simulate a stale file left by an older version of this skill, and a
+    // local file the user placed there themselves.
+    const installedDir = path.join(cwd, ".claude", "skills", "takontuku-modules");
+    await writeFile(path.join(installedDir, "stale-reference.md"), "old content");
+
+    installSkills(cwd, sourceDir);
+
+    await expect(readFile(path.join(installedDir, "stale-reference.md"), "utf8")).rejects.toThrow();
+  });
+
+  it("leaves a directory it doesn't own alone", async () => {
+    await writeSkill("takontuku-modules");
+    await mkdir(path.join(cwd, ".claude", "skills", "my-own-skill"), { recursive: true });
+    await writeFile(
+      path.join(cwd, ".claude", "skills", "my-own-skill", "SKILL.md"),
+      "---\nname: my-own-skill\ndescription: mine\n---\n",
+    );
+
+    installSkills(cwd, sourceDir);
+
+    const content = await readFile(
+      path.join(cwd, ".claude", "skills", "my-own-skill", "SKILL.md"),
+      "utf8",
+    );
+    expect(content).toContain("mine");
+  });
+
+  it("throws when the source directory does not exist", () => {
+    expect(() => installSkills(cwd, path.join(sourceDir, "does-not-exist"))).toThrow(
+      /No bundled skills found/,
+    );
+  });
+
+  it("throws when the source directory has no skills", () => {
+    expect(() => installSkills(cwd, sourceDir)).toThrow(/No skills to install/);
+  });
+});

@@ -213,7 +213,18 @@ export function scaffoldClient(
   version: string | null,
 ): string {
   const clientDir = path.join(scratchParent, clientName);
-  sh("node", [path.join(ROOT, "packages/create-takontuku/dist/bin.js"), clientName], scratchParent);
+  // Both flags are mandatory, for different reasons. `--yes` suppresses the
+  // interactive wizard: these gates inherit this process's stdin, so run from
+  // a terminal they would otherwise sit waiting on a prompt forever.
+  // `--no-install` stops create-takontuku installing and migrating on its own,
+  // which would run before the .npmrc written below exists and so resolve
+  // @takontuku/* from public npm (or fail) instead of this run's registry --
+  // the gates drive those steps themselves, at the pinned e2e version.
+  sh(
+    "node",
+    [path.join(ROOT, "packages/create-takontuku/dist/bin.js"), clientName, "--yes", "--no-install"],
+    scratchParent,
+  );
   const npmrcLines = [`@takontuku:registry=${REGISTRY}`, `registry=${REGISTRY}`];
   if (REGISTRY_AUTH_TOKEN) {
     npmrcLines.push(`//${new URL(REGISTRY).host}/:_authToken=${REGISTRY_AUTH_TOKEN}`);

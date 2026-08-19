@@ -31,3 +31,8 @@ tasks:
     inputs:
       - "src/**/*"
       - "vitest.config.ts"
+      # skills/ is an input because src/skills.test.ts validates those files.
+      # Without it, moon serves a cached pass and a malformed SKILL.md ships
+      # silently -- agent tooling ignores a skill it cannot parse, so nothing
+      # else would catch it either.
+      - "skills/**/*"
