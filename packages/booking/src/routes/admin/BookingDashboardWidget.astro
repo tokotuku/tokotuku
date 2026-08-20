@@ -1,0 +1,39 @@
+---
+import { env } from "cloudflare:workers";
+import { createTranslator } from "@takontuku/core";
+import { brand, date } from "@takontuku/core/brand";
+import Icon from "@takontuku/ui/Icon.astro";
+import { listBookings } from "../../bookings";
+import { bookingMessages } from "../../messages";
+
+const t = createTranslator(brand, bookingMessages);
+const todayIso = new Date().toISOString().slice(0, 10);
+const sevenDaysOut = new Date();
+sevenDaysOut.setUTCDate(sevenDaysOut.getUTCDate() + 7);
+const upcoming = await listBookings(env.DB, {
+  from: todayIso,
+  to: sevenDaysOut.toISOString().slice(0, 10),
+});
+---
+
+<section class="booking-widget panel" data-dashboard-widget="booking" aria-labelledby="booking-widget-title">
+  <div class="widget-heading"><div><p class="eyebrow">{t("booking.dashboard.eyebrow")}</p><h2 id="booking-widget-title">{t("booking.dashboard.title")}</h2></div><a href="/admin/bookings">{t("booking.dashboard.manage")} ↗</a></div>
+  {upcoming.length === 0 ? (
+    <div class="zero-state"><div class="zero-icon"><Icon paths={["M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z", "M8 2v4", "M16 2v4", "M3 10h18"]} size={22} /></div><h3>{t("booking.dashboard.empty")}</h3><p>{t("booking.dashboard.emptyDescription")}</p></div>
+  ) : (
+    <div class="booking-list">
+      <h3>{t("booking.dashboard.upcoming")}</h3>
+      {upcoming.slice(0, 5).map((booking) => (
+        <a href={"/admin/orders#" + booking.orderId} class="booking-row">
+          <span><strong>{booking.itemName}</strong><small>{booking.customerName}</small></span>
+          <span class="booking-row-date">{date(new Date(booking.startDate))}</span>
+        </a>
+      ))}
+    </div>
+  )}
+</section>
+
+<style>
+  .booking-widget { padding:1.25rem; }.widget-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; }.widget-heading h2,.widget-heading p { margin:0; }.eyebrow { color:var(--tk-color-accent); font-size:.65rem; font-weight:700; letter-spacing:.13em; text-transform:uppercase; }.widget-heading h2 { margin-top:.3rem; font-family:var(--tk-font-family-display); font-size:1.75rem; font-weight:400; }.widget-heading a { color:var(--tk-color-fg-muted); font-size:.7rem; text-decoration:none; }.zero-state { display:grid; place-items:center; margin-top:1.5rem; padding:2.2rem 1rem; border:1px dashed var(--tk-color-border); border-radius:var(--tk-radius-md); text-align:center; }.zero-icon { display:grid; width:2.5rem; height:2.5rem; place-items:center; border:1px solid var(--tk-color-border); border-radius:50%; color:var(--tk-color-fg-muted); }.zero-state h3 { margin:1rem 0 .3rem; font-size:.9rem; }.zero-state p { max-width:25rem; margin:0; color:var(--tk-color-fg-muted); font-size:.74rem; }.booking-list { margin-top:1.5rem; padding-top:1.2rem; border-top:1px solid var(--tk-color-border); }.booking-list h3 { margin:0 0 .55rem; font-size:.8rem; }.booking-row { display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:.7rem 0; border-bottom:1px solid var(--tk-color-border); color:inherit; text-decoration:none; }.booking-row:last-child { border-bottom:0; }.booking-row strong,.booking-row small { display:block; }.booking-row strong { font-size:.74rem; }.booking-row small { margin-top:.15rem; color:var(--tk-color-fg-muted); font-size:.64rem; }.booking-row-date { color:var(--tk-color-fg-muted); font-size:.7rem; white-space:nowrap; }
+  @media (max-width:560px) { .metrics { grid-template-columns:1fr; } }
+</style>

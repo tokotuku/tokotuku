@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
- * Publishes @takontuku/catalog and @takontuku/orders -- the two packages
- * that never go to public npm -- to the private registry. Run manually
+ * Publishes @takontuku/catalog, @takontuku/orders, and @takontuku/booking --
+ * the packages that never go to public npm -- to the private registry. Run manually
  * from a machine with publish credentials there; this deliberately has no
  * CI counterpart (see .github/workflows/ci.yml, which only ever publishes
  * the public packages) so a release never depends on that registry's
@@ -28,16 +28,17 @@ const DRY_RUN = process.argv.includes("--dry-run");
 const { PRIVATE_REGISTRY_URL } = process.env;
 const REGISTRY = PRIVATE_REGISTRY_URL ?? "http://localhost:4873";
 
-// Publish order matters: orders' workspace:* on catalog must resolve to an
-// already-published version.
-const PRIVATE_PACKAGES = ["packages/catalog", "packages/orders"];
+// Publish order matters: orders' workspace:* on catalog, and booking's on
+// both catalog and orders, must each resolve to an already-published version.
+const PRIVATE_PACKAGES = ["packages/catalog", "packages/orders", "packages/booking"];
 
 function main(): void {
   console.log(`Publishing private modules to ${REGISTRY}${DRY_RUN ? " (dry run)" : ""}`);
-  sh("moon", ["run", "catalog:build", "orders:build"], ROOT);
-  // Both packages are scoped (@takontuku/catalog, @takontuku/orders), so
-  // neither hits the unscoped-name auth problem withDefaultRegistryForPublish
-  // exists for -- @takontuku:registry= in .npmrc anchors them by itself.
+  sh("moon", ["run", "catalog:build", "orders:build", "booking:build"], ROOT);
+  // All three packages are scoped (@takontuku/catalog, @takontuku/orders,
+  // @takontuku/booking), so none hit the unscoped-name auth problem
+  // withDefaultRegistryForPublish exists for -- @takontuku:registry= in
+  // .npmrc anchors them by itself.
   for (const dir of PRIVATE_PACKAGES) {
     publishPackage({
       dir,

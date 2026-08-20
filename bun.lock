@@ -136,6 +136,29 @@
         "@cloudflare/workers-types",
       ],
     },
+    "packages/booking": {
+      "name": "@takontuku/booking",
+      "version": "0.1.0",
+      "dependencies": {
+        "@takontuku/catalog": "workspace:*",
+        "@takontuku/core": "workspace:*",
+        "@takontuku/orders": "workspace:*",
+        "@takontuku/ui": "workspace:*",
+      },
+      "devDependencies": {
+        "@astrojs/check": "^0.9.4",
+        "@cloudflare/workers-types": "^5.20260710.1",
+        "@takontuku/config": "workspace:*",
+        "astro": "^7.0.9",
+      },
+      "peerDependencies": {
+        "@cloudflare/workers-types": ">=4",
+        "astro": ">=7.0.0",
+      },
+      "optionalPeers": [
+        "@cloudflare/workers-types",
+      ],
+    },
     "packages/catalog": {
       "name": "@takontuku/catalog",
       "version": "0.1.0",
@@ -848,6 +871,8 @@
     "@tailwindcss/vite": ["@tailwindcss/vite@4.3.3", "", { "dependencies": { "@tailwindcss/node": "4.3.3", "@tailwindcss/oxide": "4.3.3", "tailwindcss": "4.3.3" }, "peerDependencies": { "vite": "^5.2.0 || ^6 || ^7 || ^8" } }, "sha512-yYU8cogLeSh/ms2jh8Fj7jaba/EWa7Ja6GoUqYZaraEuCI5YS6ms6ObZgjjedm+jm6XZjdNRWBpPP6Z86oOxcw=="],
 
     "@takontuku/auth": ["@takontuku/auth@workspace:packages/auth"],
+
+    "@takontuku/booking": ["@takontuku/booking@workspace:packages/booking"],
 
     "@takontuku/catalog": ["@takontuku/catalog@workspace:packages/catalog"],
 

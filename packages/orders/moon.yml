@@ -20,6 +20,15 @@ tasks:
       - "src/**/*"
       - "*.json"
 
+  test:
+    command: "vitest run"
+    # orders.ts imports findProductById from @takontuku/catalog, resolved
+    # via its built dist/ — same reasoning as the typecheck task below.
+    deps: ["core:build", "catalog:build"]
+    inputs:
+      - "src/**/*"
+      - "vitest.config.ts"
+
   typecheck:
     command: "astro check"
     # @takontuku/core and @takontuku/catalog are consumed via their built

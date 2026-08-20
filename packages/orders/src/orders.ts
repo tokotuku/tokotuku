@@ -1,5 +1,5 @@
 import type { D1Database } from "@cloudflare/workers-types";
-import { findProductsByIds } from "@takontuku/catalog";
+import { findProductById, findProductsByIds } from "@takontuku/catalog";
 import {
   ConstraintViolationError,
   collectOrderCreateStatements,
@@ -7,8 +7,46 @@ import {
   mapD1Error,
 } from "@takontuku/core";
 
-export const orderStatuses = ["pending", "confirmed", "delivered", "cancelled"] as const;
+// `pending`..`delivered` is the original checkout-and-ship lifecycle.
+// `inquiry`..`in_progress`..`completed` is the lead-and-fulfill lifecycle a
+// module like @takontuku/booking creates orders into via createInquiryOrder
+// — a request has no total until an admin quotes it, and "delivered" (a
+// shipment concept) doesn't fit a finished visit or service. Both lifecycles
+// share `confirmed` as their convergence point and `cancelled` as their exit.
+export const orderStatuses = [
+  "inquiry",
+  "quoted",
+  "pending",
+  "confirmed",
+  "in_progress",
+  "delivered",
+  "completed",
+  "cancelled",
+] as const;
 export type OrderStatus = (typeof orderStatuses)[number];
+
+/**
+ * Legal next statuses for each current status — the "transisi legalnya"
+ * @takontuku/orders is responsible for exporting alongside the vocabulary
+ * itself (no CHECK on orders.status: SQLite can't ALTER a CHECK in place,
+ * so legality lives here, in TypeScript, where it can actually change).
+ * A status mapped to [] is terminal: nothing, including re-selecting the
+ * same value, is a legal move out of it.
+ */
+export const orderTransitions: Record<OrderStatus, OrderStatus[]> = {
+  inquiry: ["quoted", "confirmed", "cancelled"],
+  quoted: ["confirmed", "cancelled"],
+  pending: ["confirmed", "cancelled"],
+  confirmed: ["in_progress", "delivered", "completed", "cancelled"],
+  in_progress: ["completed", "cancelled"],
+  delivered: [],
+  completed: [],
+  cancelled: [],
+};
+
+function generateOrderNumber(): string {
+  return `TK-${new Date().toISOString().slice(0, 10).replaceAll("-", "")}-${crypto.randomUUID().slice(0, 6).toUpperCase()}`;
+}
 
 export const paymentMethods = ["cash", "transfer"] as const;
 export type PaymentMethod = (typeof paymentMethods)[number];
@@ -32,10 +70,11 @@ export interface AdminOrder {
   id: number;
   orderNumber: string;
   customerName: string;
-  customerEmail: string;
+  customerEmail: string | null;
   createdAt: string;
   itemCount: number;
-  totalCents: number;
+  /** NULL for an order that hasn't been quoted yet — see createInquiryOrder. */
+  totalCents: number | null;
   status: OrderStatus;
   paymentMethod: PaymentMethod;
   paymentStatus: "unpaid" | "paid";
@@ -91,7 +130,7 @@ export async function createOrder(
     if (!product) throw new Error("Ada produk yang sudah tidak tersedia.");
     subtotalCents += product.priceCents * item.quantity;
   }
-  const orderNumber = `TK-${new Date().toISOString().slice(0, 10).replaceAll("-", "")}-${crypto.randomUUID().slice(0, 6).toUpperCase()}`;
+  const orderNumber = generateOrderNumber();
 
   const statements = [
     db
@@ -164,6 +203,90 @@ export async function createOrder(
   return { orderNumber, totalCents: subtotalCents };
 }
 
+export interface InquiryDetails {
+  customerName: string;
+  customerPhone: string;
+  /** Optional — a WhatsApp-first lead may give only a phone number. */
+  customerEmail?: string;
+  /** Where the service happens. Stored in shipping_address; nothing ships. */
+  serviceAddress: string;
+  note?: string;
+  /** Lead channel, for reporting. Defaults to 'web' since this is normally called from a storefront form POST. */
+  source?: string;
+}
+
+/**
+ * Creates an order for a single catalog item with no computed total and no
+ * signed-in user — the entry point for a lead that hasn't been quoted yet
+ * (a scheduling request from @takontuku/booking, a project inquiry, or any
+ * future channel that isn't "add to cart and pay now"). Neighbor to
+ * createOrder, not a replacement: physical checkout keeps using createOrder.
+ *
+ * subtotal_cents/total_cents stay NULL rather than being computed from
+ * priceCents × some multiplier — this function has no idea what that
+ * multiplier would even mean (days? occurrences? a flat quote?), and
+ * guessing would print a price nobody quoted. An admin fills in the real
+ * total when they quote the order.
+ */
+export async function createInquiryOrder(
+  db: D1Database,
+  itemId: number,
+  details: InquiryDetails,
+  attributes?: Record<string, unknown>,
+): Promise<{ orderNumber: string }> {
+  const product = await findProductById(db, itemId);
+  if (!product) throw new Error("Layanan yang diminta sudah tidak tersedia.");
+
+  const orderNumber = generateOrderNumber();
+  const statements = [
+    db
+      .prepare(
+        `INSERT INTO orders
+          (order_number, source, user_id, customer_name, customer_email, customer_phone,
+           shipping_address, shipping_city, shipping_postal_code, customer_note,
+           subtotal_cents, total_cents, status)
+         VALUES (?, ?, NULL, ?, ?, ?, ?, '', '', ?, NULL, NULL, 'inquiry')`,
+      )
+      .bind(
+        orderNumber,
+        details.source ?? "web",
+        details.customerName,
+        details.customerEmail ?? null,
+        details.customerPhone,
+        details.serviceAddress,
+        details.note ?? "",
+      ),
+    // price_cents is an honest snapshot of the item's listed rate — useful
+    // reference for whoever quotes the order. line_total_cents stays NULL
+    // for the same reason subtotal/total do on the order itself.
+    db
+      .prepare(
+        `INSERT INTO order_items
+          (order_id, item_id, product_name, sku, price_cents, quantity, line_total_cents)
+         VALUES ((SELECT id FROM orders WHERE order_number = ?), ?, ?, ?, ?, 1, NULL)`,
+      )
+      .bind(orderNumber, product.id, product.name, product.sku, product.priceCents),
+  ];
+
+  const hookStatements = collectOrderCreateStatements({
+    db,
+    orderNumber,
+    items: [{ itemId: product.id, quantity: 1 }],
+    // exactOptionalPropertyTypes: an explicit `attributes: undefined` is not
+    // the same as the property being absent — only include the key at all
+    // when there's a real value.
+    ...(attributes ? { attributes } : {}),
+  });
+
+  try {
+    await db.batch([...statements, ...hookStatements]);
+  } catch (error) {
+    throw mapD1Error(error);
+  }
+
+  return { orderNumber };
+}
+
 export async function findCustomerOrder(db: D1Database, orderNumber: string, userId: string) {
   return db
     .prepare(
@@ -200,10 +323,10 @@ export async function listOrders(db: D1Database): Promise<AdminOrder[]> {
       id: number;
       order_number: string;
       customer_name: string;
-      customer_email: string;
+      customer_email: string | null;
       created_at: string;
       item_count: number;
-      total_cents: number;
+      total_cents: number | null;
       status: OrderStatus;
       payment_method: PaymentMethod;
       payment_status: "unpaid" | "paid";
@@ -237,8 +360,12 @@ export async function getOrderDashboardSummary(db: D1Database): Promise<OrderDas
         "SELECT COALESCE(SUM(total_cents), 0) AS value FROM orders WHERE status != 'cancelled' AND created_at >= datetime('now', '-30 day')",
       )
       .first<{ value: number }>(),
+    // 'pending' (a placed physical order) and 'inquiry' (a fresh lead) are
+    // the two lifecycles' respective "just arrived, admin hasn't acted yet"
+    // states. 'quoted' is deliberately excluded — the admin already acted;
+    // the ball is in the customer's court.
     db
-      .prepare("SELECT COUNT(*) AS value FROM orders WHERE status = 'pending'")
+      .prepare("SELECT COUNT(*) AS value FROM orders WHERE status IN ('pending', 'inquiry')")
       .first<{ value: number }>(),
     listOrders(db),
   ]);
@@ -256,10 +383,9 @@ export async function updateOrderStatus(db: D1Database, id: number, status: Orde
     .bind(id)
     .first<{ status: OrderStatus }>();
   if (!current) throw new Error("Order tidak ditemukan.");
-  if (current.status === "cancelled")
-    throw new Error("Order yang dibatalkan tidak dapat diaktifkan kembali.");
-  if (current.status === "delivered")
-    throw new Error("Order yang sudah diterima dan dibayar tidak dapat diubah lagi.");
+  if (status !== current.status && !orderTransitions[current.status].includes(status)) {
+    throw new Error(`Order berstatus "${current.status}" tidak dapat dipindahkan ke "${status}".`);
+  }
   const { results: items } = await db
     .prepare("SELECT item_id AS itemId, quantity FROM order_items WHERE order_id = ?")
     .bind(id)
@@ -273,10 +399,13 @@ export async function updateOrderStatus(db: D1Database, id: number, status: Orde
     items,
   });
 
+  // 'delivered' (physical) and 'completed' (service) are the two lifecycles'
+  // respective "fulfilled" terminal states — both imply payment is settled,
+  // same as the pre-existing 'delivered' rule.
   const statusUpdate = db
     .prepare(
       `UPDATE orders
-       SET status = ?, payment_status = CASE WHEN ? = 'delivered' THEN 'paid' ELSE payment_status END,
+       SET status = ?, payment_status = CASE WHEN ? IN ('delivered', 'completed') THEN 'paid' ELSE payment_status END,
            updated_at = datetime('now')
        WHERE id = ?`,
     )

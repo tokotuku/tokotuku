@@ -1,0 +1,50 @@
+{
+  "name": "@takontuku/booking",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "files": [
+    "dist",
+    "src",
+    "migrations"
+  ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./register": "./src/register.ts",
+    "./routes/*": "./src/routes/*",
+    "./package.json": "./package.json"
+  },
+  "dependencies": {
+    "@takontuku/catalog": "workspace:*",
+    "@takontuku/core": "workspace:*",
+    "@takontuku/orders": "workspace:*",
+    "@takontuku/ui": "workspace:*"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.4",
+    "@cloudflare/workers-types": "^5.20260710.1",
+    "@takontuku/config": "workspace:*",
+    "astro": "^7.0.9"
+  },
+  "peerDependencies": {
+    "@cloudflare/workers-types": ">=4",
+    "astro": ">=7.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@cloudflare/workers-types": {
+      "optional": true
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "lint": "biome check .",
+    "typecheck": "astro check"
+  }
+}

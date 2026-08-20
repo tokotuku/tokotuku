@@ -52,14 +52,18 @@ export function orders(): ModuleDefinition {
 }
 
 export {
+  type AdminOrder,
   approvePayment,
   attachPaymentProof,
+  createInquiryOrder,
   createOrder,
   findCustomerOrder,
   getOrderDashboardSummary,
+  type InquiryDetails,
   listOrders,
   type OrderStatus,
   orderStatuses,
+  orderTransitions,
   type PaymentMethod,
   paymentMethods,
   updateOrderStatus,

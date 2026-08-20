@@ -26,7 +26,7 @@ const t = createTranslator(brand, catalogMessages);
   <section class="collection-section" aria-labelledby="collection-title">
     <div class="collection-heading"><div><p class="eyebrow">{t("catalog.storefront.collectionEyebrow")}</p><h2 id="collection-title">{t("catalog.storefront.collectionHeading")}</h2></div><a href="/products">{t("catalog.storefront.viewAll")} <span aria-hidden="true">↗</span></a></div>
     <div class="product-grid">
-      {products.map((product) => <ProductCard id={product.id} name={product.name} description={product.description} price={money(product.priceCents / 100)} priceCents={product.priceCents} imageUrl={mediaUrl(product.imageKey)} stock={product.stock} showAddToCart={hasOrders} category={product.category} labels={{ view: t("catalog.products.view"), add: t("catalog.products.addToCart"), soldOut: t("catalog.products.status.outOfStock"), lowStock: t("catalog.products.fewLeft") }} />)}
+      {products.map((product) => { const isPhysical = product.fulfillmentType === "physical"; return <ProductCard id={product.id} name={product.name} description={product.description} price={money(product.priceCents / 100)} priceCents={product.priceCents} imageUrl={mediaUrl(product.imageKey)} stock={product.stock} showStock={isPhysical} showAddToCart={hasOrders && isPhysical} category={product.category} labels={{ view: t("catalog.products.view"), add: t("catalog.products.addToCart"), soldOut: t("catalog.products.status.outOfStock"), lowStock: t("catalog.products.fewLeft") }} />; })}
     </div>
   </section>
 )}

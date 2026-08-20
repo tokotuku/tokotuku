@@ -1,6 +1,9 @@
 import type { R2Bucket } from "@cloudflare/workers-types";
 import type { ProductInput } from "./products";
 
+/** Kept in sync with the <select> in ProductForm.astro. */
+export const fulfillmentTypes = ["physical", "scheduled"] as const;
+
 function requiredText(form: FormData, name: string, label: string) {
   const value = String(form.get(name) ?? "").trim();
   if (!value) throw new Error(`${label} wajib diisi.`);
@@ -17,7 +20,13 @@ export async function productInputFromForm(
   const sku = requiredText(form, "sku", "SKU").toUpperCase();
   const category = requiredText(form, "category", "Kategori");
   const price = Number(form.get("price"));
-  const stock = Number(form.get("stock"));
+  const fulfillmentType = String(form.get("fulfillmentType") ?? "physical");
+  if (!fulfillmentTypes.includes(fulfillmentType as (typeof fulfillmentTypes)[number]))
+    throw new Error("Tipe pemenuhan tidak valid.");
+  // A 'scheduled' item's stock input is disabled in the form, so it is
+  // absent from the submission entirely — 0 is the correct read, not a
+  // validation failure.
+  const stock = fulfillmentType === "physical" ? Number(form.get("stock")) : 0;
   if (!Number.isFinite(price) || price < 0) throw new Error("Harga tidak valid.");
   if (!Number.isInteger(stock) || stock < 0)
     throw new Error("Stok harus berupa bilangan bulat positif.");
@@ -59,5 +68,6 @@ export async function productInputFromForm(
     stock,
     isActive: form.get("isActive") === "on",
     customFields,
+    fulfillmentType,
   };
 }

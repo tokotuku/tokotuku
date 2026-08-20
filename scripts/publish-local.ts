@@ -30,6 +30,7 @@ const PACKAGES = [
   "packages/auth",
   "packages/catalog",
   "packages/orders",
+  "packages/booking",
   "packages/create-takontuku",
 ];
 
@@ -37,7 +38,15 @@ function main(): void {
   console.log(`Publishing every package to ${REGISTRY}${DRY_RUN ? " (dry run)" : ""}`);
   sh(
     "moon",
-    ["run", "core:build", "auth:build", "catalog:build", "orders:build", "create-takontuku:build"],
+    [
+      "run",
+      "core:build",
+      "auth:build",
+      "catalog:build",
+      "orders:build",
+      "booking:build",
+      "create-takontuku:build",
+    ],
     ROOT,
   );
   withDefaultRegistryForPublish(REGISTRY, () => {

@@ -1,0 +1,189 @@
+---
+import { env } from "cloudflare:workers";
+import { findProductById } from "@takontuku/catalog";
+import { createTranslator } from "@takontuku/core";
+import { brand } from "@takontuku/core/brand";
+import { createInquiryOrder } from "@takontuku/orders";
+import Icon from "@takontuku/ui/Icon.astro";
+import Layout from "@takontuku/ui/Layout.astro";
+import StoreHeader from "@takontuku/ui/StoreHeader.astro";
+import type { BookingRequestAttributes } from "../../booking-hooks";
+import { findItemSchedule, listSlots } from "../../bookings";
+import { bookingMessages } from "../../messages";
+
+const t = createTranslator(brand, bookingMessages);
+const locale = brand.locale.toLowerCase().startsWith("id") ? "id" : "en";
+
+const itemId = Number(Astro.params["id"]);
+const product = await findProductById(env.DB, itemId);
+const schedule = product ? await findItemSchedule(env.DB, itemId) : null;
+// A product that exists but isn't fulfillmentType 'scheduled', or one that
+// is but has no booking_item_schedule row yet (the admin hasn't configured
+// it), gets the same "not bookable" state — the customer has no use for
+// the distinction, and it isn't a 404 (the product itself is real).
+const notBookable = product?.fulfillmentType !== "scheduled" || !schedule;
+const slots = !notBookable && schedule?.mode === "slot" ? await listSlots(env.DB, itemId) : [];
+const weekdayNames =
+  locale === "id"
+    ? ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"]
+    : ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+const todayIso = new Date().toISOString().slice(0, 10);
+
+function addDays(iso: string, days: number): string {
+  const date = new Date(`${iso}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
+}
+
+function daysBetween(fromIso: string, toIso: string): number {
+  const msPerDay = 86_400_000;
+  return Math.round(
+    (new Date(`${toIso}T00:00:00Z`).getTime() - new Date(`${fromIso}T00:00:00Z`).getTime()) /
+      msPerDay,
+  );
+}
+
+let error = "";
+let orderNumber = Astro.url.searchParams.get("order");
+
+if (!notBookable && schedule && Astro.request.method === "POST" && !orderNumber) {
+  try {
+    const form = await Astro.request.formData();
+    const required = (name: string, label: string) => {
+      const value = String(form.get(name) ?? "").trim();
+      if (!value) throw new Error(t("booking.form.error.required", { label }));
+      return value;
+    };
+    const customerName = required("customerName", t("booking.form.name"));
+    const customerPhone = required("customerPhone", t("booking.form.phone"));
+    const customerEmail = String(form.get("customerEmail") ?? "").trim();
+    const serviceAddress = required("serviceAddress", t("booking.form.address"));
+    const note = String(form.get("note") ?? "").trim();
+    const startDate = required("startDate", t("booking.form.startDate"));
+
+    if (daysBetween(todayIso, startDate) < schedule.leadTimeDays) {
+      throw new Error(t("booking.form.error.leadTime", { days: schedule.leadTimeDays }));
+    }
+
+    let attributes: BookingRequestAttributes;
+    if (schedule.mode === "slot") {
+      const slotId = Number(form.get("slotId"));
+      const slot = slots.find((candidate) => candidate.id === slotId);
+      if (!slot) throw new Error(t("booking.form.error.slotRequired"));
+      if (new Date(`${startDate}T00:00:00Z`).getUTCDay() !== slot.weekday) {
+        throw new Error(t("booking.form.error.weekdayMismatch"));
+      }
+      attributes = {
+        itemId,
+        mode: "slot",
+        startDate,
+        endDate: null,
+        slotId: slot.id,
+        occurrencesPerDay: 1,
+      };
+    } else {
+      const endDate = required("endDate", t("booking.form.endDate"));
+      if (endDate < startDate) throw new Error(t("booking.form.error.invalidDateRange"));
+      const days = daysBetween(startDate, endDate) + 1;
+      if (days < schedule.minDays) {
+        throw new Error(t("booking.form.error.minDays", { days: schedule.minDays }));
+      }
+      if (schedule.maxDays !== null && days > schedule.maxDays) {
+        throw new Error(t("booking.form.error.maxDays", { days: schedule.maxDays }));
+      }
+      attributes = {
+        itemId,
+        mode: "range",
+        startDate,
+        endDate,
+        slotId: null,
+        occurrencesPerDay: schedule.occurrencesPerDay,
+      };
+    }
+
+    const created = await createInquiryOrder(
+      env.DB,
+      itemId,
+      {
+        customerName,
+        customerPhone,
+        // exactOptionalPropertyTypes: only include the key when there's a
+        // real value — an explicit `customerEmail: undefined` isn't the
+        // same as the property being absent.
+        ...(customerEmail ? { customerEmail } : {}),
+        serviceAddress,
+        note,
+      },
+      { booking: attributes },
+    );
+    return Astro.redirect(`/booking/${itemId}?order=${encodeURIComponent(created.orderNumber)}`);
+  } catch (caught) {
+    error = caught instanceof Error ? caught.message : t("booking.form.error.generic");
+    orderNumber = null;
+  }
+}
+---
+
+<Layout title={t("booking.detail.title") + " — " + brand.name} siteName={brand.name} lang={locale}>
+  <StoreHeader brand={brand} announcement={brand.storefront?.announcement} labels={{ home: locale === "id" ? "Beranda" : "Home", shop: locale === "id" ? "Toko" : "Shop" }} />
+  <main>
+    {orderNumber ? (
+      <section class="success-card">
+        <span class="success-icon"><Icon name="check" size={22} /></span>
+        <p class="eyebrow">{t("booking.detail.eyebrow")}</p>
+        <h1>{t("booking.success.title")}</h1>
+        <p>{t("booking.success.description", { orderNumber })}</p>
+        <a class="primary-link" href="/">{t("booking.success.backHome")}</a>
+      </section>
+    ) : notBookable ? (
+      <section class="success-card">
+        <p class="eyebrow">{t("booking.detail.eyebrow")}</p>
+        <h1>{t("booking.detail.notFound")}</h1>
+        <a class="primary-link" href="/products">{t("booking.detail.backToService")}</a>
+      </section>
+    ) : (
+      <>
+        <p class="eyebrow">{t("booking.detail.eyebrow")}</p>
+        <h1>{product?.name}</h1>
+        <p class="description">{t("booking.detail.description")}</p>
+        {error && <p class="booking-error" role="alert">{error}</p>}
+        <form method="post" class="booking-form">
+          <section>
+            <h2>{locale === "id" ? "Kontak" : "Contact"}</h2>
+            <div class="fields">
+              <label>{t("booking.form.name")}<input name="customerName" required autocomplete="name" /></label>
+              <label>{t("booking.form.phone")}<input name="customerPhone" type="tel" required autocomplete="tel" /></label>
+              <label>{t("booking.form.email")}<input name="customerEmail" type="email" autocomplete="email" /></label>
+              <label class="wide">{t("booking.form.address")}<textarea name="serviceAddress" required rows="3" autocomplete="street-address"></textarea></label>
+            </div>
+            <h2>{locale === "id" ? "Jadwal" : "Schedule"}</h2>
+            {schedule?.mode === "slot" ? (
+              <div class="fields">
+                <label>{t("booking.form.startDate")}<input name="startDate" type="date" required min={addDays(todayIso, schedule.leadTimeDays)} /></label>
+                <label>{t("booking.form.slot")}<select name="slotId" required>
+                  <option value="">—</option>
+                  {slots.map((slot) => <option value={slot.id}>{weekdayNames[slot.weekday]} {slot.startTime}</option>)}
+                </select></label>
+              </div>
+            ) : (
+              <div class="fields">
+                <label>{t("booking.form.startDate")}<input name="startDate" type="date" required min={addDays(todayIso, schedule?.leadTimeDays ?? 0)} /></label>
+                <label>{t("booking.form.endDate")}<input name="endDate" type="date" required min={addDays(todayIso, schedule?.leadTimeDays ?? 0)} /></label>
+              </div>
+            )}
+            <div class="fields">
+              <label class="wide">{t("booking.form.note")}<textarea name="note" rows="3"></textarea></label>
+            </div>
+          </section>
+          <button type="submit">{t("booking.form.submit")}</button>
+        </form>
+      </>
+    )}
+  </main>
+</Layout>
+
+<style>
+  main { width:min(100% - 2.5rem,50rem); margin:auto; padding-block:2.5rem 5rem; }.eyebrow { margin:0; color:var(--tk-color-accent); font-size:.68rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; }h1 { margin:.5rem 0 1rem; font-family:var(--tk-font-family-display); font-size:clamp(2.2rem,5vw,3.4rem); font-weight:400; letter-spacing:-.04em; }.description { max-width:34rem; margin:0 0 2rem; color:var(--tk-color-fg-muted); }.booking-form section { padding:1.5rem; border:1px solid var(--tk-color-border); border-radius:var(--tk-radius-xl); }.booking-form h2 { margin:0 0 1rem; font-size:1rem; }.booking-form h2:not(:first-child) { margin-top:1.75rem; }.fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; }.fields label { display:grid; gap:.4rem; color:var(--tk-color-fg-muted); font-size:.8rem; }.wide { grid-column:1/-1; }.fields input,.fields select,.fields textarea { box-sizing:border-box; width:100%; min-height:2.75rem; padding:.65rem .8rem; border:1px solid var(--tk-color-border); border-radius:var(--tk-radius-md); background:var(--tk-color-bg); color:var(--tk-color-fg); font:inherit; }.booking-form > button { display:flex; width:100%; min-height:3rem; margin-top:1.5rem; align-items:center; justify-content:center; border:0; border-radius:var(--tk-radius-md); background:var(--tk-color-accent); color:var(--tk-color-accent-fg); font-size:.85rem; font-weight:700; cursor:pointer; }.booking-error { padding:12px 14px; margin-bottom:1rem; border-radius:10px; background:color-mix(in srgb,var(--tk-color-danger) 9%,var(--tk-color-bg)); color:var(--tk-color-danger); }.success-card { max-width:34rem; margin:3rem auto; text-align:center; }.success-icon { display:grid; width:60px; height:60px; margin:0 auto 1.25rem; place-items:center; border-radius:50%; background:color-mix(in srgb,var(--tk-color-success) 14%,var(--tk-color-bg)); color:var(--tk-color-success); font-size:28px; }.primary-link { display:inline-flex; margin-top:1.25rem; padding-inline:1.4rem; min-height:2.9rem; align-items:center; justify-content:center; border-radius:var(--tk-radius-md); background:var(--tk-color-accent); color:var(--tk-color-accent-fg); font-weight:700; text-decoration:none; }
+  @media (max-width:640px) { .fields { grid-template-columns:1fr; } }
+</style>

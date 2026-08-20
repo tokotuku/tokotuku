@@ -18,7 +18,7 @@ function isDevelopment(): boolean {
   return typeof process !== "undefined" && process.env.NODE_ENV !== "production";
 }
 
-const knownNamespaces = ["auth.", "admin.", "catalog.", "orders."];
+const knownNamespaces = ["auth.", "admin.", "catalog.", "orders.", "booking."];
 
 /** Resolve a package-owned localized dictionary and apply client overrides. */
 export function createTranslator(

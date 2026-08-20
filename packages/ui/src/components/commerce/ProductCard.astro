@@ -9,6 +9,12 @@ interface Props {
   priceCents: number;
   imageUrl: string;
   stock?: number;
+  /**
+   * A scheduled (booking) item has no stock at all — not zero, meaningless.
+   * Set to false so the card never renders "Sold out"/"Few left" for it,
+   * and never disables its action button on a stock reading that isn't real.
+   */
+  showStock?: boolean;
   showAddToCart?: boolean;
   category?: string;
   labels?: { view?: string; add?: string; soldOut?: string; lowStock?: string };
@@ -23,18 +29,21 @@ const {
   priceCents,
   imageUrl,
   stock = 1,
+  showStock = true,
   showAddToCart = false,
   category = "Everyday objects",
   labels = {},
   imageAlt = name,
 } = Astro.props;
 const serialized = JSON.stringify({ id, name, priceCents, imageUrl });
-const available = stock > 0;
-const stockLabel = !available
-  ? (labels.soldOut ?? "Sold out")
-  : stock <= 5
-    ? (labels.lowStock ?? "Few left")
-    : undefined;
+const available = !showStock || stock > 0;
+const stockLabel = !showStock
+  ? undefined
+  : !available
+    ? (labels.soldOut ?? "Sold out")
+    : stock <= 5
+      ? (labels.lowStock ?? "Few left")
+      : undefined;
 ---
 
 <article class="product-card" data-product-card>

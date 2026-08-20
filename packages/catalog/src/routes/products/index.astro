@@ -61,7 +61,7 @@ const paginationBase =
       {noMatch ? (
         <section class="no-match" data-catalog-no-match><p class="eyebrow">{t("catalog.products.noSearchResult")}</p><h2>{t("catalog.products.noMatch")}</h2><p>{t("catalog.products.noMatchDescription")}</p><a href="/products">{t("catalog.products.reset")} ↗</a></section>
       ) : (
-        <div class="product-grid">{products.map((product) => <ProductCard id={product.id} name={product.name} description={product.description} price={money(product.priceCents / 100)} priceCents={product.priceCents} imageUrl={mediaUrl(product.imageKey)} stock={product.stock} showAddToCart={hasOrders} category={product.category} labels={{ view: t("catalog.products.view"), add: t("catalog.products.addToCart"), soldOut: t("catalog.products.status.outOfStock"), lowStock: t("catalog.products.fewLeft") }} />)}</div>
+        <div class="product-grid">{products.map((product) => { const isPhysical = product.fulfillmentType === "physical"; return <ProductCard id={product.id} name={product.name} description={product.description} price={money(product.priceCents / 100)} priceCents={product.priceCents} imageUrl={mediaUrl(product.imageKey)} stock={product.stock} showStock={isPhysical} showAddToCart={hasOrders && isPhysical} category={product.category} labels={{ view: t("catalog.products.view"), add: t("catalog.products.addToCart"), soldOut: t("catalog.products.status.outOfStock"), lowStock: t("catalog.products.fewLeft") }} />; })}</div>
       )}
       {totalPages > 1 && <Pagination page={page} totalPages={totalPages} baseUrl={paginationBase} />}
     </main>

@@ -13,6 +13,11 @@ const product = await findProductById(env.DB, id);
 if (!product) return new Response("Product not found", { status: 404 });
 const t = createTranslator(brand, catalogMessages);
 const hasOrders = registry.moduleNames.includes("orders");
+// A scheduled item is booked, not carted or stocked — capability-checked by
+// name only, same as hasOrders above, so catalog never imports
+// @takontuku/booking and stays installable without it.
+const isPhysical = product.fulfillmentType === "physical";
+const hasBooking = registry.moduleNames.includes("booking");
 const imageUrl = mediaUrl(product.imageKey);
 const serialized = JSON.stringify({
   id: product.id,
@@ -35,7 +40,9 @@ const productJsonLd = {
     priceCurrency: brand.currency,
     price: (product.priceCents / 100).toFixed(2),
     availability:
-      product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      !isPhysical || product.stock > 0
+        ? "https://schema.org/InStock"
+        : "https://schema.org/OutOfStock",
   },
 };
 ---
@@ -46,12 +53,12 @@ const productJsonLd = {
     <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="/">{t("catalog.detail.home")}</a><span>/</span><a href="/products">{t("catalog.detail.shop")}</a><span>/</span><span>{product.name}</span></nav>
     <div class="product-detail">
       <div class="media"><img src={imageUrl} alt={product.name} /></div>
-      <section class="product-copy"><p class="eyebrow">{product.category}</p><h1>{product.name}</h1><p class="price">{money(product.priceCents / 100)}</p><p class="description">{product.description}</p><p class:list={["stock", product.stock <= 5 && "stock--low"]}>{product.stock > 0 ? t("catalog.detail.inStock", { count: product.stock }) : t("catalog.detail.outOfStock")}</p>{hasOrders && <button type="button" data-add-to-cart data-product={serialized} disabled={product.stock <= 0}>{product.stock > 0 ? t("catalog.detail.add") : t("catalog.detail.soldOut")}</button>}{Object.keys(product.customFields).length > 0 && <dl>{Object.entries(product.customFields).map(([key, value]) => <div><dt>{key}</dt><dd>{value}</dd></div>)}</dl>}{hasOrders && <ul><li>{t("catalog.detail.cash")}</li><li>{t("catalog.detail.reassurance")}</li></ul>}</section>
+      <section class="product-copy"><p class="eyebrow">{product.category}</p><h1>{product.name}</h1><p class="price">{money(product.priceCents / 100)}</p><p class="description">{product.description}</p>{isPhysical ? <><p class:list={["stock", product.stock <= 5 && "stock--low"]}>{product.stock > 0 ? t("catalog.detail.inStock", { count: product.stock }) : t("catalog.detail.outOfStock")}</p>{hasOrders && <button type="button" data-add-to-cart data-product={serialized} disabled={product.stock <= 0}>{product.stock > 0 ? t("catalog.detail.add") : t("catalog.detail.soldOut")}</button>}</> : hasBooking && <a class="book-now" href={`/booking/${product.id}`}>{t("catalog.detail.bookNow")}</a>}{Object.keys(product.customFields).length > 0 && <dl>{Object.entries(product.customFields).map(([key, value]) => <div><dt>{key}</dt><dd>{value}</dd></div>)}</dl>}{isPhysical && hasOrders && <ul><li>{t("catalog.detail.cash")}</li><li>{t("catalog.detail.reassurance")}</li></ul>}</section>
     </div>
   </main>
 </Layout>
 
 <style>
-  main { width:min(100% - 2.5rem,78rem); margin:auto; padding-block:2rem 5rem; }.breadcrumbs { display:flex; flex-wrap:wrap; gap:.55rem; margin-bottom:2rem; color:var(--tk-color-fg-muted); font-size:.72rem; }.breadcrumbs a { text-decoration:none; }.product-detail { display:grid; grid-template-columns:minmax(0,1.1fr) minmax(20rem,.9fr); gap:clamp(2rem,7vw,6rem); align-items:center; }.media { aspect-ratio:1; overflow:hidden; border-radius:var(--tk-radius-md); background:var(--tk-color-bg-subtle); }.media img { display:block; width:100%; height:100%; object-fit:cover; }.eyebrow { margin:0; color:var(--tk-color-accent); font-size:.68rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; }.product-copy h1 { max-width:10ch; margin:.55rem 0 .8rem; font-family:var(--tk-font-family-display); font-size:clamp(3rem,7vw,6.2rem); font-weight:400; letter-spacing:-.05em; line-height:.9; }.price { margin:0; font-size:1.25rem; font-weight:700; }.description { max-width:32rem; margin:1.2rem 0 0; color:var(--tk-color-fg-muted); font-size:1rem; line-height:1.7; }.stock { margin:1.2rem 0 0; color:var(--tk-color-success); font-size:.8rem; font-weight:700; }.stock--low { color:var(--tk-color-warning); }.product-copy button { width:100%; min-height:3.2rem; margin-top:1.2rem; border:0; border-radius:var(--tk-radius-sm); background:var(--tk-color-accent); color:var(--tk-color-accent-fg); font-size:.8rem; font-weight:700; cursor:pointer; }.product-copy button:disabled { opacity:.55; cursor:not-allowed; }dl { margin:1.5rem 0 0; border-top:1px solid var(--tk-color-border); }dl div { display:flex; justify-content:space-between; gap:1.5rem; padding:.75rem 0; border-bottom:1px solid var(--tk-color-border); font-size:.75rem; }dt { color:var(--tk-color-fg-muted); }dd { margin:0; font-weight:700; }ul { display:grid; gap:.45rem; margin:1.5rem 0 0; padding:1.2rem 0 0 1rem; border-top:1px solid var(--tk-color-border); color:var(--tk-color-fg-muted); font-size:.75rem; }
+  main { width:min(100% - 2.5rem,78rem); margin:auto; padding-block:2rem 5rem; }.breadcrumbs { display:flex; flex-wrap:wrap; gap:.55rem; margin-bottom:2rem; color:var(--tk-color-fg-muted); font-size:.72rem; }.breadcrumbs a { text-decoration:none; }.product-detail { display:grid; grid-template-columns:minmax(0,1.1fr) minmax(20rem,.9fr); gap:clamp(2rem,7vw,6rem); align-items:center; }.media { aspect-ratio:1; overflow:hidden; border-radius:var(--tk-radius-md); background:var(--tk-color-bg-subtle); }.media img { display:block; width:100%; height:100%; object-fit:cover; }.eyebrow { margin:0; color:var(--tk-color-accent); font-size:.68rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; }.product-copy h1 { max-width:10ch; margin:.55rem 0 .8rem; font-family:var(--tk-font-family-display); font-size:clamp(3rem,7vw,6.2rem); font-weight:400; letter-spacing:-.05em; line-height:.9; }.price { margin:0; font-size:1.25rem; font-weight:700; }.description { max-width:32rem; margin:1.2rem 0 0; color:var(--tk-color-fg-muted); font-size:1rem; line-height:1.7; }.stock { margin:1.2rem 0 0; color:var(--tk-color-success); font-size:.8rem; font-weight:700; }.stock--low { color:var(--tk-color-warning); }.product-copy button,.product-copy .book-now { display:flex; align-items:center; justify-content:center; width:100%; min-height:3.2rem; margin-top:1.2rem; border:0; border-radius:var(--tk-radius-sm); background:var(--tk-color-accent); color:var(--tk-color-accent-fg); font-size:.8rem; font-weight:700; text-decoration:none; cursor:pointer; }.product-copy button:disabled { opacity:.55; cursor:not-allowed; }dl { margin:1.5rem 0 0; border-top:1px solid var(--tk-color-border); }dl div { display:flex; justify-content:space-between; gap:1.5rem; padding:.75rem 0; border-bottom:1px solid var(--tk-color-border); font-size:.75rem; }dt { color:var(--tk-color-fg-muted); }dd { margin:0; font-weight:700; }ul { display:grid; gap:.45rem; margin:1.5rem 0 0; padding:1.2rem 0 0 1rem; border-top:1px solid var(--tk-color-border); color:var(--tk-color-fg-muted); font-size:.75rem; }
   @media (max-width:760px) { main { width:min(100% - 1.5rem,78rem); padding-top:1.25rem; }.product-detail { grid-template-columns:1fr; }.product-copy h1 { max-width:12ch; } }
 </style>

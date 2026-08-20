@@ -25,7 +25,7 @@ const t = createTranslator(brand, catalogMessages);
   ) : (
     <>
       <div class="metrics"><DashboardMetric label={t("catalog.dashboard.activeProducts")} value={String(productCount)} hint={t("catalog.dashboard.acrossCategories", { count: categories.length })} /><DashboardMetric label={t("catalog.dashboard.categories")} value={String(categories.length)} /><DashboardMetric label={t("catalog.dashboard.lowStock")} value={String(products.filter((product) => product.stock > 0 && product.stock <= 5).length)} tone="warning" hint={t("catalog.dashboard.lowStockHint")} /></div>
-      <div class="product-preview"><div class="subheading"><h3>{t("catalog.dashboard.featured")}</h3><a href="/products">{t("catalog.dashboard.viewStore")} ↗</a></div>{products.length ? products.slice(0, 4).map((product) => <div class="product-row"><span class="product-dot"></span><span>{product.name}</span><strong>{product.stock}</strong></div>) : <p class="muted">{t("catalog.dashboard.noActiveProducts")}</p>}</div>
+      <div class="product-preview"><div class="subheading"><h3>{t("catalog.dashboard.featured")}</h3><a href="/products">{t("catalog.dashboard.viewStore")} ↗</a></div>{products.length ? products.slice(0, 4).map((product) => <div class="product-row"><span class="product-dot"></span><span>{product.name}</span><strong>{product.fulfillmentType === "physical" ? product.stock : "—"}</strong></div>) : <p class="muted">{t("catalog.dashboard.noActiveProducts")}</p>}</div>
     </>
   )}
 </section>

@@ -17,7 +17,7 @@ const t = createTranslator(brand, orderMessages);
   ) : (
     <>
       <div class="metrics"><DashboardMetric label={t("orders.dashboard.today")} value={money(summary.todaySalesCents / 100)} /><DashboardMetric label={t("orders.dashboard.thirtyDays")} value={money(summary.thirtyDayRevenueCents / 100)} /><DashboardMetric label={t("orders.dashboard.pending")} value={String(summary.pendingCount)} tone={summary.pendingCount ? "warning" : "default"} /></div>
-      <div class="recent-list"><h3>{t("orders.dashboard.recent")}</h3>{summary.recentOrders.map((order) => <a href={"/admin/orders#" + order.id} class="order-row"><span><strong>{order.orderNumber}</strong><small>{order.customerName}</small></span><span><strong>{money(order.totalCents / 100)}</strong><small class:list={["status", "status--" + order.status]}>{order.status}</small></span></a>)}</div>
+      <div class="recent-list"><h3>{t("orders.dashboard.recent")}</h3>{summary.recentOrders.map((order) => <a href={"/admin/orders#" + order.id} class="order-row"><span><strong>{order.orderNumber}</strong><small>{order.customerName}</small></span><span><strong>{order.totalCents === null ? "—" : money(order.totalCents / 100)}</strong><small class:list={["status", "status--" + order.status]}>{order.status}</small></span></a>)}</div>
     </>
   )}
 </section>

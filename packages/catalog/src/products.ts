@@ -11,6 +11,7 @@ interface ProductRow {
   stock: number;
   is_active: number;
   custom_fields_json: string;
+  fulfillment_type: string;
 }
 
 export interface Product {
@@ -24,6 +25,7 @@ export interface Product {
   stock: number;
   isActive: boolean;
   customFields: Record<string, string>;
+  fulfillmentType: string;
 }
 
 export interface ProductInput {
@@ -36,6 +38,12 @@ export interface ProductInput {
   stock: number;
   isActive: boolean;
   customFields: Record<string, string>;
+  /**
+   * 'physical' (default) or 'scheduled' — see the note on catalog_items in
+   * migrations/0001_init.sql. Only 'physical' items get an
+   * inventory_item_stock row; 'scheduled' items are booked, not stocked.
+   */
+  fulfillmentType: string;
 }
 
 export interface InventoryMovement {
@@ -56,7 +64,7 @@ export interface ListProductsOptions {
 
 const productColumns =
   "ci.id, ci.name, ci.description, ci.price_cents, ci.image_key, ci.sku, ci.category, " +
-  "COALESCE(s.on_hand, 0) AS stock, ci.is_active, ci.custom_fields_json";
+  "COALESCE(s.on_hand, 0) AS stock, ci.is_active, ci.custom_fields_json, ci.fulfillment_type";
 
 const productFrom = "FROM catalog_items ci LEFT JOIN inventory_item_stock s ON s.item_id = ci.id";
 
@@ -86,6 +94,7 @@ function toProduct(row: ProductRow): Product {
     stock: row.stock,
     isActive: row.is_active === 1,
     customFields: parseCustomFields(row.custom_fields_json),
+    fulfillmentType: row.fulfillment_type,
   };
 }
 
@@ -188,8 +197,8 @@ export async function createProduct(db: D1Database, input: ProductInput): Promis
   const row = await db
     .prepare(
       `INSERT INTO catalog_items
-        (name, description, price_cents, image_key, sku, category, is_active, custom_fields_json, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+        (name, description, price_cents, image_key, sku, category, is_active, custom_fields_json, fulfillment_type, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
        RETURNING id`,
     )
     .bind(
@@ -201,45 +210,44 @@ export async function createProduct(db: D1Database, input: ProductInput): Promis
       input.category,
       input.isActive ? 1 : 0,
       JSON.stringify(input.customFields),
+      input.fulfillmentType,
     )
     .first<{ id: number }>();
   if (!row) throw new Error("Product could not be created");
 
-  const statements = [
-    db
-      .prepare("INSERT INTO inventory_item_stock (item_id, on_hand) VALUES (?, ?)")
-      .bind(row.id, input.stock),
-  ];
-  if (input.stock > 0) {
-    statements.push(
+  // Stock is a physical-goods concept. A scheduled (booking) item has
+  // nothing to count, so it never gets an inventory_item_stock row at all —
+  // not a row with on_hand = 0, which would render as "sold out".
+  if (input.fulfillmentType === "physical") {
+    const statements = [
       db
-        .prepare(
-          "INSERT INTO inventory_movements (item_id, quantity_change, reason, note) VALUES (?, ?, 'manual_adjustment', 'Initial stock')",
-        )
+        .prepare("INSERT INTO inventory_item_stock (item_id, on_hand) VALUES (?, ?)")
         .bind(row.id, input.stock),
-    );
+    ];
+    if (input.stock > 0) {
+      statements.push(
+        db
+          .prepare(
+            "INSERT INTO inventory_movements (item_id, quantity_change, reason, note) VALUES (?, ?, 'manual_adjustment', 'Initial stock')",
+          )
+          .bind(row.id, input.stock),
+      );
+    }
+    await db.batch(statements);
   }
-  await db.batch(statements);
   return row.id;
 }
 
 export async function updateProduct(db: D1Database, id: number, input: ProductInput) {
-  const current = await db
-    .prepare(
-      `SELECT COALESCE(s.on_hand, 0) AS on_hand
-       FROM catalog_items ci LEFT JOIN inventory_item_stock s ON s.item_id = ci.id
-       WHERE ci.id = ?`,
-    )
-    .bind(id)
-    .first<{ on_hand: number }>();
-  if (!current) throw new Error("Product not found");
-  const stockChange = input.stock - current.on_hand;
+  const exists = await db.prepare("SELECT 1 FROM catalog_items WHERE id = ?").bind(id).first();
+  if (!exists) throw new Error("Product not found");
+
   const statements = [
     db
       .prepare(
         `UPDATE catalog_items SET
         name = ?, description = ?, price_cents = ?, image_key = ?, sku = ?, category = ?,
-        is_active = ?, custom_fields_json = ?, updated_at = datetime('now')
+        is_active = ?, custom_fields_json = ?, fulfillment_type = ?, updated_at = datetime('now')
        WHERE id = ?`,
       )
       .bind(
@@ -251,22 +259,38 @@ export async function updateProduct(db: D1Database, id: number, input: ProductIn
         input.category,
         input.isActive ? 1 : 0,
         JSON.stringify(input.customFields),
+        input.fulfillmentType,
         id,
       ),
   ];
-  if (stockChange !== 0) {
-    statements.push(
-      db
-        .prepare(
-          "UPDATE inventory_item_stock SET on_hand = ?, updated_at = datetime('now') WHERE item_id = ?",
-        )
-        .bind(input.stock, id),
-      db
-        .prepare(
-          "INSERT INTO inventory_movements (item_id, quantity_change, reason, note) VALUES (?, ?, 'manual_adjustment', 'Stock changed in product editor')",
-        )
-        .bind(id, stockChange),
-    );
+
+  // Scheduled (booking) items carry no stock, so there is no diff to write —
+  // see the matching branch in createProduct.
+  if (input.fulfillmentType === "physical") {
+    const current = await db
+      .prepare("SELECT COALESCE(on_hand, 0) AS on_hand FROM inventory_item_stock WHERE item_id = ?")
+      .bind(id)
+      .first<{ on_hand: number }>();
+    const stockChange = input.stock - (current?.on_hand ?? 0);
+    if (stockChange !== 0) {
+      statements.push(
+        // Upsert, not a plain UPDATE: an item switched from 'scheduled' to
+        // 'physical' just now has no inventory_item_stock row yet, and a
+        // plain UPDATE would silently match zero rows.
+        db
+          .prepare(
+            `INSERT INTO inventory_item_stock (item_id, on_hand, updated_at)
+             VALUES (?, ?, datetime('now'))
+             ON CONFLICT(item_id) DO UPDATE SET on_hand = excluded.on_hand, updated_at = excluded.updated_at`,
+          )
+          .bind(id, input.stock),
+        db
+          .prepare(
+            "INSERT INTO inventory_movements (item_id, quantity_change, reason, note) VALUES (?, ?, 'manual_adjustment', 'Stock changed in product editor')",
+          )
+          .bind(id, stockChange),
+      );
+    }
   }
   await db.batch(statements);
 }

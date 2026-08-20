@@ -1,0 +1,90 @@
+---
+import { env } from "cloudflare:workers";
+import brand from "virtual:takontuku/config";
+import { createTranslator } from "@takontuku/core";
+import { date } from "@takontuku/core/brand";
+import AdminLayout from "@takontuku/core/routes/AdminLayout.astro";
+import Icon from "@takontuku/ui/Icon.astro";
+import { type Booking, findOverlappingOrderIds, listBookings } from "../../bookings";
+import { bookingMessages } from "../../messages";
+
+const t = createTranslator(brand, bookingMessages);
+const locale = brand.locale.toLowerCase().startsWith("id") ? "id" : "en";
+const weekdayNames =
+  locale === "id"
+    ? ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"]
+    : ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+// Defaults to "from today" — the useful day-to-day view is what's coming
+// up, not a scroll through history. ?all=1 drops that filter.
+const showAll = Astro.url.searchParams.get("all") === "1";
+const todayIso = new Date().toISOString().slice(0, 10);
+const bookings = await listBookings(env.DB, showAll ? {} : { from: todayIso });
+const overlapping = findOverlappingOrderIds(bookings);
+
+const dateRangeFor = (booking: Booking) =>
+  booking.mode === "slot"
+    ? `${date(new Date(booking.startDate))} · ${booking.slotWeekday !== null ? weekdayNames[booking.slotWeekday] : ""} ${booking.slotStartTime ?? ""}`
+    : booking.endDate && booking.endDate !== booking.startDate
+      ? `${date(new Date(booking.startDate))} – ${date(new Date(booking.endDate))}`
+      : date(new Date(booking.startDate));
+---
+
+<AdminLayout title={t("booking.admin.title")}>
+  {bookings.length === 0 ? (
+    <section class="standalone-empty" data-bookings-empty>
+      <div class="empty-symbol"><Icon paths={["M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z", "M8 2v4", "M16 2v4", "M3 10h18"]} size={27} /></div>
+      <p class="eyebrow">{t("booking.admin.eyebrow")}</p>
+      <h1>{t("booking.admin.empty")}</h1>
+      <p>{t("booking.admin.emptyDescription")}</p>
+      {!showAll && <a class="admin-button" href="/admin/bookings?all=1">{locale === "id" ? "Lihat semua" : "View all"}</a>}
+    </section>
+  ) : (
+    <>
+      <header class="page-heading">
+        <div>
+          <p class="eyebrow">{t("booking.admin.eyebrow")}</p>
+          <h1>{t("booking.admin.title")}</h1>
+          <p>{t("booking.admin.description")}</p>
+        </div>
+        <div class="page-actions">
+          <a class="admin-button" href={showAll ? "/admin/bookings" : "/admin/bookings?all=1"}>{showAll ? (locale === "id" ? "Hanya mendatang" : "Upcoming only") : (locale === "id" ? "Lihat semua" : "View all")}</a>
+        </div>
+      </header>
+      <section class="panel data-panel">
+        <div class="table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>{t("booking.admin.order")}</th>
+                <th>{t("booking.admin.service")}</th>
+                <th>{t("booking.admin.customer")}</th>
+                <th>{t("booking.admin.date")}</th>
+                <th>{t("booking.admin.address")}</th>
+                <th>{t("booking.admin.status")}</th>
+                <th><span class="sr-only">{t("booking.admin.viewOrder")}</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              {bookings.map((booking) => (
+                <tr>
+                  <td><strong>#{booking.orderNumber}</strong>{overlapping.has(booking.orderId) && <span class="overlap-badge">{t("booking.admin.overlap")}</span>}</td>
+                  <td>{booking.itemName}</td>
+                  <td><div class="entity"><span class="entity-avatar">{booking.customerName.slice(0, 2).toUpperCase()}</span><div><strong>{booking.customerName}</strong><span>{booking.customerPhone}</span></div></div></td>
+                  <td>{dateRangeFor(booking)}</td>
+                  <td class="address-cell">{booking.serviceAddress}</td>
+                  <td><span class={"status status--" + (booking.status === "cancelled" ? "danger" : booking.status === "confirmed" || booking.status === "completed" ? "success" : "warning")}>{booking.status}</span></td>
+                  <td><div class="row-actions"><a aria-label={t("booking.admin.viewOrder")} href={"/admin/orders#" + booking.orderId}><Icon name="eye" size={16} /></a></div></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </>
+  )}
+</AdminLayout>
+
+<style>
+  .standalone-empty { display:grid; min-height:calc(100vh - 13rem); place-items:center; align-content:center; padding:3rem; text-align:center; }.empty-symbol { display:grid; width:4.5rem; height:4.5rem; place-items:center; border:1px solid var(--admin-line); border-radius:50%; background:var(--admin-accent-soft); color:var(--admin-accent); }.standalone-empty .eyebrow { margin:1.5rem 0 .45rem; color:var(--tk-color-accent); font-size:.68rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; }.standalone-empty h1 { margin:0; font-family:var(--tk-font-family-display); font-size:clamp(2.7rem,5vw,4.5rem); font-weight:400; letter-spacing:-.045em; }.standalone-empty > p:not(.eyebrow) { max-width:30rem; margin:.7rem 0 1.4rem; color:var(--tk-color-fg-muted); font-size:.8rem; line-height:1.7; }.data-panel { overflow:hidden; }.page-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; }.entity-avatar { background:var(--tk-color-accent); }.row-actions a { display:grid; width:40px; height:40px; place-items:center; border-radius:7px; color:var(--tk-color-fg); text-decoration:none; }.address-cell { max-width:16rem; overflow:hidden; color:var(--tk-color-fg-muted); font-size:.75rem; text-overflow:ellipsis; white-space:nowrap; }.overlap-badge { display:inline-flex; margin-left:.5rem; padding:.2rem .45rem; border-radius:var(--tk-radius-full); background:color-mix(in srgb,var(--tk-color-danger) 12%,transparent); color:var(--tk-color-danger); font-size:.6rem; font-weight:700; text-transform:uppercase; letter-spacing:.04em; }
+</style>
