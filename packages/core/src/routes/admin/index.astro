@@ -1,7 +1,11 @@
 ---
 /// <reference path="../../virtual.d.ts" />
 import widgets from "virtual:takontuku/admin-dashboard-widgets";
-import StorefrontEmptyCollection from "@takontuku/ui/StorefrontEmptyCollection.astro";
+import adminNav from "virtual:takontuku/admin-nav";
+import registry from "virtual:takontuku/registry";
+import AdminInspector from "@takontuku/ui/AdminInspector.astro";
+import AdminMetric from "@takontuku/ui/AdminMetric.astro";
+import AdminPageHeader from "@takontuku/ui/AdminPageHeader.astro";
 import { brand } from "../../brand";
 import { coreMessages, createTranslator } from "../../messages";
 import AdminLayout from "../AdminLayout.astro";
@@ -15,26 +19,38 @@ const locale = brand.locale.toLowerCase().startsWith("id") ? "id" : "en";
 const summaryWidgets = widgets.filter((widget) => widget.area === "summary");
 const mainWidgets = widgets.filter((widget) => widget.area === "main");
 const asideWidgets = widgets.filter((widget) => widget.area === "aside");
+const moduleLinks = adminNav.filter((item) => item.href !== "/admin");
+const installedModules = registry.moduleNames.filter((name) => name !== "core");
+const formatModuleName = (name: string) =>
+  name.replace(/[-_]+/g, " ").replace(/\b\w/g, (character) => character.toUpperCase());
 ---
 
 <AdminLayout title={t("admin.dashboard.title", { brand: brand.name })}>
-  <header class="dashboard-heading">
-    <div><p class="eyebrow">{brand.name}</p><h1>{t("admin.dashboard.greeting", { name: displayName })}</h1><p>{locale === "id" ? "Ringkasan operasional toko, berdasarkan data yang benar-benar terjadi." : "A clear operational view of what is happening in your store."}</p></div>
-    <div class="page-actions"><a class="admin-button admin-button--quiet" href="/">{locale === "id" ? "Lihat toko" : "View store"} ↗</a></div>
-  </header>
+  <AdminPageHeader eyebrow={brand.name} title={t("admin.dashboard.greeting", { name: displayName })} description={locale === "id" ? "Ringkasan operasional toko, berdasarkan data yang benar-benar terjadi." : "A clear operational view of what is happening in your store."} />
   {widgets.length > 0 ? (
     <div class="dashboard-layout">
       {summaryWidgets.length > 0 && <div class="dashboard-widgets dashboard-widgets--summary" data-dashboard-area="summary">{summaryWidgets.map(({ component: Widget }) => <Widget />)}</div>}
       {mainWidgets.length > 0 && <div class="dashboard-widgets dashboard-widgets--main" data-dashboard-area="main">{mainWidgets.map(({ component: Widget }) => <Widget />)}</div>}
-      {asideWidgets.length > 0 && <aside class="dashboard-widgets dashboard-widgets--aside" data-dashboard-area="aside">{asideWidgets.map(({ component: Widget }) => <Widget />)}</aside>}
     </div>
   ) : (
-    <section class="empty-dashboard panel"><StorefrontEmptyCollection eyebrow={locale === "id" ? "Workspace siap" : "Workspace ready"} title={locale === "id" ? "Tambahkan modul untuk mulai bekerja." : "Add a module to start working."} description={locale === "id" ? "Takontuku akan menampilkan area operasional di sini saat Catalog atau Orders dipasang." : "Takontuku will place operational workspaces here when Catalog or Orders is installed."} /></section>
+    <section class="dashboard-start panel" aria-labelledby="dashboard-start-title">
+      <div class="dashboard-start-heading"><div><p class="eyebrow">{locale === "id" ? "Workspace siap" : "Workspace ready"}</p><h2 id="dashboard-start-title">{locale === "id" ? "Mulai dari modul yang kamu butuhkan." : "Start with the modules you need."}</h2><p>{locale === "id" ? "Takontuku hanya menampilkan area kerja yang benar-benar dipasang di proyek ini." : "Takontuku only shows workspaces that are actually installed in this project."}</p><div class="dashboard-installed-modules"><span>{locale === "id" ? "Modul terpasang" : "Installed modules"}</span><div>{installedModules.map((moduleName) => <b>{formatModuleName(moduleName)}</b>)}</div></div></div><span class="dashboard-start-count">{installedModules.length}</span></div>
+      {moduleLinks.length > 0 ? <div class="dashboard-module-links">{moduleLinks.map((item) => <a href={item.href}><span>{item.labelByLocale?.[locale] ?? item.label}</span><span aria-hidden="true">↗</span></a>)}</div> : <p class="dashboard-empty-hint">{locale === "id" ? "Tambahkan modul Catalog, Orders, atau modul lain untuk mulai bekerja." : "Add Catalog, Orders, or another module to start working."}</p>}
+    </section>
   )}
+
+  <Fragment slot="inspector">
+    <AdminInspector title="Workspace" description={locale === "id" ? "Konfigurasi aktif untuk aplikasi ini." : "The active configuration for this app."}>
+      <div class="inspector-metrics"><AdminMetric label={locale === "id" ? "Modul terpasang" : "Installed modules"} value={String(installedModules.length)} /><AdminMetric label={locale === "id" ? "Bahasa" : "Locale"} value={locale.toUpperCase()} /><AdminMetric label={locale === "id" ? "Peran" : "Role"} value={user.role ?? "—"} /></div>
+    </AdminInspector>
+    {asideWidgets.map(({ component: Widget }) => <Widget />)}
+    <AdminInspector title={locale === "id" ? "Identitas" : "Identity"}>
+      <dl class="inspector-list"><div><dt>{locale === "id" ? "Mata uang" : "Currency"}</dt><dd>{brand.currency}</dd></div><div><dt>{locale === "id" ? "Zona waktu" : "Time zone"}</dt><dd>{brand.timeZone}</dd></div></dl>
+    </AdminInspector>
+  </Fragment>
 </AdminLayout>
 
 <style>
-  .dashboard-heading { display:flex; align-items:flex-end; justify-content:space-between; gap:1.5rem; margin-bottom:2rem; }.eyebrow { margin:0 0 .5rem; color:var(--tk-color-accent); font-size:.68rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; }.dashboard-heading h1 { margin:0; font-family:var(--tk-font-family-display); font-size:clamp(2.5rem,4.2vw,4.3rem); font-weight:400; letter-spacing:-.045em; line-height:.95; }.dashboard-heading p:last-child { max-width:38rem; margin:.7rem 0 0; color:var(--tk-color-fg-muted); font-size:.8rem; }.page-actions { display:flex; gap:.5rem; }.admin-button { display:inline-flex; min-height:2.75rem; align-items:center; padding-inline:1rem; border-radius:var(--tk-radius-sm); font-size:.75rem; font-weight:700; text-decoration:none; }.admin-button--quiet { border:1px solid var(--admin-line); background:var(--admin-surface); }.dashboard-layout { display:grid; gap:1rem; }.dashboard-widgets { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; }.dashboard-widgets--summary,.dashboard-widgets--aside { grid-template-columns:1fr; }.dashboard-widgets--aside { align-content:start; }.dashboard-widgets :global([data-dashboard-widget="orders"]) { grid-column:span 2; }.panel { border:1px solid var(--admin-line); border-radius:var(--tk-radius-md); background:var(--admin-surface); }.empty-dashboard { overflow:hidden; }.empty-dashboard :global(.empty-collection) { min-height:28rem; }
-  @media (min-width:1000px) { .dashboard-layout:has(.dashboard-widgets--aside) { grid-template-columns:minmax(0,1fr) 20rem; align-items:start; }.dashboard-layout:has(.dashboard-widgets--aside) .dashboard-widgets--summary,.dashboard-layout:has(.dashboard-widgets--aside) .dashboard-widgets--main { grid-column:1; }.dashboard-layout:has(.dashboard-widgets--aside) .dashboard-widgets--aside { grid-column:2; grid-row:1 / span 2; } }
-  @media (max-width:800px) { .dashboard-heading { align-items:flex-start; flex-direction:column; }.dashboard-widgets { grid-template-columns:1fr; }.dashboard-widgets :global([data-dashboard-widget="orders"]) { grid-column:auto; } }
+  .dashboard-start { padding:1.5rem; }.dashboard-start-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; }.dashboard-start h2 { max-width:22ch; margin:.4rem 0 0; font-family:var(--tk-font-family-display); font-size:clamp(1.8rem,3vw,2.7rem); font-weight:400; letter-spacing:-.04em; line-height:1; }.dashboard-start-heading p:not(.eyebrow) { max-width:34rem; margin:.6rem 0 0; color:var(--tk-color-fg-muted); font-size:.78rem; line-height:1.6; }.dashboard-installed-modules { display:grid; gap:.55rem; margin-top:1.1rem; color:var(--tk-color-fg-muted); font-size:.68rem; }.dashboard-installed-modules > div { display:flex; flex-wrap:wrap; gap:.45rem; }.dashboard-installed-modules b { padding:.35rem .6rem; border:1px solid var(--admin-line); border-radius:999px; color:var(--tk-color-fg); font-size:.7rem; font-weight:var(--tk-font-weight-semibold); }.dashboard-start-count { display:grid; flex:none; width:3rem; height:3rem; place-items:center; border:1px solid var(--admin-line); border-radius:50%; color:var(--tk-color-accent); font-family:var(--tk-font-family-display); font-size:1.35rem; }.dashboard-module-links { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.65rem; margin-top:1.5rem; padding-top:1.2rem; border-top:1px solid var(--admin-line); }.dashboard-module-links a { display:flex; align-items:center; justify-content:space-between; gap:.5rem; min-height:3rem; padding:0 .8rem; border:1px solid var(--admin-line); border-radius:8px; color:var(--tk-color-fg); font-size:.75rem; font-weight:700; text-decoration:none; }.dashboard-module-links a:hover { border-color:var(--tk-color-accent); color:var(--tk-color-accent); }.dashboard-empty-hint { margin:1.5rem 0 0; padding-top:1.2rem; border-top:1px solid var(--admin-line); color:var(--tk-color-fg-muted); font-size:.78rem; }.inspector-metrics { display:grid; gap:.6rem; margin-top:1rem; }
+  @media(max-width:760px){.dashboard-start{padding:1.1rem}.dashboard-module-links{grid-template-columns:1fr}.dashboard-start-count{width:2.5rem;height:2.5rem}}
 </style>

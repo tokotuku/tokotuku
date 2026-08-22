@@ -3,6 +3,10 @@ import { env } from "cloudflare:workers";
 import brand from "virtual:takontuku/config";
 import { createTranslator } from "@takontuku/core";
 import AdminLayout from "@takontuku/core/routes/AdminLayout.astro";
+import AdminInspector from "@takontuku/ui/AdminInspector.astro";
+import AdminMetric from "@takontuku/ui/AdminMetric.astro";
+import AdminPageHeader from "@takontuku/ui/AdminPageHeader.astro";
+import Icon from "@takontuku/ui/Icon.astro";
 import { catalogMessages, localizeCatalogError } from "../../../messages";
 import { productInputFromForm } from "../../../product-form";
 import { createProduct } from "../../../products";
@@ -25,6 +29,21 @@ if (Astro.request.method === "POST") {
 ---
 
 <AdminLayout title={t("catalog.products.newTitle")}>
-  <header class="page-heading"><div><h1>{t("catalog.products.newTitle")}</h1><p>{t("catalog.products.newDescription")}</p></div></header>
+  <AdminPageHeader eyebrow={t("catalog.products.catalogEyebrow")} title={t("catalog.products.newTitle")} description={t("catalog.products.newDescription")}>
+    <Fragment slot="actions"><a class="admin-button" href="/admin/products">{t("catalog.products.form.cancel")}</a></Fragment>
+  </AdminPageHeader>
   <ProductForm error={error} />
+  <Fragment slot="inspector">
+    <AdminInspector title={t("catalog.products.newTitle")} description="Pengaturan ringkas produk baru.">
+      <div class="inspector-metrics">
+        <AdminMetric label="Status" value="Aktif" tone="positive" />
+        <AdminMetric label={t("catalog.products.form.price")} value="—" />
+        <AdminMetric label={t("catalog.products.form.fulfillmentType")} value={t("catalog.products.form.fulfillmentType.physical")} />
+        <AdminMetric label={t("catalog.products.form.stock")} value="0" />
+      </div>
+      <div class="inspector-actions"><button class="admin-button admin-button--primary" type="submit" form="product-form"><Icon name="check" size={16} /> {t("catalog.products.form.save")}</button></div>
+    </AdminInspector>
+  </Fragment>
 </AdminLayout>
+
+<style>.inspector-metrics{display:grid;gap:.6rem}</style>

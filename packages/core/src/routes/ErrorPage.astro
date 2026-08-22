@@ -1,4 +1,5 @@
 ---
+import BrandMark from "@takontuku/ui/BrandMark.astro";
 import Icon from "@takontuku/ui/Icon.astro";
 import Layout from "@takontuku/ui/Layout.astro";
 import { brand } from "../brand";
@@ -17,7 +18,7 @@ const t = createTranslator(brand, coreMessages);
   <main class="error-page">
     <button type="button" data-error-theme aria-label={t("admin.nav.theme")}><Icon name="moon" size={17} /></button>
     <section>
-      <a class="error-brand" href="/"><Icon name="logo" size={18} /> {brand.name}</a>
+      <a class="error-brand" href="/"><BrandMark size={28} /> {brand.name}</a>
       <div class:list={["error-icon", forbidden ? "error-icon--warning" : ""]}><Icon name={forbidden ? "lock" : "search"} size={26} /></div>
       <p class="error-code">{code}</p>
       <h1>{t(forbidden ? "admin.error.forbiddenTitle" : "admin.error.notFoundTitle")}</h1>

@@ -1,0 +1,111 @@
+---
+interface Props {
+  id: string;
+  titleLabel: string;
+  closeLabel: string;
+  loadingLabel: string;
+  errorLabel: string;
+  retryLabel?: string;
+}
+
+const {
+  id,
+  titleLabel,
+  closeLabel,
+  loadingLabel,
+  errorLabel,
+  retryLabel = "Try again",
+} = Astro.props;
+---
+
+<dialog id={id} class="admin-quick-view" data-admin-quick-view data-error-label={errorLabel} aria-labelledby={`${id}-title`}>
+  <header class="quick-view-header">
+    <div>
+      <h2 id={`${id}-title`} data-quick-view-title>{titleLabel}</h2>
+      <p data-quick-view-meta></p>
+    </div>
+    <button class="icon-button quick-view-close" type="button" data-quick-view-close aria-label={closeLabel}>×</button>
+  </header>
+  <div class="quick-view-content" data-quick-view-content aria-live="polite">
+    <div class="quick-view-loading" data-quick-view-loading>{loadingLabel}</div>
+    <div class="quick-view-error" data-quick-view-error hidden>
+      <span data-quick-view-error-message>{errorLabel}</span>
+      <button type="button" data-quick-view-retry>{retryLabel}</button>
+    </div>
+    <div data-quick-view-body hidden></div>
+  </div>
+  <footer class="quick-view-footer" data-quick-view-footer><slot name="footer" /></footer>
+</dialog>
+
+<script>
+  type QuickViewDetail = { data: unknown; trigger: HTMLElement; dialog: HTMLDialogElement };
+  const dialogs = Array.from(document.querySelectorAll<HTMLDialogElement>("[data-admin-quick-view]"));
+
+  for (const dialog of dialogs) {
+    const title = dialog.querySelector<HTMLElement>("[data-quick-view-title]");
+    const meta = dialog.querySelector<HTMLElement>("[data-quick-view-meta]");
+    const loading = dialog.querySelector<HTMLElement>("[data-quick-view-loading]");
+    const error = dialog.querySelector<HTMLElement>("[data-quick-view-error]");
+    const errorMessage = dialog.querySelector<HTMLElement>("[data-quick-view-error-message]");
+    const body = dialog.querySelector<HTMLElement>("[data-quick-view-body]");
+    const retry = dialog.querySelector<HTMLButtonElement>("[data-quick-view-retry]");
+    const close = dialog.querySelector<HTMLButtonElement>("[data-quick-view-close]");
+    const cache = new Map<string, unknown>();
+    let controller: AbortController | undefined;
+    let lastTrigger: HTMLElement | undefined;
+    const fallbackErrorLabel = dialog.dataset["errorLabel"] ?? "Unable to load preview.";
+
+    const setState = (state: "loading" | "error" | "body") => {
+      if (loading) loading.hidden = state !== "loading";
+      if (error) error.hidden = state !== "error";
+      if (body) body.hidden = state !== "body";
+    };
+    const closeDialog = () => {
+      controller?.abort();
+      if (dialog.open) dialog.close();
+      lastTrigger?.focus();
+    };
+    const emit = (data: unknown, trigger: HTMLElement) => {
+      document.dispatchEvent(new CustomEvent<QuickViewDetail>("takontuku:quick-view-loaded", { detail: { data, trigger, dialog } }));
+    };
+    const load = async (trigger: HTMLElement) => {
+      const endpoint = trigger.dataset["quickViewEndpoint"];
+      if (!endpoint) return;
+      lastTrigger = trigger;
+      controller?.abort();
+      if (!dialog.open) dialog.showModal();
+      if (title) title.textContent = trigger.dataset["quickViewTitle"] ?? title.textContent ?? "Preview";
+      if (meta) meta.textContent = trigger.dataset["quickViewMeta"] ?? "";
+      if (body) body.replaceChildren();
+      setState("loading");
+      const cached = cache.get(endpoint);
+      if (cached !== undefined) {
+        setState("body");
+        emit(cached, trigger);
+        return;
+      }
+      controller = new AbortController();
+      try {
+        const response = await fetch(endpoint, { headers: { Accept: "application/json" }, signal: controller.signal });
+        if (!response.ok) throw new Error(response.status === 404 ? "Not found" : "Request failed");
+        const data: unknown = await response.json();
+        cache.set(endpoint, data);
+        setState("body");
+        emit(data, trigger);
+      } catch (caught) {
+        if (caught instanceof DOMException && caught.name === "AbortError") return;
+        if (errorMessage) errorMessage.textContent = caught instanceof Error ? caught.message : fallbackErrorLabel;
+        setState("error");
+      }
+    };
+
+    document.querySelectorAll<HTMLElement>(`[data-quick-view-target="${CSS.escape(dialog.id)}"]`).forEach((trigger) => {
+      trigger.addEventListener("click", (event) => { event.preventDefault(); void load(trigger); });
+    });
+    close?.addEventListener("click", closeDialog);
+    dialog.addEventListener("cancel", (event) => { event.preventDefault(); closeDialog(); });
+    dialog.addEventListener("click", (event) => { if (event.target === dialog) closeDialog(); });
+    dialog.addEventListener("close", () => lastTrigger?.focus());
+    retry?.addEventListener("click", () => { if (lastTrigger) void load(lastTrigger); });
+  }
+</script>

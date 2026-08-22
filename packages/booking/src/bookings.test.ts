@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Booking } from "./bookings";
-import { findOverlappingOrderIds } from "./bookings";
+import { findBookingByOrderId, findOverlappingOrderIds } from "./bookings";
 
 function booking(overrides: Partial<Booking>): Booking {
   return {
@@ -83,5 +83,45 @@ describe("findOverlappingOrderIds", () => {
     const a = booking({ orderId: 1, startDate: "2026-09-03", endDate: "2026-09-03" });
     const b = booking({ orderId: 2, startDate: "2026-09-03", endDate: "2026-09-03" });
     expect(findOverlappingOrderIds([a, b])).toEqual(new Set([1, 2]));
+  });
+});
+
+describe("findBookingByOrderId", () => {
+  it("returns the booking row joined to its order", async () => {
+    const db = {
+      prepare: () => ({
+        bind: () => ({
+          first: async () => ({
+            order_id: 9,
+            order_number: "TK-9",
+            item_id: 4,
+            item_name: "Studio visit",
+            mode: "slot",
+            start_date: "2026-09-10",
+            end_date: null,
+            slot_id: 2,
+            slot_weekday: 4,
+            slot_start_time: "10:00",
+            occurrences_per_day: 1,
+            service_address: "Jl. Contoh 9",
+            note: "Ring the bell",
+            status: "confirmed",
+            customer_name: "Bima",
+            customer_phone: "0812",
+          }),
+        }),
+      }),
+    };
+    await expect(findBookingByOrderId(db as never, 9)).resolves.toMatchObject({
+      orderId: 9,
+      orderNumber: "TK-9",
+      itemName: "Studio visit",
+      slotStartTime: "10:00",
+    });
+  });
+
+  it("returns null when the order has no booking extension", async () => {
+    const db = { prepare: () => ({ bind: () => ({ first: async () => null }) }) };
+    await expect(findBookingByOrderId(db as never, 404)).resolves.toBeNull();
   });
 });

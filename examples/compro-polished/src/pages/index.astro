@@ -1,0 +1,135 @@
+---
+import Card from "@takontuku/ui/Card.astro";
+import Layout from "@takontuku/ui/Layout.astro";
+import StoreFooter from "@takontuku/ui/StoreFooter.astro";
+import StoreHeader from "@takontuku/ui/StoreHeader.astro";
+---
+
+<Layout
+  title="Arunika Energi — Menyalakan masa depan"
+  description="Arunika Energi membangun infrastruktur energi bersih yang tangguh untuk Indonesia."
+  image="/images/arunika-hero.png"
+  lang="id-ID"
+  siteName="Arunika Energi"
+  palette={{ light: { accent: "#d88a2c", accentForeground: "#102b3a" }, dark: { accent: "#f2b45d", accentForeground: "#102b3a" } }}
+>
+  <StoreHeader
+    brand={{ name: "Arunika Energi" }}
+    announcement="Energi yang tumbuh bersama Indonesia"
+    showShop={false}
+    showSearch={false}
+    links={[{ label: "Tentang kami", href: "/#about" }, { label: "Operasi", href: "/#operations" }, { label: "Tim", href: "/#team" }]}
+  />
+
+  <main>
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <p class="eyebrow">ARUNIKA ENERGI · ENERGI BERSIH INDONESIA</p>
+        <h1 id="hero-title">Menyalakan masa depan, mulai dari hari ini.</h1>
+        <p class="hero-lede">Kami membangun sistem energi yang lebih bersih, tangguh, dan dekat dengan kebutuhan masyarakat Indonesia.</p>
+        <div class="hero-actions">
+          <a class="cta cta-primary" href="#about">Kenali Arunika <span aria-hidden="true">↗</span></a>
+          <a class="cta cta-quiet" href="#operations">Lihat cara kami bekerja</a>
+        </div>
+      </div>
+      <div class="hero-media">
+        <img src="/images/arunika-hero.png" alt="Hamparan panel surya dan turbin angin saat matahari terbit" fetchpriority="high" />
+        <p class="image-caption">Membangun kemandirian energi dengan langkah yang terukur.</p>
+      </div>
+    </section>
+
+    <section class="intro section-shell" id="about" aria-labelledby="about-title">
+      <div class="section-kicker">01 · Tentang kami</div>
+      <div class="intro-copy">
+        <h2 id="about-title">Potensi Indonesia, dirawat untuk jangka panjang.</h2>
+        <p>Arunika Energi hadir untuk menghubungkan teknologi, alam, dan manusia. Dari pengembangan aset energi terbarukan hingga pengelolaan operasi harian, kami bekerja dengan satu keyakinan: transisi energi yang baik harus terasa nyata di lapangan.</p>
+        <div class="stats" aria-label="Arunika dalam angka">
+          <div><strong>12</strong><span>lokasi operasi</span></div>
+          <div><strong>180 MW</strong><span>kapasitas terkelola</span></div>
+          <div><strong>24/7</strong><span>pemantauan sistem</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="operations section-shell" id="operations" aria-labelledby="operations-title">
+      <div class="section-heading">
+        <div class="section-kicker">02 · Operasi</div>
+        <h2 id="operations-title">Teliti di setiap detail.</h2>
+      </div>
+      <div class="operations-grid">
+        <div class="operations-media"><img src="/images/arunika-operations.png" alt="Dua teknisi memeriksa peralatan pada fasilitas panel surya" loading="lazy" /></div>
+        <Card class="operations-card">
+          <p class="card-number">01 / 03</p>
+          <h3>Keandalan yang bisa dirasakan</h3>
+          <p>Tim lapangan kami menjaga setiap sistem bekerja dengan aman dan konsisten—dengan data, disiplin, dan perhatian pada konteks setempat.</p>
+          <a class="text-link" href="#team">Temui orang-orangnya <span aria-hidden="true">→</span></a>
+        </Card>
+      </div>
+    </section>
+
+    <section class="team section-shell" id="team" aria-labelledby="team-title">
+      <div class="team-media"><img src="/images/arunika-team.png" alt="Tim Arunika Energi berdiri di depan fasilitas energi terbarukan" loading="lazy" /></div>
+      <div class="team-copy">
+        <div class="section-kicker">03 · Tim kami</div>
+        <h2 id="team-title">Kerja besar selalu dimulai dari rasa memiliki.</h2>
+        <p>Kami adalah insinyur, operator, pemimpin komunitas, dan pembelajar yang percaya bahwa energi masa depan dibangun bersama.</p>
+        <a class="cta cta-primary" href="mailto:halo@arunikaenergi.id">Bergabung dengan kami <span aria-hidden="true">↗</span></a>
+      </div>
+    </section>
+
+    <section class="closing section-shell" aria-labelledby="closing-title">
+      <p class="eyebrow">Mari bergerak bersama</p>
+      <h2 id="closing-title">Ada banyak hal baik yang bisa kita nyalakan.</h2>
+      <a class="cta cta-primary" href="mailto:halo@arunikaenergi.id">Hubungi Arunika <span aria-hidden="true">↗</span></a>
+    </section>
+  </main>
+
+  <StoreFooter brandName="Arunika Energi" tagline="Energi yang tumbuh bersama Indonesia." links={[{ label: "Tentang kami", href: "/#about" }, { label: "Operasi", href: "/#operations" }, { label: "Tim", href: "/#team" }]} madeWith="Dibangun dengan niat baik." copyright="© 2026 Arunika Energi." />
+</Layout>
+
+<style>
+  :global(:root) { --tk-font-family-display: "Newsreader", Georgia, serif; --tk-font-family-sans: "Manrope", system-ui, sans-serif; --tk-radius-lg: 1.25rem; }
+  main { overflow: hidden; }
+  .section-shell { width: min(100% - 3rem, 78rem); margin-inline: auto; }
+  .hero { display: grid; grid-template-columns: minmax(20rem, .82fr) minmax(0, 1.18fr); min-height: min(44rem, 72vw); background: var(--tk-color-surface); }
+  .hero-copy { display: flex; flex-direction: column; justify-content: center; padding: clamp(3rem, 7vw, 7rem) clamp(1.5rem, 6vw, 6rem); }
+  .eyebrow, .section-kicker { margin: 0; color: var(--tk-color-accent); font-size: .7rem; font-weight: 800; letter-spacing: .16em; line-height: 1.4; text-transform: uppercase; }
+  h1, h2, h3 { font-family: var(--tk-font-family-display); font-weight: 400; letter-spacing: -.04em; }
+  h1 { max-width: 9ch; margin: 1.25rem 0 1.5rem; font-size: clamp(3.4rem, 6vw, 6.5rem); line-height: .9; }
+  h2 { margin: 0; font-size: clamp(2.5rem, 4.5vw, 5rem); line-height: .95; }
+  h3 { margin: 0; font-size: clamp(1.9rem, 3vw, 2.8rem); line-height: 1; }
+  p { line-height: 1.7; }
+  .hero-lede { max-width: 28rem; margin: 0; color: var(--tk-color-fg-muted); font-size: clamp(1rem, 1.4vw, 1.15rem); }
+  .hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; margin-top: 2rem; }
+  .cta { display: inline-flex; align-items: center; gap: .8rem; min-height: 3rem; padding: .75rem 1.1rem; border-radius: var(--tk-radius-md); font-size: .85rem; font-weight: 800; text-decoration: none; transition: transform var(--tk-duration-fast) var(--tk-easing-standard); }
+  .cta:hover, .text-link:hover { transform: translateY(-1px); }
+  .cta-primary { background: var(--tk-color-accent); color: var(--tk-color-accent-fg); }
+  .cta-quiet { color: var(--tk-color-fg); }
+  .hero-media { position: relative; min-height: 30rem; }
+  .hero-media img, .operations-media img, .team-media img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .image-caption { position: absolute; right: 1.25rem; bottom: 1.25rem; max-width: 14rem; margin: 0; padding: .7rem .8rem; background: color-mix(in srgb, var(--tk-color-bg) 86%, transparent); color: var(--tk-color-fg); font-size: .72rem; line-height: 1.4; }
+  .intro { display: grid; grid-template-columns: .7fr 1.3fr; gap: 4rem; padding-block: clamp(5rem, 11vw, 10rem); }
+  .intro-copy { max-width: 52rem; }
+  .intro-copy h2 { max-width: 10ch; }
+  .intro-copy > p { max-width: 42rem; margin: 2rem 0 0; color: var(--tk-color-fg-muted); font-size: 1.05rem; }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid var(--tk-color-border); }
+  .stats div { display: grid; gap: .25rem; }
+  .stats strong { font-family: var(--tk-font-family-display); font-size: 2.2rem; font-weight: 400; }
+  .stats span, .card-number { color: var(--tk-color-fg-muted); font-size: .75rem; letter-spacing: .04em; text-transform: uppercase; }
+  .operations { padding-block: clamp(4rem, 8vw, 7rem); }
+  .section-heading { display: flex; justify-content: space-between; align-items: end; gap: 2rem; margin-bottom: 2rem; }
+  .section-heading h2 { max-width: 8ch; text-align: right; }
+  .operations-grid { display: grid; grid-template-columns: 1.2fr .8fr; gap: 1rem; align-items: stretch; }
+  .operations-media { min-height: 32rem; overflow: hidden; border-radius: var(--tk-radius-lg); }
+  .operations-card { justify-content: center; padding: clamp(2rem, 5vw, 4rem); background: var(--tk-color-bg-subtle); border: 0; box-shadow: none; }
+  .operations-card p:not(.card-number) { color: var(--tk-color-fg-muted); }
+  .text-link { display: inline-flex; gap: .6rem; margin-top: 1rem; color: var(--tk-color-fg); font-size: .85rem; font-weight: 800; text-decoration: none; transition: transform var(--tk-duration-fast) var(--tk-easing-standard); }
+  .team { display: grid; grid-template-columns: 1.1fr .9fr; gap: clamp(2rem, 7vw, 7rem); align-items: center; padding-block: clamp(5rem, 11vw, 10rem); }
+  .team-media { min-height: 34rem; overflow: hidden; border-radius: var(--tk-radius-lg); }
+  .team-copy { max-width: 31rem; }
+  .team-copy h2 { margin-top: 1rem; }
+  .team-copy p { color: var(--tk-color-fg-muted); }
+  .closing { display: grid; justify-items: center; padding-block: clamp(5rem, 10vw, 9rem); text-align: center; }
+  .closing h2 { max-width: 10ch; margin: 1rem 0 2rem; }
+  @media (max-width: 720px) { .section-shell { width: min(100% - 2rem, 78rem); } .hero, .intro, .operations-grid, .team { grid-template-columns: 1fr; } .hero { min-height: auto; } .hero-copy { order: 2; padding: 3rem 1.25rem 4rem; } .hero-media { order: 1; min-height: 20rem; } h1 { max-width: 10ch; font-size: clamp(3.5rem, 16vw, 5rem); } .intro { gap: 2rem; } .section-heading { align-items: start; flex-direction: column; } .section-heading h2 { text-align: left; } .operations-media, .team-media { min-height: 22rem; } .team-copy { padding-bottom: 1rem; } .stats { gap: .5rem; } .stats strong { font-size: 1.7rem; } }
+</style>

@@ -49,6 +49,10 @@ export function catalog(): ModuleDefinition {
     adminRoutes: [
       { pattern: "/admin/products", entrypoint: "@takontuku/catalog/routes/admin/products.astro" },
       {
+        pattern: "/admin/api/products/[id]",
+        entrypoint: "@takontuku/catalog/routes/api/admin/products/[id].ts",
+      },
+      {
         pattern: "/admin/products/new",
         entrypoint: "@takontuku/catalog/routes/admin/products/new.astro",
       },

@@ -1,0 +1,69 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "score",
+    "verdict",
+    "rubric",
+    "strengths",
+    "gaps",
+    "recommendations",
+    "production_gaps",
+    "over_engineered",
+    "under_engineered",
+    "evidence"
+  ],
+  "properties": {
+    "score": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "verdict": { "type": "string", "enum": ["pass", "needs_revision", "blocked"] },
+    "rubric": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "checks_routes",
+        "architecture",
+        "tier_fit",
+        "content_ux_assets",
+        "maintainability"
+      ],
+      "properties": {
+        "checks_routes": { "type": "integer", "minimum": 0, "maximum": 30 },
+        "architecture": { "type": "integer", "minimum": 0, "maximum": 25 },
+        "tier_fit": { "type": "integer", "minimum": 0, "maximum": 20 },
+        "content_ux_assets": { "type": "integer", "minimum": 0, "maximum": 15 },
+        "maintainability": { "type": "integer", "minimum": 0, "maximum": 10 }
+      }
+    },
+    "strengths": { "type": "array", "items": { "type": "string" } },
+    "gaps": { "$ref": "#/$defs/issueList" },
+    "recommendations": { "$ref": "#/$defs/recommendationList" },
+    "production_gaps": { "$ref": "#/$defs/issueList" },
+    "over_engineered": { "$ref": "#/$defs/issueList" },
+    "under_engineered": { "$ref": "#/$defs/issueList" },
+    "evidence": { "type": "array", "items": { "type": "string" } }
+  },
+  "$defs": {
+    "issue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["summary", "severity", "location"],
+      "properties": {
+        "summary": { "type": "string" },
+        "severity": { "type": "string", "enum": ["blocker", "high", "medium", "low", "info"] },
+        "location": { "type": "string" }
+      }
+    },
+    "issueList": { "type": "array", "items": { "$ref": "#/$defs/issue" } },
+    "recommendation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["priority", "action", "location"],
+      "properties": {
+        "priority": { "type": "string", "enum": ["P0", "P1", "P2", "P3"] },
+        "action": { "type": "string" },
+        "location": { "type": "string" }
+      }
+    },
+    "recommendationList": { "type": "array", "items": { "$ref": "#/$defs/recommendation" } }
+  }
+}

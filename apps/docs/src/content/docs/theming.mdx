@@ -1,6 +1,6 @@
 ---
 title: Theming
-description: Apply light, dark, or custom Takontuku accent themes.
+description: Apply the default gading–jati theme or a custom Takontuku palette.
 sidebar:
   order: 2
 ---
@@ -32,6 +32,49 @@ Set `data-theme` on an ancestor, normally the root element:
 ```
 
 Takontuku exposes light and dark choices. When `data-theme` is absent, the inline bootstrap follows `prefers-color-scheme`; a saved choice is kept in `localStorage`. OS forced-colors and prefers-contrast remain supported for accessibility.
+
+## Brand palette
+
+`brand.palette.light` and `brand.palette.dark` accept the following optional keys:
+
+```ts
+type TakontukuPaletteColors = {
+  background?: string; surface?: string; subtle?: string; foreground?: string;
+  mutedForeground?: string; border?: string; accent?: string; accentHover?: string;
+  accentForeground?: string; focusRing?: string; sidebar?: string;
+  sidebarForeground?: string; sidebarMutedForeground?: string;
+  sidebarActive?: string; sidebarActiveForeground?: string;
+};
+```
+
+The package defaults are warm ivory and teak: `#f4f0e7` for the light canvas, `#fffdf8` for
+surfaces, `#2d211a` for foreground and admin rail, and `#765038` for the accent. Dark mode uses
+the corresponding `#191511` / `#211b17` / `#120f0d` / `#c58b63` values. Success, warning, and
+danger are semantic package colors and are deliberately not brand-overridable.
+
+Values supplied by the brand win over package defaults. Missing values fall back independently,
+and the same serializer is used by storefront `Layout`, `AdminLayout`, and `AuthFrame`.
+
+The old accent-only configuration remains valid:
+
+```js
+palette: { light: { accent: "#7c3aed", accentForeground: "#ffffff" } }
+```
+
+A full gading–jati variation can be explicit when a brand needs to tune every surface:
+
+```js
+palette: {
+  light: {
+    background: "#f4f0e7", surface: "#fffdf8", subtle: "#ede5d9",
+    foreground: "#2d211a", mutedForeground: "#74695f", border: "#d8cfc2",
+    accent: "#765038", accentHover: "#5e3d2b", accentForeground: "#fff9f0",
+    focusRing: "#9a6847", sidebar: "#2d211a", sidebarForeground: "#fff9f0",
+    sidebarMutedForeground: "#bbae9f", sidebarActive: "#6c4d38",
+    sidebarActiveForeground: "#fff9f0",
+  },
+}
+```
 
 ## Override tokens
 
@@ -71,10 +114,38 @@ takontuku({
 })
 ```
 
-`backgroundImage` accepts a public path or absolute URL and is rendered as a decorative image (not interpolated into CSS). On small screens it becomes a compact editorial backdrop behind the solid form panel. `messages` is a sparse override map: defaults are selected from the locale (`id*` uses Indonesian, everything else uses English), and unknown keys are ignored in production (with a development warning). `{brand}`, `{name}`, `{count}`, `{from}`, and `{to}` placeholders are supported.
+`backgroundImage` accepts a public path or absolute URL and is rendered as a decorative image (not interpolated into CSS). If omitted, `@takontuku/auth` uses its package-owned portrait of a contemporary Javanese workspace: ivory plaster, teak, and morning light. If the configured image fails to load, the panel falls back to a flat teak color while keeping the brand and Jarene readable. `backgroundPosition` accepts the same safe CSS position string used by `object-position`.
+
+On small screens the visual panel is hidden and the form remains clean and usable. `messages` is a
+sparse override map: defaults are selected from the locale (`id*` uses Indonesian, everything else
+uses English), and unknown keys are ignored in production (with a development warning).
+
+The optional `@takontuku/jarene` module renders one quote on the server while the auth HTML is
+generated. It has no route, database, user data, hydration, or client-side quote rotation. Remove
+it with `bunx takontuku remove jarene`; new scaffolds include it by default.
 
 For the package-owned fallback, omit `auth` entirely:
 
 ```js
 brand: { name: "Kedai Senja", locale: "id-ID", currency: "IDR" }
 ```
+
+## Admin inspector and quick views
+
+`AdminLayout` exposes a named `inspector` slot. A page that supplies the slot gets an inline
+320-pixel summary rail on wide screens and a sheet at smaller breakpoints:
+
+```astro
+<AdminLayout title="Produk">
+  <main>...</main>
+  <Fragment slot="inspector">
+    <AdminInspector title="Ringkasan">...</AdminInspector>
+  </Fragment>
+</AdminLayout>
+```
+
+Use `AdminPageHeader`, `AdminInspector`, `AdminMetric`, and `AdminQuickView` from
+`@takontuku/ui`. Quick-view triggers provide `data-quick-view-endpoint` and an entity ID; the
+shared controller handles loading, retry, successful-response caching, aborting stale requests,
+`Escape`, focus return, and responsive dialog sizing. Keep detail rendering text-based (`textContent`
+or DOM APIs), and retain a normal edit/detail link so the table works without JavaScript.

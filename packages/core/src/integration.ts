@@ -18,6 +18,24 @@ export interface TakontukuAuthBrand {
   backgroundPosition?: string;
 }
 
+export interface TakontukuPaletteColors {
+  background?: string;
+  surface?: string;
+  subtle?: string;
+  foreground?: string;
+  mutedForeground?: string;
+  border?: string;
+  accent?: string;
+  accentHover?: string;
+  accentForeground?: string;
+  focusRing?: string;
+  sidebar?: string;
+  sidebarForeground?: string;
+  sidebarMutedForeground?: string;
+  sidebarActive?: string;
+  sidebarActiveForeground?: string;
+}
+
 export interface TakontukuStorefrontBrand {
   announcement?: string | false;
   hero?: {
@@ -35,8 +53,8 @@ export interface TakontukuBrand extends FormattersConfig {
   name: string;
   logo?: { src: string; alt?: string };
   palette?: {
-    light?: { accent: string; accentForeground: string };
-    dark?: { accent: string; accentForeground: string };
+    light?: TakontukuPaletteColors;
+    dark?: TakontukuPaletteColors;
   };
   storefront?: TakontukuStorefrontBrand;
   auth?: TakontukuAuthBrand;

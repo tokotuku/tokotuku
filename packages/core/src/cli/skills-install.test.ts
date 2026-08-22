@@ -27,6 +27,23 @@ async function writeSkill(name: string, description = "A test skill."): Promise<
 }
 
 describe("installSkills", () => {
+  it("installs every bundled Takontuku skill by default", async () => {
+    const result = installSkills(cwd);
+
+    expect(result.skills).toEqual([
+      "takontuku-data",
+      "takontuku-modules",
+      "takontuku-store-builder",
+      "takontuku-ui",
+    ]);
+    for (const target of result.targets) {
+      for (const skill of result.skills) {
+        const content = await readFile(path.join(cwd, target, skill, "SKILL.md"), "utf8");
+        expect(content).toContain(`name: ${skill}`);
+      }
+    }
+  });
+
   it("copies every bundled skill into both agent-skill directories", async () => {
     await writeSkill("takontuku-modules");
     await writeSkill("takontuku-data");

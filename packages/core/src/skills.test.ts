@@ -43,10 +43,19 @@ function parseFrontmatter(source: string): Frontmatter {
 }
 
 describe("shipped agent skills", () => {
-  const directories = skillDirectories();
+  const directories = skillDirectories().sort();
 
   it("ships at least one skill", () => {
     expect(directories.length).toBeGreaterThan(0);
+  });
+
+  it("ships the complete Takontuku workflow set", () => {
+    expect(directories).toEqual([
+      "takontuku-data",
+      "takontuku-modules",
+      "takontuku-store-builder",
+      "takontuku-ui",
+    ]);
   });
 
   describe.each(directories)("%s", (directory) => {

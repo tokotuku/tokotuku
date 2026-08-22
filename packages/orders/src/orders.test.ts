@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { orderTransitions, updateOrderStatus } from "./orders";
+import { findAdminOrderDetail, orderTransitions, updateOrderStatus } from "./orders";
 
 /**
  * Minimal fake covering only what updateOrderStatus's three queries need:
@@ -59,5 +59,61 @@ describe("updateOrderStatus", () => {
       batch: async () => [],
     };
     await expect(updateOrderStatus(db as never, 999, "confirmed")).rejects.toThrow();
+  });
+});
+
+describe("findAdminOrderDetail", () => {
+  it("maps customer, payment, and item data with one joined read", async () => {
+    let prepareCalls = 0;
+    const db = {
+      prepare: () => {
+        prepareCalls += 1;
+        return {
+          bind: () => ({
+            all: async () => ({
+              results: [
+                {
+                  id: 7,
+                  order_number: "TK-7",
+                  customer_name: "Ratri",
+                  customer_email: "ratri@example.test",
+                  customer_phone: "0800",
+                  shipping_address: "Jl. Teak 1",
+                  shipping_city: "Yogyakarta",
+                  shipping_postal_code: "55111",
+                  customer_note: "Call before delivery",
+                  source: "web",
+                  created_at: "2026-08-22 08:00:00",
+                  total_cents: 125000,
+                  status: "pending",
+                  payment_status: "unpaid",
+                  payment_method: "transfer",
+                  payment_proof_key: "payment-proofs/7.jpg",
+                  item_id: 3,
+                  product_name: "Teak tray",
+                  sku: "TRAY-001",
+                  price_cents: 125000,
+                  quantity: 1,
+                  line_total_cents: 125000,
+                },
+              ],
+            }),
+          }),
+        };
+      },
+    };
+
+    await expect(findAdminOrderDetail(db as never, 7)).resolves.toMatchObject({
+      orderNumber: "TK-7",
+      customerPhone: "0800",
+      paymentMethod: "transfer",
+      items: [{ itemId: 3, quantity: 1, lineTotalCents: 125000 }],
+    });
+    expect(prepareCalls).toBe(1);
+  });
+
+  it("returns null when the joined order query has no rows", async () => {
+    const db = { prepare: () => ({ bind: () => ({ all: async () => ({ results: [] }) }) }) };
+    await expect(findAdminOrderDetail(db as never, 404)).resolves.toBeNull();
   });
 });

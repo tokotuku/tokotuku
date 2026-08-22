@@ -2,16 +2,23 @@ import { log } from "@clack/prompts";
 import type { PackageManager } from "./environment";
 import type { StepFailure } from "./setup";
 
+export function manualSetupSteps(projectName: string, manager: PackageManager): string[] {
+  return [
+    `cd ${projectName}`,
+    `${manager} install`,
+    "bunx takontuku skills install",
+    `${manager} run cf-typegen`,
+    "bunx takontuku db sync",
+    "bunx wrangler d1 migrations apply DB --local",
+    `${manager} run dev`,
+  ];
+}
+
 export function printManualSteps(projectName: string, manager: PackageManager): void {
   log.info(
     [
       "Finish setup yourself with:",
-      `  cd ${projectName}`,
-      `  ${manager} install`,
-      `  ${manager} run cf-typegen`,
-      "  bunx takontuku db sync",
-      "  bunx wrangler d1 migrations apply DB --local",
-      `  ${manager} run dev`,
+      ...manualSetupSteps(projectName, manager).map((step) => `  ${step}`),
     ].join("\n"),
   );
 }
@@ -44,6 +51,7 @@ export function printFooter(projectName: string, seeded: boolean): void {
       ...(seeded
         ? []
         : ["Load seed data (module seeds plus your own seed/): `bunx takontuku db seed`."]),
+      "Build with AI: read AGENTS.md, then ask for a Takontuku storefront plan and implementation.",
       "Add or drop features: `bunx takontuku add <module>` / `remove <module>`.",
       "Change locale, currency, and branding: astro.config.mjs's brand{}.",
       "",

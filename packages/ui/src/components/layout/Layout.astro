@@ -3,6 +3,7 @@
 import "@takontuku/ui/styles.css";
 import ambientScripts from "virtual:takontuku/ambient-scripts";
 import SEO from "@takontuku/ui/SEO.astro";
+import { type PaletteColors, paletteStyle } from "../../theme";
 
 interface Props {
   title: string;
@@ -13,12 +14,7 @@ interface Props {
   jsonLd?: Record<string, unknown> | Record<string, unknown>[] | undefined;
   noindex?: boolean | undefined;
   siteName?: string | undefined;
-  palette?:
-    | {
-        light?: { accent?: string; accentForeground?: string };
-        dark?: { accent?: string; accentForeground?: string };
-      }
-    | undefined;
+  palette?: { light?: PaletteColors; dark?: PaletteColors } | undefined;
 }
 
 const {
@@ -36,14 +32,7 @@ const {
 const canonicalUrl = new URL(Astro.url.pathname, Astro.url.origin).toString();
 const absoluteImage = image ? new URL(image, Astro.url.origin).toString() : undefined;
 const locale = lang.toLowerCase().startsWith("id") ? "id" : "en";
-const paletteVars = [
-  palette?.light?.accent ? `--tk-color-accent:${palette.light.accent}` : "",
-  palette?.light?.accentForeground ? `--tk-color-accent-fg:${palette.light.accentForeground}` : "",
-  palette?.dark?.accent ? `--tk-dark-accent:${palette.dark.accent}` : "",
-  palette?.dark?.accentForeground ? `--tk-dark-accent-fg:${palette.dark.accentForeground}` : "",
-]
-  .filter(Boolean)
-  .join(";");
+const paletteVars = paletteStyle({ palette });
 ---
 
 <html lang={locale} style={paletteVars || undefined}>

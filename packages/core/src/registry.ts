@@ -1,6 +1,7 @@
 import type {
   AdminDashboardWidget,
   AdminNavItem,
+  AuthPanelWidget,
   ModuleDefinition,
   ModuleMigration,
   ModuleRoute,
@@ -26,6 +27,7 @@ export interface ResolvedRegistry {
   ambientScripts: string[];
   storefrontHomeSections: StorefrontHomeSection[];
   adminDashboardWidgets: AdminDashboardWidget[];
+  authPanelWidgets: AuthPanelWidget[];
   /** Modules in topo order, carrying just enough for `takontuku db sync` to plan migrations. */
   modules: ResolvedModule[];
 }
@@ -80,6 +82,13 @@ export function resolveModules(modules: ModuleDefinition[]): ResolvedRegistry {
       __localOrder: localOrder,
     })),
   );
+  const authPanelWidgets = sorted.flatMap((mod, dependencyOrder) =>
+    (mod.authPanelWidgets ?? []).map((widget, localOrder) => ({
+      ...widget,
+      __dependencyOrder: dependencyOrder,
+      __localOrder: localOrder,
+    })),
+  );
   function stableContributions<
     T extends { id: string; order?: number; __dependencyOrder: number; __localOrder: number },
   >(contributions: T[], kind: string): T[] {
@@ -112,6 +121,9 @@ export function resolveModules(modules: ModuleDefinition[]): ResolvedRegistry {
   const orderedWidgets = stableContributions(dashboardWidgets, "admin dashboard widget").map(
     ({ __dependencyOrder: _dependencyOrder, __localOrder: _localOrder, ...widget }) => widget,
   );
+  const orderedAuthPanelWidgets = stableContributions(authPanelWidgets, "auth panel widget").map(
+    ({ __dependencyOrder: _dependencyOrder, __localOrder: _localOrder, ...widget }) => widget,
+  );
 
   return {
     moduleNames: sorted.map((mod) => mod.name),
@@ -125,6 +137,7 @@ export function resolveModules(modules: ModuleDefinition[]): ResolvedRegistry {
     ambientScripts: sorted.flatMap((mod) => mod.ambientScripts ?? []),
     storefrontHomeSections: orderedSections,
     adminDashboardWidgets: orderedWidgets,
+    authPanelWidgets: orderedAuthPanelWidgets,
     modules: sorted.map((mod) => ({
       name: mod.name,
       requires: mod.requires ?? [],

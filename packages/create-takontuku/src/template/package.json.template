@@ -21,6 +21,7 @@
     "@tailwindcss/vite": "^4.3.1",
     "@takontuku/auth": "latest",
     "@takontuku/core": "latest",
+    "@takontuku/jarene": "latest",
     "@takontuku/ui": "latest",
     "astro": "^7.0.9",
     "tailwindcss": "^4.3.1"

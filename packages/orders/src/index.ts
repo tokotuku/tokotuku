@@ -39,6 +39,10 @@ export function orders(): ModuleDefinition {
     ],
     adminRoutes: [
       { pattern: "/admin/orders", entrypoint: "@takontuku/orders/routes/admin/orders.astro" },
+      {
+        pattern: "/admin/api/orders/[id]",
+        entrypoint: "@takontuku/orders/routes/api/admin/orders/[id].ts",
+      },
     ],
     adminDashboardWidgets: [
       {
@@ -53,10 +57,13 @@ export function orders(): ModuleDefinition {
 
 export {
   type AdminOrder,
+  type AdminOrderDetail,
+  type AdminOrderItem,
   approvePayment,
   attachPaymentProof,
   createInquiryOrder,
   createOrder,
+  findAdminOrderDetail,
   findCustomerOrder,
   getOrderDashboardSummary,
   type InquiryDetails,

@@ -81,6 +81,25 @@ export interface AdminOrder {
   paymentProofKey: string | null;
 }
 
+export interface AdminOrderItem {
+  itemId: number;
+  productName: string;
+  sku: string;
+  priceCents: number;
+  quantity: number;
+  lineTotalCents: number | null;
+}
+
+export interface AdminOrderDetail extends AdminOrder {
+  customerPhone: string;
+  shippingAddress: string;
+  shippingCity: string;
+  shippingPostalCode: string;
+  customerNote: string;
+  source: string;
+  items: AdminOrderItem[];
+}
+
 export interface OrderDashboardSummary {
   todaySalesCents: number;
   thirtyDayRevenueCents: number;
@@ -345,6 +364,94 @@ export async function listOrders(db: D1Database): Promise<AdminOrder[]> {
     paymentStatus: row.payment_status,
     paymentProofKey: row.payment_proof_key,
   }));
+}
+
+/**
+ * Load the order inspector payload in one joined read. The list page keeps
+ * using listOrders (one aggregate query); this helper is only called for the
+ * selected order in the progressive-enhancement quick view.
+ */
+export async function findAdminOrderDetail(
+  db: D1Database,
+  id: number,
+): Promise<AdminOrderDetail | null> {
+  const { results } = await db
+    .prepare(
+      `SELECT o.id, o.order_number, o.customer_name, o.customer_email,
+              o.customer_phone, o.shipping_address, o.shipping_city,
+              o.shipping_postal_code, o.customer_note, o.source, o.created_at,
+              o.total_cents, o.status, o.payment_status,
+              CASE WHEN p.order_id IS NULL THEN 'cash' ELSE 'transfer' END AS payment_method,
+              p.proof_key AS payment_proof_key,
+              oi.item_id, oi.product_name, oi.sku, oi.price_cents,
+              oi.quantity, oi.line_total_cents
+       FROM orders o
+       LEFT JOIN payments_bank_transfer_proofs p ON p.order_id = o.id
+       LEFT JOIN order_items oi ON oi.order_id = o.id
+       WHERE o.id = ?
+       ORDER BY oi.id ASC`,
+    )
+    .bind(id)
+    .all<{
+      id: number;
+      order_number: string;
+      customer_name: string;
+      customer_email: string | null;
+      customer_phone: string;
+      shipping_address: string;
+      shipping_city: string;
+      shipping_postal_code: string;
+      customer_note: string;
+      source: string;
+      created_at: string;
+      total_cents: number | null;
+      status: OrderStatus;
+      payment_status: "unpaid" | "paid";
+      payment_method: PaymentMethod;
+      payment_proof_key: string | null;
+      item_id: number | null;
+      product_name: string | null;
+      sku: string | null;
+      price_cents: number | null;
+      quantity: number | null;
+      line_total_cents: number | null;
+    }>();
+
+  const first = results[0];
+  if (!first) return null;
+  return {
+    id: first.id,
+    orderNumber: first.order_number,
+    customerName: first.customer_name,
+    customerEmail: first.customer_email,
+    createdAt: first.created_at,
+    itemCount: results.reduce((count, row) => count + (row.quantity ?? 0), 0),
+    totalCents: first.total_cents,
+    status: first.status,
+    paymentMethod: first.payment_method,
+    paymentStatus: first.payment_status,
+    paymentProofKey: first.payment_proof_key,
+    customerPhone: first.customer_phone,
+    shippingAddress: first.shipping_address,
+    shippingCity: first.shipping_city,
+    shippingPostalCode: first.shipping_postal_code,
+    customerNote: first.customer_note,
+    source: first.source,
+    items: results.flatMap((row) =>
+      row.item_id === null || row.product_name === null || row.sku === null || row.quantity === null
+        ? []
+        : [
+            {
+              itemId: row.item_id,
+              productName: row.product_name,
+              sku: row.sku,
+              priceCents: row.price_cents ?? 0,
+              quantity: row.quantity,
+              lineTotalCents: row.line_total_cents,
+            },
+          ],
+    ),
+  };
 }
 
 /** Operational dashboard values derived only from orders that actually exist. */

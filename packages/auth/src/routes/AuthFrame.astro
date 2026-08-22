@@ -1,11 +1,13 @@
 ---
 /// <reference types="@takontuku/core/virtual.d.ts" />
 import "@takontuku/ui/styles.css";
-import { Image } from "astro:assets";
+import authPanelWidgets from "virtual:takontuku/auth-panel-widgets";
 import brand from "virtual:takontuku/config";
 import { createTranslator } from "@takontuku/core";
+import BrandMark from "@takontuku/ui/BrandMark.astro";
 import Icon from "@takontuku/ui/Icon.astro";
-import defaultAuthImage from "../auth-background.webp";
+import { paletteStyle } from "@takontuku/ui/theme";
+import defaultAuthImage from "../auth-login-background-default-v2.png";
 import { authMessages } from "../messages";
 
 interface Props {
@@ -15,13 +17,14 @@ interface Props {
 const { title } = Astro.props;
 const t = createTranslator(brand, authMessages);
 const authImage = brand.auth?.backgroundImage ?? defaultAuthImage;
+const authImageSrc = typeof authImage === "string" ? authImage : authImage.src;
 const requestedPosition = brand.auth?.backgroundPosition ?? "center";
 const authImagePosition = /^[a-z0-9% .,-]+$/i.test(requestedPosition)
   ? requestedPosition
   : "center";
 ---
 
-<html lang={brand.locale.toLowerCase().startsWith("id") ? "id" : "en"}>
+<html lang={brand.locale.toLowerCase().startsWith("id") ? "id" : "en"} style={paletteStyle(brand) || undefined}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
@@ -35,37 +38,31 @@ const authImagePosition = /^[a-z0-9% .,-]+$/i.test(requestedPosition)
     </script>
   </head>
   <body>
-    <main class="auth-shell auth-shell--image">
+    <main class="auth-shell">
       <button class="auth-theme" type="button" data-auth-theme aria-label={t("auth.theme")}>
         <Icon name="moon" size={17} />
       </button>
 
-      <div class="auth-backdrop" aria-hidden="true">
-        {typeof authImage === "string" ? (
-          <img data-auth-image src={authImage} alt="" loading="eager" fetchpriority="high" style={`object-position:${authImagePosition}`} />
-        ) : (
-          <Image data-auth-image src={authImage} alt="" loading="eager" widths={[640, 960, 1200]} sizes="(max-width: 880px) 100vw, 56vw" style={`object-position:${authImagePosition}`} />
-        )}
-      </div>
+      <aside class="auth-story">
+        <div class="auth-backdrop" aria-hidden="true">
+          <img data-auth-image src={authImageSrc} alt="" loading="eager" fetchpriority="high" style={`object-position:${authImagePosition}`} />
+        </div>
+        <a class="auth-brand" href="/" aria-label={t("auth.mobile.brandAria", { brand: brand.name })}>
+          {brand.logo?.src ? <img src={brand.logo.src} alt={brand.logo.alt ?? brand.name} /> : <span><BrandMark size={40} /></span>} {brand.name}
+        </a>
+        {authPanelWidgets.length > 0 && <div class="auth-panel-widgets">{authPanelWidgets.map(({ component: Widget }) => <Widget />)}</div>}
+      </aside>
 
       <section class="auth-form-side">
+        <div class="auth-mobile-backdrop" aria-hidden="true">
+          <img src={authImageSrc} alt="" loading="eager" fetchpriority="high" style={`object-position:${authImagePosition}`} />
+        </div>
         <a class="auth-form-brand" href="/" aria-label={t("auth.mobile.brandAria", { brand: brand.name })}>
-          {brand.logo?.src ? <img src={brand.logo.src} alt={brand.logo.alt ?? brand.name} /> : <span><Icon name="logo" size={18} /></span>}
+          {brand.logo?.src ? <img src={brand.logo.src} alt={brand.logo.alt ?? brand.name} /> : <span><BrandMark size={32} /></span>}
           {brand.name}
         </a>
         <div class="auth-form-surface"><slot /></div>
       </section>
-
-      <aside class="auth-story">
-        <a class="auth-brand" href="/" aria-label={t("auth.mobile.brandAria", { brand: brand.name })}>
-          {brand.logo?.src ? <img src={brand.logo.src} alt={brand.logo.alt ?? brand.name} /> : <span><Icon name="logo" size={20} /></span>} {brand.name}
-        </a>
-        <div class="story-copy">
-          <p>{t("auth.hero.eyebrow")}</p>
-          <strong>{t("auth.hero.title")}</strong>
-          <span>{t("auth.hero.description")}</span>
-        </div>
-      </aside>
     </main>
   </body>
 </html>
@@ -86,32 +83,30 @@ const authImagePosition = /^[a-z0-9% .,-]+$/i.test(requestedPosition)
 <style is:global>
   *, *::before, *::after { box-sizing: border-box; }
   :focus-visible { outline: 3px solid color-mix(in srgb, var(--tk-color-focus-ring) 70%, transparent); outline-offset: 3px; }
-  .auth-shell { position: relative; display: grid; min-height: 100vh; grid-template-columns: minmax(320px, .88fr) minmax(0, 1.12fr); gap: 16px; padding: 12px; overflow: hidden; background: var(--tk-color-bg); }
-  .auth-backdrop { position: absolute; z-index: 0; top: 12px; right: 12px; bottom: 12px; left: calc(44% + 4px); overflow: hidden; border-radius: 14px; background: #c7b59f; }
-  .auth-backdrop::after { position: absolute; inset: 0; content: ""; background: rgb(23 23 20 / 36%); }
+  .auth-shell { position: relative; display: grid; min-height: 100vh; grid-template-columns: 360px minmax(0, 1fr); overflow: hidden; background: var(--tk-color-bg); }
+  .auth-backdrop { position: absolute; z-index: 0; inset: 0; overflow: hidden; background: #2d211a; }
+  .auth-backdrop::after { position: absolute; inset: 0; content: ""; background: linear-gradient(180deg, rgb(45 33 26 / 5%), rgb(45 33 26 / 38%)); }
   .auth-backdrop img { width: 100%; height: 100%; object-fit: cover; }
   .auth-form-side, .auth-story { position: relative; z-index: 1; min-width: 0; }
-  .auth-form-side { display: flex; align-items: center; justify-content: center; flex-direction: column; padding: 48px 40px; }
+  .auth-mobile-backdrop { display: none; }
+  .auth-form-side { display: flex; align-items: center; justify-content: center; flex-direction: column; padding: 48px clamp(28px, 7vw, 88px); background: var(--tk-color-bg); }
   .auth-form-surface { width: min(100%, 420px); }
-  .auth-form-brand { display: inline-flex; max-width: 100%; align-items: center; gap: 9px; margin: 0 auto 38px; overflow-wrap: anywhere; color: var(--tk-color-fg); font-size: 16px; font-weight: var(--tk-font-weight-bold); text-decoration: none; }
-  .auth-form-brand > span { display: grid; width: 32px; height: 32px; place-items: center; border-radius: 10px; background: color-mix(in srgb, var(--tk-color-accent) 14%, var(--tk-color-bg)); color: var(--tk-color-accent); }.auth-form-brand > img { display:block; width:auto; max-width:8rem; max-height:2rem; }
-  .auth-story { display: flex; min-height: calc(100vh - 24px); flex-direction: column; padding: 40px; color: #fffaf3; }
+  .auth-form-brand { display: none; max-width: 100%; align-items: center; gap: 9px; margin: 0 auto 30px; overflow-wrap: anywhere; color: var(--tk-color-fg); font-size: 16px; font-weight: var(--tk-font-weight-bold); text-decoration: none; }
+  .auth-form-brand > span { display: grid; width: 32px; height: 32px; flex: 0 0 32px; place-items: center; overflow: hidden; border-radius: 10px; background: color-mix(in srgb, var(--tk-color-accent) 14%, var(--tk-color-bg)); }.auth-form-brand > img { display:block; width:auto; max-width:8rem; max-height:2rem; }
+  .auth-story { display: flex; min-height: 100vh; flex-direction: column; padding: 32px; color: #fffaf3; box-shadow: 10px 0 28px rgb(25 15 10 / 14%); }
   .auth-brand { position: relative; z-index: 1; display: inline-flex; width: fit-content; max-width: 100%; align-items: center; gap: 11px; overflow-wrap: anywhere; color: white; font-size: 18px; font-weight: var(--tk-font-weight-bold); text-decoration: none; }
-  .auth-brand > span { display: grid; width: 40px; height: 40px; place-items: center; border-radius: 12px; background: rgb(255 239 212 / 16%); color: #ffe6be; }.auth-brand > img { display:block; width:auto; max-width:10rem; max-height:2.5rem; }
-  .story-copy { position: relative; z-index: 1; max-width: 540px; margin-top: auto; padding: 1.25rem 1.5rem 1.35rem; overflow-wrap: anywhere; border-left: 2px solid #f2c39d; background: rgb(23 23 20 / 58%); }
-  .story-copy p, .story-copy strong { display: block; margin: 0; font-family: var(--tk-font-family-display); font-size: clamp(36px, 4vw, 54px); font-weight: 400; letter-spacing: -0.045em; line-height: 1.03; }
-  .story-copy strong { color: #f2c39d; }
-  .story-copy span { display: block; max-width: 500px; margin-top: 21px; color: #f5e6d6; font-size: 15px; line-height: 1.55; }
-  .auth-theme { position: absolute; z-index: 3; top: 23px; right: 23px; display: grid; width: 40px; height: 40px; place-items: center; border: 1px solid var(--tk-color-border); border-radius: 12px; background: color-mix(in srgb, var(--tk-color-bg) 88%, transparent); color: var(--tk-color-fg); cursor: pointer; }
+  .auth-brand > span { display: grid; width: 40px; height: 40px; flex: 0 0 40px; place-items: center; overflow: hidden; border: 1px solid rgb(255 250 243 / 45%); border-radius: 12px; background: rgb(255 250 243 / 92%); }.auth-brand > img { display:block; width:auto; max-width:10rem; max-height:2.5rem; }
+  .auth-panel-widgets { position: relative; z-index: 1; display: grid; gap: 16px; max-width: 31rem; margin-top: auto; container-type: inline-size; }
+  .auth-theme { position: absolute; z-index: 3; top: 24px; right: 24px; display: grid; width: 40px; height: 40px; place-items: center; border: 1px solid var(--tk-color-border); border-radius: 12px; background: color-mix(in srgb, var(--tk-color-bg) 88%, transparent); color: var(--tk-color-fg); cursor: pointer; }
   .auth-card { width: 100%; overflow-wrap: anywhere; }
-  .auth-card h1 { margin: 0; color: var(--tk-color-fg); font-size: 28px; font-weight: var(--tk-font-weight-medium); letter-spacing: -0.035em; line-height: 1.1; }
+  .auth-card h1 { margin: 0; color: var(--tk-color-fg); font-size: 30px; font-weight: var(--tk-font-weight-medium); letter-spacing: -0.035em; line-height: 1.1; }
   .auth-card > p { margin: 9px 0 28px; color: var(--tk-color-fg-muted); font-size: 14px; line-height: 1.5; }
   .field { display: grid; gap: 8px; margin-top: 18px; }
   .field-row { display: flex; align-items: center; justify-content: space-between; }
   .field label, .field-row label { color: var(--tk-color-fg); font-size: 14px; font-weight: var(--tk-font-weight-semibold); }
   .field-row a { color: var(--tk-color-accent); font-size: 13px; font-weight: var(--tk-font-weight-semibold); }
   .input-wrap { position: relative; display: flex; height: 47px; align-items: center; }
-  .input-wrap > svg { position: absolute; left: 15px; color: var(--tk-color-fg-muted); pointer-events: none; }
+  .input-wrap > svg { position: absolute; left: 15px; width: 18px; min-width: 18px; height: 18px; aspect-ratio: 1; overflow: visible; color: var(--tk-color-fg-muted); pointer-events: none; }
   .input-wrap input { width: 100%; height: 100%; padding: 0 43px; border: 1px solid var(--tk-color-border); border-radius: 12px; outline: 0; background: var(--tk-color-bg); color: var(--tk-color-fg); font: inherit; font-size: 14px; }
   .input-wrap input:focus { border-color: var(--tk-color-accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--tk-color-accent) 15%, transparent); }
   .password-toggle { position: absolute; right: 5px; display: grid; width: 40px; height: 40px; place-items: center; border: 0; border-radius: 9px; background: transparent; color: var(--tk-color-fg-muted); cursor: pointer; }
@@ -126,13 +121,15 @@ const authImagePosition = /^[a-z0-9% .,-]+$/i.test(requestedPosition)
   .auth-message { margin: 14px 0 0 !important; padding: 11px 13px; border-radius: 10px; background: color-mix(in srgb, var(--tk-color-danger) 10%, var(--tk-color-bg)); color: var(--tk-color-danger) !important; font-size: 12px !important; line-height: 1.45; }
   .auth-message.success { background: color-mix(in srgb, var(--tk-color-success) 12%, var(--tk-color-bg)); color: var(--tk-color-success) !important; }
   @media (max-width: 880px) {
-    .auth-shell { display: block; min-height: 100svh; padding: 0; overflow-x: hidden; }
-    .auth-backdrop { position: absolute; inset: 0; border-radius: 0; background: var(--tk-color-bg); }
-    .auth-backdrop img { position: absolute; inset: 0; width: 100%; height: 54%; opacity: .96; }
-    .auth-backdrop::after { background: rgb(23 23 20 / 12%); }
-    .auth-form-side { display: block; min-height: 100svh; padding: clamp(96px, 16vh, 128px) 20px 40px; }
-    .auth-form-brand { max-width: 100%; margin: 0 0 24px 4px; overflow-wrap: anywhere; }
-    .auth-form-surface { padding: 24px; border: 1px solid var(--tk-color-border); border-radius: 14px; background: var(--tk-color-bg); box-shadow: var(--tk-shadow-lg); }
+    .auth-shell { display: block; min-height: 100svh; overflow-x: hidden; }
+    .auth-form-side { display: block; min-height: 100svh; padding: clamp(88px, 13vh, 120px) 20px 40px; isolation: isolate; background: transparent; }
+    .auth-mobile-backdrop { position: absolute; z-index: 0; display: block; inset: 0; overflow: hidden; background: #2d211a; }
+    .auth-mobile-backdrop::after { position: absolute; z-index: 1; inset: 0; content: ""; background: rgb(45 33 26 / 42%); }
+    .auth-mobile-backdrop img { width: 100%; height: 100%; object-fit: cover; filter: blur(16px); transform: scale(1.08); }
+    .auth-form-side > :not(.auth-mobile-backdrop) { position: relative; z-index: 1; }
+    .auth-form-brand { display: inline-flex; max-width: 100%; margin: 0 0 24px 4px; overflow-wrap: anywhere; }
+    .auth-form-surface { width: min(100%, 420px); margin-inline: auto; padding: 24px; border: 1px solid color-mix(in srgb, var(--tk-color-border) 84%, white); border-radius: 14px; background: color-mix(in srgb, var(--tk-color-bg) 94%, transparent); box-shadow: 0 20px 50px rgb(25 15 10 / 24%), 0 4px 14px rgb(25 15 10 / 14%); }
+    .auth-card h1 { color: #fff; text-shadow: 0 1px 2px rgb(0 0 0 / 24%); }
     .auth-story { display: none; }
     .auth-theme { top: 20px; right: 20px; }
   }

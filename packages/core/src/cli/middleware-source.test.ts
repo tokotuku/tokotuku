@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { addRegisterImport, removeRegisterImport } from "./middleware-source";
 
-// Byte-identical across every examples/* app and the scaffold template.
+// Representative scaffold middleware and the shape preserved by the CLI.
 const FIXTURE = `import { defineMiddleware } from "astro:middleware";
 import "@takontuku/auth/register";
 import "@takontuku/catalog/register";

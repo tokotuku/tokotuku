@@ -1,5 +1,14 @@
+import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { applyPlaceholders, targetFileName, titleCase } from "./template";
+import {
+  applyPlaceholders,
+  copyTemplate,
+  TEMPLATE_DIR,
+  targetFileName,
+  titleCase,
+} from "./template";
 
 describe("titleCase", () => {
   it("capitalizes each hyphen-separated word", () => {
@@ -51,5 +60,35 @@ describe("targetFileName", () => {
 
   it("leaves a file without the suffix unchanged", () => {
     expect(targetFileName("README.md")).toBe("README.md");
+  });
+});
+
+describe("copyTemplate", () => {
+  it("writes the AI guidance files with the selected brand name", async () => {
+    const outputDir = await mkdtemp(path.join(tmpdir(), "takontuku-template-"));
+    try {
+      await copyTemplate(TEMPLATE_DIR, outputDir, {
+        projectName: "coffee-shop",
+        brandName: "Kopi Pagi",
+        locale: "id-ID",
+        currency: "IDR",
+        timeZone: "Asia/Jakarta",
+      });
+
+      await expect(readFile(path.join(outputDir, "AGENTS.md"), "utf8")).resolves.toContain(
+        "# Kopi Pagi — Takontuku project instructions",
+      );
+      await expect(readFile(path.join(outputDir, "CLAUDE.md"), "utf8")).resolves.toContain(
+        "# Claude instructions for Kopi Pagi",
+      );
+      await expect(readFile(path.join(outputDir, "README.md"), "utf8")).resolves.toContain(
+        "# Kopi Pagi",
+      );
+      await expect(readFile(path.join(outputDir, "README.md"), "utf8")).resolves.not.toContain(
+        "{{brandName}}",
+      );
+    } finally {
+      await rm(outputDir, { recursive: true, force: true });
+    }
   });
 });

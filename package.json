@@ -15,9 +15,6 @@
   "scripts": {
     "build": "moon run :build",
     "dev": "moon run :dev",
-    "example-bare": "moon run example-bare:dev",
-    "example-seeded": "moon run example-seeded:dev",
-    "example-styled": "moon run example-styled:dev",
     "test": "moon run :test",
     "lint": "moon run :lint",
     "lint:fix": "biome check --write .",

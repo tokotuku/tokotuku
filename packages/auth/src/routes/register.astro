@@ -9,7 +9,7 @@ const t = createTranslator(brand, authMessages);
 ---
 
 <AuthFrame title={t("auth.register.title")}>
-  <form class="auth-card" id="register-form" data-error-fallback={t("auth.common.error")} novalidate>
+  <form class="auth-card" id="register-form" method="post" action="/register" data-error-fallback={t("auth.common.error")} novalidate>
     <h1>{t("auth.register.title")}</h1>
     <p>{t("auth.register.description", { brand: brand.name })}</p>
     <div class="field"><label for="name">{t("auth.register.nameLabel")}</label><div class="input-wrap"><Icon name="user" size={16}/><input id="name" name="name" autocomplete="name" placeholder={t("auth.register.namePlaceholder")} required /></div></div>

@@ -2,9 +2,9 @@
 // Gate 1 from the migration plan ("tarball install"): publishes every
 // publishable @takontuku/* package to a real registry, scaffolds a client
 // with create-takontuku in a scratch directory OUTSIDE this repo, and runs
-// the exact flow a real client would: bun install -> takontuku db sync ->
-// wrangler d1 migrations apply --local -> astro build -> a wrangler dev
-// boot check.
+// the exact flow a real client would: bun install -> takontuku skills install ->
+// takontuku db sync -> wrangler d1 migrations apply --local -> astro build
+// -> a wrangler dev boot check.
 //
 // workspace:* symlinks hide broken exports maps, missing "files" entries,
 // missing peerDependencies, and node_modules module resolution failures --
@@ -19,7 +19,14 @@ import { spawn } from "node:child_process";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { installClient, publishAll, scaffoldClient, sh, waitForServer } from "./shared.ts";
+import {
+  assertAgentSetup,
+  installClient,
+  publishAll,
+  scaffoldClient,
+  sh,
+  waitForServer,
+} from "./shared.ts";
 
 const BOOT_CHECK_PORT = 8799;
 
@@ -51,6 +58,8 @@ async function main(): Promise<void> {
   console.log(`Scaffolded client at ${clientDir}`);
 
   installClient(clientDir);
+  sh("bunx", ["takontuku", "skills", "install"], clientDir);
+  assertAgentSetup(clientDir);
   sh("bunx", ["takontuku", "db", "sync"], clientDir);
   sh("bunx", ["wrangler", "d1", "migrations", "apply", "DB", "--local"], clientDir);
   sh("bun", ["run", "build"], clientDir);

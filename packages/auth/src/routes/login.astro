@@ -9,22 +9,11 @@ const requestedNext = Astro.url.searchParams.get("next") ?? "/admin";
 const next =
   requestedNext.startsWith("/") && !requestedNext.startsWith("//") ? requestedNext : "/admin";
 const t = createTranslator(brand, authMessages);
-const demoAccounts = import.meta.env.DEV
-  ? [
-      { role: t("auth.login.demoRole.admin"), email: "admin@example.com", password: "admin12345" },
-      { role: t("auth.login.demoRole.staff"), email: "staff@example.com", password: "staff12345" },
-      {
-        role: t("auth.login.demoRole.customer"),
-        email: "customer@example.com",
-        password: "customer12345",
-      },
-    ]
-  : [];
 const setupComplete = Astro.url.searchParams.get("setup") === "complete";
 ---
 
 <AuthFrame title={t("auth.login.title")}>
-  <form class="auth-card" id="login-form" data-next={next} data-error-fallback={t("auth.common.error")} novalidate>
+  <form class="auth-card" id="login-form" method="post" action="/login" data-next={next} data-error-fallback={t("auth.common.error")} novalidate>
     <h1>{t("auth.login.title")}</h1>
     <p>{t("auth.login.description", { brand: brand.name })}</p>
     {setupComplete && <p class="auth-message success">{t("auth.login.setupComplete")}</p>}
@@ -32,11 +21,10 @@ const setupComplete = Astro.url.searchParams.get("setup") === "complete";
     <div class="field"><label for="email">{t("auth.login.emailLabel")}</label><div class="input-wrap"><Icon name="mail" size={16}/><input id="email" name="email" type="email" autocomplete="email" placeholder={t("auth.login.emailPlaceholder")} required /></div></div>
     <div class="field"><div class="field-row"><label for="password">{t("auth.login.passwordLabel")}</label><a href="/forgot-password">{t("auth.login.forgot")}</a></div><div class="input-wrap"><Icon name="lock" size={16}/><input id="password" name="password" type="password" autocomplete="current-password" placeholder={t("auth.login.passwordPlaceholder")} required /><button class="password-toggle" type="button" data-password-toggle data-show-label={t("auth.common.showPassword")} data-hide-label={t("auth.common.hidePassword")} aria-label={t("auth.common.showPassword")}><Icon name="eye" size={16}/></button></div></div>
     <label class="check-row"><input type="checkbox" name="remember" /> {t("auth.login.remember")}</label>
-    <p class="auth-message" id="login-error" hidden></p>
+    <p class="auth-message" id="login-error" aria-live="polite" hidden></p>
     <button class="auth-submit" type="submit">{t("auth.login.submit")} <Icon name="arrowRight" size={16}/></button>
     <p class="auth-switch">{t("auth.login.newAccount", { brand: brand.name })} <a href="/register">{t("auth.login.createAccount")}</a></p>
 
-    {demoAccounts.length > 0 && <details class="demo-accounts"><summary>{t("auth.login.demoSummary")}</summary><div>{demoAccounts.map((account) => <button type="button" data-demo-account data-email={account.email} data-password={account.password}>{t("auth.login.demoUse", { role: account.role })}</button>)}</div></details>}
   </form>
 </AuthFrame>
 
@@ -49,19 +37,33 @@ const setupComplete = Astro.url.searchParams.get("setup") === "complete";
   const submit = form?.querySelector<HTMLButtonElement>("[type=submit]");
 
   form?.querySelector<HTMLElement>("[data-password-toggle]")?.addEventListener("click", (event) => { if (password) { password.type = password.type === "password" ? "text" : "password"; const button = event.currentTarget as HTMLElement; button.setAttribute("aria-label", password.type === "password" ? (button.dataset["showLabel"] ?? "") : (button.dataset["hideLabel"] ?? "")); } });
-  for (const button of form?.querySelectorAll<HTMLElement>("[data-demo-account]") ?? []) button.addEventListener("click", () => { if (email) email.value = button.dataset["email"] ?? ""; if (password) password.value = button.dataset["password"] ?? ""; });
   form?.addEventListener("submit", async (event) => {
     event.preventDefault();
     error?.setAttribute("hidden", "");
     if (!form.reportValidity() || !email || !password) return;
     if (submit) submit.disabled = true;
-    const result = await authClient.signIn.email({ email: email.value, password: password.value });
-    if (submit) submit.disabled = false;
-    if (result.error) { if (error) { error.textContent = result.error.message ?? form.dataset["errorFallback"] ?? ""; error.removeAttribute("hidden"); } return; }
-    location.href = form.dataset["next"] ?? "/admin";
+    try {
+      const result = await authClient.signIn.email({ email: email.value, password: password.value });
+      if (result.error) {
+        if (error) {
+          error.textContent = result.error.message ?? form.dataset["errorFallback"] ?? "";
+          error.removeAttribute("hidden");
+        }
+        return;
+      }
+      location.href = form.dataset["next"] ?? "/admin";
+    } catch (caught) {
+      if (error) {
+        error.textContent = caught instanceof Error && caught.message
+          ? caught.message
+          : form.dataset["errorFallback"] ?? "";
+        error.removeAttribute("hidden");
+      }
+    } finally {
+      if (submit) submit.disabled = false;
+    }
   });
 </script>
 
 <style>
-  .demo-accounts { margin-top: 20px; color: var(--tk-color-fg-muted); font-size: 11px; }.demo-accounts summary { cursor:pointer; text-align:center; }.demo-accounts div { display:flex; flex-wrap:wrap; justify-content:center; gap:6px; margin-top:9px; }.demo-accounts button { min-height:40px; padding:5px 8px; border:1px solid var(--tk-color-border); border-radius:7px; background:var(--tk-color-bg); color:var(--tk-color-fg); font-size:10px; cursor:pointer; }
 </style>

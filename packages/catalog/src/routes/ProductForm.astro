@@ -8,16 +8,17 @@ import type { Product } from "../products";
 interface Props {
   product?: Product;
   error?: string;
+  formId?: string;
 }
 
-const { product, error } = Astro.props;
+const { product, error, formId = "product-form" } = Astro.props;
 const fields = Object.entries(product?.customFields ?? {});
 const t = createTranslator(brand, catalogMessages);
 const fulfillmentType = product?.fulfillmentType ?? "physical";
 ---
 
 {error && <p class="form-error" role="alert">{error}</p>}
-<form method="post" enctype="multipart/form-data" class="product-form" data-remove-label={t("catalog.products.form.removeField")}>
+<form id={formId} method="post" enctype="multipart/form-data" class="product-form" data-remove-label={t("catalog.products.form.removeField")}>
   <section class="panel form-section">
     <div class="section-heading"><div><h2>{t("catalog.products.form.infoTitle")}</h2><p>{t("catalog.products.form.infoDescription")}</p></div></div>
     <div class="form-grid">

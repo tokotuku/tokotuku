@@ -193,6 +193,29 @@ export async function listBookings(
   return results.map(toBooking);
 }
 
+/** Load one booking for the admin quick view without reading unrelated orders. */
+export async function findBookingByOrderId(
+  db: D1Database,
+  orderId: number,
+): Promise<Booking | null> {
+  const row = await db
+    .prepare(
+      `SELECT b.order_id, o.order_number, b.item_id, ci.name AS item_name, b.mode,
+              b.start_date, b.end_date, b.slot_id, s.weekday AS slot_weekday,
+              s.start_time AS slot_start_time, b.occurrences_per_day,
+              o.shipping_address AS service_address, o.customer_note AS note,
+              o.status, o.customer_name, o.customer_phone
+       FROM booking_order_bookings b
+       JOIN orders o ON o.id = b.order_id
+       JOIN catalog_items ci ON ci.id = b.item_id
+       LEFT JOIN booking_slots s ON s.id = b.slot_id
+       WHERE b.order_id = ?`,
+    )
+    .bind(orderId)
+    .first<BookingRow>();
+  return row ? toBooking(row) : null;
+}
+
 function rangesOverlap(aStart: string, aEnd: string, bStart: string, bEnd: string): boolean {
   return aStart <= bEnd && bStart <= aEnd;
 }

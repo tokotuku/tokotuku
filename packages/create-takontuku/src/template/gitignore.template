@@ -26,3 +26,8 @@ pnpm-debug.log*
 
 # generated cloudflare worker types (regenerate with `bun run cf-typegen`)
 worker-configuration.d.ts
+
+# AI fixture evaluator artifacts (not application source)
+FACTS.json
+review.json
+graphify-out/

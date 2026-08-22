@@ -31,6 +31,10 @@ export function booking(): ModuleDefinition {
     ],
     adminRoutes: [
       { pattern: "/admin/bookings", entrypoint: "@takontuku/booking/routes/admin/bookings.astro" },
+      {
+        pattern: "/admin/api/bookings/[orderId]",
+        entrypoint: "@takontuku/booking/routes/api/admin/bookings/[orderId].ts",
+      },
     ],
     adminDashboardWidgets: [
       {
@@ -47,6 +51,7 @@ export type { BookingRequestAttributes } from "./booking-hooks";
 export {
   type Booking,
   type BookingSlot,
+  findBookingByOrderId,
   findItemSchedule,
   findOverlappingOrderIds,
   type ItemSchedule,

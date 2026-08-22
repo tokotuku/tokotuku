@@ -86,6 +86,7 @@ describe("resolveModules", () => {
       ambientScripts: [],
       storefrontHomeSections: [],
       adminDashboardWidgets: [],
+      authPanelWidgets: [],
       modules: [],
     });
   });
@@ -98,6 +99,7 @@ describe("resolveModules", () => {
         adminDashboardWidgets: [
           { id: "catalog", entrypoint: "./catalog.astro", area: "main", order: 20 },
         ],
+        authPanelWidgets: [{ id: "catalog-auth", entrypoint: "./catalog-auth.astro", order: 20 }],
       },
       {
         name: "orders",
@@ -106,6 +108,7 @@ describe("resolveModules", () => {
         adminDashboardWidgets: [
           { id: "orders", entrypoint: "./orders.astro", area: "main", order: 20 },
         ],
+        authPanelWidgets: [{ id: "orders-auth", entrypoint: "./orders-auth.astro", order: 20 }],
       },
     ]);
     expect(registry.storefrontHomeSections.map((item) => item.id)).toEqual([
@@ -113,12 +116,22 @@ describe("resolveModules", () => {
       "values",
     ]);
     expect(registry.adminDashboardWidgets.map((item) => item.id)).toEqual(["catalog", "orders"]);
+    expect(registry.authPanelWidgets.map((item) => item.id)).toEqual([
+      "catalog-auth",
+      "orders-auth",
+    ]);
     expect(() =>
       resolveModules([
         { name: "one", storefrontHomeSections: [{ id: "same", entrypoint: "./one.astro" }] },
         { name: "two", storefrontHomeSections: [{ id: "same", entrypoint: "./two.astro" }] },
       ]),
     ).toThrow(/Duplicate storefront home section contribution id/);
+    expect(() =>
+      resolveModules([
+        { name: "one", authPanelWidgets: [{ id: "same", entrypoint: "./one.astro" }] },
+        { name: "two", authPanelWidgets: [{ id: "same", entrypoint: "./two.astro" }] },
+      ]),
+    ).toThrow(/Duplicate auth panel widget contribution id/);
   });
 
   it("carries each module's migrations through in topo order, defaulting to none", () => {

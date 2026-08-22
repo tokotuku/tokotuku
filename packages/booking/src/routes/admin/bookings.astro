@@ -4,6 +4,10 @@ import brand from "virtual:takontuku/config";
 import { createTranslator } from "@takontuku/core";
 import { date } from "@takontuku/core/brand";
 import AdminLayout from "@takontuku/core/routes/AdminLayout.astro";
+import AdminInspector from "@takontuku/ui/AdminInspector.astro";
+import AdminMetric from "@takontuku/ui/AdminMetric.astro";
+import AdminPageHeader from "@takontuku/ui/AdminPageHeader.astro";
+import AdminQuickView from "@takontuku/ui/AdminQuickView.astro";
 import Icon from "@takontuku/ui/Icon.astro";
 import { type Booking, findOverlappingOrderIds, listBookings } from "../../bookings";
 import { bookingMessages } from "../../messages";
@@ -14,77 +18,66 @@ const weekdayNames =
   locale === "id"
     ? ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"]
     : ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-
-// Defaults to "from today" — the useful day-to-day view is what's coming
-// up, not a scroll through history. ?all=1 drops that filter.
 const showAll = Astro.url.searchParams.get("all") === "1";
 const todayIso = new Date().toISOString().slice(0, 10);
 const bookings = await listBookings(env.DB, showAll ? {} : { from: todayIso });
 const overlapping = findOverlappingOrderIds(bookings);
-
 const dateRangeFor = (booking: Booking) =>
   booking.mode === "slot"
     ? `${date(new Date(booking.startDate))} · ${booking.slotWeekday !== null ? weekdayNames[booking.slotWeekday] : ""} ${booking.slotStartTime ?? ""}`
     : booking.endDate && booking.endDate !== booking.startDate
       ? `${date(new Date(booking.startDate))} – ${date(new Date(booking.endDate))}`
       : date(new Date(booking.startDate));
+const upcomingCount = bookings.filter(
+  (booking) => (booking.endDate ?? booking.startDate) >= todayIso && booking.status !== "cancelled",
+).length;
+const nearestDate = bookings.map((booking) => booking.startDate).sort()[0] ?? "—";
+const statusCounts = new Map<string, number>();
+for (const booking of bookings)
+  statusCounts.set(booking.status, (statusCounts.get(booking.status) ?? 0) + 1);
 ---
 
 <AdminLayout title={t("booking.admin.title")}>
   {bookings.length === 0 ? (
     <section class="standalone-empty" data-bookings-empty>
       <div class="empty-symbol"><Icon paths={["M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z", "M8 2v4", "M16 2v4", "M3 10h18"]} size={27} /></div>
-      <p class="eyebrow">{t("booking.admin.eyebrow")}</p>
-      <h1>{t("booking.admin.empty")}</h1>
-      <p>{t("booking.admin.emptyDescription")}</p>
+      <p class="eyebrow">{t("booking.admin.eyebrow")}</p><h1>{t("booking.admin.empty")}</h1><p>{t("booking.admin.emptyDescription")}</p>
       {!showAll && <a class="admin-button" href="/admin/bookings?all=1">{locale === "id" ? "Lihat semua" : "View all"}</a>}
     </section>
   ) : (
     <>
-      <header class="page-heading">
-        <div>
-          <p class="eyebrow">{t("booking.admin.eyebrow")}</p>
-          <h1>{t("booking.admin.title")}</h1>
-          <p>{t("booking.admin.description")}</p>
-        </div>
-        <div class="page-actions">
-          <a class="admin-button" href={showAll ? "/admin/bookings" : "/admin/bookings?all=1"}>{showAll ? (locale === "id" ? "Hanya mendatang" : "Upcoming only") : (locale === "id" ? "Lihat semua" : "View all")}</a>
-        </div>
-      </header>
-      <section class="panel data-panel">
-        <div class="table-wrap">
-          <table class="admin-table">
-            <thead>
-              <tr>
-                <th>{t("booking.admin.order")}</th>
-                <th>{t("booking.admin.service")}</th>
-                <th>{t("booking.admin.customer")}</th>
-                <th>{t("booking.admin.date")}</th>
-                <th>{t("booking.admin.address")}</th>
-                <th>{t("booking.admin.status")}</th>
-                <th><span class="sr-only">{t("booking.admin.viewOrder")}</span></th>
-              </tr>
-            </thead>
-            <tbody>
-              {bookings.map((booking) => (
-                <tr>
-                  <td><strong>#{booking.orderNumber}</strong>{overlapping.has(booking.orderId) && <span class="overlap-badge">{t("booking.admin.overlap")}</span>}</td>
-                  <td>{booking.itemName}</td>
-                  <td><div class="entity"><span class="entity-avatar">{booking.customerName.slice(0, 2).toUpperCase()}</span><div><strong>{booking.customerName}</strong><span>{booking.customerPhone}</span></div></div></td>
-                  <td>{dateRangeFor(booking)}</td>
-                  <td class="address-cell">{booking.serviceAddress}</td>
-                  <td><span class={"status status--" + (booking.status === "cancelled" ? "danger" : booking.status === "confirmed" || booking.status === "completed" ? "success" : "warning")}>{booking.status}</span></td>
-                  <td><div class="row-actions"><a aria-label={t("booking.admin.viewOrder")} href={"/admin/orders#" + booking.orderId}><Icon name="eye" size={16} /></a></div></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+      <AdminPageHeader eyebrow={t("booking.admin.eyebrow")} title={t("booking.admin.title")} description={t("booking.admin.description")}>
+        <Fragment slot="actions"><a class="admin-button" href={showAll ? "/admin/bookings" : "/admin/bookings?all=1"}>{showAll ? (locale === "id" ? "Hanya mendatang" : "Upcoming only") : (locale === "id" ? "Lihat semua" : "View all")}</a></Fragment>
+      </AdminPageHeader>
+      <section class="panel data-panel" data-booking-table data-result-template={`${bookings.length} booking`} data-no-match={locale === "id" ? "Tidak ada booking yang cocok" : "No matching bookings"}>
+        <div class="table-toolbar"><label class="table-search"><span class="sr-only">{t("booking.admin.search")}</span><input type="search" placeholder={t("booking.admin.searchPlaceholder")} data-table-search /></label></div>
+        <div class="table-wrap"><table class="admin-table"><thead><tr><th>{t("booking.admin.order")}</th><th>{t("booking.admin.service")}</th><th>{t("booking.admin.customer")}</th><th>{t("booking.admin.date")}</th><th>{t("booking.admin.address")}</th><th>{t("booking.admin.status")}</th><th><span class="sr-only">{t("booking.admin.previewTitle")}</span></th></tr></thead><tbody>
+          {bookings.map((booking) => <tr data-row data-search={`${booking.orderNumber} ${booking.itemName} ${booking.customerName} ${booking.customerPhone} ${booking.serviceAddress}`.toLowerCase()}><td><strong>#{booking.orderNumber}</strong>{overlapping.has(booking.orderId) && <span class="overlap-badge">{t("booking.admin.overlap")}</span>}</td><td>{booking.itemName}</td><td><div class="entity"><span class="entity-avatar">{booking.customerName.slice(0, 2).toUpperCase()}</span><div><strong>{booking.customerName}</strong><span>{booking.customerPhone}</span></div></div></td><td>{dateRangeFor(booking)}</td><td class="address-cell">{booking.serviceAddress}</td><td><span class={`status status--${booking.status === "cancelled" ? "danger" : booking.status === "confirmed" || booking.status === "completed" ? "success" : "warning"}`}>{booking.status}</span></td><td><div class="row-actions"><button type="button" data-quick-view-target="booking-quick-view" data-quick-view-endpoint={`/admin/api/bookings/${booking.orderId}`} data-quick-view-title={`#${booking.orderNumber}`} data-quick-view-meta={booking.itemName} data-quick-view-overlap={String(overlapping.has(booking.orderId))} aria-label={`${t("booking.admin.previewTitle")}: ${booking.orderNumber}`}><Icon name="eye" size={16} /></button><a href={`/admin/orders#${booking.orderId}`} aria-label={t("booking.admin.viewOrder")}><Icon name="arrowRight" size={16} /></a></div></td></tr>)}
+        </tbody></table></div><div class="table-footer"><span data-result-count>{bookings.length} booking</span></div>
       </section>
     </>
   )}
+
+  <Fragment slot="inspector">
+    <AdminInspector title={t("booking.admin.title")} description={t("booking.admin.description")}>
+      <div class="inspector-metrics"><AdminMetric label={locale === "id" ? "Mendatang" : "Upcoming"} value={String(upcomingCount)} tone={upcomingCount ? "positive" : "default"} /><AdminMetric label={locale === "id" ? "Bentrok" : "Clashes"} value={String(overlapping.size)} tone={overlapping.size ? "warning" : "default"} /><AdminMetric label={locale === "id" ? "Tanggal terdekat" : "Nearest date"} value={nearestDate === "—" ? nearestDate : date(new Date(nearestDate))} /></div>
+    </AdminInspector>
+    <AdminInspector title={t("booking.admin.status")}><dl class="inspector-list">{[...statusCounts.entries()].map(([status, count]) => <div><dt>{status}</dt><dd>{count}</dd></div>)}{statusCounts.size === 0 && <div><dt>—</dt><dd>0</dd></div>}</dl></AdminInspector>
+  </Fragment>
+
+  <AdminQuickView id="booking-quick-view" titleLabel={t("booking.admin.previewTitle")} closeLabel={t("booking.admin.previewClose")} loadingLabel={t("booking.admin.previewLoading")} errorLabel={t("booking.admin.previewError")} retryLabel={t("booking.admin.previewRetry")} />
 </AdminLayout>
 
+{bookings.length > 0 && <script>
+  type BookingDetail = { orderId:number; orderNumber:string; itemId:number; itemName:string; mode:string; startDate:string; endDate:string|null; slotId:number|null; slotWeekday:number|null; slotStartTime:string|null; occurrencesPerDay:number; serviceAddress:string; note:string; status:string; customerName:string; customerPhone:string };
+  const container = document.querySelector<HTMLElement>("[data-booking-table]"); const rows = Array.from(container?.querySelectorAll<HTMLElement>("[data-row]") ?? []); const count = container?.querySelector("[data-result-count]"); const resultTemplate = container?.dataset["resultTemplate"] ?? ""; const emptyLabel = container?.dataset["noMatch"] ?? "";
+  container?.querySelector<HTMLInputElement>("[data-table-search]")?.addEventListener("input", (event) => { const query = (event.currentTarget as HTMLInputElement).value.trim().toLowerCase(); let visible = 0; for (const row of rows) { const match = row.dataset["search"]?.includes(query) ?? false; row.hidden = !match; if (match) visible += 1; } if (count) count.textContent = visible ? resultTemplate.replace(/\d+/, String(visible)) : emptyLabel; });
+  const locale = document.documentElement.lang === "id" ? "id-ID" : "en-US";
+  const addTextRow = (parent:HTMLElement, label:string, value:string) => { const row = document.createElement("div"); const dt = document.createElement("dt"); dt.textContent = label; const dd = document.createElement("dd"); dd.textContent = value || "—"; row.append(dt, dd); parent.append(row); };
+  const addSection = (parent:HTMLElement, heading:string, content:HTMLElement) => { const section = document.createElement("section"); section.className = "quick-view-section"; const title = document.createElement("h3"); title.textContent = heading; section.append(title, content); parent.append(section); };
+  document.addEventListener("takontuku:quick-view-loaded", (event) => { const detail = (event as CustomEvent<{data:BookingDetail;trigger:HTMLElement;dialog:HTMLDialogElement}>).detail; if (detail.dialog.id !== "booking-quick-view") return; const body = detail.dialog.querySelector<HTMLElement>("[data-quick-view-body]"); const footer = detail.dialog.querySelector<HTMLElement>("[data-quick-view-footer]"); if (!body || !footer) return; const booking = detail.data; body.replaceChildren(); footer.replaceChildren(); const wrapper = document.createElement("div"); wrapper.className = "quick-view-data"; const heading = document.createElement("h3"); heading.textContent = booking.itemName; wrapper.append(heading); const facts = document.createElement("dl"); addTextRow(facts, "Order", `#${booking.orderNumber}`); addTextRow(facts, "Tanggal", new Intl.DateTimeFormat(locale, { dateStyle:"medium" }).format(new Date(booking.startDate))); addTextRow(facts, "Slot", [booking.slotStartTime, booking.endDate && booking.endDate !== booking.startDate ? `sampai ${booking.endDate}` : ""].filter(Boolean).join(" · ") || booking.mode); addTextRow(facts, "Status", booking.status); addSection(wrapper, "Jadwal", facts); const customer = document.createElement("dl"); addTextRow(customer, "Nama", booking.customerName); addTextRow(customer, "Telepon", booking.customerPhone); addTextRow(customer, "Alamat", booking.serviceAddress); addSection(wrapper, "Pelanggan", customer); if (booking.note) { const note = document.createElement("p"); note.className = "quick-view-note"; note.textContent = booking.note; addSection(wrapper, "Catatan", note); } if (detail.trigger.dataset["quickViewOverlap"] === "true") { const warning = document.createElement("p"); warning.className = "booking-warning"; warning.textContent = "Booking ini memiliki bentrok jadwal dengan booking lain."; wrapper.append(warning); } body.append(wrapper); const orderLink = document.createElement("a"); orderLink.className = "admin-button admin-button--primary"; orderLink.href = `/admin/orders#${booking.orderId}`; orderLink.textContent = "Buka pesanan"; const serviceLink = document.createElement("a"); serviceLink.className = "admin-button"; serviceLink.href = `/admin/products/${booking.itemId}/edit`; serviceLink.textContent = "Lihat layanan"; footer.append(orderLink, serviceLink); });
+</script>}
+
 <style>
-  .standalone-empty { display:grid; min-height:calc(100vh - 13rem); place-items:center; align-content:center; padding:3rem; text-align:center; }.empty-symbol { display:grid; width:4.5rem; height:4.5rem; place-items:center; border:1px solid var(--admin-line); border-radius:50%; background:var(--admin-accent-soft); color:var(--admin-accent); }.standalone-empty .eyebrow { margin:1.5rem 0 .45rem; color:var(--tk-color-accent); font-size:.68rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; }.standalone-empty h1 { margin:0; font-family:var(--tk-font-family-display); font-size:clamp(2.7rem,5vw,4.5rem); font-weight:400; letter-spacing:-.045em; }.standalone-empty > p:not(.eyebrow) { max-width:30rem; margin:.7rem 0 1.4rem; color:var(--tk-color-fg-muted); font-size:.8rem; line-height:1.7; }.data-panel { overflow:hidden; }.page-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; }.entity-avatar { background:var(--tk-color-accent); }.row-actions a { display:grid; width:40px; height:40px; place-items:center; border-radius:7px; color:var(--tk-color-fg); text-decoration:none; }.address-cell { max-width:16rem; overflow:hidden; color:var(--tk-color-fg-muted); font-size:.75rem; text-overflow:ellipsis; white-space:nowrap; }.overlap-badge { display:inline-flex; margin-left:.5rem; padding:.2rem .45rem; border-radius:var(--tk-radius-full); background:color-mix(in srgb,var(--tk-color-danger) 12%,transparent); color:var(--tk-color-danger); font-size:.6rem; font-weight:700; text-transform:uppercase; letter-spacing:.04em; }
+  .standalone-empty { display:grid; min-height:calc(100vh - 13rem); place-items:center; align-content:center; padding:3rem; text-align:center; }.empty-symbol { display:grid; width:4.5rem; height:4.5rem; place-items:center; border:1px solid var(--admin-line); border-radius:50%; background:var(--admin-accent-soft); color:var(--admin-accent); }.standalone-empty .eyebrow { margin:1.5rem 0 .45rem; color:var(--tk-color-accent); font-size:.68rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; }.standalone-empty h1 { margin:0; font-family:var(--tk-font-family-display); font-size:clamp(2.7rem,5vw,4.5rem); font-weight:400; letter-spacing:-.045em; }.standalone-empty > p:not(.eyebrow) { max-width:30rem; margin:.7rem 0 1.4rem; color:var(--tk-color-fg-muted); font-size:.8rem; line-height:1.7; }.data-panel { overflow:hidden; }.entity-avatar { background:var(--tk-color-accent); }.row-actions a,.row-actions button { display:grid; width:38px; height:38px; place-items:center; border:0; border-radius:7px; background:transparent; color:var(--tk-color-fg); text-decoration:none; cursor:pointer; }.row-actions a:hover,.row-actions button:hover { background:var(--admin-soft); }.address-cell { max-width:16rem; overflow:hidden; color:var(--tk-color-fg-muted); font-size:.75rem; text-overflow:ellipsis; white-space:nowrap; }.overlap-badge { display:inline-flex; margin-left:.5rem; padding:.2rem .45rem; border-radius:var(--tk-radius-full); background:color-mix(in srgb,var(--tk-color-danger) 12%,transparent); color:var(--tk-color-danger); font-size:.6rem; font-weight:700; text-transform:uppercase; letter-spacing:.04em; }.quick-view-section { display:grid; gap:9px; }.quick-view-section h3 { margin:0; color:var(--tk-color-fg-muted); font-size:10px; font-weight:var(--tk-font-weight-bold); letter-spacing:.08em; text-transform:uppercase; }.quick-view-note { margin:0; color:var(--tk-color-fg-muted); font-size:12px; line-height:1.6; white-space:pre-wrap; }.booking-warning { margin:0; padding:10px; border:1px solid color-mix(in srgb,var(--tk-color-warning) 30%,var(--admin-line)); border-radius:8px; background:color-mix(in srgb,var(--tk-color-warning) 9%,transparent); color:var(--tk-color-warning); font-size:12px; line-height:1.5; }
 </style>

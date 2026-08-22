@@ -36,3 +36,12 @@ declare module "virtual:takontuku/admin-dashboard-widgets" {
   >;
   export default widgets;
 }
+
+declare module "virtual:takontuku/auth-panel-widgets" {
+  const widgets: Array<
+    import("./module").AuthPanelWidget & {
+      component: import("astro/runtime/server/index.js").AstroComponentFactory;
+    }
+  >;
+  export default widgets;
+}

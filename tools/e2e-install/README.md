@@ -10,8 +10,10 @@ that needs one adds it explicitly with the real `takontuku add` command (`shared
 ## Gate 1 — `run.ts`, "tarball install"
 
 Publishes every publishable `@takontuku/*` package to a real registry and installs them into a
-scratch client the way a real client would — `create-takontuku` → `bun install` → `takontuku db
-sync` → `wrangler d1 migrations apply --local` → `astro build` → a `wrangler dev` boot check.
+scratch client the way a real client would — `create-takontuku` → `bun install` → `takontuku
+skills install` → `takontuku db sync` → `wrangler d1 migrations apply --local` → `astro build`
+→ a `wrangler dev` boot check. Gate 1 also verifies the generated `AGENTS.md`, `CLAUDE.md`,
+`README.md`, and both local skill directories.
 
 This exists because `workspace:*` symlinks hide problems that only surface once packages are
 actually installed from tarballs: broken `exports` maps, missing `files` entries, missing

@@ -6,6 +6,7 @@ export {
   type TakontukuBrand,
   type TakontukuIntegration,
   type TakontukuOptions,
+  type TakontukuPaletteColors,
   type TakontukuStorefrontBrand,
   takontuku,
 } from "./integration";

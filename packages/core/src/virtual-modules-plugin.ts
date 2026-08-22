@@ -26,25 +26,21 @@ export function takontukuVirtualModulesPlugin(
     "virtual:takontuku/config": `export default ${JSON.stringify(brand)};`,
     "virtual:takontuku/storefront-home-sections": [
       ...registry.storefrontHomeSections.map(
-        (section, index) =>
-          "import Section" + index + " from " + JSON.stringify(section.entrypoint) + ";",
+        (section, index) => `import Section${index} from ${JSON.stringify(section.entrypoint)};`,
       ),
-      "export default " +
-        JSON.stringify(registry.storefrontHomeSections) +
-        ".map((section, index) => ({ ...section, component: [" +
-        registry.storefrontHomeSections.map((_, index) => "Section" + index).join(", ") +
-        "][index] }));",
+      `export default ${JSON.stringify(registry.storefrontHomeSections)}.map((section, index) => ({ ...section, component: [${registry.storefrontHomeSections.map((_, index) => `Section${index}`).join(", ")}][index] }));`,
     ].join("\n"),
     "virtual:takontuku/admin-dashboard-widgets": [
       ...registry.adminDashboardWidgets.map(
-        (widget, index) =>
-          "import Widget" + index + " from " + JSON.stringify(widget.entrypoint) + ";",
+        (widget, index) => `import Widget${index} from ${JSON.stringify(widget.entrypoint)};`,
       ),
-      "export default " +
-        JSON.stringify(registry.adminDashboardWidgets) +
-        ".map((widget, index) => ({ ...widget, component: [" +
-        registry.adminDashboardWidgets.map((_, index) => "Widget" + index).join(", ") +
-        "][index] }));",
+      `export default ${JSON.stringify(registry.adminDashboardWidgets)}.map((widget, index) => ({ ...widget, component: [${registry.adminDashboardWidgets.map((_, index) => `Widget${index}`).join(", ")}][index] }));`,
+    ].join("\n"),
+    "virtual:takontuku/auth-panel-widgets": [
+      ...registry.authPanelWidgets.map(
+        (widget, index) => `import Widget${index} from ${JSON.stringify(widget.entrypoint)};`,
+      ),
+      `export default ${JSON.stringify(registry.authPanelWidgets)}.map((widget, index) => ({ ...widget, component: [${registry.authPanelWidgets.map((_, index) => `Widget${index}`).join(", ")}][index] }));`,
     ].join("\n"),
     "virtual:takontuku/ambient-scripts": [
       ...registry.ambientScripts.map(

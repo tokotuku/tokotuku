@@ -1,0 +1,36 @@
+{
+  "brand": "Arunika Energi",
+  "mode": "company-profile",
+  "design": {
+    "direction": "calm, credible energy infrastructure with an Indonesian editorial warmth",
+    "palette": {
+      "ink": "deep forest blue-black for primary type and navigation",
+      "accent": "sunlit amber for calls to action and energy cues",
+      "surface": "warm ivory with pale mist-blue panels",
+      "support": "muted sage for operational and sustainability notes",
+      "dark": "midnight blue-black with amber highlights"
+    },
+    "type": "strong compact display headlines paired with quiet, highly legible sans-serif body copy",
+    "imagery": "wide documentary photography of renewable infrastructure, field operations, and people at work; natural light, no text or logos"
+  },
+  "assets": [
+    {
+      "id": "hero",
+      "path": "/images/arunika-hero.png",
+      "role": "landing-page hero",
+      "prompt": "Wide documentary photograph of a solar field and wind turbines at first light in an Indonesian landscape, calm confident atmosphere, generous open sky and clean negative space for website copy, natural warm dawn light, subtle deep blue and amber palette, no text, no logos, no watermark."
+    },
+    {
+      "id": "operations",
+      "path": "/images/arunika-operations.png",
+      "role": "operations section",
+      "prompt": "Editorial documentary photograph of two energy technicians in safety gear inspecting renewable-energy equipment at a clean modern solar and battery facility, candid collaboration, textured industrial detail, soft daylight, restrained forest blue and amber accents, no text, no logos, no watermark."
+    },
+    {
+      "id": "team",
+      "path": "/images/arunika-team.png",
+      "role": "team section",
+      "prompt": "Warm editorial group portrait of a diverse Indonesian energy team standing together at a modern renewable-energy site, approachable and capable, natural late-afternoon light, subtle landscape context, authentic documentary photography, no text, no logos, no watermark."
+    }
+  ]
+}

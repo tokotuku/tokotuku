@@ -4,7 +4,7 @@
 // create-takontuku, and driving/asserting against a booted client.
 
 import { execFileSync } from "node:child_process";
-import { readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -59,6 +59,24 @@ export function installClient(clientDir: string): void {
   sh("bun", ["install", "--registry", REGISTRY, "--force"], clientDir);
 }
 
+export function assertAgentSetup(clientDir: string): void {
+  for (const fileName of ["AGENTS.md", "CLAUDE.md", "README.md"]) {
+    assert(existsSync(path.join(clientDir, fileName)), `scaffold is missing ${fileName}`);
+  }
+
+  const skills = ["takontuku-data", "takontuku-modules", "takontuku-store-builder", "takontuku-ui"];
+  for (const target of [".agents/skills", ".claude/skills"]) {
+    for (const skill of skills) {
+      const skillPath = path.join(clientDir, target, skill, "SKILL.md");
+      assert(existsSync(skillPath), `installed skill is missing ${target}/${skill}/SKILL.md`);
+      assert(
+        readFileSync(skillPath, "utf8").includes(`name: ${skill}`),
+        `${target}/${skill}/SKILL.md has the wrong skill metadata`,
+      );
+    }
+  }
+}
+
 /** Updates an existing scratch client from the registry used by this E2E run. */
 export function updateClient(clientDir: string): void {
   sh("bun", ["update", "--registry", REGISTRY, "--force"], clientDir);
@@ -75,6 +93,7 @@ const PUBLISHABLE_PACKAGES = [
   "packages/auth",
   "packages/catalog",
   "packages/orders",
+  "packages/booking",
   "packages/create-takontuku",
 ];
 
@@ -186,7 +205,15 @@ function publishPackage(dir: string, version: string): void {
 export function publishAll(): string {
   sh(
     "moon",
-    ["run", "core:build", "auth:build", "catalog:build", "orders:build", "create-takontuku:build"],
+    [
+      "run",
+      "core:build",
+      "auth:build",
+      "catalog:build",
+      "orders:build",
+      "booking:build",
+      "create-takontuku:build",
+    ],
     ROOT,
   );
 

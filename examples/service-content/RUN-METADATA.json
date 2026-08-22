@@ -1,0 +1,7 @@
+{
+  "requestedModel": "gpt-5.6-luna",
+  "requestedReasoningEffort": "medium",
+  "effectiveModel": "gpt-5.6-luna",
+  "effectiveReasoningEffort": "medium",
+  "cwd": "/Volumes/external/Works/rivana/tokotuku/examples/service-content"
+}

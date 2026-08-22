@@ -15,3 +15,9 @@ tasks:
     inputs:
       - "src/**/*"
       - "tsconfig.json"
+
+  test:
+    command: "vitest run src/theme.test.ts"
+    inputs:
+      - "src/theme.ts"
+      - "src/theme.test.ts"
