@@ -7,7 +7,7 @@ sidebar:
 
 ## Install
 
-The starter ships its Astro components and Tailwind theme as one local workspace package.
+The starter ships Astro components and the Tailwind theme as separate workspace packages.
 Install the workspace dependencies once:
 
 ```sh
@@ -21,7 +21,7 @@ Import components directly. They render semantic HTML and static Tailwind CSS wi
 ```astro
 ---
 import Button from "@takontuku/ui/Button.astro";
-import "@takontuku/ui/styles.css";
+import "@takontuku/theme/styles.css";
 ---
 
 <Button variant="primary">Save changes</Button>
@@ -31,4 +31,36 @@ import "@takontuku/ui/styles.css";
 
 | Package | Purpose |
 | --- | --- |
-| `@takontuku/ui` | Astro components plus Tailwind theme and global styles |
+| `@takontuku/theme` | Tailwind tokens, fonts, palette API, and light/dark bootstrap |
+| `@takontuku/ui` | Astro component primitives and application surfaces |
+| `@takontuku/charts` | Deferred ECharts/Flint chart component and chart types |
+
+## Build with AI
+
+Projects generated with `create-takontuku` include `AGENTS.md` as the canonical project
+instructions and a small `CLAUDE.md` bridge. The scaffold also installs Takontuku skills for
+Codex, Claude, and Cursor in `.agents/skills/` and `.claude/skills/`:
+
+- `takontuku-store-builder` — turn a business brief into a module, brand, page, data, and
+  validation plan.
+- `takontuku-ui` — use the packaged components, theme tokens, brand configuration, and
+  locale-aware formatters.
+- `takontuku-modules` — add, remove, and safely integrate optional features.
+- `takontuku-data` — handle migrations, seed data, media, and local/deployed secrets.
+
+Start an AI coding task by asking it to read `AGENTS.md`, for example:
+
+```text
+Buat toko online untuk bisnis kopi lokal ini. Mulai dengan rencana, gunakan workflow Takontuku
+yang tersedia, lalu implementasikan dan jalankan typecheck serta lint.
+```
+
+After upgrading `@takontuku/core`, refresh both skill directories:
+
+```sh
+bunx takontuku skills install
+```
+
+To verify the setup, ask the agent to list the active instruction file and explain which
+Takontuku skill applies to the requested change. The agent should identify `AGENTS.md` and
+route store-wide requests through `takontuku-store-builder`.

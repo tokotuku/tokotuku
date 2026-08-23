@@ -2,11 +2,15 @@
 import { env } from "cloudflare:workers";
 import brand from "virtual:takontuku/config";
 import { createTranslator } from "@takontuku/core";
-import AdminLayout from "@takontuku/core/routes/AdminLayout.astro";
+import AdminLayout from "@takontuku/core/layouts/AdminLayout.astro";
+import AdminInspector from "@takontuku/ui/AdminInspector.astro";
+import AdminPageHeader from "@takontuku/ui/AdminPageHeader.astro";
+import Icon from "@takontuku/ui/Icon.astro";
+import InspectorMetric from "@takontuku/ui/InspectorMetric.astro";
+import ProductForm from "../../../components/ProductForm.astro";
 import { catalogMessages, localizeCatalogError } from "../../../messages";
 import { productInputFromForm } from "../../../product-form";
 import { createProduct } from "../../../products";
-import ProductForm from "../../ProductForm.astro";
 
 const t = createTranslator(brand, catalogMessages);
 
@@ -22,9 +26,24 @@ if (Astro.request.method === "POST") {
     error = localizeCatalogError(caught, t);
   }
 }
+
+import "../../../styles/routes/catalog-admin-products-new.css";
 ---
 
 <AdminLayout title={t("catalog.products.newTitle")}>
-  <header class="page-heading"><div><h1>{t("catalog.products.newTitle")}</h1><p>{t("catalog.products.newDescription")}</p></div></header>
+  <AdminPageHeader eyebrow={t("catalog.products.catalogEyebrow")} title={t("catalog.products.newTitle")} description={t("catalog.products.newDescription")}>
+    <Fragment slot="actions"><a class="admin-button" href="/admin/products">{t("catalog.products.form.cancel")}</a></Fragment>
+  </AdminPageHeader>
   <ProductForm error={error} />
+  <Fragment slot="inspector">
+    <AdminInspector title={t("catalog.products.newTitle")} description="Pengaturan ringkas produk baru.">
+      <div class="inspector-metrics">
+        <InspectorMetric label="Status" value="Aktif" tone="positive" />
+        <InspectorMetric label={t("catalog.products.form.price")} value="—" />
+        <InspectorMetric label={t("catalog.products.form.fulfillmentType")} value={t("catalog.products.form.fulfillmentType.physical")} />
+        <InspectorMetric label={t("catalog.products.form.stock")} value="0" />
+      </div>
+      <div class="inspector-actions"><button class="admin-button admin-button--primary" type="submit" form="product-form"><Icon name="check" size={16} /> {t("catalog.products.form.save")}</button></div>
+    </AdminInspector>
+  </Fragment>
 </AdminLayout>

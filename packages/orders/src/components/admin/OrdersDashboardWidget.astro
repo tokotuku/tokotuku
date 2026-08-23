@@ -1,0 +1,36 @@
+---
+import { env } from "cloudflare:workers";
+import { createTranslator } from "@takontuku/core";
+import { brand, money } from "@takontuku/core/brand";
+import DashboardMetric from "@takontuku/ui/DashboardMetric.astro";
+import Icon from "@takontuku/ui/Icon.astro";
+import { orderMessages } from "../../messages";
+import { getOrderDashboardSummary, type OrderStatus } from "../../orders";
+
+const summary = await getOrderDashboardSummary(env.DB);
+const t = createTranslator(brand, orderMessages);
+const orderStatusClass: Record<OrderStatus, string> = {
+  inquiry: "status--info",
+  quoted: "status--info",
+  pending: "status--warning",
+  confirmed: "status--success",
+  in_progress: "status--warning",
+  delivered: "status--success",
+  completed: "status--success",
+  cancelled: "status--danger",
+};
+
+import "./OrdersDashboardWidget.css";
+---
+<section class="orders-widget panel" data-dashboard-widget="orders" aria-labelledby="orders-widget-title">
+  <div class="widget-heading"><div><p class="eyebrow">{t("orders.dashboard.eyebrow")}</p><h2 id="orders-widget-title">{t("orders.dashboard.title")}</h2></div><a href="/admin/orders">{t("orders.dashboard.viewAll")} ↗</a></div>
+  {summary.recentOrders.length === 0 && (
+    <div class="zero-state"><div class="zero-icon"><Icon name="orders" size={23} /></div><h3>{t("orders.dashboard.empty")}</h3><p>{t("orders.dashboard.emptyDescription")}</p></div>
+  )}
+  {summary.recentOrders.length > 0 && (
+    <>
+      <div class="metrics"><DashboardMetric label={t("orders.dashboard.today")} value={money(summary.todaySalesCents / 100)} /><DashboardMetric label={t("orders.dashboard.thirtyDays")} value={money(summary.thirtyDayRevenueCents / 100)} /><DashboardMetric label={t("orders.dashboard.pending")} value={String(summary.pendingCount)} tone={summary.pendingCount ? "warning" : "default"} /></div>
+      <div class="recent-list"><h3>{t("orders.dashboard.recent")}</h3>{summary.recentOrders.map((order) => <a href={"/admin/orders#" + order.id} class="order-row"><span><strong>{order.orderNumber}</strong><small>{order.customerName}</small></span><span><strong>{order.totalCents === null ? "—" : money(order.totalCents / 100)}</strong><small class:list={["status", orderStatusClass[order.status]]}>{order.status}</small></span></a>)}</div>
+    </>
+  )}
+</section>

@@ -12,40 +12,40 @@ apps/
   docs/             Documentation site (Astro + Starlight)
   storybook/        Isolated Astro component development and accessibility checks
 examples/
-  example-bare/     Example: fresh `create-takontuku` install, no data, port 4410
-  example-seeded/   Example: bare install + `takontuku db seed`, port 4420
-  example-styled/   Example: seeded install + a theme override, port 4430
+  compro-*/         Company-profile AI fixture matrix
+  product-*/        Product-commerce AI fixture matrix
+  service-*/        Service-commerce AI fixture matrix
 packages/
   core/             Integration, registry, middleware, admin shell (@takontuku/core, public)
   auth/             Better Auth + roles (@takontuku/auth, public)
-  ui/               The complete Astro component set (@takontuku/ui, public)
+  jarene/           Server-rendered auth-panel quote module (@takontuku/jarene, public)
+  theme/            Tailwind tokens, palette API, fonts, and theme bootstrap (@takontuku/theme, public)
+  ui/               Astro component primitives (@takontuku/ui, public)
+  charts/           Deferred ECharts/Flint chart component (@takontuku/charts, public)
   catalog/          Product catalog + admin + demo seed (@takontuku/catalog, private)
   orders/           Orders lifecycle + checkout + cart (@takontuku/orders, private)
+  booking/          Service scheduling and booking (@takontuku/booking, private)
   create-takontuku/  `bunx create-takontuku` scaffolding CLI
 configs/            Shared TypeScript, tsup, and vitest configuration (@takontuku/config)
 scripts/            Repo maintenance scripts (e.g. commit message validation)
 tools/              Local dev infrastructure (Verdaccio private registry, e2e install gates)
 ```
 
-Every `@takontuku/*` package is consumed by the `apps/*` and `examples/*` clients as a local
-workspace package (`workspace:*`) — nothing here needs Verdaccio or a real npm publish to install
-and run.
+Every `@takontuku/*` package is consumed by the `apps/*` and `examples/*` fixtures as a local
+workspace package. Release `0.2.0` uses breaking subpath exports: theme styles come from
+`@takontuku/theme`, charts from `@takontuku/charts`, and admin lists expose cursor pages.
+The `examples/**` matrix is intentionally frozen as a pre-release fixture and is excluded from
+the 0.2.0 refactor and release gates.
 
-## Examples
+See [`MIGRATION-0.2.md`](MIGRATION-0.2.md) before upgrading an existing application.
 
-Three small client apps under `examples/` exist purely to demonstrate the framework's three core
-claims, each independently runnable (distinct dev ports, so all three can run at once):
+## AI fixture matrix
 
-| App | Demonstrates | Dev port |
-| --- | --- | --- |
-| [`examples/example-bare`](examples/example-bare) | What `bunx create-takontuku` produces on its own — public-only (`auth`+`core`+`ui`), no demo data | 4410 |
-| [`examples/example-seeded`](examples/example-seeded) | `example-bare` plus `catalog`+`orders` added, then seeded with `bun run db:seed` | 4420 |
-| [`examples/example-styled`](examples/example-styled) | Overriding a stock `@takontuku/ui` component from client code (`src/theme/`) | 4430 |
-
-Each app's own README has exact setup commands. `example-styled` adds one file,
-[`src/theme/ProductCard.astro`](examples/example-styled/src/theme/ProductCard.astro), which
-replaces `@takontuku/ui`'s stock product card everywhere it's used — nothing else in the app
-changes.
+The `examples/` directory is a nine-case acceptance matrix for the AI-first scaffold. Each
+fixture is generated in a fresh Luna-medium session and reviewed by a separate Terra-high session.
+The three rows within each business type deliberately share a brand so install-only, content, and
+polished behavior can be compared directly. See [`examples/README.md`](examples/README.md) for
+the prompts, module expectations, checks, scores, and review findings.
 
 ## Modules
 
@@ -79,6 +79,14 @@ bun run build
 bun run lint
 bun run typecheck
 ```
+
+## AI-first client scaffolds
+
+`bunx create-takontuku` generates `AGENTS.md` as the canonical project guide, a small
+`CLAUDE.md` bridge, and a README with AI starter prompts. A normal install also runs
+`takontuku skills install`, which puts the four Takontuku skills into `.agents/skills/` and
+`.claude/skills/` for Codex, Cursor, and Claude. Run that command again after upgrading
+`@takontuku/core`.
 
 ## Conventions
 

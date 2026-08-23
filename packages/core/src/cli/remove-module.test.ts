@@ -26,6 +26,7 @@ function emptyRegistry(overrides: Partial<ResolvedRegistry> = {}): ResolvedRegis
     ambientScripts: [],
     storefrontHomeSections: [],
     adminDashboardWidgets: [],
+    authPanelWidgets: [],
     modules: [],
     ...overrides,
   };

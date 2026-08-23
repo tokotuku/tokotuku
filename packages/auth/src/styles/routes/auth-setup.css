@@ -1,0 +1,26 @@
+.setup-card {
+  width: min(100%, 410px);
+}
+.setup-step {
+  display: inline-flex;
+  margin-bottom: 14px;
+  padding: 6px 9px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--tk-color-accent) 11%, var(--tk-color-bg));
+  color: var(--tk-color-accent);
+  font-size: 10px;
+  font-weight: var(--tk-font-weight-bold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.setup-card .auth-submit {
+  margin-top: 20px;
+}
+.setup-note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 14px 0 0 !important;
+  font-size: 10px !important;
+}

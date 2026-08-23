@@ -4,7 +4,7 @@
 // create-takontuku, and driving/asserting against a booted client.
 
 import { execFileSync } from "node:child_process";
-import { readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -59,22 +59,70 @@ export function installClient(clientDir: string): void {
   sh("bun", ["install", "--registry", REGISTRY, "--force"], clientDir);
 }
 
+/**
+ * A packed install must let Tailwind v4 see utility classes inside the
+ * @takontuku packages themselves. Checking the built CSS catches a missing
+ * `@source` declaration that a workspace symlink can hide.
+ */
+export function assertPackedTailwindUtilities(clientDir: string): void {
+  const distDir = path.join(clientDir, "dist");
+  const cssFiles: string[] = [];
+  const visit = (directory: string): void => {
+    if (!existsSync(directory)) return;
+    for (const entry of readdirSync(directory)) {
+      const filePath = path.join(directory, entry);
+      if (statSync(filePath).isDirectory()) visit(filePath);
+      else if (filePath.endsWith(".css")) cssFiles.push(filePath);
+    }
+  };
+  visit(distDir);
+  const css = cssFiles.map((filePath) => readFileSync(filePath, "utf8")).join("\n");
+  assert(
+    /\.rounded-tk-md(?:[,{])/.test(css),
+    "packed build is missing theme utility rounded-tk-md",
+  );
+  assert(
+    /\.text-foreground(?:[,{])/.test(css),
+    "packed build is missing theme utility text-foreground",
+  );
+}
+
+export function assertAgentSetup(clientDir: string): void {
+  for (const fileName of ["AGENTS.md", "CLAUDE.md", "README.md"]) {
+    assert(existsSync(path.join(clientDir, fileName)), `scaffold is missing ${fileName}`);
+  }
+
+  const skills = ["takontuku-data", "takontuku-modules", "takontuku-store-builder", "takontuku-ui"];
+  for (const target of [".agents/skills", ".claude/skills"]) {
+    for (const skill of skills) {
+      const skillPath = path.join(clientDir, target, skill, "SKILL.md");
+      assert(existsSync(skillPath), `installed skill is missing ${target}/${skill}/SKILL.md`);
+      assert(
+        readFileSync(skillPath, "utf8").includes(`name: ${skill}`),
+        `${target}/${skill}/SKILL.md has the wrong skill metadata`,
+      );
+    }
+  }
+}
+
 /** Updates an existing scratch client from the registry used by this E2E run. */
 export function updateClient(clientDir: string): void {
   sh("bun", ["update", "--registry", REGISTRY, "--force"], clientDir);
 }
 
-// Publish order matters: `bun publish` requires every workspace:*
-// reference (including in devDependencies) to resolve to an already-
-// published version, so each entry here must come after everything it
-// depends on.
+// Keep the publish order dependency-friendly so a real registry can resolve
+// each tarball's internal Takontuku references as soon as it is published.
 const PUBLISHABLE_PACKAGES = [
   "configs",
-  "packages/core",
+  "packages/theme",
   "packages/ui",
+  "packages/charts",
+  "packages/core",
   "packages/auth",
+  "packages/jarene",
   "packages/catalog",
   "packages/orders",
+  "packages/booking",
   "packages/create-takontuku",
 ];
 
@@ -145,9 +193,9 @@ function publishWithRetry(cwd: string, attempts = 3): void {
 }
 
 /**
- * Registries refuse `private: true` and require every workspace:*
- * dependency to resolve to a real version -- neither is true for these
- * packages as checked in. Stamps both in memory, publishes, and restores
+ * Registries refuse `private: true`, and the isolated e2e version must be
+ * used for every internal Takontuku dependency instead of the release range
+ * checked into the workspace. Stamps both in memory, publishes, and restores
  * the file from disk afterward regardless of outcome.
  */
 function publishPackage(dir: string, version: string): void {
@@ -161,7 +209,7 @@ function publishPackage(dir: string, version: string): void {
       const deps = pkg[depField] as Record<string, string> | undefined;
       if (!deps) continue;
       for (const name of Object.keys(deps)) {
-        if (deps[name] === "workspace:*") deps[name] = version;
+        if (name.startsWith("@takontuku/")) deps[name] = version;
       }
     }
     writeJson(pkgPath, pkg);
@@ -186,7 +234,16 @@ function publishPackage(dir: string, version: string): void {
 export function publishAll(): string {
   sh(
     "moon",
-    ["run", "core:build", "auth:build", "catalog:build", "orders:build", "create-takontuku:build"],
+    [
+      "run",
+      "core:build",
+      "auth:build",
+      "catalog:build",
+      "orders:build",
+      "booking:build",
+      "jarene:build",
+      "create-takontuku:build",
+    ],
     ROOT,
   );
 
@@ -213,7 +270,18 @@ export function scaffoldClient(
   version: string | null,
 ): string {
   const clientDir = path.join(scratchParent, clientName);
-  sh("node", [path.join(ROOT, "packages/create-takontuku/dist/bin.js"), clientName], scratchParent);
+  // Both flags are mandatory, for different reasons. `--yes` suppresses the
+  // interactive wizard: these gates inherit this process's stdin, so run from
+  // a terminal they would otherwise sit waiting on a prompt forever.
+  // `--no-install` stops create-takontuku installing and migrating on its own,
+  // which would run before the .npmrc written below exists and so resolve
+  // @takontuku/* from public npm (or fail) instead of this run's registry --
+  // the gates drive those steps themselves, at the pinned e2e version.
+  sh(
+    "node",
+    [path.join(ROOT, "packages/create-takontuku/dist/bin.js"), clientName, "--yes", "--no-install"],
+    scratchParent,
+  );
   const npmrcLines = [`@takontuku:registry=${REGISTRY}`, `registry=${REGISTRY}`];
   if (REGISTRY_AUTH_TOKEN) {
     npmrcLines.push(`//${new URL(REGISTRY).host}/:_authToken=${REGISTRY_AUTH_TOKEN}`);
@@ -331,15 +399,28 @@ export function queryTableNames(clientDir: string): string[] {
 
 export async function waitForServer(url: string, timeoutMs: number): Promise<void> {
   const deadline = Date.now() + timeoutMs;
+  let lastError: unknown;
   while (Date.now() < deadline) {
     try {
-      await fetch(url);
+      await fetchWithTimeout(url, Math.min(1_000, deadline - Date.now()));
       return;
-    } catch {
-      await new Promise((resolve) => setTimeout(resolve, 500));
+    } catch (error) {
+      lastError = error;
+      await new Promise((resolve) => setTimeout(resolve, 250));
     }
   }
-  throw new Error(`Server at ${url} did not respond within ${timeoutMs}ms`);
+  const reason = lastError instanceof Error ? ` (${lastError.message})` : "";
+  throw new Error(`Server at ${url} did not respond within ${timeoutMs}ms${reason}`);
+}
+
+export async function fetchWithTimeout(url: string, timeoutMs: number): Promise<Response> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { signal: controller.signal });
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 export interface AdminCredentials {

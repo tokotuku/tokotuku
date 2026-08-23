@@ -1,4 +1,4 @@
-import "@takontuku/ui/styles.css";
+import "@takontuku/theme/styles.css";
 
 if (typeof document !== "undefined") {
   document.documentElement.dataset.theme = "light";

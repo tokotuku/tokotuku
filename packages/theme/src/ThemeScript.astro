@@ -1,0 +1,18 @@
+<script is:inline>
+  (() => {
+    const storageKey = "takontuku-theme";
+    let saved = null;
+    try {
+      saved = localStorage.getItem(storageKey);
+    } catch {
+      // Private browsing modes can deny storage; system preference still works.
+    }
+    const savedTheme = saved === "light" || saved === "dark" ? saved : null;
+    let theme = savedTheme ?? "light";
+    if (!savedTheme && typeof window.matchMedia === "function" && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      theme = "dark";
+    }
+
+    document.documentElement.dataset.theme = theme;
+  })();
+</script>

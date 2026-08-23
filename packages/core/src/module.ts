@@ -30,6 +30,12 @@ export interface AdminDashboardWidget {
   order?: number;
 }
 
+export interface AuthPanelWidget {
+  id: string;
+  entrypoint: string;
+  order?: number;
+}
+
 export interface ModuleMigration {
   /** Slug identifying this migration within its module, e.g. "init" or "add-fulfillment-type". */
   name: string;
@@ -87,6 +93,8 @@ export interface ModuleDefinition {
   storefrontHomeSections?: StorefrontHomeSection[];
   /** Optional operational widgets rendered by the core admin dashboard. */
   adminDashboardWidgets?: AdminDashboardWidget[];
+  /** Optional widgets rendered in the visual panel shared by auth pages. */
+  authPanelWidgets?: AuthPanelWidget[];
   /**
    * This module's own migrations, in the order they must be applied. `db
    * sync` assigns each a global sequence number the first time it sees it —

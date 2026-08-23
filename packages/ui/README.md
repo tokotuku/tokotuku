@@ -1,9 +1,9 @@
 # Starter application UI
 
-All Astro components and the Tailwind v4 theme for the Takontuku starter live in this single
-workspace package.
+The Astro component primitives and application surfaces for the Takontuku starter live in this
+package. Theme tokens and chart runtime are opt-in sibling packages.
 
-Import `@takontuku/ui/styles.css` once in the application layout. It provides Tailwind,
+Import `@takontuku/theme/styles.css` once in the application layout. It provides Tailwind,
 semantic theme utilities, and light/dark color modes with OS accessibility support.
 
 ## Included surfaces
@@ -20,8 +20,8 @@ Components are exported individually so an application only imports the surfaces
 
 ```astro
 ---
-import Chart from "@takontuku/ui/Chart.astro";
-import type { ChartInput } from "@takontuku/ui/chart";
+import Chart from "@takontuku/charts/Chart.astro";
+import type { ChartInput } from "@takontuku/charts/types";
 
 const input: ChartInput = {
   data: { values: [{ product: "Widget", revenue: 1200 }] },
@@ -40,6 +40,6 @@ The chart component follows the active Takontuku theme, respects reduced-motion 
 enables ECharts ARIA decals, and renders a collapsible data table as an accessible fallback.
 Selections bubble as a `chart-select` custom event from the chart root.
 
-The client runtime registers bar, line, pie, scatter, and heatmap series. Add another ECharts
-series or component in `src/components/charts/client.ts` only when a product screen needs it, preserving
-the modular bundle.
+The client runtime registers bar, line, pie, scatter, and heatmap series. It is loaded only when a
+chart is within 200px of the viewport. Add another ECharts series or component in
+`@takontuku/charts` only when a product screen needs it, preserving the deferred bundle.

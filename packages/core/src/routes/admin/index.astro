@@ -1,40 +1,139 @@
 ---
 /// <reference path="../../virtual.d.ts" />
 import widgets from "virtual:takontuku/admin-dashboard-widgets";
-import StorefrontEmptyCollection from "@takontuku/ui/StorefrontEmptyCollection.astro";
+import adminNav from "virtual:takontuku/admin-nav";
+import registry from "virtual:takontuku/registry";
+import AdminDashboardArtwork from "@takontuku/ui/AdminDashboardArtwork.astro";
+import AdminInspector from "@takontuku/ui/AdminInspector.astro";
+import Icon from "@takontuku/ui/Icon.astro";
+import InspectorMetric from "@takontuku/ui/InspectorMetric.astro";
 import { brand } from "../../brand";
+import {
+  calculateDashboardReadiness,
+  type DashboardReadinessStepId,
+} from "../../dashboard-readiness";
+import AdminLayout from "../../layouts/AdminLayout.astro";
 import { coreMessages, createTranslator } from "../../messages";
-import AdminLayout from "../AdminLayout.astro";
 
 const { user } = Astro.locals;
 if (!user) throw new Error("Unreachable: middleware guards /admin/*.");
+
 const t = createTranslator(brand, coreMessages);
+const locale = brand.locale.toLowerCase().startsWith("id") ? "id" : "en";
 const displayName =
   user.name?.split(" ")[0] || user.email.split("@")[0] || t("admin.nav.defaultUser");
-const locale = brand.locale.toLowerCase().startsWith("id") ? "id" : "en";
 const summaryWidgets = widgets.filter((widget) => widget.area === "summary");
 const mainWidgets = widgets.filter((widget) => widget.area === "main");
 const asideWidgets = widgets.filter((widget) => widget.area === "aside");
+const moduleLinks = adminNav.filter((item) => item.href !== "/admin");
+const installedModules = registry.moduleNames.filter((name) => name !== "core");
+const formatModuleName = (name: string) =>
+  name.replace(/[-_]+/g, " ").replace(/\b\w/g, (character) => character.toUpperCase());
+
+// The last main contribution is the primary operational surface. Earlier
+// contributions stay in the supporting column, so a future widget such as
+// Booking naturally stacks without core importing or naming optional modules.
+const primaryWidgets = mainWidgets.length > 1 ? mainWidgets.slice(-1) : mainWidgets;
+const supportingWidgets = mainWidgets.length > 1 ? mainWidgets.slice(0, -1) : [];
+const readiness = calculateDashboardReadiness({
+  hasAuthenticatedAdmin: Boolean(user),
+  brandName: brand.name,
+  hasLogo: typeof brand.logo?.src === "string" && Boolean(brand.logo.src.trim()),
+  moduleNames: installedModules,
+});
+const readinessLabels: Record<DashboardReadinessStepId, string> = {
+  admin: t("admin.dashboard.readinessAdmin"),
+  brand: t("admin.dashboard.readinessBrand"),
+  logo: t("admin.dashboard.readinessLogo"),
+  catalog: t("admin.dashboard.readinessCatalog"),
+  orders: t("admin.dashboard.readinessOrders"),
+};
+const nextSteps = [
+  ...readiness.steps.filter((step) => !step.complete),
+  ...readiness.steps.filter((step) => step.complete).reverse(),
+].slice(0, 3);
+const artwork = brand.admin?.dashboardArtwork ?? "energy";
+
+import "../../styles/routes/core-admin-dashboard.css";
 ---
 
 <AdminLayout title={t("admin.dashboard.title", { brand: brand.name })}>
-  <header class="dashboard-heading">
-    <div><p class="eyebrow">{brand.name}</p><h1>{t("admin.dashboard.greeting", { name: displayName })}</h1><p>{locale === "id" ? "Ringkasan operasional toko, berdasarkan data yang benar-benar terjadi." : "A clear operational view of what is happening in your store."}</p></div>
-    <div class="page-actions"><a class="admin-button admin-button--quiet" href="/">{locale === "id" ? "Lihat toko" : "View store"} ↗</a></div>
-  </header>
-  {widgets.length > 0 ? (
-    <div class="dashboard-layout">
-      {summaryWidgets.length > 0 && <div class="dashboard-widgets dashboard-widgets--summary" data-dashboard-area="summary">{summaryWidgets.map(({ component: Widget }) => <Widget />)}</div>}
-      {mainWidgets.length > 0 && <div class="dashboard-widgets dashboard-widgets--main" data-dashboard-area="main">{mainWidgets.map(({ component: Widget }) => <Widget />)}</div>}
-      {asideWidgets.length > 0 && <aside class="dashboard-widgets dashboard-widgets--aside" data-dashboard-area="aside">{asideWidgets.map(({ component: Widget }) => <Widget />)}</aside>}
-    </div>
-  ) : (
-    <section class="empty-dashboard panel"><StorefrontEmptyCollection eyebrow={locale === "id" ? "Workspace siap" : "Workspace ready"} title={locale === "id" ? "Tambahkan modul untuk mulai bekerja." : "Add a module to start working."} description={locale === "id" ? "Takontuku akan menampilkan area operasional di sini saat Catalog atau Orders dipasang." : "Takontuku will place operational workspaces here when Catalog or Orders is installed."} /></section>
-  )}
-</AdminLayout>
+  {widgets.length > 0 && (
+    <>
+      <header class="dashboard-populated-intro">
+        <div class="dashboard-populated-copy">
+          <p class="eyebrow">{brand.name}</p>
+          <h1>{t("admin.dashboard.greeting", { name: displayName })}</h1>
+          <p>{t("admin.dashboard.description")}</p>
+        </div>
+        <AdminDashboardArtwork artwork={artwork} class="dashboard-populated-art" />
+      </header>
 
-<style>
-  .dashboard-heading { display:flex; align-items:flex-end; justify-content:space-between; gap:1.5rem; margin-bottom:2rem; }.eyebrow { margin:0 0 .5rem; color:var(--tk-color-accent); font-size:.68rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; }.dashboard-heading h1 { margin:0; font-family:var(--tk-font-family-display); font-size:clamp(2.5rem,4.2vw,4.3rem); font-weight:400; letter-spacing:-.045em; line-height:.95; }.dashboard-heading p:last-child { max-width:38rem; margin:.7rem 0 0; color:var(--tk-color-fg-muted); font-size:.8rem; }.page-actions { display:flex; gap:.5rem; }.admin-button { display:inline-flex; min-height:2.75rem; align-items:center; padding-inline:1rem; border-radius:var(--tk-radius-sm); font-size:.75rem; font-weight:700; text-decoration:none; }.admin-button--quiet { border:1px solid var(--admin-line); background:var(--admin-surface); }.dashboard-layout { display:grid; gap:1rem; }.dashboard-widgets { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; }.dashboard-widgets--summary,.dashboard-widgets--aside { grid-template-columns:1fr; }.dashboard-widgets--aside { align-content:start; }.dashboard-widgets :global([data-dashboard-widget="orders"]) { grid-column:span 2; }.panel { border:1px solid var(--admin-line); border-radius:var(--tk-radius-md); background:var(--admin-surface); }.empty-dashboard { overflow:hidden; }.empty-dashboard :global(.empty-collection) { min-height:28rem; }
-  @media (min-width:1000px) { .dashboard-layout:has(.dashboard-widgets--aside) { grid-template-columns:minmax(0,1fr) 20rem; align-items:start; }.dashboard-layout:has(.dashboard-widgets--aside) .dashboard-widgets--summary,.dashboard-layout:has(.dashboard-widgets--aside) .dashboard-widgets--main { grid-column:1; }.dashboard-layout:has(.dashboard-widgets--aside) .dashboard-widgets--aside { grid-column:2; grid-row:1 / span 2; } }
-  @media (max-width:800px) { .dashboard-heading { align-items:flex-start; flex-direction:column; }.dashboard-widgets { grid-template-columns:1fr; }.dashboard-widgets :global([data-dashboard-widget="orders"]) { grid-column:auto; } }
-</style>
+      <section class="dashboard-summary dashboard-summary--compact" aria-label={t("admin.dashboard.activeModules")}>
+        <article class="dashboard-summary-card dashboard-summary-card--modules">
+          <span class="dashboard-summary-icon" aria-hidden="true"><Icon name="dashboard" size={20} /></span>
+          <div>
+            <p>{t("admin.dashboard.activeModules")}</p>
+            <strong>{installedModules.length}</strong>
+            <div class="dashboard-module-chips">
+              {installedModules.map((moduleName) => <span>{formatModuleName(moduleName)}</span>)}
+            </div>
+          </div>
+        </article>
+      </section>
+
+      {summaryWidgets.length > 0 && <div class="dashboard-widgets dashboard-widgets--summary" data-dashboard-area="summary">{summaryWidgets.map(({ component: Widget }) => <Widget />)}</div>}
+
+      <div class:list={[
+        "dashboard-operational-grid",
+        { "dashboard-operational-grid--single": mainWidgets.length === 0 || supportingWidgets.length === 0 },
+      ]} data-dashboard-area="main" data-dashboard-layout="operational-split">
+        {mainWidgets.length > 0 && <section class="dashboard-primary-column" data-dashboard-column="primary">
+          {primaryWidgets.map(({ component: Widget }) => <Widget />)}
+        </section>}
+        {supportingWidgets.length > 0 && (
+          <aside class="dashboard-supporting-column" data-dashboard-column="supporting">
+            {supportingWidgets.map(({ component: Widget }) => <Widget />)}
+          </aside>
+        )}
+      </div>
+    </>
+  )}
+  {widgets.length === 0 && (
+    <div class="dashboard-empty-state">
+      <section class="dashboard-empty-hero" aria-labelledby="dashboard-empty-title">
+        <div class="dashboard-empty-copy">
+          <header class="dashboard-empty-welcome">
+            <p class="eyebrow">{t("admin.dashboard.welcomeEyebrow")}</p>
+            <h1 id="dashboard-empty-title">{t("admin.dashboard.greeting", { name: displayName })}</h1>
+            <p>{t("admin.dashboard.description")}</p>
+          </header>
+          <div class="dashboard-empty-start">
+            <h2>{t("admin.dashboard.workspaceStartTitle")}</h2>
+            <p>{t("admin.dashboard.workspaceStartDescription")}</p>
+            <div class="dashboard-installed-modules"><span>{t("admin.dashboard.installedModules")}</span><div>{installedModules.map((moduleName) => <b>{formatModuleName(moduleName)}</b>)}</div></div>
+          </div>
+        </div>
+        <AdminDashboardArtwork artwork={artwork} class="dashboard-empty-art" />
+      </section>
+
+      <section class="dashboard-next-steps panel" aria-labelledby="dashboard-next-steps-empty-title">
+        <div class="panel-heading"><div><p class="eyebrow">{t("admin.dashboard.setup")}</p><h2 id="dashboard-next-steps-empty-title">{t("admin.dashboard.nextSteps")}</h2></div></div>
+        <ol class="dashboard-readiness-list dashboard-readiness-list--horizontal">
+          {nextSteps.map((step) => <li class:list={{ "is-complete": step.complete }} data-readiness-step={step.id}><span class="readiness-check" aria-hidden="true"><Icon name="check" size={13} /></span><span>{readinessLabels[step.id]}</span></li>)}
+        </ol>
+        {moduleLinks.length > 0 ? <div class="dashboard-module-links">{moduleLinks.map((item) => <a href={item.href}><span>{item.labelByLocale?.[locale] ?? item.label}</span><span aria-hidden="true">↗</span></a>)}</div> : <p class="dashboard-empty-hint">{t("admin.dashboard.addModuleHint")}</p>}
+      </section>
+    </div>
+  )}
+
+  <Fragment slot="inspector">
+    <AdminInspector title="Workspace" description={t("admin.dashboard.inspectorDescription")}>
+      <div class="inspector-metrics"><InspectorMetric label={t("admin.dashboard.installedModules")} value={String(installedModules.length)} /><InspectorMetric label={t("admin.dashboard.locale")} value={locale.toUpperCase()} /><InspectorMetric label={t("admin.dashboard.role")} value={user.role ?? "—"} /></div>
+    </AdminInspector>
+    {asideWidgets.map(({ component: Widget }) => <Widget />)}
+    <AdminInspector title={t("admin.dashboard.identity")}>
+      <dl class="inspector-list"><div><dt>{t("admin.dashboard.currency")}</dt><dd>{brand.currency}</dd></div><div><dt>{t("admin.dashboard.timeZone")}</dt><dd>{brand.timeZone}</dd></div></dl>
+    </AdminInspector>
+  </Fragment>
+</AdminLayout>

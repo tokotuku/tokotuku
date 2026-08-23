@@ -3,7 +3,7 @@ import { env } from "cloudflare:workers";
 import registry from "virtual:takontuku/registry";
 import { createTranslator, mediaUrl } from "@takontuku/core";
 import { brand, money } from "@takontuku/core/brand";
-import Layout from "@takontuku/ui/Layout.astro";
+import Layout from "@takontuku/ui/DocumentLayout.astro";
 import Pagination from "@takontuku/ui/Pagination.astro";
 import ProductCard from "@takontuku/ui/ProductCard.astro";
 import StorefrontEmptyCollection from "@takontuku/ui/StorefrontEmptyCollection.astro";
@@ -18,12 +18,13 @@ const category = Astro.url.searchParams.get("category") || undefined;
 const search = Astro.url.searchParams.get("q") || undefined;
 const page = Math.max(1, Math.trunc(Number(Astro.url.searchParams.get("page"))) || 1);
 const PAGE_SIZE = 12;
-const [products, totalCount, catalogCount, categories] = await Promise.all([
-  listProducts(env.DB, { category, search, limit: PAGE_SIZE, offset: (page - 1) * PAGE_SIZE }),
+const [productPage, totalCount, catalogCount, categories] = await Promise.all([
+  listProducts(env.DB, { category, search, pageSize: PAGE_SIZE, offset: (page - 1) * PAGE_SIZE }),
   countProducts(env.DB, { category, search }),
   countProducts(env.DB),
   listCategories(env.DB),
 ]);
+const products = productPage.items;
 const emptyCatalog = catalogCount === 0;
 const noMatch = !emptyCatalog && totalCount === 0;
 const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
@@ -32,7 +33,7 @@ const categoryHref = (target?: string) => {
   const params = new URLSearchParams();
   if (target) params.set("category", target);
   if (search) params.set("q", search);
-  return params.toString() ? "/products?" + params.toString() : "/products";
+  return params.toString() ? `/products?${params.toString()}` : "/products";
 };
 const tabItems = [
   { label: t("catalog.products.all"), href: categoryHref(), active: !category },
@@ -45,30 +46,28 @@ const tabItems = [
 const paginationParams = new URLSearchParams();
 if (category) paginationParams.set("category", category);
 if (search) paginationParams.set("q", search);
-const paginationBase =
-  "/products?" + paginationParams.toString() + (paginationParams.toString() ? "&" : "") + "page=";
+const paginationBase = `/products?${paginationParams.toString()}${paginationParams.toString() ? "&" : ""}page=`;
+
+import "../../styles/routes/catalog-products.css";
 ---
 
 <Layout title={t("catalog.products.title") + " — " + brand.name} description={t("catalog.storefront.description")} siteName={brand.name} lang={locale}>
   <StoreHeader current="products" brand={brand} showShop={true} showCart={hasOrders} announcement={brand.storefront?.announcement ?? (locale === "id" ? "Objek untuk ritual sehari-hari." : "Objects for everyday rituals.")} labels={{ shop: locale === "id" ? "Toko" : "Shop", home: locale === "id" ? "Beranda" : "Home", search: t("catalog.products.search"), cart: locale === "id" ? "Keranjang" : "Cart" }} />
-  {emptyCatalog ? (
+  {emptyCatalog && (
     <main data-catalog-empty="true"><StorefrontEmptyCollection eyebrow={t("catalog.storefront.eyebrow")} title={t("catalog.storefront.emptyTitle")} description={Astro.locals.canAccessBackoffice ? t("catalog.storefront.emptyStaffDescription") : t("catalog.storefront.emptyDescription")} actionHref={Astro.locals.canAccessBackoffice ? "/admin/products/new" : undefined} actionLabel={Astro.locals.canAccessBackoffice ? t("catalog.storefront.addFirst") : undefined} /></main>
-  ) : (
+  )}
+  {!emptyCatalog && (
     <main data-catalog-listing="true">
       <header class="listing-heading"><div><p class="eyebrow">{t("catalog.storefront.eyebrow")}</p><h1>{t("catalog.storefront.title")}</h1><p>{t("catalog.products.description", { count: catalogCount, categories: categories.length })}</p></div></header>
       <Tabs items={tabItems} label={t("catalog.products.categoryFilter")} />
       <form method="get" class="search-form"><label for="catalog-search">{t("catalog.products.search")}</label><div><input id="catalog-search" type="search" name="q" value={search ?? ""} placeholder={t("catalog.products.searchPlaceholder")} />{category && <input type="hidden" name="category" value={category} />}<button type="submit">{t("catalog.products.searchSubmit")}</button></div></form>
-      {noMatch ? (
+      {noMatch && (
         <section class="no-match" data-catalog-no-match><p class="eyebrow">{t("catalog.products.noSearchResult")}</p><h2>{t("catalog.products.noMatch")}</h2><p>{t("catalog.products.noMatchDescription")}</p><a href="/products">{t("catalog.products.reset")} ↗</a></section>
-      ) : (
-        <div class="product-grid">{products.map((product) => <ProductCard id={product.id} name={product.name} description={product.description} price={money(product.priceCents / 100)} priceCents={product.priceCents} imageUrl={mediaUrl(product.imageKey)} stock={product.stock} showAddToCart={hasOrders} category={product.category} labels={{ view: t("catalog.products.view"), add: t("catalog.products.addToCart"), soldOut: t("catalog.products.status.outOfStock"), lowStock: t("catalog.products.fewLeft") }} />)}</div>
+      )}
+      {!noMatch && (
+        <div class="product-grid">{products.map((product) => { const isPhysical = product.fulfillmentType === "physical"; return <ProductCard id={product.id} name={product.name} description={product.description} price={money(product.priceCents / 100)} priceCents={product.priceCents} imageUrl={mediaUrl(product.imageKey)} stock={product.stock} showStock={isPhysical} showAddToCart={hasOrders && isPhysical} category={product.category} labels={{ view: t("catalog.products.view"), add: t("catalog.products.addToCart"), soldOut: t("catalog.products.status.outOfStock"), lowStock: t("catalog.products.fewLeft") }} />; })}</div>
       )}
       {totalPages > 1 && <Pagination page={page} totalPages={totalPages} baseUrl={paginationBase} />}
     </main>
   )}
 </Layout>
-
-<style>
-  main { width:min(100% - 2.5rem,78rem); margin:auto; }.listing-heading { padding:4.5rem 0 2rem; }.eyebrow { margin:0 0 .5rem; color:var(--tk-color-accent); font-size:.68rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; }.listing-heading h1 { max-width:14ch; margin:0; font-family:var(--tk-font-family-display); font-size:clamp(2.8rem,6vw,5.4rem); font-weight:400; letter-spacing:-.045em; line-height:.93; }.listing-heading > div > p:last-child { margin:.8rem 0 0; color:var(--tk-color-fg-muted); font-size:.8rem; }.search-form { display:grid; gap:.45rem; max-width:34rem; margin:1.6rem 0 2rem; }.search-form label { color:var(--tk-color-fg-muted); font-size:.68rem; }.search-form div { display:flex; gap:.5rem; }.search-form input { min-width:0; flex:1; min-height:2.8rem; padding:.65rem .8rem; border:1px solid var(--tk-color-border); border-radius:var(--tk-radius-sm); background:var(--tk-color-surface); color:var(--tk-color-fg); }.search-form button { min-width:5rem; min-height:2.8rem; border:0; border-radius:var(--tk-radius-sm); background:var(--tk-color-accent); color:var(--tk-color-accent-fg); font-size:.75rem; font-weight:700; cursor:pointer; }.product-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1rem; padding-bottom:4rem; }.no-match { display:grid; min-height:18rem; place-items:center; align-content:center; padding:3rem 1.5rem 5rem; border-block:1px solid var(--tk-color-border); text-align:center; }.no-match h2 { margin:.45rem 0; font-family:var(--tk-font-family-display); font-size:2.5rem; font-weight:400; }.no-match p:not(.eyebrow) { margin:0; color:var(--tk-color-fg-muted); }.no-match a { display:inline-flex; margin-top:1.2rem; color:var(--tk-color-accent); font-size:.8rem; font-weight:700; text-decoration:none; } main :global(nav.pagination) { margin:0 0 4rem; }
-  @media (max-width:900px) { .product-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } } @media (max-width:560px) { main { width:min(100% - 1.5rem,78rem); }.listing-heading { padding-top:3rem; }.product-grid { grid-template-columns:1fr; } }
-</style>

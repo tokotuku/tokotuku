@@ -1,0 +1,31 @@
+---
+/// <reference types="@takontuku/core/virtual.d.ts" />
+import brand from "virtual:takontuku/config";
+import { pickJareneQuote } from "../quotes";
+
+const quote = pickJareneQuote();
+const locale = brand.locale.toLowerCase().startsWith("id") ? "id" : "en";
+const discipline = quote.discipline[locale];
+const text = locale === "id" ? quote.translated : quote.original;
+
+import "./JareneAuthQuote.css";
+---
+
+<section class="jarene-quote" aria-label={locale === "id" ? "Kutipan" : "Quote"}>
+  <blockquote cite={quote.source.url}>{text}</blockquote>
+  <footer>
+    <div>
+      <cite>{quote.author}</cite>
+      <span>{discipline}</span>
+    </div>
+    <a href={quote.source.url} target="_blank" rel="noreferrer" aria-label={`${quote.source.title}, ${quote.source.detail}`}>
+      <span class="jarene-quote__source">
+        <strong>{quote.source.title}</strong>
+        <small>{quote.source.detail}</small>
+      </span>
+      <span class="jarene-quote__external" aria-hidden="true">↗</span>
+    </a>
+  </footer>
+</section>
+
+

@@ -1,0 +1,68 @@
+---
+import type { ChartInput } from "./types.js";
+
+interface Props {
+  input: ChartInput;
+  title: string;
+  description?: string;
+  height?: number;
+  showTable?: boolean;
+}
+
+const { input, title, description, height = 360, showTable = true } = Astro.props;
+const rows = (
+  "values" in input.data && Array.isArray(input.data.values) ? input.data.values : []
+) as Record<string, unknown>[];
+const columns = rows.length > 0 ? Object.keys(rows[0] as object) : [];
+const serialized = JSON.stringify({ input, title, description }).replaceAll("<", "\\u003c");
+
+import "./Chart.css";
+---
+
+<figure class="tk-chart" data-chart-root data-chart-state="loading" style={`--chart-height:${height}px`}>
+  <figcaption>
+    <div>
+      <h2>{title}</h2>
+      {description && <p>{description}</p>}
+    </div>
+    <slot name="actions" />
+  </figcaption>
+
+  <div class="chart-stage">
+    <div data-chart-canvas role="img" aria-label={description ?? title}></div>
+    <p class="loading" data-chart-loading>Rendering visualization…</p>
+    <p class="error" data-chart-error>Unable to render chart.</p>
+  </div>
+
+  {
+    showTable && rows.length > 0 && (
+      <details>
+        <summary>View accessible data table</summary>
+        <div class="table-frame">
+          <table>
+            <caption>{title}</caption>
+            <thead>
+              <tr>{columns.map((column) => <th>{column}</th>)}</tr>
+            </thead>
+            <tbody>
+              {rows.map((row) => (
+                <tr>{columns.map((column) => <td>{String(row[column] ?? "—")}</td>)}</tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </details>
+    )
+  }
+
+  <script is:inline type="application/json" data-chart-config set:html={serialized}></script>
+</figure>
+
+<script>
+  import { disposeCharts, mountCharts } from "./client.js";
+
+  mountCharts();
+  document.addEventListener("astro:page-load", () => mountCharts());
+  document.addEventListener("astro:before-swap", disposeCharts);
+</script>
+

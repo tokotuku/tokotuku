@@ -11,10 +11,9 @@ import {
   scanImports,
 } from "./astro-config";
 
-// A verbatim copy of examples/example-styled/astro.config.mjs -- the
-// hardest real case: the load-bearing 3-line comment above defineConfig,
-// a comment inside brand{}, a commented-out auth{} line, and a server{}
-// block with its own 2-line comment.
+// A representative client config -- including the load-bearing comment above
+// defineConfig, a comment inside brand{}, a commented-out auth{} line, and a
+// server{} block with its own comment.
 const FIXTURE = `// @ts-check
 import cloudflare from "@astrojs/cloudflare";
 import tailwindcss from "@tailwindcss/vite";
@@ -41,11 +40,10 @@ export default defineConfig({
       modules: [auth(), catalog(), orders()],
     }),
   ],
-  // @takontuku/ui's Layout.astro imports its own CSS, which needs this plugin.
+  // @takontuku/theme/styles.css is imported by DocumentLayout.astro and needs this plugin.
   vite: { plugins: [tailwindcss()] },
   output: "server",
-  // Distinct from apps/example-bare and apps/example-seeded so all three
-  // can run \`astro dev\` at the same time without a port clash.
+  // A dedicated port keeps this neutral inline fixture isolated during tests.
   server: {
     host: "127.0.0.1",
     port: 4430,

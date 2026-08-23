@@ -1,0 +1,213 @@
+main {
+  width: min(100% - calc(var(--tk-spacing-4) * 2), 68rem);
+  margin-inline: auto;
+  padding-block: var(--tk-spacing-10) var(--tk-spacing-12);
+}
+.eyebrow {
+  margin: 0;
+  color: var(--tk-color-accent);
+  font-size: var(--tk-font-size-xs);
+  font-weight: var(--tk-font-weight-bold);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+h1 {
+  margin: var(--tk-spacing-2) 0 var(--tk-spacing-8);
+  font-size: clamp(2.5rem, 6vw, 5rem);
+  letter-spacing: -0.05em;
+}
+.checkout-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 22rem;
+  gap: var(--tk-spacing-8);
+  align-items: start;
+}
+.checkout-grid section,
+.checkout-grid aside,
+.success-card {
+  padding: var(--tk-spacing-6);
+  border: 1px solid var(--tk-color-border);
+  border-radius: var(--tk-radius-xl);
+}
+section h2:first-child,
+aside h2 {
+  margin-top: 0;
+}
+section h2:not(:first-child) {
+  margin-top: var(--tk-spacing-7);
+}
+label {
+  display: grid;
+  gap: var(--tk-spacing-2);
+  color: var(--tk-color-fg-muted);
+  font-size: var(--tk-font-size-sm);
+}
+input,
+textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: var(--tk-spacing-3);
+  border: 1px solid var(--tk-color-border);
+  border-radius: var(--tk-radius-md);
+  background: var(--tk-color-bg);
+  color: var(--tk-color-fg);
+  font: inherit;
+}
+.fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--tk-spacing-4);
+}
+.wide {
+  grid-column: 1 / -1;
+}
+aside {
+  background: var(--tk-color-bg-subtle);
+}
+.order-lines {
+  display: grid;
+  gap: 10px;
+}
+.order-lines .order-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: var(--tk-font-size-sm);
+}
+.total {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 18px;
+  padding: 16px 0;
+  border-block: 1px solid var(--tk-color-border);
+}
+.payment,
+.cash-note {
+  display: grid;
+  gap: 5px;
+  margin: 16px 0;
+  padding: 13px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--tk-color-accent) 9%, var(--tk-color-bg));
+}
+.payment span,
+.cash-note span {
+  color: var(--tk-color-fg-muted);
+  font-size: var(--tk-font-size-xs);
+  line-height: 1.5;
+}
+button,
+.primary-link {
+  display: flex;
+  width: 100%;
+  min-height: 2.9rem;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: var(--tk-radius-md);
+  background: var(--tk-color-accent);
+  color: var(--tk-color-accent-fg);
+  font: inherit;
+  font-weight: var(--tk-font-weight-semibold);
+  text-decoration: none;
+  cursor: pointer;
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+aside > a {
+  display: block;
+  margin-top: var(--tk-spacing-4);
+  color: var(--tk-color-accent);
+  font-size: var(--tk-font-size-sm);
+}
+.checkout-error {
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--tk-color-danger) 9%, var(--tk-color-bg));
+  color: var(--tk-color-danger);
+}
+.success-card {
+  max-width: 38rem;
+  margin: auto;
+  text-align: center;
+}
+.success-card h1 {
+  margin-bottom: 20px;
+}
+.success-icon {
+  display: grid;
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 20px;
+  place-items: center;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--tk-color-success) 14%, var(--tk-color-bg));
+  color: var(--tk-color-success);
+  font-size: 28px;
+}
+.success-card .cash-note {
+  text-align: left;
+  margin: 25px 0;
+}
+.primary-link {
+  width: fit-content;
+  margin: auto;
+  padding-inline: 22px;
+}
+@media (max-width: 48rem) {
+  .checkout-grid,
+  .fields {
+    grid-template-columns: 1fr;
+  }
+  .wide {
+    grid-column: auto;
+  }
+}
+.payment-methods {
+  display: grid;
+  gap: var(--tk-spacing-2);
+  margin: 16px 0;
+  padding: 0;
+  border: 0;
+}
+.payment-methods legend {
+  padding: 0 0 8px;
+  color: var(--tk-color-fg);
+  font-size: var(--tk-font-size-sm);
+  font-weight: var(--tk-font-weight-semibold);
+}
+.payment-option {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--tk-color-border);
+  border-radius: var(--tk-radius-md);
+  font-size: var(--tk-font-size-sm);
+  color: var(--tk-color-fg);
+  cursor: pointer;
+}
+.payment-option input {
+  width: auto;
+  min-height: auto;
+}
+.payment-option span {
+  color: var(--tk-color-fg-muted);
+  font-size: var(--tk-font-size-xs);
+}
+.proof-form {
+  display: grid;
+  gap: 10px;
+  margin-top: 8px;
+}
+.proof-form input[type="file"] {
+  padding: 8px;
+}
+.proof-form button {
+  min-height: 2.5rem;
+}

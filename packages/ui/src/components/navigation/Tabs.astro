@@ -12,6 +12,8 @@ interface Props {
 }
 
 const { items, label = "Page sections" } = Astro.props;
+
+import "./Tabs.css";
 ---
 
 <nav class="tabs" aria-label={label}>
@@ -24,42 +26,3 @@ const { items, label = "Page sections" } = Astro.props;
     ))
   }
 </nav>
-
-<style>
-  .tabs {
-    display: flex;
-    gap: var(--tk-spacing-1);
-    overflow-x: auto;
-    border-bottom: 1px solid var(--tk-color-border);
-  }
-
-  a {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--tk-spacing-2);
-    padding: var(--tk-spacing-3) var(--tk-spacing-4);
-    border-bottom: 2px solid transparent;
-    color: var(--tk-color-fg-muted);
-    font-size: var(--tk-font-size-sm);
-    font-weight: var(--tk-font-weight-medium);
-    text-decoration: none;
-    white-space: nowrap;
-  }
-
-  a:hover {
-    color: var(--tk-color-fg);
-  }
-
-  a[aria-current="page"] {
-    border-bottom-color: var(--tk-color-accent);
-    color: var(--tk-color-accent);
-  }
-
-  span {
-    padding: 0 var(--tk-spacing-2);
-    border-radius: var(--tk-radius-full);
-    background: var(--tk-color-bg-subtle);
-    color: var(--tk-color-fg-muted);
-    font-size: var(--tk-font-size-xs);
-  }
-</style>

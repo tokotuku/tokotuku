@@ -1,0 +1,92 @@
+.error-page {
+  position: relative;
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 24px;
+  background: var(--tk-color-bg);
+  color: var(--tk-color-fg);
+  text-align: center;
+}
+.error-page > button {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+section {
+  display: flex;
+  width: min(100%, 430px);
+  flex-direction: column;
+  align-items: center;
+}
+.error-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 67px;
+  color: inherit;
+  font-size: 18px;
+  font-weight: var(--tk-font-weight-bold);
+  text-decoration: none;
+}
+.error-icon {
+  display: grid;
+  width: 64px;
+  height: 64px;
+  place-items: center;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--tk-color-accent) 14%, var(--tk-color-bg));
+  color: var(--tk-color-accent);
+}
+.error-icon--warning {
+  background: color-mix(in srgb, var(--tk-color-warning) 16%, var(--tk-color-bg));
+  color: var(--tk-color-warning);
+}
+.error-code {
+  margin: 13px 0 -4px;
+  color: var(--tk-color-fg-muted);
+  font-size: 11px;
+  font-weight: var(--tk-font-weight-bold);
+  letter-spacing: 0.16em;
+}
+h1 {
+  margin: 16px 0 0;
+  font-size: 17px;
+}
+section > p:not(.error-code) {
+  max-width: 390px;
+  margin: 9px 0 19px;
+  color: var(--tk-color-fg-muted);
+  font-size: 14px;
+  line-height: 1.45;
+}
+.error-primary {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px;
+  border: 1px solid var(--tk-color-accent);
+  border-radius: var(--tk-radius-md);
+  background: var(--tk-color-accent);
+  color: var(--tk-color-accent-fg);
+  font-size: 13px;
+  font-weight: var(--tk-font-weight-semibold);
+  text-decoration: none;
+}
+.error-secondary {
+  margin-top: 14px;
+  color: inherit;
+  font-size: 13px;
+  font-weight: var(--tk-font-weight-semibold);
+  text-decoration: none;
+}

@@ -9,6 +9,14 @@ export interface OrderCreateContext {
   db: D1Database;
   orderNumber: string;
   items: OrderLineItem[];
+  /**
+   * Module-owned, order-creation-time data no hook could otherwise see —
+   * e.g. `attributes.booking` carries the requested date range so
+   * `@takontuku/booking`'s hook can write `booking_order_bookings` in the
+   * same atomic batch. Keyed by module name so unrelated hooks never
+   * collide; a hook that doesn't recognize its key just returns [].
+   */
+  attributes?: Record<string, unknown>;
 }
 
 export type OrderCreateHook = (ctx: OrderCreateContext) => D1PreparedStatement[];

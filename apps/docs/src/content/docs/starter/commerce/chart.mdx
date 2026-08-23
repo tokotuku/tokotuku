@@ -5,7 +5,7 @@ sidebar:
   order: 2
 ---
 
-import Chart from "@takontuku/ui/Chart.astro";
+import Chart from "@takontuku/charts/Chart.astro";
 import ComponentPreview from "../../../../components/ComponentPreview.astro";
 
 ## Preview
@@ -37,8 +37,8 @@ import ComponentPreview from "../../../../components/ComponentPreview.astro";
 
 ```astro
 ---
-import Chart from "@takontuku/ui/Chart.astro";
-import type { ChartInput } from "@takontuku/ui/chart";
+import Chart from "@takontuku/charts/Chart.astro";
+import type { ChartInput } from "@takontuku/charts/types";
 
 const input: ChartInput = {
   data: { values: [{ product: "Widget", price: 19.99 }] },

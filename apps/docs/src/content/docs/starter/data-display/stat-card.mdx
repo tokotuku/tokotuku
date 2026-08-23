@@ -11,7 +11,7 @@ import ComponentPreview from "../../../../components/ComponentPreview.astro";
 ## Preview
 
 <ComponentPreview label="Statistic cards" layout="stack">
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(12rem,1fr));gap:1rem">
+  <div class="grid grid-cols-[repeat(auto-fit,minmax(12rem,1fr))] gap-4">
     <StatCard label="Revenue" value="$24,580" change="+12.5%" trend="up" hint="vs last month" />
     <StatCard label="Refunds" value="$840" change="-3.2%" trend="down" hint="vs last month" />
   </div>

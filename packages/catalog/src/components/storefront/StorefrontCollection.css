@@ -1,0 +1,60 @@
+.collection-section {
+  max-width: 78rem;
+  margin: auto;
+  padding: 4.5rem max(1.25rem, 3vw) 4rem;
+}
+.collection-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.eyebrow {
+  margin: 0 0 0.4rem;
+  color: var(--tk-color-accent);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.collection-heading h2 {
+  margin: 0;
+  font-family: var(--tk-font-family-display);
+  font-size: clamp(2.2rem, 4vw, 3.5rem);
+  font-weight: 400;
+  letter-spacing: -0.035em;
+}
+.collection-heading a {
+  color: var(--tk-color-fg-muted);
+  font-size: 0.75rem;
+  text-decoration: none;
+}
+.collection-heading a:hover {
+  color: var(--tk-color-accent);
+}
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+.product-grid .product-card {
+  min-width: 0;
+}
+@media (max-width: 900px) {
+  .product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 560px) {
+  .collection-section {
+    padding-top: 3rem;
+  }
+  .collection-heading {
+    align-items: start;
+    flex-direction: column;
+  }
+  .product-grid {
+    grid-template-columns: 1fr;
+  }
+}

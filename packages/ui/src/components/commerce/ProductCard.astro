@@ -9,6 +9,12 @@ interface Props {
   priceCents: number;
   imageUrl: string;
   stock?: number;
+  /**
+   * A scheduled (booking) item has no stock at all — not zero, meaningless.
+   * Set to false so the card never renders "Sold out"/"Few left" for it,
+   * and never disables its action button on a stock reading that isn't real.
+   */
+  showStock?: boolean;
   showAddToCart?: boolean;
   category?: string;
   labels?: { view?: string; add?: string; soldOut?: string; lowStock?: string };
@@ -23,18 +29,21 @@ const {
   priceCents,
   imageUrl,
   stock = 1,
+  showStock = true,
   showAddToCart = false,
   category = "Everyday objects",
   labels = {},
   imageAlt = name,
 } = Astro.props;
 const serialized = JSON.stringify({ id, name, priceCents, imageUrl });
-const available = stock > 0;
-const stockLabel = !available
-  ? (labels.soldOut ?? "Sold out")
-  : stock <= 5
-    ? (labels.lowStock ?? "Few left")
-    : undefined;
+const available = !showStock || stock > 0;
+let stockLabel: string | undefined;
+if (showStock) {
+  if (!available) stockLabel = labels.soldOut ?? "Sold out";
+  else if (stock <= 5) stockLabel = labels.lowStock ?? "Few left";
+}
+
+import "./ProductCard.css";
 ---
 
 <article class="product-card" data-product-card>
@@ -47,8 +56,3 @@ const stockLabel = !available
     <div class="footer"><strong>{price}</strong>{showAddToCart && <button type="button" data-add-to-cart data-product={serialized} disabled={!available} aria-label={available ? (labels.add ?? "Add to cart") + " " + name : (labels.soldOut ?? "Sold out")}>{available ? <Icon name="plus" size={16} /> : <span>{labels.soldOut ?? "Sold out"}</span>}</button>}</div>
   </div>
 </article>
-
-<style>
-  .product-card { display:flex; min-width:0; flex-direction:column; overflow:hidden; border:1px solid var(--tk-color-border); border-radius:var(--tk-radius-md); background:var(--tk-color-surface); transition:transform var(--tk-duration-normal) var(--tk-easing-standard),box-shadow var(--tk-duration-normal) var(--tk-easing-standard); }.product-card:hover { transform:translateY(-2px); box-shadow:var(--tk-shadow-md); }.media { position:relative; display:block; aspect-ratio:1/1; overflow:hidden; background:var(--tk-color-bg-subtle); }.media img { display:block; width:100%; height:100%; object-fit:cover; transition:transform var(--tk-duration-slow) var(--tk-easing-standard); }.product-card:hover .media img { transform:scale(1.025); }.stock-pill { position:absolute; top:.75rem; left:.75rem; padding:.3rem .5rem; border-radius:var(--tk-radius-full); background:color-mix(in srgb,var(--tk-color-surface) 88%,transparent); color:var(--tk-color-success); font-size:.62rem; font-weight:700; }.stock-pill--out { color:var(--tk-color-danger); }
-  .body { display:flex; flex:1; flex-direction:column; justify-content:space-between; gap:1.25rem; padding:1rem; }.copy p,.copy h2 { margin:0; }.category { color:var(--tk-color-fg-muted); font-size:.65rem; letter-spacing:.03em; }.copy h2 { margin-top:.25rem; font-family:var(--tk-font-family-display); font-size:1.25rem; font-weight:500; line-height:1.05; }.copy h2 a { text-decoration:none; }.description { display:-webkit-box; margin-top:.45rem !important; overflow:hidden; color:var(--tk-color-fg-muted); font-size:.76rem; line-height:1.5; -webkit-box-orient:vertical; -webkit-line-clamp:2; }.footer { display:flex; align-items:center; justify-content:space-between; gap:.75rem; }.footer strong { font-size:.9rem; font-weight:700; }.footer button { display:grid; min-width:2.4rem; min-height:2.4rem; padding:.35rem; place-items:center; border:1px solid var(--tk-color-border); border-radius:50%; background:transparent; color:var(--tk-color-fg); font-size:1.1rem; cursor:pointer; }.footer button:hover:not(:disabled) { border-color:var(--tk-color-accent); color:var(--tk-color-accent); }.footer button:disabled { min-width:auto; padding-inline:.55rem; border-radius:var(--tk-radius-sm); color:var(--tk-color-fg-muted); font-size:.62rem; cursor:not-allowed; }
-</style>

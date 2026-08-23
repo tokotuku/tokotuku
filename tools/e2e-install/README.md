@@ -10,8 +10,11 @@ that needs one adds it explicitly with the real `takontuku add` command (`shared
 ## Gate 1 — `run.ts`, "tarball install"
 
 Publishes every publishable `@takontuku/*` package to a real registry and installs them into a
-scratch client the way a real client would — `create-takontuku` → `bun install` → `takontuku db
-sync` → `wrangler d1 migrations apply --local` → `astro build` → a `wrangler dev` boot check.
+scratch client the way a real client would — `create-takontuku` → `bun install` → `takontuku
+skills install` → `takontuku db sync` → `wrangler d1 migrations apply --local` → `astro build`
+→ a `wrangler dev` boot check. Gate 1 also verifies the generated `AGENTS.md`, `CLAUDE.md`,
+`README.md`, both local skill directories, and the emitted Tailwind utilities sourced from the
+packed `@takontuku/*` packages.
 
 This exists because `workspace:*` symlinks hide problems that only surface once packages are
 actually installed from tarballs: broken `exports` maps, missing `files` entries, missing
@@ -102,7 +105,7 @@ removes `orders` again, then runs the client's real `cf-typegen`, `lint`, `typec
 scripts against whatever `add`/`remove` left behind.
 
 This script exists because, before it did, neither of these two mechanisms had ever run for real.
-Seeding had no framework mechanism at all — only a manual, hardcoded script in `apps/example`.
+Seeding had no framework mechanism at all — only a manual, hardcoded script in an old fixture.
 The theme override had a real bug: `buildThemeAliases`' `find` regex only anchored the end of the
 specifier, so Vite's `id.replace(find, replacement)` left the original package prefix stuck onto
 the front of the replacement path. The existing unit test only asserted `find.test(id)`, never
@@ -139,6 +142,14 @@ moon run e2e-install:smoke         # Gate 3
 moon run e2e-install:propagation   # Gate 5 (verification slice)
 moon run e2e-install:demo          # Demo walkthrough
 moon run e2e-install:modules       # real lint/typecheck/build against add/remove output
+```
+
+Gate 1 launches the packed client's Wrangler CLI through Node so the local dev proxy is exercised
+the same way it is in a normal client environment. If Node is not on `PATH` (for example when the
+gate itself is started by Bun), point it at the runtime explicitly:
+
+```sh
+TAKONTUKU_NODE_BINARY=/path/to/node moon run e2e-install:run
 ```
 
 Each run publishes at a unique version (`0.0.0-e2e.<timestamp>`), so all seven are safe to run

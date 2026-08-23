@@ -17,8 +17,7 @@ let sessionResolver: SessionResolver | null = null;
 /**
  * Registers how the middleware resolves the current request's session.
  * Core has no opinion on the auth library — until @takontuku/auth exists as
- * its own package, the app registers this itself (see
- * apps/example/src/lib/session-resolver.ts). No resolver registered means
+ * its own package, the consumer app registers this itself. No resolver registered means
  * every request is treated as anonymous, not an error.
  */
 export function registerSessionResolver(resolver: SessionResolver): void {

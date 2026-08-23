@@ -1,0 +1,16 @@
+$schema: "https://moonrepo.dev/schemas/project.json"
+language: "typescript"
+stack: "infrastructure"
+layer: "tool"
+
+tasks:
+  lint:
+    command: "bunx biome check ."
+    inputs:
+      - "*.ts"
+
+  typecheck:
+    command: "bunx tsc --noEmit -p tsconfig.json"
+    inputs:
+      - "*.ts"
+      - "tsconfig.json"

@@ -2,6 +2,7 @@
 /// <reference path="./virtual.d.ts" />
 import { existsSync, readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+import type { PaletteColors } from "@takontuku/theme/palette";
 import type { AstroIntegration } from "astro";
 import type { FormattersConfig } from "./format";
 import type { ModuleDefinition } from "./module";
@@ -18,6 +19,8 @@ export interface TakontukuAuthBrand {
   backgroundPosition?: string;
 }
 
+export type TakontukuPaletteColors = PaletteColors;
+
 export interface TakontukuStorefrontBrand {
   announcement?: string | false;
   hero?: {
@@ -31,12 +34,27 @@ export interface TakontukuStorefrontBrand {
   newsletter?: { action: string };
 }
 
+export type TakontukuAdminDashboardArtwork =
+  | "abstract"
+  | "energy"
+  | {
+      light: string;
+      dark?: string;
+      position?: string;
+    };
+
+export interface TakontukuAdminBrand {
+  /** Decorative artwork preset or custom light/dark URLs used by the admin dashboard. */
+  dashboardArtwork?: TakontukuAdminDashboardArtwork;
+}
+
 export interface TakontukuBrand extends FormattersConfig {
   name: string;
   logo?: { src: string; alt?: string };
+  admin?: TakontukuAdminBrand;
   palette?: {
-    light?: { accent: string; accentForeground: string };
-    dark?: { accent: string; accentForeground: string };
+    light?: TakontukuPaletteColors;
+    dark?: TakontukuPaletteColors;
   };
   storefront?: TakontukuStorefrontBrand;
   auth?: TakontukuAuthBrand;

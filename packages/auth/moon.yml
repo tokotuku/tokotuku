@@ -29,3 +29,8 @@ tasks:
     inputs:
       - "src/**/*"
       - "tsconfig.json"
+
+  test:
+    command: "vitest run"
+    inputs:
+      - "src/**/*.test.ts"

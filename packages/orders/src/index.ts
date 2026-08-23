@@ -12,6 +12,10 @@ export function orders(): ModuleDefinition {
         name: "payments-bank-transfer",
         url: new URL("../migrations/0002_payments_bank_transfer.sql", import.meta.url),
       },
+      {
+        name: "admin-cursor-indexes",
+        url: new URL("../migrations/0003_admin_cursor_indexes.sql", import.meta.url),
+      },
     ],
     adminNav: [
       {
@@ -26,7 +30,7 @@ export function orders(): ModuleDefinition {
         order: 20,
       },
     ],
-    ambientScripts: ["@takontuku/orders/routes/CartScript.astro"],
+    ambientScripts: ["@takontuku/orders/components/cart/CartScript.astro"],
     storefrontRoutes: [
       { pattern: "/cart", entrypoint: "@takontuku/orders/routes/cart.astro" },
       { pattern: "/checkout", entrypoint: "@takontuku/orders/routes/checkout.astro" },
@@ -39,11 +43,15 @@ export function orders(): ModuleDefinition {
     ],
     adminRoutes: [
       { pattern: "/admin/orders", entrypoint: "@takontuku/orders/routes/admin/orders.astro" },
+      {
+        pattern: "/admin/api/orders/[id]",
+        entrypoint: "@takontuku/orders/routes/api/admin/orders/[id].ts",
+      },
     ],
     adminDashboardWidgets: [
       {
         id: "orders-overview",
-        entrypoint: "@takontuku/orders/routes/admin/OrdersDashboardWidget.astro",
+        entrypoint: "@takontuku/orders/components/admin/OrdersDashboardWidget.astro",
         area: "main",
         order: 30,
       },
@@ -52,14 +60,23 @@ export function orders(): ModuleDefinition {
 }
 
 export {
+  type AdminOrder,
+  type AdminOrderDetail,
+  type AdminOrderItem,
   approvePayment,
   attachPaymentProof,
+  createInquiryOrder,
   createOrder,
+  findAdminOrderDetail,
   findCustomerOrder,
   getOrderDashboardSummary,
+  type InquiryDetails,
+  type ListOrdersOptions,
   listOrders,
+  type OrderDashboardSummary,
   type OrderStatus,
   orderStatuses,
+  orderTransitions,
   type PaymentMethod,
   paymentMethods,
   updateOrderStatus,

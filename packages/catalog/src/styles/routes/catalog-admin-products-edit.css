@@ -1,0 +1,54 @@
+.save-notice {
+  padding: 11px 14px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--tk-color-success) 10%, var(--admin-surface));
+  color: var(--tk-color-success);
+}
+.danger-button {
+  color: var(--tk-color-danger);
+}
+.movement-panel {
+  margin-top: 18px;
+  padding: 22px;
+  overflow: auto;
+}
+.movement-panel h2,
+.movement-panel p {
+  margin: 0;
+}
+.movement-panel > div p {
+  margin-top: 5px;
+  color: var(--tk-color-fg-muted);
+  font-size: 12px;
+}
+.movement-panel table {
+  width: 100%;
+  margin-top: 18px;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.movement-panel th,
+.movement-panel td {
+  padding: 11px;
+  border-top: 1px solid var(--admin-line);
+  text-align: left;
+}
+.movement-panel th {
+  color: var(--tk-color-fg-muted);
+}
+.positive {
+  color: var(--tk-color-success);
+  font-weight: var(--tk-font-weight-bold);
+}
+.negative {
+  color: var(--tk-color-danger);
+  font-weight: var(--tk-font-weight-bold);
+}
+.empty-movements {
+  margin-top: 18px !important;
+  color: var(--tk-color-fg-muted);
+}
+.inspector-metrics {
+  display: grid;
+  gap: 0.6rem;
+}

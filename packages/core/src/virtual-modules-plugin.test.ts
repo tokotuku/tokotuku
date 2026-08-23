@@ -22,6 +22,7 @@ describe("takontuku virtual config modules", () => {
       locale: "id-ID",
       currency: "IDR",
       timeZone: "Asia/Jakarta",
+      admin: { dashboardArtwork: "energy" as const },
       auth: { backgroundImage: "/images/auth.webp", backgroundPosition: "center 30%" },
       messages: { "auth.login.title": "Masuk ke Warm Market" },
     };
@@ -56,6 +57,7 @@ describe("takontuku virtual config modules", () => {
         adminDashboardWidgets: [
           { id: "catalog", entrypoint: "@demo/CatalogWidget.astro", area: "main" },
         ],
+        authPanelWidgets: [{ id: "quote", entrypoint: "@demo/AuthQuote.astro" }],
       },
     ]);
     const plugin = takontukuVirtualModulesPlugin(registry, {
@@ -67,7 +69,9 @@ describe("takontuku virtual config modules", () => {
     const load = plugin.load as (id: string) => string;
     const storefrontSource = load(resolveId("virtual:takontuku/storefront-home-sections"));
     const dashboardSource = load(resolveId("virtual:takontuku/admin-dashboard-widgets"));
+    const authSource = load(resolveId("virtual:takontuku/auth-panel-widgets"));
     expect(storefrontSource).toContain('import Section0 from "@demo/Collection.astro";');
     expect(dashboardSource).toContain('import Widget0 from "@demo/CatalogWidget.astro";');
+    expect(authSource).toContain('import Widget0 from "@demo/AuthQuote.astro";');
   });
 });

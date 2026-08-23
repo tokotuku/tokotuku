@@ -1,0 +1,37 @@
+{
+  "name": "@takontuku/charts",
+  "version": "0.2.0",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
+  },
+  "type": "module",
+  "files": [
+    "src"
+  ],
+  "exports": {
+    "./Chart.astro": "./src/Chart.astro",
+    "./types": {
+      "types": "./src/types.ts",
+      "import": "./src/types.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "dependencies": {
+    "@takontuku/theme": "^0.2.0",
+    "echarts": "^6.1.0",
+    "flint-chart": "0.2.1"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.4",
+    "astro": "^7.0.9",
+    "tailwindcss": "^4.3.1"
+  },
+  "peerDependencies": {
+    "astro": ">=7.0.0"
+  },
+  "scripts": {
+    "lint": "biome check .",
+    "typecheck": "astro check"
+  }
+}

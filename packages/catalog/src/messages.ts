@@ -28,6 +28,7 @@ export const catalogMessages: MessageDictionaries = {
     "catalog.detail.soldOut": "Stok habis",
     "catalog.detail.reassurance": "Stok dipesan setelah checkout.",
     "catalog.detail.cash": "Bayar saat pesanan tiba.",
+    "catalog.detail.bookNow": "Ajukan booking",
     "catalog.products.title": "Produk",
     "catalog.products.description":
       "Katalog kamu berisi {count} produk dalam {categories} kategori.",
@@ -48,6 +49,12 @@ export const catalogMessages: MessageDictionaries = {
     "catalog.products.status": "Status",
     "catalog.products.actions": "Aksi",
     "catalog.products.edit": "Edit {name}",
+    "catalog.products.preview": "Lihat ringkasan {name}",
+    "catalog.products.previewTitle": "Ringkasan produk",
+    "catalog.products.previewClose": "Tutup ringkasan",
+    "catalog.products.previewLoading": "Memuat ringkasan…",
+    "catalog.products.previewError": "Ringkasan produk tidak dapat dimuat.",
+    "catalog.products.previewRetry": "Coba lagi",
     "catalog.products.showing": "Menampilkan 1–{count} dari {count}",
     "catalog.products.empty": "Belum ada produk",
     "catalog.products.emptyDescription":
@@ -58,6 +65,7 @@ export const catalogMessages: MessageDictionaries = {
     "catalog.products.status.outOfStock": "Stok habis",
     "catalog.products.status.lowStock": "Stok menipis",
     "catalog.products.status.inStock": "Tersedia",
+    "catalog.products.status.scheduled": "Terjadwal",
     "catalog.products.newTitle": "Tambah produk",
     "catalog.products.newDescription":
       "Buat produk, atur stok, dan tambahkan field yang dibutuhkan.",
@@ -74,6 +82,10 @@ export const catalogMessages: MessageDictionaries = {
     "catalog.products.error.imageSize": "Ukuran gambar maksimal 5 MB.",
     "catalog.products.error.imageRequired": "Gambar produk wajib diunggah.",
     "catalog.products.error.notFound": "Produk tidak ditemukan.",
+    "catalog.products.error.invalidFulfillmentType": "Tipe pemenuhan tidak valid.",
+    "catalog.products.form.fulfillmentType": "Tipe pemenuhan",
+    "catalog.products.form.fulfillmentType.physical": "Barang fisik (punya stok)",
+    "catalog.products.form.fulfillmentType.scheduled": "Terjadwal (dipesan, bukan disetok)",
     "catalog.products.form.infoTitle": "Informasi produk",
     "catalog.products.form.infoDescription": "Data utama yang tampil di katalog.",
     "catalog.products.form.name": "Nama produk",
@@ -151,6 +163,7 @@ export const catalogMessages: MessageDictionaries = {
     "catalog.detail.soldOut": "Sold out",
     "catalog.detail.reassurance": "Stock is reserved after checkout.",
     "catalog.detail.cash": "Pay when your order arrives.",
+    "catalog.detail.bookNow": "Request booking",
     "catalog.products.title": "Products",
     "catalog.products.description":
       "Your catalog has {count} products across {categories} categories.",
@@ -171,6 +184,12 @@ export const catalogMessages: MessageDictionaries = {
     "catalog.products.status": "Status",
     "catalog.products.actions": "Actions",
     "catalog.products.edit": "Edit {name}",
+    "catalog.products.preview": "View summary for {name}",
+    "catalog.products.previewTitle": "Product summary",
+    "catalog.products.previewClose": "Close summary",
+    "catalog.products.previewLoading": "Loading summary…",
+    "catalog.products.previewError": "The product summary could not be loaded.",
+    "catalog.products.previewRetry": "Try again",
     "catalog.products.showing": "Showing 1–{count} of {count}",
     "catalog.products.empty": "No products yet",
     "catalog.products.emptyDescription":
@@ -181,6 +200,7 @@ export const catalogMessages: MessageDictionaries = {
     "catalog.products.status.outOfStock": "Out of stock",
     "catalog.products.status.lowStock": "Low stock",
     "catalog.products.status.inStock": "In stock",
+    "catalog.products.status.scheduled": "Scheduled",
     "catalog.products.newTitle": "Add product",
     "catalog.products.newDescription": "Create a product, set stock, and add the fields you need.",
     "catalog.products.editTitle": "Edit product",
@@ -196,6 +216,10 @@ export const catalogMessages: MessageDictionaries = {
     "catalog.products.error.imageSize": "Product image must be 5 MB or smaller.",
     "catalog.products.error.imageRequired": "A product image is required.",
     "catalog.products.error.notFound": "Product not found.",
+    "catalog.products.error.invalidFulfillmentType": "Fulfillment type is invalid.",
+    "catalog.products.form.fulfillmentType": "Fulfillment type",
+    "catalog.products.form.fulfillmentType.physical": "Physical good (stocked)",
+    "catalog.products.form.fulfillmentType.scheduled": "Scheduled (booked, not stocked)",
     "catalog.products.form.infoTitle": "Product information",
     "catalog.products.form.infoDescription": "The main data shown in your catalog.",
     "catalog.products.form.name": "Product name",
@@ -271,6 +295,7 @@ export function localizeCatalogError(error: unknown, t: Translator): string {
     "Ukuran gambar maksimal 5 MB.": "catalog.products.error.imageSize",
     "Gambar produk wajib diunggah.": "catalog.products.error.imageRequired",
     "Product not found": "catalog.products.error.notFound",
+    "Tipe pemenuhan tidak valid.": "catalog.products.error.invalidFulfillmentType",
   };
   return known[message] ? t(known[message]) : t("catalog.products.formError");
 }

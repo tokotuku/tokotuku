@@ -30,6 +30,38 @@ describe("order hooks", () => {
     expect(result).toContain(stmtB);
   });
 
+  it("passes attributes through to the hook untouched", () => {
+    let seen: Record<string, unknown> | undefined;
+    onOrderCreate((ctx) => {
+      seen = ctx.attributes;
+      return [];
+    });
+
+    collectOrderCreateStatements({
+      db: {} as never,
+      orderNumber: "TK-1",
+      items: [{ itemId: 1, quantity: 2 }],
+      attributes: { booking: { startDate: "2026-09-03", endDate: "2026-09-07" } },
+    });
+
+    expect(seen).toEqual({ booking: { startDate: "2026-09-03", endDate: "2026-09-07" } });
+  });
+
+  it("a hook that doesn't recognize the attributes key returns no statements", () => {
+    onOrderCreate((ctx) => {
+      const booking = ctx.attributes?.["booking"];
+      return booking ? [{ sql: "insert booking" } as never] : [];
+    });
+
+    const result = collectOrderCreateStatements({
+      db: {} as never,
+      orderNumber: "TK-1",
+      items: [{ itemId: 1, quantity: 1 }],
+    });
+
+    expect(result).toEqual([]);
+  });
+
   it("returns no statements when no hook is registered for status changes", () => {
     const result = collectOrderStatusChangeStatements({
       db: {} as never,

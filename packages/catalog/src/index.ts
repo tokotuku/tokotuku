@@ -7,6 +7,10 @@ export function catalog(): ModuleDefinition {
       { name: "init", url: new URL("../migrations/0001_init.sql", import.meta.url) },
       { name: "inventory", url: new URL("../migrations/0002_inventory.sql", import.meta.url) },
       { name: "projects", url: new URL("../migrations/0003_projects.sql", import.meta.url) },
+      {
+        name: "admin-cursor-indexes",
+        url: new URL("../migrations/0004_admin_cursor_indexes.sql", import.meta.url),
+      },
     ],
     mediaPrefixes: ["products/"],
     seeds: [
@@ -34,20 +38,24 @@ export function catalog(): ModuleDefinition {
     storefrontHomeSections: [
       {
         id: "catalog-collection",
-        entrypoint: "@takontuku/catalog/routes/StorefrontCollection.astro",
+        entrypoint: "@takontuku/catalog/components/storefront/StorefrontCollection.astro",
         order: 20,
       },
     ],
     adminDashboardWidgets: [
       {
         id: "catalog-overview",
-        entrypoint: "@takontuku/catalog/routes/admin/CatalogDashboardWidget.astro",
+        entrypoint: "@takontuku/catalog/components/admin/CatalogDashboardWidget.astro",
         area: "main",
         order: 20,
       },
     ],
     adminRoutes: [
       { pattern: "/admin/products", entrypoint: "@takontuku/catalog/routes/admin/products.astro" },
+      {
+        pattern: "/admin/api/products/[id]",
+        entrypoint: "@takontuku/catalog/routes/api/admin/products/[id].ts",
+      },
       {
         pattern: "/admin/products/new",
         entrypoint: "@takontuku/catalog/routes/admin/products/new.astro",
@@ -64,10 +72,12 @@ export { catalogMessages } from "./messages";
 export { productInputFromForm } from "./product-form";
 export {
   archiveProduct,
+  type CatalogDashboardSummary,
   countProducts,
   createProduct,
   findProductById,
   findProductsByIds,
+  getCatalogDashboardSummary,
   type InventoryMovement,
   type ListProductsOptions,
   listCategories,

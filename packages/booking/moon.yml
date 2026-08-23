@@ -1,0 +1,43 @@
+$schema: "https://moonrepo.dev/schemas/project.json"
+language: "typescript"
+stack: "frontend"
+layer: "library"
+
+tasks:
+  build:
+    command: "tsup"
+    deps: ["core:build", "catalog:build", "orders:build"]
+    inputs:
+      - "src/**/*"
+      - "tsup.config.ts"
+      - "tsconfig.json"
+    outputs:
+      - "dist"
+
+  lint:
+    command: "biome check ."
+    inputs:
+      - "src/**/*"
+      - "*.json"
+
+  test:
+    command: "vitest run"
+    # bookings.test.ts only exercises pure functions and needs no sibling
+    # dist, but keeping deps aligned with build/typecheck avoids surprises
+    # if a future test imports from @takontuku/catalog or @takontuku/orders.
+    deps: ["core:build", "catalog:build", "orders:build"]
+    inputs:
+      - "src/**/*"
+      - "vitest.config.ts"
+
+  typecheck:
+    command: "astro check"
+    # @takontuku/core, @takontuku/catalog, and @takontuku/orders are consumed
+    # via their built dist/ (not raw source) for runtime values like
+    # defineModule, findProductById, and createInquiryOrder — without this,
+    # typecheck can race tsup's clean-then-rebuild and read a briefly-missing
+    # dist/index.d.ts.
+    deps: ["core:build", "catalog:build", "orders:build"]
+    inputs:
+      - "src/**/*"
+      - "tsconfig.json"
