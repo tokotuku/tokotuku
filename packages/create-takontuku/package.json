@@ -1,6 +1,6 @@
 {
   "name": "create-takontuku",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "publishConfig": {
     "registry": "https://registry.npmjs.org",
     "access": "public"
@@ -14,7 +14,7 @@
     "src/template"
   ],
   "devDependencies": {
-    "@takontuku/config": "workspace:*",
+    "@takontuku/config": "^0.2.0",
     "@types/bun": "latest"
   },
   "scripts": {

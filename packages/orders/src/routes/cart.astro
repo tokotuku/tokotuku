@@ -1,13 +1,15 @@
 ---
 import { createTranslator } from "@takontuku/core";
 import { brand, money } from "@takontuku/core/brand";
+import Layout from "@takontuku/ui/DocumentLayout.astro";
 import Icon from "@takontuku/ui/Icon.astro";
-import Layout from "@takontuku/ui/Layout.astro";
 import StoreHeader from "@takontuku/ui/StoreHeader.astro";
 import { orderMessages } from "../messages";
 
 const id = brand.locale.toLowerCase().startsWith("id");
 const t = createTranslator(brand, orderMessages);
+
+import "../styles/routes/orders-cart.css";
 ---
 
 <Layout title={`${t("orders.cart.pageTitle")} — ${brand.name}`} siteName={brand.name} lang={id ? "id" : "en"}>
@@ -146,32 +148,3 @@ const t = createTranslator(brand, orderMessages);
 
   onCartChange(render);
 </script>
-
-<style>
-  main { width: min(100% - 2.5rem, 78rem); margin-inline: auto; padding-block: 4.5rem 5rem; }
-  header p { margin: 0; color: var(--tk-color-accent); font-size: var(--tk-font-size-xs); font-weight: var(--tk-font-weight-bold); letter-spacing: 0.1em; text-transform: uppercase; }
-  h1 { margin: var(--tk-spacing-2) 0 2.5rem; font-family:var(--tk-font-family-display); font-size: clamp(3rem, 6vw, 5.4rem); font-weight:400; letter-spacing: -0.05em; line-height:.95; }
-  .cart-layout { display: grid; grid-template-columns: minmax(0, 1fr) 22rem; gap: var(--tk-spacing-8); align-items: start; }
-  .cart-items { display: grid; gap: var(--tk-spacing-4); }
-  .cart-items :global(article) { display: grid; grid-template-columns: 7rem minmax(0, 1fr) auto; gap: var(--tk-spacing-4); align-items: center; padding-bottom: var(--tk-spacing-4); border-bottom: 1px solid var(--tk-color-border); }
-  .cart-items :global(article img) { width: 7rem; height: 7rem; border-radius: var(--tk-radius-lg); object-fit: cover; background: var(--tk-color-bg-subtle); }
-  .cart-items :global(article h2), .cart-items :global(article p) { margin: 0; }
-  .cart-items :global(article h2) { font-size: var(--tk-font-size-lg); }
-  .cart-items :global(article h2 a) { color: var(--tk-color-fg); text-decoration: none; }
-  .cart-items :global(article p) { margin-top: var(--tk-spacing-1); color: var(--tk-color-fg-muted); font-size: var(--tk-font-size-sm); }
-  .cart-items :global(article button) { padding: 0; border: 0; background: transparent; color: var(--tk-color-danger); cursor: pointer; font: inherit; font-size: var(--tk-font-size-xs); }
-  .cart-items :global(.quantity) { display: grid; justify-items: end; gap: var(--tk-spacing-3); }
-  .cart-items :global(.quantity .qty-row) { display: flex; align-items: center; gap: var(--tk-spacing-3); }
-  .cart-items :global(.quantity label) { color: var(--tk-color-fg-muted); font-size: var(--tk-font-size-xs); }
-  .cart-items :global(.quantity span) { color: var(--tk-color-fg-muted); font-size:10px; }
-  .cart-items :global(input) { width: 3.5rem; margin-left: var(--tk-spacing-1); padding: var(--tk-spacing-2); border: 1px solid var(--tk-color-border); border-radius: var(--tk-radius-md); background: var(--tk-color-bg); color: var(--tk-color-fg); }
-  aside { padding: var(--tk-spacing-5); border: 1px solid var(--tk-color-border); border-radius: var(--tk-radius-xl); background: var(--tk-color-bg-subtle); }
-  aside h2 { margin-top: 0; }
-  aside div { display: flex; justify-content: space-between; padding-block: var(--tk-spacing-4); border-block: 1px solid var(--tk-color-border); }
-  aside p { color: var(--tk-color-fg-muted); font-size: var(--tk-font-size-xs); }
-  aside a, .empty a { display: block; margin-top: var(--tk-spacing-4); padding: var(--tk-spacing-3); border-radius: var(--tk-radius-md); background: var(--tk-color-accent); color: var(--tk-color-accent-fg); font-size: var(--tk-font-size-sm); font-weight: var(--tk-font-weight-bold); text-align: center; text-decoration: none; }
-  .empty { display:grid; min-height:20rem; place-items:center; align-content:center; padding:2.5rem; border:1px solid var(--tk-color-border); border-radius:var(--tk-radius-md); background:var(--tk-color-surface); text-align:center; }.empty-mark { display:grid; width:4rem; height:4rem; place-items:center; border:1px solid var(--tk-color-border); border-radius:50%; color:var(--tk-color-accent); font-size:2rem; }.empty h2 { margin:1.25rem 0 .45rem; font-family:var(--tk-font-family-display); font-size:2rem; font-weight:400; }
-  .empty p { color: var(--tk-color-fg-muted); }
-  .empty a { width: fit-content; margin-inline: auto; }
-  @media (max-width: 48rem) { main { width:min(100% - 1.5rem,78rem); padding-top:3rem; }.cart-layout { grid-template-columns: 1fr; } .cart-items :global(article) { grid-template-columns: 5rem minmax(0, 1fr); } .cart-items :global(article img) { width: 5rem; height: 5rem; } .cart-items :global(.quantity) { grid-column: 2; justify-items: start; } }
-</style>

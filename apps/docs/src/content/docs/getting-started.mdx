@@ -7,7 +7,7 @@ sidebar:
 
 ## Install
 
-The starter ships its Astro components and Tailwind theme as one local workspace package.
+The starter ships Astro components and the Tailwind theme as separate workspace packages.
 Install the workspace dependencies once:
 
 ```sh
@@ -21,7 +21,7 @@ Import components directly. They render semantic HTML and static Tailwind CSS wi
 ```astro
 ---
 import Button from "@takontuku/ui/Button.astro";
-import "@takontuku/ui/styles.css";
+import "@takontuku/theme/styles.css";
 ---
 
 <Button variant="primary">Save changes</Button>
@@ -31,7 +31,9 @@ import "@takontuku/ui/styles.css";
 
 | Package | Purpose |
 | --- | --- |
-| `@takontuku/ui` | Astro components plus Tailwind theme and global styles |
+| `@takontuku/theme` | Tailwind tokens, fonts, palette API, and light/dark bootstrap |
+| `@takontuku/ui` | Astro component primitives and application surfaces |
+| `@takontuku/charts` | Deferred ECharts/Flint chart component and chart types |
 
 ## Build with AI
 

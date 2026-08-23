@@ -1,4 +1,12 @@
 import type { D1Database } from "@cloudflare/workers-types";
+import {
+  assertCursor,
+  CursorError,
+  type CursorPage,
+  cursorFilterSignature,
+  encodeCursor,
+  normalizePageSize,
+} from "@takontuku/core";
 
 interface ProductRow {
   id: number;
@@ -54,9 +62,19 @@ export interface InventoryMovement {
   createdAt: string;
 }
 
+export interface CatalogDashboardSummary {
+  total: number;
+  active: number;
+  lowStock: number;
+  outOfStock: number;
+}
+
 export interface ListProductsOptions {
-  limit?: number;
+  pageSize?: number;
+  /** Numbered storefront pagination remains supported; admin routes use cursors. */
   offset?: number;
+  after?: string;
+  before?: string;
   activeOnly?: boolean;
   category?: string | undefined;
   search?: string | undefined;
@@ -114,7 +132,7 @@ function buildProductFilter({
     bindings.push(category);
   }
   if (search) {
-    conditions.push("(ci.name LIKE ? OR ci.description LIKE ?)");
+    conditions.push("(ci.name LIKE ? OR ci.sku LIKE ?)");
     const like = `%${search}%`;
     bindings.push(like, like);
   }
@@ -123,23 +141,77 @@ function buildProductFilter({
 
 export async function listProducts(
   db: D1Database,
-  { limit, offset, activeOnly = true, category, search }: ListProductsOptions = {},
-): Promise<Product[]> {
+  {
+    pageSize = 25,
+    offset,
+    after,
+    before,
+    activeOnly = true,
+    category,
+    search,
+  }: ListProductsOptions = {},
+): Promise<CursorPage<Product>> {
+  if (after && before) throw new CursorError("after and before cursors are mutually exclusive.");
+  const size = normalizePageSize(pageSize);
   const { where, bindings } = buildProductFilter({ activeOnly, category, search });
-  let query = `SELECT ${productColumns} ${productFrom}${where} ORDER BY ci.id DESC`;
-  if (limit !== undefined) {
-    query += " LIMIT ?";
-    bindings.push(Math.max(0, Math.trunc(limit)));
+  const filters = cursorFilterSignature({
+    activeOnly,
+    category: category ?? null,
+    search: search ?? null,
+  });
+  let direction: "ASC" | "DESC" = "DESC";
+  if (after) {
+    const cursor = assertCursor(after, { domain: "catalog", filters });
+    const id = cursor.keys["id"];
+    if (typeof id !== "number") throw new CursorError("Catalog cursor sort key is invalid.");
+    bindings.push(id);
   }
-  if (offset !== undefined) {
-    query += " OFFSET ?";
-    bindings.push(Math.max(0, Math.trunc(offset)));
+  if (before) {
+    const cursor = assertCursor(before, { domain: "catalog", filters });
+    const id = cursor.keys["id"];
+    if (typeof id !== "number") throw new CursorError("Catalog cursor sort key is invalid.");
+    bindings.push(id);
+    direction = "ASC";
   }
+  let cursorWhere = "";
+  if (after) cursorWhere = " AND ci.id < ?";
+  else if (before) cursorWhere = " AND ci.id > ?";
+  const numbered = offset !== undefined && !after && !before;
+  const pagination = numbered ? "LIMIT ? OFFSET ?" : "LIMIT ?";
+  const query = `SELECT ${productColumns} ${productFrom}${where}${cursorWhere} ORDER BY ci.id ${direction} ${pagination}`;
+  bindings.push(numbered ? size : size + 1);
+  if (numbered) bindings.push(Math.max(0, Math.trunc(offset)));
   const { results } = await db
     .prepare(query)
     .bind(...bindings)
     .all<ProductRow>();
-  return results.map(toProduct);
+  const hasExtra = results.length > size;
+  const pageRows = results.slice(0, size).map(toProduct);
+  if (before) pageRows.reverse();
+  const first = pageRows[0];
+  const last = pageRows.at(-1);
+  const makeCursor = (product: Product | undefined): string | null =>
+    product ? encodeCursor({ domain: "catalog", keys: { id: product.id }, filters }) : null;
+
+  let hasNextPage = hasExtra;
+  let hasPreviousPage = Boolean(after);
+  if (numbered) {
+    hasNextPage = false;
+    hasPreviousPage = Boolean(offset);
+  } else if (before) {
+    hasNextPage = true;
+    hasPreviousPage = hasExtra;
+  }
+
+  return {
+    items: pageRows,
+    pageInfo: {
+      startCursor: makeCursor(first),
+      endCursor: makeCursor(last),
+      hasNextPage,
+      hasPreviousPage,
+    },
+  };
 }
 
 export async function countProducts(
@@ -156,6 +228,27 @@ export async function countProducts(
     .bind(...bindings)
     .first<{ count: number }>();
   return row?.count ?? 0;
+}
+
+/** Aggregate inspector values independently of the current 25-row admin page. */
+export async function getCatalogDashboardSummary(db: D1Database): Promise<CatalogDashboardSummary> {
+  const row = await db
+    .prepare(
+      `SELECT
+         COUNT(*) AS total,
+         SUM(CASE WHEN ci.is_active = 1 THEN 1 ELSE 0 END) AS active,
+         SUM(CASE WHEN ci.is_active = 1 AND ci.fulfillment_type = 'physical' AND COALESCE(s.on_hand, 0) BETWEEN 1 AND 5 THEN 1 ELSE 0 END) AS low_stock,
+         SUM(CASE WHEN ci.is_active = 1 AND ci.fulfillment_type = 'physical' AND COALESCE(s.on_hand, 0) = 0 THEN 1 ELSE 0 END) AS out_of_stock
+       ${productFrom}
+       WHERE ci.price_cents IS NOT NULL`,
+    )
+    .first<{ total: number; active: number; low_stock: number; out_of_stock: number }>();
+  return {
+    total: row?.total ?? 0,
+    active: row?.active ?? 0,
+    lowStock: row?.low_stock ?? 0,
+    outOfStock: row?.out_of_stock ?? 0,
+  };
 }
 
 export async function listCategories(db: D1Database): Promise<string[]> {

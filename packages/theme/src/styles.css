@@ -1,0 +1,6 @@
+@import "tailwindcss";
+@import "./fonts.css";
+@import "./tokens.css";
+
+/* Tailwind v4: explicitly include package-owned source while retaining consumer detection. */
+@source "../../";

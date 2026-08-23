@@ -1,0 +1,11 @@
+"$schema": "https://moonrepo.dev/schemas/project.json"
+language: "typescript"
+stack: "frontend"
+layer: "library"
+tasks:
+  lint:
+    command: biome check .
+  typecheck:
+    command: astro check
+  test:
+    command: vitest run src/palette.test.ts

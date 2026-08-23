@@ -1,0 +1,35 @@
+.dashboard-metric {
+  min-width: 0;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--admin-line, var(--tk-color-border));
+  border-radius: var(--tk-radius-md);
+  background: var(--admin-surface, var(--tk-color-surface));
+}
+.dashboard-metric p,
+.dashboard-metric strong,
+.dashboard-metric span {
+  display: block;
+  margin: 0;
+}
+.dashboard-metric p {
+  color: var(--tk-color-fg-muted);
+  font-size: 0.7rem;
+}
+.dashboard-metric strong {
+  margin-top: 0.45rem;
+  font-family: var(--tk-font-family-display);
+  font-size: clamp(1.35rem, 2.2vw, 2rem);
+  font-weight: 400;
+  letter-spacing: -0.03em;
+}
+.dashboard-metric span {
+  margin-top: 0.4rem;
+  color: var(--tk-color-fg-muted);
+  font-size: 0.68rem;
+}
+.dashboard-metric--positive strong {
+  color: var(--tk-color-success);
+}
+.dashboard-metric--warning strong {
+  color: var(--tk-color-warning);
+}

@@ -1,6 +1,6 @@
 {
   "name": "@takontuku/ui",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "publishConfig": {
     "registry": "https://registry.npmjs.org",
     "access": "public"
@@ -15,8 +15,9 @@
     "./Card.astro": "./src/components/core/Card.astro",
     "./Icon.astro": "./src/components/core/Icon.astro",
     "./Input.astro": "./src/components/core/Input.astro",
-    "./Layout.astro": "./src/components/layout/Layout.astro",
+    "./DocumentLayout.astro": "./src/components/layout/DocumentLayout.astro",
     "./AdminPageHeader.astro": "./src/components/layout/AdminPageHeader.astro",
+    "./AdminDashboardArtwork.astro": "./src/components/layout/AdminDashboardArtwork.astro",
     "./AdminInspector.astro": "./src/components/layout/AdminInspector.astro",
     "./AdminQuickView.astro": "./src/components/layout/AdminQuickView.astro",
     "./Alert.astro": "./src/components/feedback/Alert.astro",
@@ -24,11 +25,11 @@
     "./AppSidebar.astro": "./src/components/layout/AppSidebar.astro",
     "./AppTopbar.astro": "./src/components/layout/AppTopbar.astro",
     "./Badge.astro": "./src/components/data-display/Badge.astro",
-    "./Chart.astro": "./src/components/charts/Chart.astro",
     "./DataTable.astro": "./src/components/data-display/DataTable.astro",
     "./EmptyState.astro": "./src/components/feedback/EmptyState.astro",
     "./PageHeader.astro": "./src/components/layout/PageHeader.astro",
     "./Pagination.astro": "./src/components/navigation/Pagination.astro",
+    "./CursorPagination.astro": "./src/components/navigation/CursorPagination.astro",
     "./ProductCard.astro": "./src/components/commerce/ProductCard.astro",
     "./SEO.astro": "./src/components/seo/SEO.astro",
     "./Skeleton.astro": "./src/components/feedback/Skeleton.astro",
@@ -38,18 +39,12 @@
     "./StoreFooter.astro": "./src/components/storefront/StoreFooter.astro",
     "./StorefrontEmptyCollection.astro": "./src/components/storefront/StorefrontEmptyCollection.astro",
     "./DashboardMetric.astro": "./src/components/data-display/DashboardMetric.astro",
-    "./AdminMetric.astro": "./src/components/data-display/AdminMetric.astro",
+    "./InspectorMetric.astro": "./src/components/data-display/InspectorMetric.astro",
     "./Tabs.astro": "./src/components/navigation/Tabs.astro",
-    "./chart": "./src/components/charts/types.ts",
-    "./theme": "./src/theme.ts",
-    "./styles.css": "./src/styles/global.css",
-    "./admin.css": "./src/styles/admin.css"
+    "./package.json": "./package.json"
   },
   "dependencies": {
-    "@fontsource-variable/manrope": "^5.2.6",
-    "@fontsource-variable/newsreader": "^5.2.6",
-    "echarts": "^6.1.0",
-    "flint-chart": "0.2.1"
+    "@takontuku/theme": "^0.2.0"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.4",

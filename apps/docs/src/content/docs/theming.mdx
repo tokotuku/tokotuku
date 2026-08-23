@@ -10,16 +10,17 @@ runtime color modes.
 
 ## Load the global stylesheet
 
-Import the UI stylesheet once from the application layout:
+Import the theme stylesheet once from the document layout:
 
 ```astro
 ---
-import "@takontuku/ui/styles.css";
+import "@takontuku/theme/styles.css";
 ---
 ```
 
 The stylesheet imports Tailwind, defines its `@theme` utilities, and contains all Takontuku color
-modes. Components remain zero-runtime; Tailwind generates static CSS during the Vite build.
+modes. `ThemeScript.astro` is the single local-storage and system-preference bootstrap; Tailwind
+generates static CSS during the Vite build.
 
 ## Select a palette
 
@@ -31,7 +32,7 @@ Set `data-theme` on an ancestor, normally the root element:
 
 ```
 
-Takontuku exposes light and dark choices. When `data-theme` is absent, the inline bootstrap follows `prefers-color-scheme`; a saved choice is kept in `localStorage`. OS forced-colors and prefers-contrast remain supported for accessibility.
+Takontuku exposes light and dark choices. When `data-theme` is absent, `ThemeScript.astro` follows `prefers-color-scheme`; a saved choice is kept in `localStorage`. OS forced-colors and prefers-contrast remain supported for accessibility.
 
 ## Brand palette
 
@@ -53,7 +54,7 @@ the corresponding `#191511` / `#211b17` / `#120f0d` / `#c58b63` values. Success,
 danger are semantic package colors and are deliberately not brand-overridable.
 
 Values supplied by the brand win over package defaults. Missing values fall back independently,
-and the same serializer is used by storefront `Layout`, `AdminLayout`, and `AuthFrame`.
+and the same serializer is used by `DocumentLayout`, `AdminLayout`, and `AuthFrame`.
 
 The old accent-only configuration remains valid:
 
@@ -130,6 +131,52 @@ For the package-owned fallback, omit `auth` entirely:
 brand: { name: "Kedai Senja", locale: "id-ID", currency: "IDR" }
 ```
 
+## Admin dashboard artwork
+
+The admin dashboard uses the energy editorial artwork preset by default. The artwork is
+decorative, ships with the UI package in light and dark variants, and can be selected per brand
+without changing the dashboard route:
+
+```js
+brand: {
+  name: "Kedai Senja",
+  admin: {
+    dashboardArtwork: "energy",
+  },
+}
+```
+
+Use the abstract preset when a commerce, service, or company-profile brand needs a more neutral
+composition without industry-specific objects:
+
+```js
+brand: {
+  admin: {
+    dashboardArtwork: "abstract",
+  },
+}
+```
+
+Consumers may provide their own light asset and, optionally, a separate dark asset. `position`
+maps to the decorative artwork's `object-position`-equivalent crop position and defaults to
+`center`; if `dark` is omitted, the light asset is used for both themes.
+
+```js
+brand: {
+  admin: {
+    dashboardArtwork: {
+      light: "/images/dashboard-light.webp",
+      dark: "/images/dashboard-dark.webp",
+      position: "center right",
+    },
+  },
+}
+```
+
+Unknown preset values and invalid custom objects safely fall back to `abstract`. The artwork is
+hidden from the accessibility tree and does not change document flow. Existing brand
+configurations remain valid because `admin` and `dashboardArtwork` are optional.
+
 ## Admin inspector and quick views
 
 `AdminLayout` exposes a named `inspector` slot. A page that supplies the slot gets an inline
@@ -144,7 +191,7 @@ brand: { name: "Kedai Senja", locale: "id-ID", currency: "IDR" }
 </AdminLayout>
 ```
 
-Use `AdminPageHeader`, `AdminInspector`, `AdminMetric`, and `AdminQuickView` from
+Use `AdminPageHeader`, `AdminInspector`, `InspectorMetric`, and `AdminQuickView` from
 `@takontuku/ui`. Quick-view triggers provide `data-quick-view-endpoint` and an entity ID; the
 shared controller handles loading, retry, successful-response caching, aborting stale requests,
 `Escape`, focus return, and responsive dialog sizing. Keep detail rendering text-based (`textContent`

@@ -1,4 +1,4 @@
-// Layout.astro renders whatever `@takontuku/core`'s Vite plugin puts on this
+// DocumentLayout.astro renders whatever `@takontuku/core`'s Vite plugin puts on this
 // virtual module (each installed module's ambient scripts, e.g. orders'
 // cart wiring) — declared locally rather than imported from
 // `@takontuku/core` so `ui` doesn't depend on the package that already

@@ -1,0 +1,63 @@
+---
+import abstractDark from "../../assets/admin-dashboard-abstract-dark.webp";
+import abstractLight from "../../assets/admin-dashboard-abstract-light.webp";
+import energyDark from "../../assets/admin-dashboard-energy-dark.webp";
+import energyLight from "../../assets/admin-dashboard-energy-light.webp";
+
+type ArtworkConfig =
+  | "abstract"
+  | "energy"
+  | {
+      light: string;
+      dark?: string;
+      position?: string;
+    };
+type CustomArtworkConfig = Exclude<ArtworkConfig, "abstract" | "energy">;
+
+interface Props {
+  artwork?: ArtworkConfig;
+  class?: string;
+}
+
+const { artwork = "abstract", class: className } = Astro.props;
+
+const builtIn = {
+  abstract: { light: abstractLight.src, dark: abstractDark.src },
+  energy: { light: energyLight.src, dark: energyDark.src },
+} as const;
+
+function resolveCustomArtwork(value: CustomArtworkConfig) {
+  if (typeof value.light !== "string") return null;
+  const light = value.light.trim();
+  if (!light) return null;
+  const dark = typeof value.dark === "string" ? value.dark.trim() : "";
+  const requestedPosition = typeof value.position === "string" ? value.position.trim() : "";
+  const position = /^[a-z0-9% .,-]+$/i.test(requestedPosition) ? requestedPosition : "center";
+  return { light, dark: dark || light, position };
+}
+
+function resolveArtwork(value: ArtworkConfig) {
+  if (value === "abstract" || value === "energy") {
+    return { ...builtIn[value], position: "center" };
+  }
+
+  if (value && typeof value === "object") {
+    const custom = resolveCustomArtwork(value);
+    if (custom) return custom;
+  }
+
+  return { ...builtIn.abstract, position: "center" };
+}
+
+const resolved = resolveArtwork(artwork);
+const hasDistinctDarkArtwork = resolved.dark !== resolved.light;
+const imageStyle = `object-position:${resolved.position};`;
+
+import "./AdminDashboardArtwork.css";
+---
+
+<picture class:list={["admin-dashboard-artwork", className]} aria-hidden="true">
+  {hasDistinctDarkArtwork && <source media="(prefers-color-scheme: dark)" srcset={resolved.dark} />}
+  <img class="admin-dashboard-artwork__image" src={resolved.light} alt="" aria-hidden="true" tabindex="-1" loading="lazy" decoding="async" style={imageStyle} />
+</picture>
+

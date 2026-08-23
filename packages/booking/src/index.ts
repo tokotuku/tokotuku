@@ -4,7 +4,13 @@ export function booking(): ModuleDefinition {
   return defineModule({
     name: "booking",
     requires: ["catalog", "orders"],
-    migrations: [{ name: "init", url: new URL("../migrations/0001_init.sql", import.meta.url) }],
+    migrations: [
+      { name: "init", url: new URL("../migrations/0001_init.sql", import.meta.url) },
+      {
+        name: "admin-cursor-indexes",
+        url: new URL("../migrations/0002_admin_cursor_indexes.sql", import.meta.url),
+      },
+    ],
     adminNav: [
       {
         label: "Bookings",
@@ -39,7 +45,7 @@ export function booking(): ModuleDefinition {
     adminDashboardWidgets: [
       {
         id: "booking-upcoming",
-        entrypoint: "@takontuku/booking/routes/admin/BookingDashboardWidget.astro",
+        entrypoint: "@takontuku/booking/components/admin/BookingDashboardWidget.astro",
         area: "main",
         order: 25,
       },
@@ -50,10 +56,12 @@ export function booking(): ModuleDefinition {
 export type { BookingRequestAttributes } from "./booking-hooks";
 export {
   type Booking,
+  type BookingDashboardSummary,
   type BookingSlot,
   findBookingByOrderId,
   findItemSchedule,
   findOverlappingOrderIds,
+  getBookingDashboardSummary,
   type ItemSchedule,
   type ListBookingsOptions,
   listBookings,

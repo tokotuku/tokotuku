@@ -1,7 +1,7 @@
 {
   "name": "@takontuku/orders",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "files": [
     "dist",
@@ -17,18 +17,19 @@
       "import": "./dist/index.js"
     },
     "./client/cart": "./src/client/cart.ts",
+    "./components/*": "./src/components/*",
     "./routes/*": "./src/routes/*",
     "./package.json": "./package.json"
   },
   "dependencies": {
-    "@takontuku/catalog": "workspace:*",
-    "@takontuku/core": "workspace:*",
-    "@takontuku/ui": "workspace:*"
+    "@takontuku/catalog": "^0.2.0",
+    "@takontuku/core": "^0.2.0",
+    "@takontuku/ui": "^0.2.0"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.4",
     "@cloudflare/workers-types": "^5.20260710.1",
-    "@takontuku/config": "workspace:*",
+    "@takontuku/config": "^0.2.0",
     "astro": "^7.0.9"
   },
   "peerDependencies": {

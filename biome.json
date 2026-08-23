@@ -35,7 +35,8 @@
         "noNonNullAssertion": "error",
         "useImportType": "error",
         "useExportType": "error",
-        "useConst": "error"
+        "useConst": "error",
+        "noNestedTernary": "error"
       },
       "correctness": {
         "noUnusedImports": "error",

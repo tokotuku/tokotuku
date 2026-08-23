@@ -22,7 +22,9 @@
       "version": "0.0.0",
       "dependencies": {
         "@astrojs/starlight": "0.41.3",
-        "@takontuku/ui": "workspace:*",
+        "@takontuku/charts": "^0.2.0",
+        "@takontuku/theme": "^0.2.0",
+        "@takontuku/ui": "^0.2.0",
         "astro": "7.0.9",
       },
       "devDependencies": {
@@ -35,7 +37,8 @@
       "name": "storybook",
       "version": "0.0.1",
       "dependencies": {
-        "@takontuku/ui": "workspace:*",
+        "@takontuku/theme": "^0.2.0",
+        "@takontuku/ui": "^0.2.0",
         "astro": "^7.0.9",
       },
       "devDependencies": {
@@ -51,7 +54,7 @@
     },
     "configs": {
       "name": "@takontuku/config",
-      "version": "0.1.0",
+      "version": "0.2.0",
     },
     "examples/compro-content": {
       "name": "compro-content",
@@ -250,16 +253,17 @@
     },
     "packages/auth": {
       "name": "@takontuku/auth",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "dependencies": {
-        "@takontuku/core": "workspace:*",
-        "@takontuku/ui": "workspace:*",
+        "@takontuku/core": "^0.2.0",
+        "@takontuku/theme": "^0.2.0",
+        "@takontuku/ui": "^0.2.0",
         "better-auth": ">=1.6.23 <1.7.0",
       },
       "devDependencies": {
         "@astrojs/check": "^0.9.4",
         "@cloudflare/workers-types": "^5.20260710.1",
-        "@takontuku/config": "workspace:*",
+        "@takontuku/config": "^0.2.0",
         "astro": "^7.0.9",
       },
       "peerDependencies": {
@@ -272,7 +276,7 @@
     },
     "packages/booking": {
       "name": "@takontuku/booking",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "dependencies": {
         "@takontuku/catalog": "workspace:*",
         "@takontuku/core": "workspace:*",
@@ -295,7 +299,7 @@
     },
     "packages/catalog": {
       "name": "@takontuku/catalog",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "dependencies": {
         "@takontuku/core": "workspace:*",
         "@takontuku/ui": "workspace:*",
@@ -314,19 +318,37 @@
         "@cloudflare/workers-types",
       ],
     },
+    "packages/charts": {
+      "name": "@takontuku/charts",
+      "version": "0.2.0",
+      "dependencies": {
+        "@takontuku/theme": "^0.2.0",
+        "echarts": "^6.1.0",
+        "flint-chart": "0.2.1",
+      },
+      "devDependencies": {
+        "@astrojs/check": "^0.9.4",
+        "astro": "^7.0.9",
+        "tailwindcss": "^4.3.1",
+      },
+      "peerDependencies": {
+        "astro": ">=7.0.0",
+      },
+    },
     "packages/core": {
       "name": "@takontuku/core",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "bin": {
         "takontuku": "./dist/cli/bin.js",
       },
       "dependencies": {
-        "@takontuku/ui": "workspace:*",
+        "@takontuku/theme": "^0.2.0",
+        "@takontuku/ui": "^0.2.0",
       },
       "devDependencies": {
         "@astrojs/check": "^0.9.4",
         "@cloudflare/workers-types": "^5.20260710.1",
-        "@takontuku/config": "workspace:*",
+        "@takontuku/config": "^0.2.0",
         "astro": "^7.0.9",
         "vite": "^8.1.4",
       },
@@ -340,7 +362,7 @@
     },
     "packages/create-takontuku": {
       "name": "create-takontuku",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "bin": {
         "create-takontuku": "./dist/bin.js",
       },
@@ -354,7 +376,7 @@
     },
     "packages/jarene": {
       "name": "@takontuku/jarene",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "dependencies": {
         "@takontuku/core": "workspace:*",
       },
@@ -374,7 +396,7 @@
     },
     "packages/orders": {
       "name": "@takontuku/orders",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "dependencies": {
         "@takontuku/catalog": "workspace:*",
         "@takontuku/core": "workspace:*",
@@ -394,14 +416,27 @@
         "@cloudflare/workers-types",
       ],
     },
-    "packages/ui": {
-      "name": "@takontuku/ui",
-      "version": "0.1.0",
+    "packages/theme": {
+      "name": "@takontuku/theme",
+      "version": "0.2.0",
       "dependencies": {
         "@fontsource-variable/manrope": "^5.2.6",
         "@fontsource-variable/newsreader": "^5.2.6",
-        "echarts": "^6.1.0",
-        "flint-chart": "0.2.1",
+      },
+      "devDependencies": {
+        "@astrojs/check": "^0.9.4",
+        "astro": "^7.0.9",
+        "tailwindcss": "^4.3.1",
+      },
+      "peerDependencies": {
+        "tailwindcss": ">=4.0.0",
+      },
+    },
+    "packages/ui": {
+      "name": "@takontuku/ui",
+      "version": "0.2.0",
+      "dependencies": {
+        "@takontuku/theme": "^0.2.0",
       },
       "devDependencies": {
         "@astrojs/check": "^0.9.4",
@@ -1030,6 +1065,8 @@
 
     "@takontuku/catalog": ["@takontuku/catalog@workspace:packages/catalog"],
 
+    "@takontuku/charts": ["@takontuku/charts@workspace:packages/charts"],
+
     "@takontuku/config": ["@takontuku/config@workspace:configs"],
 
     "@takontuku/core": ["@takontuku/core@workspace:packages/core"],
@@ -1037,6 +1074,8 @@
     "@takontuku/jarene": ["@takontuku/jarene@workspace:packages/jarene"],
 
     "@takontuku/orders": ["@takontuku/orders@workspace:packages/orders"],
+
+    "@takontuku/theme": ["@takontuku/theme@workspace:packages/theme"],
 
     "@takontuku/ui": ["@takontuku/ui@workspace:packages/ui"],
 

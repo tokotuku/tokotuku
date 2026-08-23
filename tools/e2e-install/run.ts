@@ -15,12 +15,14 @@
 // Prerequisite: a registry reachable at REGISTRY_URL (defaults to Verdaccio
 // on http://localhost:4873). Start one locally with `moon run verdaccio:up`.
 
-import { spawn } from "node:child_process";
-import { mkdtempSync } from "node:fs";
+import { execFileSync, spawn } from "node:child_process";
+import { existsSync, mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import {
   assertAgentSetup,
+  assertPackedTailwindUtilities,
+  fetchWithTimeout,
   installClient,
   publishAll,
   scaffoldClient,
@@ -30,17 +32,51 @@ import {
 
 const BOOT_CHECK_PORT = 8799;
 
-/** Boots the built worker with `wrangler dev` and confirms it serves a request, then tears it down -- proof the tarball-installed package graph doesn't just build, it runs. */
+function resolveNodeBinary(): string {
+  const configured = process.env.TAKONTUKU_NODE_BINARY;
+  const candidate = configured ?? process.env.npm_node_execpath ?? "node";
+  try {
+    execFileSync(candidate, ["--version"], { stdio: "ignore" });
+  } catch {
+    throw new Error(
+      `Node is required to run the Wrangler boot check; set TAKONTUKU_NODE_BINARY to a Node executable (tried ${candidate})`,
+    );
+  }
+  return candidate;
+}
+
+// Keep Wrangler on Node here. Running its CLI through bunx leaves the outer
+// dev proxy waiting forever on some Bun runtimes even though the inner worker
+// is healthy and reachable.
+/** Boots the built worker with Wrangler's Node CLI and confirms it serves a request, then tears it down -- proof the tarball-installed package graph doesn't just build, it runs. */
 async function bootCheck(clientDir: string): Promise<void> {
-  const child = spawn("bunx", ["wrangler", "dev", "--port", String(BOOT_CHECK_PORT)], {
-    cwd: clientDir,
-    stdio: "inherit",
-    detached: true,
-  });
+  const wranglerCli = path.join(clientDir, "node_modules", "wrangler", "wrangler-dist", "cli.js");
+  if (!existsSync(wranglerCli)) {
+    throw new Error(`wrangler CLI is missing from the packed client: ${wranglerCli}`);
+  }
+
+  const child = spawn(
+    resolveNodeBinary(),
+    [
+      wranglerCli,
+      "dev",
+      "--local",
+      "--ip",
+      "127.0.0.1",
+      "--port",
+      String(BOOT_CHECK_PORT),
+      "--show-interactive-dev-session=false",
+    ],
+    {
+      cwd: clientDir,
+      stdio: "inherit",
+      detached: true,
+    },
+  );
 
   try {
-    await waitForServer(`http://localhost:${BOOT_CHECK_PORT}/setup`, 30_000);
-    const response = await fetch(`http://localhost:${BOOT_CHECK_PORT}/setup`);
+    await waitForServer(`http://127.0.0.1:${BOOT_CHECK_PORT}/setup`, 30_000);
+    const response = await fetchWithTimeout(`http://127.0.0.1:${BOOT_CHECK_PORT}/setup`, 5_000);
     if (!response.ok) {
       throw new Error(`GET /setup returned ${response.status}`);
     }
@@ -63,6 +99,7 @@ async function main(): Promise<void> {
   sh("bunx", ["takontuku", "db", "sync"], clientDir);
   sh("bunx", ["wrangler", "d1", "migrations", "apply", "DB", "--local"], clientDir);
   sh("bun", ["run", "build"], clientDir);
+  assertPackedTailwindUtilities(clientDir);
   await bootCheck(clientDir);
 
   console.log("");

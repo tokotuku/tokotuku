@@ -2,14 +2,16 @@
 import brand from "virtual:takontuku/config";
 import { createTranslator } from "@takontuku/core";
 import Icon from "@takontuku/ui/Icon.astro";
+import AuthFrame from "../components/AuthFrame.astro";
 import { authMessages } from "../messages";
-import AuthFrame from "./AuthFrame.astro";
 
 const requestedNext = Astro.url.searchParams.get("next") ?? "/admin";
 const next =
   requestedNext.startsWith("/") && !requestedNext.startsWith("//") ? requestedNext : "/admin";
 const t = createTranslator(brand, authMessages);
 const setupComplete = Astro.url.searchParams.get("setup") === "complete";
+
+import "../styles/routes/auth-login.css";
 ---
 
 <AuthFrame title={t("auth.login.title")}>
@@ -17,11 +19,11 @@ const setupComplete = Astro.url.searchParams.get("setup") === "complete";
     <h1>{t("auth.login.title")}</h1>
     <p>{t("auth.login.description", { brand: brand.name })}</p>
     {setupComplete && <p class="auth-message success">{t("auth.login.setupComplete")}</p>}
+    <p class="auth-message" id="login-error" aria-live="polite" hidden></p>
 
     <div class="field"><label for="email">{t("auth.login.emailLabel")}</label><div class="input-wrap"><Icon name="mail" size={16}/><input id="email" name="email" type="email" autocomplete="email" placeholder={t("auth.login.emailPlaceholder")} required /></div></div>
-    <div class="field"><div class="field-row"><label for="password">{t("auth.login.passwordLabel")}</label><a href="/forgot-password">{t("auth.login.forgot")}</a></div><div class="input-wrap"><Icon name="lock" size={16}/><input id="password" name="password" type="password" autocomplete="current-password" placeholder={t("auth.login.passwordPlaceholder")} required /><button class="password-toggle" type="button" data-password-toggle data-show-label={t("auth.common.showPassword")} data-hide-label={t("auth.common.hidePassword")} aria-label={t("auth.common.showPassword")}><Icon name="eye" size={16}/></button></div></div>
+    <div class="field password-field"><label for="password">{t("auth.login.passwordLabel")}</label><div class="input-wrap"><Icon name="lock" size={16}/><input id="password" name="password" type="password" autocomplete="current-password" placeholder={t("auth.login.passwordPlaceholder")} required /><button class="password-toggle" type="button" data-password-toggle data-show-label={t("auth.common.showPassword")} data-hide-label={t("auth.common.hidePassword")} aria-label={t("auth.common.showPassword")}><Icon name="eye" size={16}/></button></div><a class="password-forgot" href="/forgot-password">{t("auth.login.forgot")}</a></div>
     <label class="check-row"><input type="checkbox" name="remember" /> {t("auth.login.remember")}</label>
-    <p class="auth-message" id="login-error" aria-live="polite" hidden></p>
     <button class="auth-submit" type="submit">{t("auth.login.submit")} <Icon name="arrowRight" size={16}/></button>
     <p class="auth-switch">{t("auth.login.newAccount", { brand: brand.name })} <a href="/register">{t("auth.login.createAccount")}</a></p>
 
@@ -64,6 +66,3 @@ const setupComplete = Astro.url.searchParams.get("setup") === "complete";
     }
   });
 </script>
-
-<style>
-</style>

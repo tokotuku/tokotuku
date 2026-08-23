@@ -19,7 +19,9 @@ packages/
   core/             Integration, registry, middleware, admin shell (@takontuku/core, public)
   auth/             Better Auth + roles (@takontuku/auth, public)
   jarene/           Server-rendered auth-panel quote module (@takontuku/jarene, public)
-  ui/               The complete Astro component set (@takontuku/ui, public)
+  theme/            Tailwind tokens, palette API, fonts, and theme bootstrap (@takontuku/theme, public)
+  ui/               Astro component primitives (@takontuku/ui, public)
+  charts/           Deferred ECharts/Flint chart component (@takontuku/charts, public)
   catalog/          Product catalog + admin + demo seed (@takontuku/catalog, private)
   orders/           Orders lifecycle + checkout + cart (@takontuku/orders, private)
   booking/          Service scheduling and booking (@takontuku/booking, private)
@@ -30,8 +32,12 @@ tools/              Local dev infrastructure (Verdaccio private registry, e2e in
 ```
 
 Every `@takontuku/*` package is consumed by the `apps/*` and `examples/*` fixtures as a local
-workspace package (`workspace:*`) — nothing here needs Verdaccio or a real npm publish to install
-and run.
+workspace package. Release `0.2.0` uses breaking subpath exports: theme styles come from
+`@takontuku/theme`, charts from `@takontuku/charts`, and admin lists expose cursor pages.
+The `examples/**` matrix is intentionally frozen as a pre-release fixture and is excluded from
+the 0.2.0 refactor and release gates.
+
+See [`MIGRATION-0.2.md`](MIGRATION-0.2.md) before upgrading an existing application.
 
 ## AI fixture matrix
 

@@ -22,6 +22,7 @@ describe("takontuku virtual config modules", () => {
       locale: "id-ID",
       currency: "IDR",
       timeZone: "Asia/Jakarta",
+      admin: { dashboardArtwork: "energy" as const },
       auth: { backgroundImage: "/images/auth.webp", backgroundPosition: "center 30%" },
       messages: { "auth.login.title": "Masuk ke Warm Market" },
     };

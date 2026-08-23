@@ -40,7 +40,7 @@ export default defineConfig({
       modules: [auth(), catalog(), orders()],
     }),
   ],
-  // @takontuku/ui's Layout.astro imports its own CSS, which needs this plugin.
+  // @takontuku/theme/styles.css is imported by DocumentLayout.astro and needs this plugin.
   vite: { plugins: [tailwindcss()] },
   output: "server",
   // A dedicated port keeps this neutral inline fixture isolated during tests.

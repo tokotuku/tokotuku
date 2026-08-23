@@ -1,17 +1,19 @@
 ---
 import { env } from "cloudflare:workers";
 import brand from "virtual:takontuku/config";
-import { createTranslator } from "@takontuku/core";
+import { CursorError, createTranslator } from "@takontuku/core";
 import { date, money } from "@takontuku/core/brand";
-import AdminLayout from "@takontuku/core/routes/AdminLayout.astro";
+import AdminLayout from "@takontuku/core/layouts/AdminLayout.astro";
 import AdminInspector from "@takontuku/ui/AdminInspector.astro";
-import AdminMetric from "@takontuku/ui/AdminMetric.astro";
 import AdminPageHeader from "@takontuku/ui/AdminPageHeader.astro";
 import AdminQuickView from "@takontuku/ui/AdminQuickView.astro";
+import CursorPagination from "@takontuku/ui/CursorPagination.astro";
 import Icon from "@takontuku/ui/Icon.astro";
+import InspectorMetric from "@takontuku/ui/InspectorMetric.astro";
 import { orderMessages } from "../../messages";
 import {
   approvePayment,
+  getOrderDashboardSummary,
   listOrders,
   type OrderStatus,
   orderStatuses,
@@ -38,7 +40,29 @@ if (Astro.request.method === "POST") {
   }
 }
 
-const orders = await listOrders(env.DB);
+const after = Astro.url.searchParams.get("after") ?? undefined;
+const before = Astro.url.searchParams.get("before") ?? undefined;
+const search = Astro.url.searchParams.get("q") ?? undefined;
+const statusParam = Astro.url.searchParams.get("status") ?? undefined;
+if (statusParam && !orderStatuses.includes(statusParam as OrderStatus)) {
+  return new Response("Invalid order status filter.", { status: 400 });
+}
+const status = statusParam as OrderStatus | undefined;
+let orderPage: Awaited<ReturnType<typeof listOrders>>;
+try {
+  orderPage = await listOrders(env.DB, {
+    pageSize: 25,
+    ...(status ? { status } : {}),
+    ...(after ? { after } : {}),
+    ...(before ? { before } : {}),
+    ...(search ? { search } : {}),
+  });
+} catch (caught) {
+  if (caught instanceof CursorError) return new Response(caught.message, { status: 400 });
+  throw caught;
+}
+const orders = orderPage.items;
+const summary = await getOrderDashboardSummary(env.DB);
 const statusLabel: Record<OrderStatus, string> = {
   inquiry: t("orders.status.inquiry"),
   quoted: t("orders.status.quoted"),
@@ -49,57 +73,71 @@ const statusLabel: Record<OrderStatus, string> = {
   completed: t("orders.status.completed"),
   cancelled: t("orders.status.cancelled"),
 };
-const statusTone = (status: OrderStatus) =>
-  status === "delivered" || status === "completed"
-    ? "success"
-    : status === "pending" || status === "inquiry"
-      ? "warning"
-      : status === "cancelled"
-        ? "danger"
-        : "info";
+function statusTone(status: OrderStatus): string {
+  if (status === "delivered" || status === "completed") return "success";
+  if (status === "pending" || status === "inquiry") return "warning";
+  if (status === "cancelled") return "danger";
+  return "info";
+}
+const statusClassByTone: Record<string, string> = {
+  success: "status--success",
+  warning: "status--warning",
+  danger: "status--danger",
+  info: "status--info",
+};
+function statusClass(status: OrderStatus): string {
+  return statusClassByTone[statusTone(status)] ?? "status--info";
+}
+function paymentStatusClass(status: string): string {
+  return status === "paid" ? "status--success" : "status--warning";
+}
+function paymentLabel(method: string, status: string): string {
+  if (method === "transfer") {
+    return status === "paid"
+      ? t("orders.admin.payment.transferVerified")
+      : t("orders.admin.payment.transferPending");
+  }
+  return status === "paid" ? t("orders.admin.payment.paidCash") : t("orders.admin.payment.cashDue");
+}
+function statusHref(nextStatus?: OrderStatus): string {
+  const params = new URLSearchParams();
+  if (nextStatus) params.set("status", nextStatus);
+  if (search) params.set("q", search);
+  const query = params.toString();
+  return query ? `/admin/orders?${query}` : "/admin/orders";
+}
 const isTerminal = (status: OrderStatus) => orderTransitions[status].length === 0;
 const locale = brand.locale.toLowerCase().startsWith("id") ? "id" : "en";
-const today = new Date().toISOString().slice(0, 10);
-const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
-const todaySalesCents = orders
-  .filter((order) => order.createdAt.slice(0, 10) === today && order.status !== "cancelled")
-  .reduce((sum, order) => sum + (order.totalCents ?? 0), 0);
-const thirtyDayRevenueCents = orders
-  .filter(
-    (order) =>
-      new Date(`${order.createdAt}Z`).getTime() >= thirtyDaysAgo && order.status !== "cancelled",
-  )
-  .reduce((sum, order) => sum + (order.totalCents ?? 0), 0);
-const pendingCount = orders.filter(
-  (order) => order.status === "pending" || order.status === "inquiry",
-).length;
-const transferPendingCount = orders.filter(
-  (order) =>
-    order.paymentMethod === "transfer" && order.paymentStatus === "unpaid" && order.paymentProofKey,
-).length;
+const todaySalesCents = summary.todaySalesCents;
+const thirtyDayRevenueCents = summary.thirtyDayRevenueCents;
+const pendingCount = summary.pendingCount;
+const transferPendingCount = summary.transferPendingCount;
+
+import "../../styles/routes/orders-admin.css";
 ---
 
 <AdminLayout title={t("orders.admin.title")} orderCount={pendingCount}>
   {error && <p class="notice notice--error" role="alert">{error}</p>}
   {Astro.url.searchParams.has("updated") && <p class="notice">{t("orders.admin.updated")}</p>}
 
-  {orders.length === 0 ? (
+  {orders.length === 0 && (
     <section class="standalone-empty" data-orders-empty>
       <div class="empty-symbol"><Icon name="orders" size={27} /></div>
       <p class="eyebrow">{locale === "id" ? "Pesanan" : "Orders"}</p>
       <h1>{t("orders.admin.empty")}</h1>
       <p>{t("orders.admin.emptyDescription")}</p>
     </section>
-  ) : (
+  )}
+  {orders.length > 0 && (
     <>
       <AdminPageHeader eyebrow={locale === "id" ? "Operasional" : "Operations"} title={t("orders.admin.title")} description={t("orders.admin.description")} />
       <section class="panel data-panel" data-order-table data-currency={brand.currency} data-result-template={t("orders.admin.showing")} data-no-match={t("orders.admin.noMatch")}>
         <div class="table-toolbar">
           <div class="filter-tabs" role="tablist" aria-label={t("orders.admin.statusFilter")}>
-            <button type="button" aria-selected="true" data-filter="All">{t("orders.admin.all")}</button>
-            {orderStatuses.map((status) => <button type="button" aria-selected="false" data-filter={status}>{statusLabel[status]}</button>)}
+            <a aria-current={!status ? "page" : undefined} href={statusHref()}>{t("orders.admin.all")}</a>
+            {orderStatuses.map((item) => <a aria-current={status === item ? "page" : undefined} href={statusHref(item)}>{statusLabel[item]}</a>)}
           </div>
-          <label class="table-search"><span class="sr-only">{t("orders.admin.search")}</span><input type="search" placeholder={t("orders.admin.searchPlaceholder")} data-table-search /></label>
+          <form method="get" class="table-search"><label class="sr-only" for="orders-admin-search">{t("orders.admin.search")}</label><input id="orders-admin-search" type="search" name="q" value={search ?? ""} placeholder={t("orders.admin.searchPlaceholder")} />{status && <input type="hidden" name="status" value={status} />}</form>
         </div>
         <div class="table-wrap">
           <table class="admin-table">
@@ -112,8 +150,8 @@ const transferPendingCount = orders.filter(
                   <td>{date(new Date(`${order.createdAt}Z`))}</td>
                   <td class="numeric">{order.itemCount}</td>
                   <td class="money">{order.totalCents === null ? "—" : money(order.totalCents / 100)}</td>
-                  <td>{order.status === "inquiry" ? <span class="status status--info">{t("orders.admin.payment.notQuoted")}</span> : <div class="payment-cell"><span class:list={["status", order.paymentStatus === "paid" ? "status--success" : "status--warning"]}>{order.paymentMethod === "transfer" ? (order.paymentStatus === "paid" ? t("orders.admin.payment.transferVerified") : t("orders.admin.payment.transferPending")) : (order.paymentStatus === "paid" ? t("orders.admin.payment.paidCash") : t("orders.admin.payment.cashDue"))}</span>{order.paymentMethod === "transfer" && order.paymentProofKey && <a href={`/api/payment-proofs/${order.paymentProofKey}`} target="_blank" rel="noreferrer">{t("orders.admin.viewProof")}</a>}{order.paymentMethod === "transfer" && order.paymentStatus === "unpaid" && order.paymentProofKey && <form method="post" class="approve-form"><input type="hidden" name="orderId" value={order.id} /><input type="hidden" name="action" value="approve_payment" /><button type="submit">{t("orders.admin.verify")}</button></form>}</div>}</td>
-                  <td><span class={`status status--${statusTone(order.status)}`}>{statusLabel[order.status]}</span></td>
+                  <td>{order.status === "inquiry" ? <span class="status status--info">{t("orders.admin.payment.notQuoted")}</span> : <div class="payment-cell"><span class:list={["status", paymentStatusClass(order.paymentStatus)]}>{paymentLabel(order.paymentMethod, order.paymentStatus)}</span>{order.paymentMethod === "transfer" && order.paymentProofKey && <a href={`/api/payment-proofs/${order.paymentProofKey}`} target="_blank" rel="noreferrer">{t("orders.admin.viewProof")}</a>}{order.paymentMethod === "transfer" && order.paymentStatus === "unpaid" && order.paymentProofKey && <form method="post" class="approve-form"><input type="hidden" name="orderId" value={order.id} /><input type="hidden" name="action" value="approve_payment" /><button type="submit">{t("orders.admin.verify")}</button></form>}</div>}</td>
+                  <td><span class:list={["status", statusClass(order.status)]}>{statusLabel[order.status]}</span></td>
                   <td><form method="post" class="status-form"><input type="hidden" name="orderId" value={order.id} /><select name="status" aria-label={`${t("orders.admin.update")} ${order.orderNumber}`} disabled={isTerminal(order.status)}>{[order.status, ...orderTransitions[order.status]].map((status) => <option value={status} selected={status === order.status}>{statusLabel[status]}</option>)}</select><button type="submit" disabled={isTerminal(order.status)}>{t("orders.admin.save")}</button></form></td>
                   <td><div class="row-actions"><button type="button" data-quick-view-target="order-quick-view" data-quick-view-endpoint={`/admin/api/orders/${order.id}`} data-quick-view-title={`#${order.orderNumber}`} data-quick-view-meta={order.customerName} aria-label={`${t("orders.admin.previewTitle")}: ${order.orderNumber}`}><Icon name="eye" size={16} /></button></div></td>
                 </tr>
@@ -123,20 +161,21 @@ const transferPendingCount = orders.filter(
         </div>
         <div class="table-footer"><span data-result-count>{t("orders.admin.showing", { count: orders.length })}</span></div>
       </section>
+      <CursorPagination pageInfo={orderPage.pageInfo} />
     </>
   )}
 
   <Fragment slot="inspector">
     <AdminInspector title={t("orders.admin.title")} description={t("orders.admin.description")}>
       <div class="inspector-metrics">
-        <AdminMetric label={t("orders.dashboard.today")} value={money(todaySalesCents / 100)} />
-        <AdminMetric label={t("orders.dashboard.thirtyDays")} value={money(thirtyDayRevenueCents / 100)} />
-        <AdminMetric label={t("orders.dashboard.pending")} value={String(pendingCount)} tone={pendingCount ? "warning" : "default"} />
-        <AdminMetric label={t("orders.admin.verify")} value={String(transferPendingCount)} tone={transferPendingCount ? "warning" : "default"} />
+        <InspectorMetric label={t("orders.dashboard.today")} value={money(todaySalesCents / 100)} />
+        <InspectorMetric label={t("orders.dashboard.thirtyDays")} value={money(thirtyDayRevenueCents / 100)} />
+        <InspectorMetric label={t("orders.dashboard.pending")} value={String(pendingCount)} tone={pendingCount ? "warning" : "default"} />
+        <InspectorMetric label={t("orders.admin.verify")} value={String(transferPendingCount)} tone={transferPendingCount ? "warning" : "default"} />
       </div>
     </AdminInspector>
     <AdminInspector title={t("orders.admin.status")}>
-      <dl class="inspector-list">{orderStatuses.map((status) => <div><dt>{statusLabel[status]}</dt><dd>{orders.filter((order) => order.status === status).length}</dd></div>)}</dl>
+      <dl class="inspector-list">{orderStatuses.map((status) => <div><dt>{statusLabel[status]}</dt><dd>{summary.statusCounts[status]}</dd></div>)}</dl>
     </AdminInspector>
   </Fragment>
 
@@ -145,10 +184,7 @@ const transferPendingCount = orders.filter(
 
 {orders.length > 0 && <script>
   type OrderDetail = { id:number; orderNumber:string; customerName:string; customerEmail:string|null; createdAt:string; itemCount:number; totalCents:number|null; status:string; paymentMethod:string; paymentStatus:string; paymentProofKey:string|null; customerPhone:string; shippingAddress:string; shippingCity:string; shippingPostalCode:string; customerNote:string; source:string; items:Array<{itemId:number;productName:string;sku:string;priceCents:number;quantity:number;lineTotalCents:number|null}> };
-  const container = document.querySelector<HTMLElement>("[data-order-table]"); const rows = Array.from(container?.querySelectorAll<HTMLElement>("[data-row]") ?? []); const count = container?.querySelector("[data-result-count]"); let filter = "All"; let query = ""; const resultTemplate = container?.dataset["resultTemplate"] ?? ""; const emptyLabel = container?.dataset["noMatch"] ?? "";
-  const update = () => { let visible = 0; for (const row of rows) { const match = (filter === "All" || row.dataset["status"] === filter) && (row.dataset["search"]?.includes(query) ?? false); row.hidden = !match; if (match) visible += 1; } if (count) count.textContent = visible ? resultTemplate.replace(/\{count\}/g, String(visible)) : emptyLabel; };
-  for (const button of container?.querySelectorAll<HTMLButtonElement>("[data-filter]") ?? []) button.addEventListener("click", () => { filter = button.dataset["filter"] ?? "All"; container?.querySelectorAll("[data-filter]").forEach((item) => item.setAttribute("aria-selected", String(item === button))); update(); });
-  container?.querySelector<HTMLInputElement>("[data-table-search]")?.addEventListener("input", (event) => { query = (event.currentTarget as HTMLInputElement).value.trim().toLowerCase(); update(); });
+  const container = document.querySelector<HTMLElement>("[data-order-table]");
 
   const transitions: Record<string, string[]> = { inquiry:["quoted","confirmed","cancelled"], quoted:["confirmed","cancelled"], pending:["confirmed","cancelled"], confirmed:["in_progress","delivered","completed","cancelled"], in_progress:["completed","cancelled"], delivered:[], completed:[], cancelled:[] };
   const labels: Record<string, string> = { inquiry:"Permintaan baru", quoted:"Penawaran terkirim", pending:"Menunggu", confirmed:"Dikonfirmasi", in_progress:"Berlangsung", delivered:"Selesai", completed:"Tuntas", cancelled:"Dibatalkan" };
@@ -172,7 +208,3 @@ const transferPendingCount = orders.filter(
     if (order.paymentMethod === "transfer" && order.paymentStatus === "unpaid" && order.paymentProofKey) { const form = document.createElement("form"); form.method = "post"; form.action = "/admin/orders"; const id = document.createElement("input"); id.type = "hidden"; id.name = "orderId"; id.value = String(order.id); const action = document.createElement("input"); action.type = "hidden"; action.name = "action"; action.value = "approve_payment"; const button = document.createElement("button"); button.className = "admin-button admin-button--primary"; button.type = "submit"; button.textContent = "Verifikasi transfer"; form.append(id, action, button); footer.append(form); }
   });
 </script>}
-
-<style>
-  .standalone-empty { display:grid; min-height:calc(100vh - 13rem); place-items:center; align-content:center; padding:3rem; text-align:center; }.empty-symbol { display:grid; width:4.5rem; height:4.5rem; place-items:center; border:1px solid var(--admin-line); border-radius:50%; background:var(--admin-accent-soft); color:var(--admin-accent); }.standalone-empty .eyebrow { margin:1.5rem 0 .45rem; color:var(--tk-color-accent); font-size:.68rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; }.standalone-empty h1 { margin:0; font-family:var(--tk-font-family-display); font-size:clamp(2.7rem,5vw,4.5rem); font-weight:400; letter-spacing:-.045em; }.standalone-empty > p:not(.eyebrow) { max-width:30rem; margin:.7rem 0 1.4rem; color:var(--tk-color-fg-muted); font-size:.8rem; line-height:1.7; }.data-panel { overflow:hidden; }.admin-table tr[hidden] { display:none; }.payment-cell { display:flex; flex-direction:column; align-items:flex-start; gap:5px; }.payment-cell a { display:inline-flex; min-height:40px; align-items:center; color:var(--tk-color-accent); font-size:11px; }.approve-form button { min-height:40px; padding:0 9px; border:0; border-radius:7px; background:var(--tk-color-success); color:var(--tk-color-accent-fg); font-size:11px; cursor:pointer; }.entity-avatar { background:var(--tk-color-accent); }.status-form { display:flex; gap:6px; }.status-form select,.status-form button { min-height:40px; border:1px solid var(--admin-line); border-radius:7px; background:var(--admin-surface); color:var(--tk-color-fg); font-size:11px; }.status-form button { padding:0 9px; background:var(--tk-color-accent); color:var(--tk-color-accent-fg); cursor:pointer; }.status-form :disabled { opacity:.5; cursor:not-allowed; }.table-link { padding:0; border:0; background:none; color:var(--tk-color-fg); font:inherit; font-weight:var(--tk-font-weight-semibold); cursor:pointer; }.notice { padding:11px 14px; border-radius:10px; background:color-mix(in srgb,var(--tk-color-success) 10%,var(--admin-surface)); color:var(--tk-color-success); }.notice--error { background:color-mix(in srgb,var(--tk-color-danger) 8%,var(--admin-surface)); color:var(--tk-color-danger); }.quick-view-section { display:grid; gap:9px; }.quick-view-section h3 { margin:0; color:var(--tk-color-fg-muted); font-size:10px; font-weight:var(--tk-font-weight-bold); letter-spacing:.08em; text-transform:uppercase; }.quick-view-total { padding-top:10px; border-top:1px solid var(--admin-line); }.quick-view-note { margin:0; color:var(--tk-color-fg-muted); font-size:12px; line-height:1.6; white-space:pre-wrap; }
-</style>

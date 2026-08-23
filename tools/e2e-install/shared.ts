@@ -4,7 +4,7 @@
 // create-takontuku, and driving/asserting against a booted client.
 
 import { execFileSync } from "node:child_process";
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -59,6 +59,34 @@ export function installClient(clientDir: string): void {
   sh("bun", ["install", "--registry", REGISTRY, "--force"], clientDir);
 }
 
+/**
+ * A packed install must let Tailwind v4 see utility classes inside the
+ * @takontuku packages themselves. Checking the built CSS catches a missing
+ * `@source` declaration that a workspace symlink can hide.
+ */
+export function assertPackedTailwindUtilities(clientDir: string): void {
+  const distDir = path.join(clientDir, "dist");
+  const cssFiles: string[] = [];
+  const visit = (directory: string): void => {
+    if (!existsSync(directory)) return;
+    for (const entry of readdirSync(directory)) {
+      const filePath = path.join(directory, entry);
+      if (statSync(filePath).isDirectory()) visit(filePath);
+      else if (filePath.endsWith(".css")) cssFiles.push(filePath);
+    }
+  };
+  visit(distDir);
+  const css = cssFiles.map((filePath) => readFileSync(filePath, "utf8")).join("\n");
+  assert(
+    /\.rounded-tk-md(?:[,{])/.test(css),
+    "packed build is missing theme utility rounded-tk-md",
+  );
+  assert(
+    /\.text-foreground(?:[,{])/.test(css),
+    "packed build is missing theme utility text-foreground",
+  );
+}
+
 export function assertAgentSetup(clientDir: string): void {
   for (const fileName of ["AGENTS.md", "CLAUDE.md", "README.md"]) {
     assert(existsSync(path.join(clientDir, fileName)), `scaffold is missing ${fileName}`);
@@ -82,15 +110,16 @@ export function updateClient(clientDir: string): void {
   sh("bun", ["update", "--registry", REGISTRY, "--force"], clientDir);
 }
 
-// Publish order matters: `bun publish` requires every workspace:*
-// reference (including in devDependencies) to resolve to an already-
-// published version, so each entry here must come after everything it
-// depends on.
+// Keep the publish order dependency-friendly so a real registry can resolve
+// each tarball's internal Takontuku references as soon as it is published.
 const PUBLISHABLE_PACKAGES = [
   "configs",
-  "packages/core",
+  "packages/theme",
   "packages/ui",
+  "packages/charts",
+  "packages/core",
   "packages/auth",
+  "packages/jarene",
   "packages/catalog",
   "packages/orders",
   "packages/booking",
@@ -164,9 +193,9 @@ function publishWithRetry(cwd: string, attempts = 3): void {
 }
 
 /**
- * Registries refuse `private: true` and require every workspace:*
- * dependency to resolve to a real version -- neither is true for these
- * packages as checked in. Stamps both in memory, publishes, and restores
+ * Registries refuse `private: true`, and the isolated e2e version must be
+ * used for every internal Takontuku dependency instead of the release range
+ * checked into the workspace. Stamps both in memory, publishes, and restores
  * the file from disk afterward regardless of outcome.
  */
 function publishPackage(dir: string, version: string): void {
@@ -180,7 +209,7 @@ function publishPackage(dir: string, version: string): void {
       const deps = pkg[depField] as Record<string, string> | undefined;
       if (!deps) continue;
       for (const name of Object.keys(deps)) {
-        if (deps[name] === "workspace:*") deps[name] = version;
+        if (name.startsWith("@takontuku/")) deps[name] = version;
       }
     }
     writeJson(pkgPath, pkg);
@@ -212,6 +241,7 @@ export function publishAll(): string {
       "catalog:build",
       "orders:build",
       "booking:build",
+      "jarene:build",
       "create-takontuku:build",
     ],
     ROOT,
@@ -369,15 +399,28 @@ export function queryTableNames(clientDir: string): string[] {
 
 export async function waitForServer(url: string, timeoutMs: number): Promise<void> {
   const deadline = Date.now() + timeoutMs;
+  let lastError: unknown;
   while (Date.now() < deadline) {
     try {
-      await fetch(url);
+      await fetchWithTimeout(url, Math.min(1_000, deadline - Date.now()));
       return;
-    } catch {
-      await new Promise((resolve) => setTimeout(resolve, 500));
+    } catch (error) {
+      lastError = error;
+      await new Promise((resolve) => setTimeout(resolve, 250));
     }
   }
-  throw new Error(`Server at ${url} did not respond within ${timeoutMs}ms`);
+  const reason = lastError instanceof Error ? ` (${lastError.message})` : "";
+  throw new Error(`Server at ${url} did not respond within ${timeoutMs}ms${reason}`);
+}
+
+export async function fetchWithTimeout(url: string, timeoutMs: number): Promise<Response> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { signal: controller.signal });
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 export interface AdminCredentials {

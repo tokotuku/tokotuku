@@ -2,10 +2,12 @@
 import brand from "virtual:takontuku/config";
 import { createTranslator } from "@takontuku/core";
 import Icon from "@takontuku/ui/Icon.astro";
+import AuthFrame from "../components/AuthFrame.astro";
 import { authMessages } from "../messages";
-import AuthFrame from "./AuthFrame.astro";
 
 const t = createTranslator(brand, authMessages);
+
+import "../styles/routes/auth-register.css";
 ---
 
 <AuthFrame title={t("auth.register.title")}>
@@ -41,5 +43,3 @@ const t = createTranslator(brand, authMessages);
     location.href = "/";
   });
 </script>
-
-<style>.role-note { margin: 13px 0 18px !important; font-size: 11px !important; }</style>

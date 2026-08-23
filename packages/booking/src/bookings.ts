@@ -1,4 +1,12 @@
 import type { D1Database } from "@cloudflare/workers-types";
+import {
+  assertCursor,
+  CursorError,
+  type CursorPage,
+  cursorFilterSignature,
+  encodeCursor,
+  normalizePageSize,
+} from "@takontuku/core";
 
 export interface ItemSchedule {
   itemId: number;
@@ -107,6 +115,14 @@ export interface Booking {
   status: string;
   customerName: string;
   customerPhone: string;
+  hasOverlap: boolean;
+}
+
+export interface BookingDashboardSummary {
+  upcomingCount: number;
+  nearestDate: string | null;
+  statusCounts: Record<string, number>;
+  clashCount: number;
 }
 
 interface BookingRow {
@@ -126,6 +142,7 @@ interface BookingRow {
   status: string;
   customer_name: string;
   customer_phone: string;
+  has_overlap: number;
 }
 
 function toBooking(row: BookingRow): Booking {
@@ -146,6 +163,7 @@ function toBooking(row: BookingRow): Booking {
     status: row.status,
     customerName: row.customer_name,
     customerPhone: row.customer_phone,
+    hasOverlap: row.has_overlap === 1,
   };
 }
 
@@ -154,12 +172,19 @@ export interface ListBookingsOptions {
   from?: string;
   to?: string;
   status?: string;
+  search?: string;
+  pageSize?: number;
+  after?: string;
+  before?: string;
 }
 
 export async function listBookings(
   db: D1Database,
-  { from, to, status }: ListBookingsOptions = {},
-): Promise<Booking[]> {
+  { from, to, status, search, pageSize = 25, after, before }: ListBookingsOptions = {},
+): Promise<CursorPage<Booking>> {
+  if (after && before) throw new CursorError("after and before cursors are mutually exclusive.");
+  const size = normalizePageSize(pageSize);
+  const normalizedStatus = status === "all" ? undefined : status;
   const conditions: string[] = [];
   const bindings: unknown[] = [];
   if (from) {
@@ -170,9 +195,46 @@ export async function listBookings(
     conditions.push("b.start_date <= ?");
     bindings.push(to);
   }
-  if (status) {
+  if (normalizedStatus) {
     conditions.push("o.status = ?");
-    bindings.push(status);
+    bindings.push(normalizedStatus);
+  }
+  if (search) {
+    conditions.push(
+      "(o.order_number LIKE ? OR ci.name LIKE ? OR o.customer_name LIKE ? OR o.customer_phone LIKE ?)",
+    );
+    const like = `%${search}%`;
+    bindings.push(like, like, like, like);
+  }
+  const filters = cursorFilterSignature({
+    from: from ?? null,
+    to: to ?? null,
+    status: normalizedStatus ?? null,
+    search: search ?? null,
+  });
+  let direction: "ASC" | "DESC" = "ASC";
+  if (after) {
+    const cursor = assertCursor(after, { domain: "booking", filters });
+    if (
+      typeof cursor.keys["startDate"] !== "string" ||
+      typeof cursor.keys["orderId"] !== "number"
+    ) {
+      throw new CursorError("Booking cursor sort keys are invalid.");
+    }
+    conditions.push("(b.start_date > ? OR (b.start_date = ? AND b.order_id > ?))");
+    bindings.push(cursor.keys["startDate"], cursor.keys["startDate"], cursor.keys["orderId"]);
+  }
+  if (before) {
+    const cursor = assertCursor(before, { domain: "booking", filters });
+    if (
+      typeof cursor.keys["startDate"] !== "string" ||
+      typeof cursor.keys["orderId"] !== "number"
+    ) {
+      throw new CursorError("Booking cursor sort keys are invalid.");
+    }
+    conditions.push("(b.start_date < ? OR (b.start_date = ? AND b.order_id < ?))");
+    bindings.push(cursor.keys["startDate"], cursor.keys["startDate"], cursor.keys["orderId"]);
+    direction = "DESC";
   }
   const where = conditions.length ? ` WHERE ${conditions.join(" AND ")}` : "";
   const { results } = await db
@@ -181,16 +243,91 @@ export async function listBookings(
               b.start_date, b.end_date, b.slot_id, s.weekday AS slot_weekday,
               s.start_time AS slot_start_time, b.occurrences_per_day,
               o.shipping_address AS service_address, o.customer_note AS note,
-              o.status, o.customer_name, o.customer_phone
+              o.status, o.customer_name, o.customer_phone,
+              CASE WHEN EXISTS (
+                SELECT 1 FROM booking_order_bookings clash
+                WHERE clash.order_id != b.order_id
+                  AND clash.item_id = b.item_id
+                  AND ((b.mode = 'slot' AND clash.mode = 'slot' AND clash.slot_id = b.slot_id AND clash.start_date = b.start_date)
+                    OR (b.mode != 'slot' OR clash.mode != 'slot')
+                      AND clash.start_date <= COALESCE(b.end_date, b.start_date)
+                      AND COALESCE(clash.end_date, clash.start_date) >= b.start_date)
+              ) THEN 1 ELSE 0 END AS has_overlap
        FROM booking_order_bookings b
        JOIN orders o ON o.id = b.order_id
        JOIN catalog_items ci ON ci.id = b.item_id
        LEFT JOIN booking_slots s ON s.id = b.slot_id${where}
-       ORDER BY b.start_date ASC, b.order_id ASC`,
+       ORDER BY b.start_date ${direction}, b.order_id ${direction}
+       LIMIT ?`,
     )
-    .bind(...bindings)
+    .bind(...bindings, size + 1)
     .all<BookingRow>();
-  return results.map(toBooking);
+  const hasExtra = results.length > size;
+  const rows = results.slice(0, size).map(toBooking);
+  if (before) rows.reverse();
+  const first = rows[0];
+  const last = rows.at(-1);
+  const makeCursor = (booking: Booking | undefined): string | null =>
+    booking
+      ? encodeCursor({
+          domain: "booking",
+          keys: { startDate: booking.startDate, orderId: booking.orderId },
+          filters,
+        })
+      : null;
+  return {
+    items: rows,
+    pageInfo: {
+      startCursor: makeCursor(first),
+      endCursor: makeCursor(last),
+      hasNextPage: before ? true : hasExtra,
+      hasPreviousPage: Boolean(after) || (Boolean(before) && hasExtra),
+    },
+  };
+}
+
+/** Aggregate booking inspector values across the full schedule, not the active page. */
+export async function getBookingDashboardSummary(db: D1Database): Promise<BookingDashboardSummary> {
+  const today = new Date().toISOString().slice(0, 10);
+  const [upcoming, nearest, statuses, clashes] = await Promise.all([
+    db
+      .prepare(
+        "SELECT COUNT(*) AS value FROM booking_order_bookings b JOIN orders o ON o.id = b.order_id WHERE COALESCE(b.end_date, b.start_date) >= ? AND o.status != 'cancelled'",
+      )
+      .bind(today)
+      .first<{ value: number }>(),
+    db
+      .prepare(
+        "SELECT MIN(b.start_date) AS value FROM booking_order_bookings b JOIN orders o ON o.id = b.order_id WHERE b.start_date >= ? AND o.status != 'cancelled'",
+      )
+      .bind(today)
+      .first<{ value: string | null }>(),
+    db
+      .prepare(
+        "SELECT o.status, COUNT(*) AS value FROM booking_order_bookings b JOIN orders o ON o.id = b.order_id GROUP BY o.status",
+      )
+      .all<{ status: string; value: number }>(),
+    db
+      .prepare(
+        `SELECT COUNT(DISTINCT b.order_id) AS value
+         FROM booking_order_bookings b
+         WHERE EXISTS (
+           SELECT 1 FROM booking_order_bookings clash
+           WHERE clash.order_id != b.order_id AND clash.item_id = b.item_id
+             AND ((b.mode = 'slot' AND clash.mode = 'slot' AND clash.slot_id = b.slot_id AND clash.start_date = b.start_date)
+               OR (b.mode != 'slot' OR clash.mode != 'slot')
+                 AND clash.start_date <= COALESCE(b.end_date, b.start_date)
+                 AND COALESCE(clash.end_date, clash.start_date) >= b.start_date)
+         )`,
+      )
+      .first<{ value: number }>(),
+  ]);
+  return {
+    upcomingCount: upcoming?.value ?? 0,
+    nearestDate: nearest?.value ?? null,
+    statusCounts: Object.fromEntries(statuses.results.map((row) => [row.status, row.value])),
+    clashCount: clashes?.value ?? 0,
+  };
 }
 
 /** Load one booking for the admin quick view without reading unrelated orders. */
@@ -204,7 +341,16 @@ export async function findBookingByOrderId(
               b.start_date, b.end_date, b.slot_id, s.weekday AS slot_weekday,
               s.start_time AS slot_start_time, b.occurrences_per_day,
               o.shipping_address AS service_address, o.customer_note AS note,
-              o.status, o.customer_name, o.customer_phone
+              o.status, o.customer_name, o.customer_phone,
+              CASE WHEN EXISTS (
+                SELECT 1 FROM booking_order_bookings clash
+                WHERE clash.order_id != b.order_id
+                  AND clash.item_id = b.item_id
+                  AND ((b.mode = 'slot' AND clash.mode = 'slot' AND clash.slot_id = b.slot_id AND clash.start_date = b.start_date)
+                    OR (b.mode != 'slot' OR clash.mode != 'slot')
+                      AND clash.start_date <= COALESCE(b.end_date, b.start_date)
+                      AND COALESCE(clash.end_date, clash.start_date) >= b.start_date)
+              ) THEN 1 ELSE 0 END AS has_overlap
        FROM booking_order_bookings b
        JOIN orders o ON o.id = b.order_id
        JOIN catalog_items ci ON ci.id = b.item_id

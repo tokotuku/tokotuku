@@ -8,6 +8,13 @@ interface Props {
 }
 
 const { label, value, change, trend = "neutral", hint } = Astro.props;
+const trendClass = {
+  up: "change--up",
+  down: "change--down",
+  neutral: "change--neutral",
+}[trend];
+
+import "./StatCard.css";
 ---
 
 <article class="stat-card">
@@ -18,63 +25,8 @@ const { label, value, change, trend = "neutral", hint } = Astro.props;
   <p class="value">{value}</p>
   {(change || hint) && (
     <div class="meta">
-      {change && <span class:list={["change", `change--${trend}`]}>{change}</span>}
+      {change && <span class:list={["change", trendClass]}>{change}</span>}
       {hint && <span class="hint">{hint}</span>}
     </div>
   )}
 </article>
-
-<style>
-  .stat-card {
-    padding: var(--tk-spacing-5);
-    border: 1px solid var(--tk-color-border);
-    border-radius: var(--tk-radius-xl);
-    background: var(--tk-color-bg);
-    box-shadow: var(--tk-shadow-sm);
-  }
-
-  .heading,
-  .meta {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--tk-spacing-3);
-  }
-
-  p {
-    margin: 0;
-  }
-
-  .label,
-  .hint {
-    color: var(--tk-color-fg-muted);
-    font-size: var(--tk-font-size-sm);
-  }
-
-  .value {
-    margin-top: var(--tk-spacing-3);
-    color: var(--tk-color-fg);
-    font-size: var(--tk-font-size-3xl);
-    font-weight: var(--tk-font-weight-bold);
-    letter-spacing: -0.03em;
-  }
-
-  .meta {
-    justify-content: flex-start;
-    margin-top: var(--tk-spacing-3);
-  }
-
-  .change {
-    color: var(--tk-color-fg-muted);
-    font-size: var(--tk-font-size-xs);
-    font-weight: var(--tk-font-weight-semibold);
-  }
-
-  .change--up {
-    color: var(--tk-color-success);
-  }
-
-  .change--down {
-    color: var(--tk-color-danger);
-  }
-</style>

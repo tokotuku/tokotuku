@@ -1,0 +1,121 @@
+.product-form {
+  display: grid;
+  gap: 18px;
+}
+.form-section {
+  padding: 22px;
+}
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.section-heading h2,
+.section-heading p {
+  margin: 0;
+}
+.section-heading h2 {
+  font-size: 17px;
+}
+.section-heading p {
+  margin-top: 5px;
+  color: var(--tk-color-fg-muted);
+  font-size: 12px;
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.form-grid label {
+  display: grid;
+  gap: 7px;
+  color: var(--tk-color-fg-muted);
+  font-size: 12px;
+}
+.form-grid label span {
+  font-weight: var(--tk-font-weight-regular);
+}
+.wide {
+  grid-column: 1 / -1;
+}
+.form-grid input,
+.form-grid textarea,
+.custom-row input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid var(--admin-line);
+  border-radius: 10px;
+  outline: none;
+  background: var(--admin-surface);
+  color: var(--tk-color-fg);
+  font: inherit;
+}
+.form-grid input:focus,
+.form-grid textarea:focus,
+.custom-row input:focus {
+  border-color: var(--admin-accent);
+}
+.toggle {
+  display: flex !important;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  color: var(--tk-color-fg) !important;
+}
+.toggle input {
+  width: auto;
+}
+.current-image img {
+  width: 90px;
+  height: 90px;
+  border-radius: 12px;
+  object-fit: cover;
+}
+.custom-fields {
+  display: grid;
+  gap: 10px;
+}
+.custom-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 40px;
+  gap: 10px;
+}
+.custom-row button {
+  min-width: 40px;
+  min-height: 40px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--admin-soft);
+  color: var(--tk-color-danger);
+  cursor: pointer;
+  font-size: 20px;
+}
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.form-error {
+  padding: 12px 15px;
+  border: 1px solid color-mix(in srgb, var(--tk-color-danger) 35%, transparent);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--tk-color-danger) 8%, var(--admin-surface));
+  color: var(--tk-color-danger);
+}
+.product-form > .form-error {
+  margin: 0;
+}
+@media (max-width: 640px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  .wide {
+    grid-column: auto;
+  }
+  .custom-row {
+    grid-template-columns: 1fr 1fr 40px;
+  }
+}

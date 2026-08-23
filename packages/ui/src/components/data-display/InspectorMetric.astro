@@ -1,0 +1,21 @@
+---
+interface Props {
+  label: string;
+  value: string;
+  hint?: string;
+  tone?: "default" | "positive" | "warning";
+}
+
+const { label, value, hint, tone = "default" } = Astro.props;
+const toneClass = {
+  default: "",
+  positive: "admin-metric--positive",
+  warning: "admin-metric--warning",
+}[tone];
+---
+
+<div class:list={["admin-metric", toneClass]}>
+  <p>{label}</p>
+  <strong>{value}</strong>
+  {hint && <span>{hint}</span>}
+</div>

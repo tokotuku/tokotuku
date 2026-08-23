@@ -6,7 +6,7 @@ export function jarene(): ModuleDefinition {
     authPanelWidgets: [
       {
         id: "jarene-quote",
-        entrypoint: "@takontuku/jarene/routes/JareneAuthQuote.astro",
+        entrypoint: "@takontuku/jarene/components/JareneAuthQuote.astro",
         order: 10,
       },
     ],

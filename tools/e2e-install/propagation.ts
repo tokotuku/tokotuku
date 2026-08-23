@@ -61,11 +61,9 @@ const PATCHED_HEADING = "Koleksi segera hadir (patched)";
 
 async function fetchProductsHeading(origin: string): Promise<string> {
   const html = await (await fetch(`${origin}/products`)).text();
-  return html.includes(PATCHED_HEADING)
-    ? "patched"
-    : html.includes(ORIGINAL_HEADING)
-      ? "original"
-      : "unknown";
+  if (html.includes(PATCHED_HEADING)) return "patched";
+  if (html.includes(ORIGINAL_HEADING)) return "original";
+  return "unknown";
 }
 
 /** /products needs no auth, but every route redirects to /setup until setup completes, so this always runs it -- harmless and idempotent on the second boot, since D1 --local state (including the admin account) persists across separate `wrangler dev` invocations in the same client dir. */

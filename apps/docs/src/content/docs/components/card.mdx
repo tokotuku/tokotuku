@@ -14,9 +14,9 @@ import ComponentPreview from "../../../components/ComponentPreview.astro";
 ## Preview
 
 <ComponentPreview label="Card example">
-  <div style="width:min(100%,22rem)">
+  <div class="w-full max-w-[22rem]">
     <Card>
-      <div slot="media" style="display:grid;place-items:center;min-height:9rem;background:var(--tk-color-bg-subtle);font-weight:700">
+      <div slot="media" class="grid min-h-[9rem] place-items-center bg-subtle font-bold">
         Product image
       </div>
       <strong>Everyday widget</strong>

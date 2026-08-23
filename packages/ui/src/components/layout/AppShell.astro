@@ -1,3 +1,6 @@
+---
+import "./AppShell.css";
+---
 <div class="shell">
   <aside class="sidebar"><slot name="sidebar" /></aside>
   <div class="workspace">
@@ -5,52 +8,3 @@
     <main class="content"><slot /></main>
   </div>
 </div>
-
-<style>
-  .shell {
-    display: grid;
-    grid-template-columns: minmax(14rem, 17rem) minmax(0, 1fr);
-    min-height: 100vh;
-    background: var(--tk-color-bg-subtle);
-  }
-
-  .sidebar {
-    position: sticky;
-    top: 0;
-    height: 100vh;
-    overflow-y: auto;
-    border-right: 1px solid var(--tk-color-border);
-    background: var(--tk-color-bg);
-  }
-
-  .workspace {
-    min-width: 0;
-  }
-
-  .topbar {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    border-bottom: 1px solid var(--tk-color-border);
-    background: var(--tk-color-bg);
-  }
-
-  .content {
-    width: min(100% - calc(var(--tk-spacing-4) * 2), 90rem);
-    margin-inline: auto;
-    padding-block: var(--tk-spacing-8);
-  }
-
-  @media (max-width: 48rem) {
-    .shell {
-      display: block;
-    }
-
-    .sidebar {
-      position: static;
-      height: auto;
-      border-right: 0;
-      border-bottom: 1px solid var(--tk-color-border);
-    }
-  }
-</style>

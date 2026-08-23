@@ -20,6 +20,7 @@ function booking(overrides: Partial<Booking>): Booking {
     status: "inquiry",
     customerName: "Test",
     customerPhone: "0800",
+    hasOverlap: false,
     ...overrides,
   };
 }

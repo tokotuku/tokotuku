@@ -50,7 +50,11 @@ export function createTranslator(
       (!isDevelopment() && key in defaults ? defaults[key] : template) ?? key;
     return fallbackTemplate.replace(/\{([a-zA-Z][\w.]*)\}/g, (match, name: string) => {
       const value = values[name];
-      return value === undefined ? (isDevelopment() ? match : "") : String(value);
+      if (value === undefined) {
+        if (isDevelopment()) return match;
+        return "";
+      }
+      return String(value);
     });
   };
 }
@@ -98,7 +102,9 @@ export const coreMessages: MessageDictionaries = {
     "admin.nav.attribution": "Dibuat dengan Takontuku UI",
     "admin.dashboard.title": "Kelola {brand}",
     "admin.dashboard.greeting": "Selamat datang, {name}",
-    "admin.dashboard.workspaceTitle": "Workspace toko",
+    "admin.dashboard.welcomeEyebrow": "Ringkasan toko",
+    "admin.dashboard.description": "Pantau aktivitas toko dan kelola pekerjaanmu dari satu tempat.",
+    "admin.dashboard.workspaceTitle": "Ruang kerja toko",
     "admin.dashboard.workspaceDescription": "Buka area kerja yang tersedia untuk mengelola toko.",
     "admin.dashboard.moduleDescription": "Buka workspace {name}.",
     "admin.dashboard.configurationTitle": "Konfigurasi toko",
@@ -107,9 +113,31 @@ export const coreMessages: MessageDictionaries = {
     "admin.dashboard.currency": "Mata uang",
     "admin.dashboard.timeZone": "Zona waktu",
     "admin.dashboard.role": "Peran",
-    "admin.dashboard.gettingStartedTitle": "Workspace siap digunakan",
+    "admin.dashboard.gettingStartedTitle": "Ruang kerja siap digunakan",
     "admin.dashboard.gettingStartedDescription":
       "Pasang modul Catalog atau Orders untuk mulai mengelola data toko.",
+    "admin.dashboard.workspaceReady": "Workspace siap",
+    "admin.dashboard.workspaceStatus": "Status workspace",
+    "admin.dashboard.ready": "Siap",
+    "admin.dashboard.statusDescription": "Semua sistem berjalan normal.",
+    "admin.dashboard.activeModules": "Modul aktif",
+    "admin.dashboard.activeModulesDescription": "Modul terpasang dan siap digunakan.",
+    "admin.dashboard.setup": "Setup",
+    "admin.dashboard.setupDescription": "{completed} dari {total} langkah selesai.",
+    "admin.dashboard.nextSteps": "Langkah berikutnya",
+    "admin.dashboard.workspaceStartTitle": "Mulai kelola toko dengan modul yang kamu butuhkan.",
+    "admin.dashboard.workspaceStartDescription":
+      "Gunakan modul yang sudah terpasang, atau tambahkan modul lain sesuai kebutuhan.",
+    "admin.dashboard.addModuleHint":
+      "Tambahkan modul Catalog, Orders, atau modul lain untuk mulai bekerja.",
+    "admin.dashboard.inspectorDescription": "Konfigurasi aktif untuk aplikasi ini.",
+    "admin.dashboard.identity": "Identitas",
+    "admin.dashboard.readinessAdmin": "Administrator siap",
+    "admin.dashboard.readinessBrand": "Kustomisasi nama brand",
+    "admin.dashboard.readinessLogo": "Tambahkan logo brand",
+    "admin.dashboard.readinessCatalog": "Pasang modul Catalog",
+    "admin.dashboard.readinessOrders": "Pasang modul Orders",
+    "admin.dashboard.setupCompletedCount": "Setup {percentage} persen selesai",
     "admin.dashboard.openModule": "Buka {name}",
     "admin.dashboard.coreModule": "Core",
     "admin.error.backHome": "Kembali ke beranda",
@@ -163,7 +191,9 @@ export const coreMessages: MessageDictionaries = {
     "admin.nav.brandDashboard": "{brand} dashboard",
     "admin.nav.attribution": "Built with Takontuku UI",
     "admin.dashboard.title": "Manage {brand}",
-    "admin.dashboard.greeting": "Welcome back, {name}",
+    "admin.dashboard.greeting": "Welcome, {name}",
+    "admin.dashboard.welcomeEyebrow": "Store overview",
+    "admin.dashboard.description": "Track store activity and manage your work from one place.",
     "admin.dashboard.workspaceTitle": "Store workspace",
     "admin.dashboard.workspaceDescription": "Open an available workspace to manage your store.",
     "admin.dashboard.moduleDescription": "Open the {name} workspace.",
@@ -173,9 +203,30 @@ export const coreMessages: MessageDictionaries = {
     "admin.dashboard.currency": "Currency",
     "admin.dashboard.timeZone": "Time zone",
     "admin.dashboard.role": "Role",
-    "admin.dashboard.gettingStartedTitle": "Your workspace is ready",
+    "admin.dashboard.gettingStartedTitle": "Your workspace is ready to use",
     "admin.dashboard.gettingStartedDescription":
       "Install the Catalog or Orders module to start managing store data.",
+    "admin.dashboard.workspaceReady": "Workspace ready",
+    "admin.dashboard.workspaceStatus": "Workspace status",
+    "admin.dashboard.ready": "Ready",
+    "admin.dashboard.statusDescription": "All systems are running normally.",
+    "admin.dashboard.activeModules": "Active modules",
+    "admin.dashboard.activeModulesDescription": "Installed modules ready to use.",
+    "admin.dashboard.setup": "Setup",
+    "admin.dashboard.setupDescription": "{completed} of {total} steps complete.",
+    "admin.dashboard.nextSteps": "Next steps",
+    "admin.dashboard.workspaceStartTitle": "Start managing your store with the modules you need.",
+    "admin.dashboard.workspaceStartDescription":
+      "Use the modules already installed, or add another when you need it.",
+    "admin.dashboard.addModuleHint": "Add Catalog, Orders, or another module to start working.",
+    "admin.dashboard.inspectorDescription": "The active configuration for this app.",
+    "admin.dashboard.identity": "Identity",
+    "admin.dashboard.readinessAdmin": "Administrator ready",
+    "admin.dashboard.readinessBrand": "Customize brand name",
+    "admin.dashboard.readinessLogo": "Add brand logo",
+    "admin.dashboard.readinessCatalog": "Install Catalog module",
+    "admin.dashboard.readinessOrders": "Install Orders module",
+    "admin.dashboard.setupCompletedCount": "Setup {percentage} percent complete",
     "admin.dashboard.openModule": "Open {name}",
     "admin.dashboard.coreModule": "Core",
     "admin.error.backHome": "Back home",

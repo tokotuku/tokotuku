@@ -1,10 +1,16 @@
 import type { D1Database } from "@cloudflare/workers-types";
 import { findProductById, findProductsByIds } from "@takontuku/catalog";
 import {
+  assertCursor,
   ConstraintViolationError,
+  CursorError,
+  type CursorPage,
   collectOrderCreateStatements,
   collectOrderStatusChangeStatements,
+  cursorFilterSignature,
+  encodeCursor,
   mapD1Error,
+  normalizePageSize,
 } from "@takontuku/core";
 
 // `pending`..`delivered` is the original checkout-and-ship lifecycle.
@@ -71,6 +77,7 @@ export interface AdminOrder {
   orderNumber: string;
   customerName: string;
   customerEmail: string | null;
+  customerPhone: string;
   createdAt: string;
   itemCount: number;
   /** NULL for an order that hasn't been quoted yet — see createInquiryOrder. */
@@ -104,7 +111,17 @@ export interface OrderDashboardSummary {
   todaySalesCents: number;
   thirtyDayRevenueCents: number;
   pendingCount: number;
+  transferPendingCount: number;
+  statusCounts: Record<OrderStatus, number>;
   recentOrders: AdminOrder[];
+}
+
+export interface ListOrdersOptions {
+  status?: OrderStatus;
+  search?: string;
+  pageSize?: number;
+  after?: string;
+  before?: string;
 }
 
 function normalizeCart(cart: CartLineInput[]) {
@@ -326,23 +343,66 @@ export async function findCustomerOrder(db: D1Database, orderNumber: string, use
     }>();
 }
 
-export async function listOrders(db: D1Database): Promise<AdminOrder[]> {
+export async function listOrders(
+  db: D1Database,
+  { status, search, pageSize = 25, after, before }: ListOrdersOptions = {},
+): Promise<CursorPage<AdminOrder>> {
+  if (after && before) throw new CursorError("after and before cursors are mutually exclusive.");
+  const size = normalizePageSize(pageSize);
+  const conditions: string[] = [];
+  const bindings: unknown[] = [];
+  if (status) {
+    conditions.push("o.status = ?");
+    bindings.push(status);
+  }
+  if (search) {
+    conditions.push(
+      "(o.order_number LIKE ? OR o.customer_name LIKE ? OR o.customer_email LIKE ? OR o.customer_phone LIKE ?)",
+    );
+    const like = `%${search}%`;
+    bindings.push(like, like, like, like);
+  }
+  const filters = cursorFilterSignature({ status: status ?? null, search: search ?? null });
+  let direction: "ASC" | "DESC" = "DESC";
+  if (after) {
+    const cursor = assertCursor(after, { domain: "orders", filters });
+    if (typeof cursor.keys["createdAt"] !== "string" || typeof cursor.keys["id"] !== "number") {
+      throw new CursorError("Order cursor sort keys are invalid.");
+    }
+    conditions.push("(o.created_at < ? OR (o.created_at = ? AND o.id < ?))");
+    bindings.push(cursor.keys["createdAt"], cursor.keys["createdAt"], cursor.keys["id"]);
+  }
+  if (before) {
+    const cursor = assertCursor(before, { domain: "orders", filters });
+    if (typeof cursor.keys["createdAt"] !== "string" || typeof cursor.keys["id"] !== "number") {
+      throw new CursorError("Order cursor sort keys are invalid.");
+    }
+    conditions.push("(o.created_at > ? OR (o.created_at = ? AND o.id > ?))");
+    bindings.push(cursor.keys["createdAt"], cursor.keys["createdAt"], cursor.keys["id"]);
+    direction = "ASC";
+  }
+  const where = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
   const { results } = await db
     .prepare(
       `SELECT o.id, o.order_number, o.customer_name, o.customer_email, o.created_at,
+              o.customer_phone,
               COALESCE(SUM(oi.quantity), 0) AS item_count, o.total_cents, o.status,
               CASE WHEN p.order_id IS NULL THEN 'cash' ELSE 'transfer' END AS payment_method,
               o.payment_status, p.proof_key AS payment_proof_key
        FROM orders o
        LEFT JOIN order_items oi ON oi.order_id = o.id
        LEFT JOIN payments_bank_transfer_proofs p ON p.order_id = o.id
-       GROUP BY o.id ORDER BY o.created_at DESC, o.id DESC`,
+       ${where}
+       GROUP BY o.id ORDER BY o.created_at ${direction}, o.id ${direction}
+       LIMIT ?`,
     )
+    .bind(...bindings, size + 1)
     .all<{
       id: number;
       order_number: string;
       customer_name: string;
       customer_email: string | null;
+      customer_phone: string;
       created_at: string;
       item_count: number;
       total_cents: number | null;
@@ -351,11 +411,13 @@ export async function listOrders(db: D1Database): Promise<AdminOrder[]> {
       payment_status: "unpaid" | "paid";
       payment_proof_key: string | null;
     }>();
-  return results.map((row) => ({
+  const hasExtra = results.length > size;
+  const rows = results.slice(0, size).map((row) => ({
     id: row.id,
     orderNumber: row.order_number,
     customerName: row.customer_name,
     customerEmail: row.customer_email,
+    customerPhone: row.customer_phone,
     createdAt: row.created_at,
     itemCount: row.item_count,
     totalCents: row.total_cents,
@@ -364,6 +426,26 @@ export async function listOrders(db: D1Database): Promise<AdminOrder[]> {
     paymentStatus: row.payment_status,
     paymentProofKey: row.payment_proof_key,
   }));
+  if (before) rows.reverse();
+  const first = rows[0];
+  const last = rows.at(-1);
+  const makeCursor = (order: AdminOrder | undefined): string | null =>
+    order
+      ? encodeCursor({
+          domain: "orders",
+          keys: { createdAt: order.createdAt, id: order.id },
+          filters,
+        })
+      : null;
+  return {
+    items: rows,
+    pageInfo: {
+      startCursor: makeCursor(first),
+      endCursor: makeCursor(last),
+      hasNextPage: before ? true : hasExtra,
+      hasPreviousPage: Boolean(after) || (Boolean(before) && hasExtra),
+    },
+  };
 }
 
 /**
@@ -456,7 +538,7 @@ export async function findAdminOrderDetail(
 
 /** Operational dashboard values derived only from orders that actually exist. */
 export async function getOrderDashboardSummary(db: D1Database): Promise<OrderDashboardSummary> {
-  const [sales, revenue, pending, recentOrders] = await Promise.all([
+  const [sales, revenue, pending, transferPending, statusRows, recentOrders] = await Promise.all([
     db
       .prepare(
         "SELECT COALESCE(SUM(total_cents), 0) AS value FROM orders WHERE status != 'cancelled' AND date(created_at) = date('now')",
@@ -474,13 +556,28 @@ export async function getOrderDashboardSummary(db: D1Database): Promise<OrderDas
     db
       .prepare("SELECT COUNT(*) AS value FROM orders WHERE status IN ('pending', 'inquiry')")
       .first<{ value: number }>(),
-    listOrders(db),
+    db
+      .prepare(
+        "SELECT COUNT(*) AS value FROM orders o JOIN payments_bank_transfer_proofs p ON p.order_id = o.id WHERE o.payment_status = 'unpaid' AND p.proof_key IS NOT NULL",
+      )
+      .first<{ value: number }>(),
+    db
+      .prepare("SELECT status, COUNT(*) AS value FROM orders GROUP BY status")
+      .all<{ status: OrderStatus; value: number }>(),
+    listOrders(db, { pageSize: 5 }),
   ]);
+  const statusCounts = Object.fromEntries(orderStatuses.map((status) => [status, 0])) as Record<
+    OrderStatus,
+    number
+  >;
+  for (const row of statusRows.results) statusCounts[row.status] = row.value;
   return {
     todaySalesCents: sales?.value ?? 0,
     thirtyDayRevenueCents: revenue?.value ?? 0,
     pendingCount: pending?.value ?? 0,
-    recentOrders: recentOrders.slice(0, 5),
+    transferPendingCount: transferPending?.value ?? 0,
+    statusCounts,
+    recentOrders: recentOrders.items,
   };
 }
 

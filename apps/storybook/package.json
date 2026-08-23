@@ -12,7 +12,8 @@
     "lint": "biome check ."
   },
   "dependencies": {
-    "@takontuku/ui": "workspace:*",
+    "@takontuku/theme": "^0.2.0",
+    "@takontuku/ui": "^0.2.0",
     "astro": "^7.0.9"
   },
   "devDependencies": {

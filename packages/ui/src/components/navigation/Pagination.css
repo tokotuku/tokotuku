@@ -1,0 +1,26 @@
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--tk-spacing-4);
+  color: var(--tk-color-fg-muted);
+  font-size: var(--tk-font-size-sm);
+}
+
+a {
+  padding: var(--tk-spacing-2) var(--tk-spacing-3);
+  border: 1px solid var(--tk-color-border);
+  border-radius: var(--tk-radius-md);
+  color: var(--tk-color-fg);
+  text-decoration: none;
+}
+
+a:hover:not([aria-disabled="true"]) {
+  border-color: var(--tk-color-accent);
+  color: var(--tk-color-accent);
+}
+
+a[aria-disabled="true"] {
+  pointer-events: none;
+  opacity: 0.45;
+}

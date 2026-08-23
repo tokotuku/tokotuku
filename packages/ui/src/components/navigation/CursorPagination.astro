@@ -1,0 +1,41 @@
+---
+interface CursorPageInfo {
+  startCursor: string | null;
+  endCursor: string | null;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+}
+
+import "./Pagination.css";
+
+interface Props {
+  pageInfo: CursorPageInfo;
+  previousLabel?: string;
+  nextLabel?: string;
+  ariaLabel?: string;
+}
+
+const {
+  pageInfo,
+  previousLabel = "Previous",
+  nextLabel = "Next",
+  ariaLabel = "Pagination",
+} = Astro.props;
+
+function cursorUrl(parameter: "after" | "before", cursor: string | null): string | undefined {
+  if (!cursor) return undefined;
+  const url = new URL(Astro.url);
+  url.searchParams.delete("after");
+  url.searchParams.delete("before");
+  url.searchParams.set(parameter, cursor);
+  return `${url.pathname}?${url.searchParams.toString()}`;
+}
+
+const previous = pageInfo.hasPreviousPage ? cursorUrl("before", pageInfo.startCursor) : undefined;
+const next = pageInfo.hasNextPage ? cursorUrl("after", pageInfo.endCursor) : undefined;
+---
+
+<nav class="pagination cursor-pagination" aria-label={ariaLabel}>
+  <a href={previous} aria-disabled={pageInfo.hasPreviousPage ? undefined : "true"}>{previousLabel}</a>
+  <a href={next} aria-disabled={pageInfo.hasNextPage ? undefined : "true"}>{nextLabel}</a>
+</nav>

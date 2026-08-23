@@ -18,7 +18,7 @@ function escapeRegExp(value: string): string {
  * Vite's alias plugin resolves via `id.replace(find, replacement)`, so a
  * `find` of `/ProductCard\.astro$` against `"@takontuku/ui/ProductCard.astro"`
  * would replace only the matched suffix, leaving the package prefix stuck
- * onto the front of the replacement (`"@takontuku/ui/app/src/theme/...`).
+ * onto the front of the replacement path.
  * Anchoring the start of the pattern too makes the match, and so the
  * replace, cover the whole string.
  */

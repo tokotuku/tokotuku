@@ -3,11 +3,12 @@ import { env } from "cloudflare:workers";
 import brand from "virtual:takontuku/config";
 import { createTranslator } from "@takontuku/core";
 import { date, money } from "@takontuku/core/brand";
-import AdminLayout from "@takontuku/core/routes/AdminLayout.astro";
+import AdminLayout from "@takontuku/core/layouts/AdminLayout.astro";
 import AdminInspector from "@takontuku/ui/AdminInspector.astro";
-import AdminMetric from "@takontuku/ui/AdminMetric.astro";
 import AdminPageHeader from "@takontuku/ui/AdminPageHeader.astro";
 import Icon from "@takontuku/ui/Icon.astro";
+import InspectorMetric from "@takontuku/ui/InspectorMetric.astro";
+import ProductForm from "../../../../components/ProductForm.astro";
 import { catalogMessages, localizeCatalogError } from "../../../../messages";
 import { productInputFromForm } from "../../../../product-form";
 import {
@@ -16,7 +17,6 @@ import {
   listInventoryMovements,
   updateProduct,
 } from "../../../../products";
-import ProductForm from "../../../ProductForm.astro";
 
 const t = createTranslator(brand, catalogMessages);
 
@@ -45,6 +45,8 @@ if (Astro.request.method === "POST") {
 const movements = await listInventoryMovements(env.DB, id);
 const movementReason = (reason: (typeof movements)[number]["reason"]) =>
   t(`catalog.products.movements.reason.${reason}`);
+
+import "../../../../styles/routes/catalog-admin-products-edit.css";
 ---
 
 <AdminLayout title={`${t("catalog.products.editTitle")} ${product.name}`}>
@@ -60,10 +62,10 @@ const movementReason = (reason: (typeof movements)[number]["reason"]) =>
   <Fragment slot="inspector">
     <AdminInspector title={product.name} description="Pengaturan utama produk.">
       <div class="inspector-metrics">
-        <AdminMetric label="Status" value={product.isActive ? "Aktif" : "Nonaktif"} tone={product.isActive ? "positive" : "warning"} />
-        <AdminMetric label={t("catalog.products.form.price")} value={money(product.priceCents / 100)} />
-        <AdminMetric label={t("catalog.products.form.fulfillmentType")} value={t(`catalog.products.form.fulfillmentType.${product.fulfillmentType}`)} />
-        {product.fulfillmentType === "physical" && <AdminMetric label={t("catalog.products.form.stock")} value={String(product.stock)} tone={product.stock <= 5 ? "warning" : "default"} />}
+        <InspectorMetric label="Status" value={product.isActive ? "Aktif" : "Nonaktif"} tone={product.isActive ? "positive" : "warning"} />
+        <InspectorMetric label={t("catalog.products.form.price")} value={money(product.priceCents / 100)} />
+        <InspectorMetric label={t("catalog.products.form.fulfillmentType")} value={t(`catalog.products.form.fulfillmentType.${product.fulfillmentType}`)} />
+        {product.fulfillmentType === "physical" && <InspectorMetric label={t("catalog.products.form.stock")} value={String(product.stock)} tone={product.stock <= 5 ? "warning" : "default"} />}
       </div>
       <div class="inspector-actions"><button class="admin-button admin-button--primary" type="submit" form="product-form"><Icon name="check" size={16} /> {t("catalog.products.form.save")}</button></div>
     </AdminInspector>
@@ -73,5 +75,3 @@ const movementReason = (reason: (typeof movements)[number]["reason"]) =>
     </AdminInspector>
   </Fragment>
 </AdminLayout>
-
-<style>.save-notice{padding:11px 14px;border-radius:10px;background:color-mix(in srgb,var(--tk-color-success) 10%,var(--admin-surface));color:var(--tk-color-success)}.danger-button{color:var(--tk-color-danger)}.movement-panel{margin-top:18px;padding:22px;overflow:auto}.movement-panel h2,.movement-panel p{margin:0}.movement-panel>div p{margin-top:5px;color:var(--tk-color-fg-muted);font-size:12px}.movement-panel table{width:100%;margin-top:18px;border-collapse:collapse;font-size:12px}.movement-panel th,.movement-panel td{padding:11px;border-top:1px solid var(--admin-line);text-align:left}.movement-panel th{color:var(--tk-color-fg-muted)}.positive{color:var(--tk-color-success);font-weight:var(--tk-font-weight-bold)}.negative{color:var(--tk-color-danger);font-weight:var(--tk-font-weight-bold)}.empty-movements{margin-top:18px!important;color:var(--tk-color-fg-muted)}.inspector-metrics{display:grid;gap:.6rem}</style>

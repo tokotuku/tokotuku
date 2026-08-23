@@ -1,6 +1,6 @@
 {
   "name": "@takontuku/auth",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "publishConfig": {
     "registry": "https://registry.npmjs.org",
     "access": "public"
@@ -19,19 +19,25 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
+    "./client": {
+      "types": "./src/auth-client.ts",
+      "import": "./src/auth-client.ts"
+    },
+    "./components/*": "./src/components/*",
     "./register": "./src/register.ts",
     "./routes/*": "./src/routes/*",
     "./package.json": "./package.json"
   },
   "dependencies": {
-    "@takontuku/core": "workspace:*",
-    "@takontuku/ui": "workspace:*",
+    "@takontuku/core": "^0.2.0",
+    "@takontuku/theme": "^0.2.0",
+    "@takontuku/ui": "^0.2.0",
     "better-auth": ">=1.6.23 <1.7.0"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.4",
     "@cloudflare/workers-types": "^5.20260710.1",
-    "@takontuku/config": "workspace:*",
+    "@takontuku/config": "^0.2.0",
     "astro": "^7.0.9"
   },
   "peerDependencies": {

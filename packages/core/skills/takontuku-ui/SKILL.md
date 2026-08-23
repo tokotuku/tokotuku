@@ -18,17 +18,17 @@ Each component is its own export. Load the stylesheet once, in the layout:
 
 ```astro
 ---
-import Layout from "@takontuku/ui/Layout.astro";
+import DocumentLayout from "@takontuku/ui/DocumentLayout.astro";
 import Button from "@takontuku/ui/Button.astro";
-import "@takontuku/ui/styles.css";
+import "@takontuku/theme/styles.css";
 ---
 ```
 
 Available: `Alert`, `AppShell`, `AppSidebar`, `AppTopbar`, `Badge`, `Button`, `Card`,
-`Chart`, `DashboardMetric`, `DataTable`, `EmptyState`, `Icon`, `Input`, `Layout`,
+`DashboardMetric`, `DataTable`, `DocumentLayout`, `EmptyState`, `Icon`, `Input`,
 `PageHeader`, `Pagination`, `ProductCard`, `SEO`, `Skeleton`, `StatCard`, `StoreFooter`,
 `StoreHeader`, `StorefrontEmptyCollection`, `StorefrontHero`, `Tabs`. Admin surfaces also
-have `@takontuku/ui/admin.css`.
+have `@takontuku/theme/admin.css`; charts are opt-in from `@takontuku/charts/Chart.astro`.
 
 ## Never format money or dates by hand
 
