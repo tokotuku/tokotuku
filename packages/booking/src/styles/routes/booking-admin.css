@@ -18,7 +18,7 @@
 }
 .standalone-empty .eyebrow {
   margin: 1.5rem 0 0.45rem;
-  color: var(--tk-color-accent);
+  color: var(--karsa-color-accent);
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.14em;
@@ -26,7 +26,7 @@
 }
 .standalone-empty h1 {
   margin: 0;
-  font-family: var(--tk-font-family-display);
+  font-family: var(--karsa-font-family-display);
   font-size: clamp(2.7rem, 5vw, 4.5rem);
   font-weight: 400;
   letter-spacing: -0.045em;
@@ -34,7 +34,7 @@
 .standalone-empty > p:not(.eyebrow) {
   max-width: 30rem;
   margin: 0.7rem 0 1.4rem;
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
   font-size: 0.8rem;
   line-height: 1.7;
 }
@@ -42,7 +42,7 @@
   overflow: hidden;
 }
 .entity-avatar {
-  background: var(--tk-color-accent);
+  background: var(--karsa-color-accent);
 }
 .row-actions a,
 .row-actions button {
@@ -53,7 +53,7 @@
   border: 0;
   border-radius: 7px;
   background: transparent;
-  color: var(--tk-color-fg);
+  color: var(--karsa-color-fg);
   text-decoration: none;
   cursor: pointer;
 }
@@ -64,7 +64,7 @@
 .address-cell {
   max-width: 16rem;
   overflow: hidden;
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
   font-size: 0.75rem;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -73,9 +73,9 @@
   display: inline-flex;
   margin-left: 0.5rem;
   padding: 0.2rem 0.45rem;
-  border-radius: var(--tk-radius-full);
-  background: color-mix(in srgb, var(--tk-color-danger) 12%, transparent);
-  color: var(--tk-color-danger);
+  border-radius: var(--karsa-radius-full);
+  background: color-mix(in srgb, var(--karsa-color-danger) 12%, transparent);
+  color: var(--karsa-color-danger);
   font-size: 0.6rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -87,15 +87,15 @@
 }
 .quick-view-section h3 {
   margin: 0;
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
   font-size: 10px;
-  font-weight: var(--tk-font-weight-bold);
+  font-weight: var(--karsa-font-weight-bold);
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 .quick-view-note {
   margin: 0;
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
   font-size: 12px;
   line-height: 1.6;
   white-space: pre-wrap;
@@ -103,10 +103,10 @@
 .booking-warning {
   margin: 0;
   padding: 10px;
-  border: 1px solid color-mix(in srgb, var(--tk-color-warning) 30%, var(--admin-line));
+  border: 1px solid color-mix(in srgb, var(--karsa-color-warning) 30%, var(--admin-line));
   border-radius: 8px;
-  background: color-mix(in srgb, var(--tk-color-warning) 9%, transparent);
-  color: var(--tk-color-warning);
+  background: color-mix(in srgb, var(--karsa-color-warning) 9%, transparent);
+  color: var(--karsa-color-warning);
   font-size: 12px;
   line-height: 1.5;
 }

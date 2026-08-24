@@ -1,0 +1,38 @@
+---
+title: Karsa
+description: A site-neutral Astro foundation for accessible interfaces, content, and modular applications.
+template: splash
+hero:
+  tagline: Compose a fast, accessible site with typed Astro components, optional modules, and a clear ownership model.
+  actions:
+    - text: Get started
+      link: /en/getting-started/
+      icon: right-arrow
+      variant: primary
+    - text: Choose a preset
+      link: /en/presets/
+      icon: open-book
+---
+
+import { Card, CardGrid } from "@astrojs/starlight/components";
+
+<CardGrid>
+  <Card title="Astro native" icon="puzzle">
+    Import typed `.astro` components directly. Static output is the default; add client behavior only where the interaction needs it.
+  </Card>
+  <Card title="Site-neutral" icon="rocket">
+    Start with a company, product, service, or publication brief. Core guidance stays reusable, while domain-specific pages name their own trade-offs.
+  </Card>
+  <Card title="Composable" icon="seti:css">
+    Install only the modules you need, keep ownership explicit, and use semantic `--karsa-*` tokens for a consistent visual system.
+  </Card>
+</CardGrid>
+
+## What Karsa provides
+
+- A typed Astro UI and theme layer with accessible primitives.
+- Optional modules with registry contributions, dependency order, migrations, and seeds.
+- Content and page patterns that keep app-owned pages separate from module-owned routes.
+- An AI workflow that records assumptions, evidence, validation, and scope decisions.
+
+Use the guides to choose a preset, then follow the matching contract for your site's content, data, and deployment.

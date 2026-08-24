@@ -25,7 +25,7 @@ async function loadRegistry(
     loaded = await import(options.fresh ? `${href}?t=${Date.now()}` : href);
   } catch (error) {
     throw new Error(
-      `Could not load ${configPath}. Run "takontuku db sync" from your project root.\n${
+      `Could not load ${configPath}. Run "karsa db sync" from your project root.\n${
         error instanceof Error ? error.message : String(error)
       }`,
     );
@@ -34,22 +34,20 @@ async function loadRegistry(
   const integrations = ((loaded.default?.integrations ?? []) as unknown[])
     .flat()
     .filter((integration): integration is AstroIntegrationLike => Boolean(integration));
-  const takontukuIntegration = integrations.find(
-    (integration) => integration.name === "@takontuku/core",
-  );
+  const karsaIntegration = integrations.find((integration) => integration.name === "@karsa/core");
 
-  if (!takontukuIntegration?.registry) {
+  if (!karsaIntegration?.registry) {
     throw new Error(
-      `Could not find the takontuku() integration in ${configPath}. Is @takontuku/core listed in "integrations"?`,
+      `Could not find the karsa() integration in ${configPath}. Is @karsa/core listed in "integrations"?`,
     );
   }
-  return takontukuIntegration.registry;
+  return karsaIntegration.registry;
 }
 
 async function runDbSync(cwd: string, registry: ResolvedRegistry): Promise<void> {
   const { written } = await syncMigrations({
     modules: registry.modules,
-    lockfilePath: path.join(cwd, "takontuku.migrations.json"),
+    lockfilePath: path.join(cwd, "karsa.migrations.json"),
     migrationsDir: path.join(cwd, "migrations"),
   });
 
@@ -97,7 +95,7 @@ async function runAdd(args: string[]): Promise<void> {
   const { positional, flags } = parseArgs(args);
   const spec = positional[0];
   if (!spec) {
-    console.error("Usage: takontuku add <module> [--no-install] [--no-sync]");
+    console.error("Usage: karsa add <module> [--no-install] [--no-sync]");
     process.exitCode = 1;
     return;
   }
@@ -127,7 +125,7 @@ async function runRemove(args: string[]): Promise<void> {
   const { positional, flags } = parseArgs(args);
   const spec = positional[0];
   if (!spec) {
-    console.error("Usage: takontuku remove <module> [--no-install]");
+    console.error("Usage: karsa remove <module> [--no-install]");
     process.exitCode = 1;
     return;
   }
@@ -151,7 +149,7 @@ async function runRemove(args: string[]): Promise<void> {
 
   console.log(`Updated ${result.filesChanged.join(", ")}.`);
   console.log(
-    'Left migrations/ and takontuku.migrations.json alone — already-applied migrations are never rewritten, and the lockfile entry is what keeps a later "takontuku add" from re-emitting them. Drop the module\'s tables with your own migration if you want the data gone.',
+    'Left migrations/ and karsa.migrations.json alone — already-applied migrations are never rewritten, and the lockfile entry is what keeps a later "karsa add" from re-emitting them. Drop the module\'s tables with your own migration if you want the data gone.',
   );
 }
 
@@ -177,12 +175,12 @@ async function main(): Promise<void> {
   if (command === "skills" && rest[0] === "install") {
     const { skills, targets } = installSkills(process.cwd());
     console.log(`Installed ${skills.join(", ")} into ${targets.join(" and ")}.`);
-    console.log("Re-run this after upgrading @takontuku/core to pick up skill updates.");
+    console.log("Re-run this after upgrading @karsa/core to pick up skill updates.");
     return;
   }
   console.error(
-    "Usage: takontuku add <module> | takontuku remove <module> | takontuku db sync | " +
-      "takontuku db seed | takontuku skills install",
+    "Usage: karsa add <module> | karsa remove <module> | karsa db sync | " +
+      "karsa db seed | karsa skills install",
   );
   process.exitCode = 1;
 }

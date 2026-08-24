@@ -1,0 +1,33 @@
+---
+title: Alur kerja AI
+description: Gunakan AI secara aman dengan memilih preset dan tier, memeriksa ownership, lalu mengembalikan bukti serta keputusan scope.
+---
+
+Workflow AI Karsa adalah loop implementasi yang dibatasi, bukan izin untuk mendesain ulang aplikasi.
+
+## Sebelum mengedit
+
+1. Baca `AGENTS.md`, `CLAUDE.md`, `astro.config.mjs`, `package.json`, dan registry yang ter-resolve.
+2. Periksa `src/pages/`, override tema, `seed/`, asset publik, dan route milik modul.
+3. Pilih preset dan tier yang diizinkan. Jangan menaikkan install → content → polished tanpa izin.
+4. Tulis plan singkat berisi halaman, modul, data, asset, ownership, asumsi, dan check.
+
+## Saat implementasi
+
+Gunakan `karsa-ui` untuk komponen dan token, `karsa-modules` untuk registry dan ownership, serta `karsa-data` untuk migrasi, seed, media, dan secret. Situs service memakai adapter di batas modul; situs company memakai halaman Astro milik aplikasi; situs publication memakai content layer. Route domain tetap di modul owner-nya.
+
+Periksa lima surface sebelum menyatakan selesai: config, registry, pages, seed data, dan ownership. Pilih vertical slice kecil yang dapat diuji daripada abstraksi spekulatif.
+
+## Laporan bukti
+
+Selesaikan dengan command dan observasi, bukan “done” generik:
+
+- preset dan tier terpilih, file berubah, serta asumsi;
+- bukti config dan registry ter-resolve;
+- bukti ownership halaman dan modul;
+- bukti seed/migrasi/media bila ada;
+- typecheck, lint, build, dan check runtime lokal terkait;
+- temuan over-engineering (hal yang sengaja tidak digeneralisasi);
+- temuan under-engineering (hal yang masih dibutuhkan brief sebelum release).
+
+Prompt Indonesia dan English boleh meminta hal yang sama; standar workflow dan bukti tetap sama.

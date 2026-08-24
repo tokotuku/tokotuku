@@ -55,16 +55,16 @@ function token(name: string): string {
 }
 
 function theme(): object {
-  const foreground = token("--tk-color-fg");
-  const muted = token("--tk-color-fg-muted");
-  const border = token("--tk-color-border");
+  const foreground = token("--karsa-color-fg");
+  const muted = token("--karsa-color-fg-muted");
+  const border = token("--karsa-color-border");
 
   return {
     color: [
-      token("--tk-color-accent"),
-      token("--tk-color-success"),
-      token("--tk-color-warning"),
-      token("--tk-color-danger"),
+      token("--karsa-color-accent"),
+      token("--karsa-color-success"),
+      token("--karsa-color-warning"),
+      token("--karsa-color-danger"),
       muted,
     ],
     textStyle: { color: foreground },

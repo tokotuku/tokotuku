@@ -6,10 +6,10 @@
   margin-bottom: 14px;
   padding: 6px 9px;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--tk-color-accent) 11%, var(--tk-color-bg));
-  color: var(--tk-color-accent);
+  background: color-mix(in srgb, var(--karsa-color-accent) 11%, var(--karsa-color-bg));
+  color: var(--karsa-color-accent);
   font-size: 10px;
-  font-weight: var(--tk-font-weight-bold);
+  font-weight: var(--karsa-font-weight-bold);
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -21,6 +21,6 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  margin: 14px 0 0 !important;
-  font-size: 10px !important;
+  margin: 14px 0 0;
+  font-size: 10px;
 }

@@ -1,0 +1,26 @@
+---
+title: Kontrak kontribusi
+description: Definisikan kontribusi modul dengan ID, entrypoint, order, ownership dependency, dan perilaku removal.
+---
+
+Kontrak kontribusi adalah seam antara modul dan host app. Kontrak membuat komposisi mudah diperiksa dan menjaga modul tetap bisa dihapus.
+
+| Kontribusi | Yang disediakan owner | Yang dikonsumsi host |
+| --- | --- | --- |
+| Site route | pattern dan entrypoint | inject hanya saat terpasang |
+| Admin route | pattern terjaga dan entrypoint | route dengan access control |
+| Navigasi | `id` stabil, label, href, order opsional | merge sesuai dependency |
+| Site home section/widget | `id` stabil, entrypoint, order opsional | render list ter-resolve |
+| `clientConfig` | opsi presentation/registration yang JSON-safe | mengekspos konfigurasi modul ter-resolve |
+| Required brand fields | field seperti `currency` yang opsional | integrasi gagal lebih awal bila tidak ada |
+| Sitemap source | `id` stabil, entrypoint, order opsional | kontribusi URL published ke `/sitemap.xml` |
+| Migrasi | URL dan nama modul | emit SQL bernomor append-only |
+| Seed/media | SQL lokal atau root media dan prefix yang diizinkan | muat data awal lokal |
+
+ID unik dalam setiap tipe kontribusi. Dependency disortir sebelum dependent; `order` adalah hint presentasi lokal, bukan sistem dependency kedua.
+
+## Uji removal
+
+Pasang modul, periksa registry ter-resolve, lalu hapus dan pastikan route, nav, widget, seed, dan registrasi middleware miliknya hilang, sementara halaman aplikasi yang tidak terkait tetap ada. Kontribusi yang meninggalkan import atau route dangling gagal kontrak.
+
+Pilih satu kontribusi sempit daripada abstraksi host yang mengantisipasi semua modul masa depan. Catat kontrak dan bukti validasinya bersama perubahan modul.

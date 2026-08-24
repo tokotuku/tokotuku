@@ -1,0 +1,17 @@
+---
+title: Skeleton
+description: Placeholder baris yang menghormati preferensi reduced motion.
+sidebar:
+  order: 3
+---
+
+import Skeleton from "@karsa/ui/Skeleton.astro";
+import ComponentPreview from "../../../../../components/ComponentPreview.astro";
+
+<ComponentPreview label="Contoh skeleton" layout="stack"><Skeleton lines={4} /></ComponentPreview>
+
+```astro
+<Skeleton lines={4} />
+```
+
+`lines` default-nya `3`. Root mengekspos `aria-busy="true"` dan label loading; animasi shimmer mati ketika pengguna memilih reduced motion.

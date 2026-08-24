@@ -1,0 +1,51 @@
+---
+title: Migrasi 0.2 → 0.3
+description: Daftar izin eksplisit untuk identifier Takontuku dan Tokotuku lama, penggantian manifest, serta urutan CLI Karsa.
+---
+
+Halaman ini adalah satu-satunya halaman dokumentasi yang sengaja menyebut nama merek lama. Gunakan identifier lama di bawah hanya ketika memigrasikan proyek 0.2; kode, dokumentasi, prompt, dan import paket baru selalu menggunakan Karsa.
+
+## Daftar izin identifier lama
+
+| Identifier lama | Pengganti 0.3 | Lokasi perubahan |
+| --- | --- | --- |
+| `Takontuku` / `Tokotuku` | `Karsa` | Copy merek, judul proyek, dan instruksi hasil scaffold |
+| `@takontuku/*` / `@tokotuku/*` | `@karsa/*` | Import paket, dependency, dan scope `.npmrc` |
+| CLI `takontuku` / `tokotuku` | CLI `karsa` | Skrip shell dan CI |
+| `create-takontuku` | `create-karsa` | Perintah scaffold dan referensi paket |
+| `takontuku-store-builder`, `takontuku-ui`, `takontuku-modules`, `takontuku-data` | `karsa-site-builder`, `karsa-ui`, `karsa-modules`, `karsa-data` | `.agents/skills/` dan `.claude/skills/` |
+| `virtual:takontuku/*` | `virtual:karsa/*` | Import virtual module dan deklarasi ambient |
+| `--tk-*` | `--karsa-*` | Token tema dan override CSS |
+| `takontuku-theme`, `takontuku-cart` | `karsa-theme`, `karsa-cart` | Key storage browser pada skrip milik aplikasi |
+| `takontuku.migrations.json` | `karsa.migrations.json` | Nama file manifest migrasi |
+
+Jangan menjalankan penggantian teks massal pada data pengguna atau catatan historis. Tinjau setiap hasil terhadap daftar izin ini, lalu biarkan data domain yang tidak terkait tetap sama.
+
+## Ganti nama manifest sebelum menjalankan CLI
+
+Manifest migrasi adalah state, bukan artefak build sementara. Ganti namanya terlebih dahulu agar CLI 0.3 melanjutkan sequence yang sudah ada, bukan membuat riwayat kedua:
+
+```sh
+mv takontuku.migrations.json karsa.migrations.json
+bun install
+bunx karsa db sync
+```
+
+Buat cadangan manifest dan direktori `migrations/` sebelum mengganti nama. Jangan mengedit, menomori ulang, atau menghapus SQL yang sudah diterapkan. Jika manifest lama tidak ada, hentikan proses dan rekonstruksi state migrasi dari database ter-deploy sebelum menjalankan `karsa db sync`.
+
+## Perubahan import dan paket
+
+Perbarui import ke subpath publik 0.3, lalu jalankan typecheck sebelum mengubah halaman:
+
+```diff
+- import Button from "@takontuku/ui/Button.astro";
++ import Button from "@karsa/ui/Button.astro";
+- import "@takontuku/ui/styles.css";
++ import "@karsa/theme/styles.css";
+```
+
+Stylesheet tema dan paket chart menjadi paket publik terpisah di 0.3. Client auth menggunakan subpath client eksplisit, dan helper list admin menggunakan cursor, bukan nomor halaman. Periksa export paket setelah memperbarui import; jangan mempertahankan alias lama hanya agar pencarian berhasil.
+
+## Verifikasi
+
+Jalankan migrasi lebih dulu pada database lokal sementara, periksa registry yang ter-resolve, terapkan migrasi lokal, lalu build. Tinjau diff agar tidak ada identifier lama di luar halaman ini dan tidak ada perubahan tidak sengaja pada `examples/**`. Catat penggantian manifest, rencana migrasi, output instalasi paket, typecheck, lint, dan build di laporan rilis.

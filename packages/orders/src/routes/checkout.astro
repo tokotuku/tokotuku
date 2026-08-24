@@ -1,10 +1,10 @@
 ---
 import { env } from "cloudflare:workers";
-import { createTranslator } from "@takontuku/core";
-import { brand, money } from "@takontuku/core/brand";
-import Layout from "@takontuku/ui/DocumentLayout.astro";
-import Icon from "@takontuku/ui/Icon.astro";
-import StoreHeader from "@takontuku/ui/StoreHeader.astro";
+import { createTranslator } from "@karsa/core";
+import { brand, money } from "@karsa/core/brand";
+import Layout from "@karsa/ui/DocumentLayout.astro";
+import Icon from "@karsa/ui/Icon.astro";
+import SiteHeader from "@karsa/ui/SiteHeader.astro";
 import { orderMessages } from "../messages";
 import {
   type CartLineInput,
@@ -14,9 +14,12 @@ import {
   paymentMethods,
 } from "../orders";
 
-const bankAccount = { bank: "BCA", accountNumber: "1234567890", accountName: "Takontuku" };
+const bankAccount = { bank: "BCA", accountNumber: "1234567890", accountName: "Karsa" };
 const id = brand.locale.toLowerCase().startsWith("id");
 const t = createTranslator(brand, orderMessages);
+const headerActions = [
+  { label: id ? "Keranjang" : "Cart", href: "/cart", icon: "cart", badge: true, current: true },
+];
 
 const { user } = Astro.locals;
 if (!user) return Astro.redirect("/login?next=/checkout");
@@ -77,7 +80,7 @@ import "../styles/routes/orders-checkout.css";
 ---
 
 <Layout title={`Checkout — ${brand.name}`} siteName={brand.name} lang={id ? "id" : "en"}>
-  <StoreHeader brand={brand} showCart={true} current="cart" announcement={brand.storefront?.announcement ?? (id ? "Objek untuk ritual sehari-hari." : "Objects for everyday rituals.")} labels={{ home: id ? "Beranda" : "Home", shop: id ? "Toko" : "Shop", cart: id ? "Keranjang" : "Cart" }} />
+  <SiteHeader brand={brand} actions={headerActions} current="cart" announcement={brand.site?.announcement ?? (id ? "Objek untuk ritual sehari-hari." : "Objects for everyday rituals.")} labels={{ home: id ? "Beranda" : "Home" }} />
   <main>
     {completedOrder && (
       <section class="success-card">
@@ -149,7 +152,7 @@ import "../styles/routes/orders-checkout.css";
   clearCart();
 </script>}
 {!completedOrder && <script>
-  import { money } from "@takontuku/core/brand";
+  import { money } from "@karsa/core/brand";
   import { readCart } from "../client/cart";
   import { appendAll } from "../client/dom";
 

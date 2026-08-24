@@ -1,0 +1,44 @@
+---
+title: Menulis konten dan blog
+description: Tulis artikel bilingual dengan frontmatter, ownership, dan bukti review yang konsisten.
+---
+
+Modul `@karsa/content` memiliki post dan route editorialnya. Modul menyimpan `slug`, `title`,
+`excerpt`, `body_markdown`, `cover_image_key` opsional, `status` (`draft`, `published`, atau
+`archived`), `author_id` opsional, serta timestamp publikasi. Pasangkan file English dengan file
+Indonesia pada path relatif yang sama ketika kedua locale aktif.
+
+## Field editor admin
+
+```text
+slug: artikel-yang-berguna
+title: Artikel yang berguna
+excerpt: Kalimat untuk kartu, search, dan feed.
+body_markdown: Heading, list, link, emphasis, quote, dan code.
+status: draft | published | archived
+cover_image_key: content/<generated-key>
+```
+
+Gunakan editor admin dan schema repository, bukan field ad hoc. Biarkan post berstatus `draft`
+sampai copy, link, atribusi, dan imagery disetujui. Upload cover disimpan di prefix R2 `content/`;
+Markdown image sengaja tidak didukung pada 0.3.
+
+Fungsi `renderMarkdownSafe()` yang sama dipakai halaman publik dan preview terautentikasi. Yang
+diizinkan hanya heading, paragraf, list, link HTTP(S), blockquote, emphasis, inline code, dan
+fenced code. Raw HTML, script, iframe, style, event handler, URL berbahaya, dan sintaks image
+dihapus.
+
+## Checklist editorial
+
+- Satu judul jelas dan deskripsi yang berguna.
+- Satu H1 lalu hierarki heading berurutan.
+- Link bekerja di route `/en/` dan `/id/`.
+- Tanggal dan label navigasi mengikuti locale.
+- Terjemahan pasangan tersedia atau alasan single-locale dijelaskan.
+- Tidak ada quote, metrik, atau klaim pelanggan yang dibuat-buat.
+- Post draft dan archived tidak boleh muncul di `/blog`, RSS, atau sitemap canonical.
+- v0.3 belum mencakup Pages CMS, tag/kategori, komentar, rich-text editor, archive author, atau
+  riwayat redirect saat slug berubah.
+
+Jalankan `bun run parity` di app docs untuk menemukan pasangan locale yang hilang. Workflow AI harus
+melampirkan sumber konten dan bukti reviewer pada laporan akhir.

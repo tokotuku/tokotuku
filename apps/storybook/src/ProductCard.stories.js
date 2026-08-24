@@ -1,4 +1,4 @@
-import ProductCard from "@takontuku/ui/ProductCard.astro";
+import ProductCard from "@karsa/ui/ProductCard.astro";
 
 export default {
   title: "Commerce/ProductCard",

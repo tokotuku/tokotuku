@@ -9,14 +9,14 @@ import {
 describe("normalizeModuleSpec", () => {
   it("prefixes a bare name with the framework's own scope", () => {
     expect(normalizeModuleSpec("blog")).toEqual({
-      packageName: "@takontuku/blog",
+      packageName: "@karsa/blog",
       versionRange: null,
     });
   });
 
   it("splits a bare name's trailing version range", () => {
     expect(normalizeModuleSpec("blog@1.2.0")).toEqual({
-      packageName: "@takontuku/blog",
+      packageName: "@karsa/blog",
       versionRange: "1.2.0",
     });
   });
@@ -29,8 +29,8 @@ describe("normalizeModuleSpec", () => {
   });
 
   it("splits a scoped package name's trailing version range without mistaking the scope's own @ for it", () => {
-    expect(normalizeModuleSpec("@takontuku/blog@1.2.0")).toEqual({
-      packageName: "@takontuku/blog",
+    expect(normalizeModuleSpec("@karsa/blog@1.2.0")).toEqual({
+      packageName: "@karsa/blog",
       versionRange: "1.2.0",
     });
   });
@@ -38,11 +38,11 @@ describe("normalizeModuleSpec", () => {
 
 describe("deriveExportNameGuess", () => {
   it("camelCases a hyphenated last segment", () => {
-    expect(deriveExportNameGuess("@takontuku/gift-cards")).toBe("giftCards");
+    expect(deriveExportNameGuess("@karsa/gift-cards")).toBe("giftCards");
   });
 
   it("leaves a single-word last segment as-is", () => {
-    expect(deriveExportNameGuess("@takontuku/blog")).toBe("blog");
+    expect(deriveExportNameGuess("@karsa/blog")).toBe("blog");
   });
 });
 
@@ -62,7 +62,7 @@ describe("hasRegisterSubpath", () => {
 describe("selectModuleFactory", () => {
   it("picks the camelCase-guessed export when it's a matching zero-arity function", () => {
     const namespace = { giftCards: () => ({ name: "gift-cards", requires: ["catalog"] }) };
-    const result = selectModuleFactory(namespace, "@takontuku/gift-cards");
+    const result = selectModuleFactory(namespace, "@karsa/gift-cards");
     expect(result).toEqual({
       exportName: "giftCards",
       moduleName: "gift-cards",
@@ -72,7 +72,7 @@ describe("selectModuleFactory", () => {
 
   it("falls back to the raw last segment", () => {
     const namespace = { "weird-name": undefined, blog: () => ({ name: "blog" }) };
-    const result = selectModuleFactory(namespace, "@takontuku/blog");
+    const result = selectModuleFactory(namespace, "@karsa/blog");
     expect(result).toEqual({ exportName: "blog", moduleName: "blog", requires: [] });
   });
 
@@ -85,13 +85,13 @@ describe("selectModuleFactory", () => {
       takesArgs: (x: number) => ({ name: "wrong", x }),
       blogModule: () => ({ name: "blog" }),
     };
-    const result = selectModuleFactory(namespace, "@takontuku/unrelated-package-name");
+    const result = selectModuleFactory(namespace, "@karsa/unrelated-package-name");
     expect(result).toEqual({ exportName: "blogModule", moduleName: "blog", requires: [] });
   });
 
   it("refuses when no export defines a module", () => {
     const namespace = { helperFn: () => 42 };
-    expect(() => selectModuleFactory(namespace, "@takontuku/blog")).toThrow(
+    expect(() => selectModuleFactory(namespace, "@karsa/blog")).toThrow(
       /Could not tell which export/,
     );
   });
@@ -101,7 +101,7 @@ describe("selectModuleFactory", () => {
       first: () => ({ name: "first" }),
       second: () => ({ name: "second" }),
     };
-    expect(() => selectModuleFactory(namespace, "@takontuku/unrelated-package-name")).toThrow(
+    expect(() => selectModuleFactory(namespace, "@karsa/unrelated-package-name")).toThrow(
       /exports more than one module definition/,
     );
   });

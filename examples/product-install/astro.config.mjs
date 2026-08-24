@@ -1,31 +1,36 @@
 // @ts-check
 import cloudflare from "@astrojs/cloudflare";
+import { auth } from "@karsa/auth";
+import { catalog } from "@karsa/catalog";
+import { karsa } from "@karsa/core";
+import { jarene } from "@karsa/jarene";
+import { orders } from "@karsa/orders";
 import tailwindcss from "@tailwindcss/vite";
-import { auth } from "@takontuku/auth";
-import { catalog } from "@takontuku/catalog";
-import { takontuku } from "@takontuku/core";
-import { jarene } from "@takontuku/jarene";
-import { orders } from "@takontuku/orders";
 import { defineConfig } from "astro/config";
 
-// Run "takontuku add <module>" or "takontuku remove <module>" to change
+// Run "karsa add <module>" or "karsa remove <module>" to change
 // what this client has installed -- it edits this file, src/middleware.ts,
 // and package.json for you.
 export default defineConfig({
   integrations: [
-    takontuku({
+    karsa({
       brand: {
         name: "Racik Rasa",
         locale: "id-ID",
         currency: "IDR",
         timeZone: "Asia/Jakarta",
         // Optional: use a local public asset or an absolute CDN/R2 URL.
-        // auth: { backgroundImage: "/images/auth-commerce.webp", backgroundPosition: "center" },
+        // auth: { backgroundImage: "/images/auth-site.webp", backgroundPosition: "center" },
       },
-      modules: [auth(), jarene(), catalog(), orders()],
+      modules: [
+        auth({ registration: "public" }),
+        jarene(),
+        catalog({ presentation: "products" }),
+        orders({ presentation: "orders" }),
+      ],
     }),
   ],
-  // @takontuku/ui's Layout.astro imports its own CSS, which needs this plugin.
+  // @karsa/ui's Layout.astro imports its own CSS, which needs this plugin.
   vite: { plugins: [tailwindcss()] },
   output: "server",
   adapter: cloudflare({

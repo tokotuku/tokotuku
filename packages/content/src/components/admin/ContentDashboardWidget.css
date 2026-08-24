@@ -1,0 +1,122 @@
+.content-dashboard-widget {
+  padding: 1.25rem;
+}
+
+.content-dashboard-heading {
+  align-items: start;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+
+.content-dashboard-heading h2 {
+  font-family: var(--karsa-font-family-display);
+  font-size: 1.45rem;
+  margin: 0.25rem 0 0;
+}
+
+.content-dashboard-heading a {
+  color: var(--karsa-color-accent);
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+.content-dashboard-heading a:hover {
+  text-decoration: underline;
+}
+
+.content-dashboard-metrics {
+  display: grid;
+  gap: 0.65rem;
+  grid-template-columns: repeat(3, 1fr);
+  margin-bottom: 1.5rem;
+}
+
+.content-dashboard-metrics > div {
+  background: var(--karsa-color-bg-subtle);
+  border-radius: var(--karsa-radius-sm);
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.85rem;
+}
+
+.content-dashboard-metrics span,
+.content-dashboard-recent small {
+  color: var(--karsa-color-fg-muted);
+  font-size: 0.75rem;
+}
+
+.content-dashboard-metrics strong {
+  font-family: var(--karsa-font-family-display);
+  font-size: 1.7rem;
+}
+
+.content-dashboard-recent h3 {
+  border-bottom: 1px solid var(--karsa-color-border);
+  font-size: 0.82rem;
+  margin: 0;
+  padding-bottom: 0.6rem;
+  text-transform: uppercase;
+}
+
+.content-dashboard-recent a {
+  align-items: center;
+  border-bottom: 1px solid var(--karsa-color-border);
+  color: var(--karsa-color-fg);
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  padding: 0.75rem 0;
+  text-decoration: none;
+}
+
+.content-dashboard-recent a:hover {
+  color: var(--karsa-color-accent);
+}
+
+.content-dashboard-recent a > span:first-child {
+  display: grid;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.content-dashboard-recent strong,
+.content-dashboard-recent small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.content-status {
+  border-radius: 999px;
+  font-size: 0.7rem;
+  padding: 0.2rem 0.5rem;
+  text-transform: capitalize;
+}
+
+.content-status--published {
+  background: color-mix(in srgb, var(--karsa-color-success) 15%, transparent);
+  color: var(--karsa-color-success);
+}
+
+.content-status--draft {
+  background: color-mix(in srgb, var(--karsa-color-warning) 15%, transparent);
+  color: var(--karsa-color-warning);
+}
+
+.content-status--archived {
+  background: color-mix(in srgb, var(--karsa-color-fg-muted) 15%, transparent);
+  color: var(--karsa-color-fg-muted);
+}
+
+.content-dashboard-empty {
+  color: var(--karsa-color-fg-muted);
+  margin: 0;
+}
+
+@media (max-width: 560px) {
+  .content-dashboard-heading {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+}

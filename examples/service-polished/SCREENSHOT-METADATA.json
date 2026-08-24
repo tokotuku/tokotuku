@@ -1,0 +1,21 @@
+{
+  "fixture": "service-polished",
+  "desktop": {
+    "status": "captured",
+    "path": "screenshots/desktop.jpg",
+    "viewport": { "width": 1440, "height": 1000 },
+    "score": 94
+  },
+  "mobile": {
+    "status": "captured",
+    "path": "screenshots/mobile.jpg",
+    "viewport": { "width": 390, "height": 844 },
+    "score": 94
+  },
+  "scoring": {
+    "status": "scored",
+    "method": "Codex browser QA at the required desktop and mobile viewports",
+    "score": 94,
+    "notes": "The setup gate was completed in local D1 before capture. Responsive service vocabulary, local imagery, contrast, overflow, and browser console were inspected; no commerce copy or console issues were observed."
+  }
+}

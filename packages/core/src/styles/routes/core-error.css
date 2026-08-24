@@ -4,8 +4,8 @@
   min-height: 100vh;
   place-items: center;
   padding: 24px;
-  background: var(--tk-color-bg);
-  color: var(--tk-color-fg);
+  background: var(--karsa-color-bg);
+  color: var(--karsa-color-fg);
   text-align: center;
 }
 .error-page > button {
@@ -35,7 +35,7 @@ section {
   margin-bottom: 67px;
   color: inherit;
   font-size: 18px;
-  font-weight: var(--tk-font-weight-bold);
+  font-weight: var(--karsa-font-weight-bold);
   text-decoration: none;
 }
 .error-icon {
@@ -44,18 +44,18 @@ section {
   height: 64px;
   place-items: center;
   border-radius: 50%;
-  background: color-mix(in srgb, var(--tk-color-accent) 14%, var(--tk-color-bg));
-  color: var(--tk-color-accent);
+  background: color-mix(in srgb, var(--karsa-color-accent) 14%, var(--karsa-color-bg));
+  color: var(--karsa-color-accent);
 }
 .error-icon--warning {
-  background: color-mix(in srgb, var(--tk-color-warning) 16%, var(--tk-color-bg));
-  color: var(--tk-color-warning);
+  background: color-mix(in srgb, var(--karsa-color-warning) 16%, var(--karsa-color-bg));
+  color: var(--karsa-color-warning);
 }
 .error-code {
   margin: 13px 0 -4px;
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
   font-size: 11px;
-  font-weight: var(--tk-font-weight-bold);
+  font-weight: var(--karsa-font-weight-bold);
   letter-spacing: 0.16em;
 }
 h1 {
@@ -65,7 +65,7 @@ h1 {
 section > p:not(.error-code) {
   max-width: 390px;
   margin: 9px 0 19px;
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
   font-size: 14px;
   line-height: 1.45;
 }
@@ -75,18 +75,18 @@ section > p:not(.error-code) {
   align-items: center;
   gap: 8px;
   padding: 0 14px;
-  border: 1px solid var(--tk-color-accent);
-  border-radius: var(--tk-radius-md);
-  background: var(--tk-color-accent);
-  color: var(--tk-color-accent-fg);
+  border: 1px solid var(--karsa-color-accent);
+  border-radius: var(--karsa-radius-md);
+  background: var(--karsa-color-accent);
+  color: var(--karsa-color-accent-fg);
   font-size: 13px;
-  font-weight: var(--tk-font-weight-semibold);
+  font-weight: var(--karsa-font-weight-semibold);
   text-decoration: none;
 }
 .error-secondary {
   margin-top: 14px;
   color: inherit;
   font-size: 13px;
-  font-weight: var(--tk-font-weight-semibold);
+  font-weight: var(--karsa-font-weight-semibold);
   text-decoration: none;
 }

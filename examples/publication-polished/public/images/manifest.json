@@ -1,0 +1,24 @@
+{
+  "brand": "Karsa Journal",
+  "mode": "publication",
+  "design": {
+    "direction": "quiet editorial warmth with an observant, human scale",
+    "palette": {
+      "ink": "deep brown-black for readable long-form text",
+      "accent": "burnt clay for links and editorial markers",
+      "surface": "warm paper with soft cream panels",
+      "dark": "near-black brown with apricot highlights"
+    },
+    "type": "expressive serif headlines paired with a calm, legible sans-serif body",
+    "imagery": "a locally stored documentary cover with natural light, no text, no logos, and no watermark"
+  },
+  "assets": [
+    {
+      "id": "hero",
+      "path": "/images/karsa-journal-hero.png",
+      "role": "publication landing-page hero",
+      "dimensions": "1536 × 1024 px",
+      "prompt": "Quiet editorial photograph of an open notebook and a ceramic cup beside a sunlit window, warm paper tones, generous negative space, natural light, no text, no logos, no watermark."
+    }
+  ]
+}

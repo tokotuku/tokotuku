@@ -1,0 +1,22 @@
+---
+title: Panduan situs produk
+description: Bangun situs berorientasi produk dengan ownership katalog dan order tetap berada di modul.
+---
+
+Ini adalah panduan domain produk. Gunakan istilah produk hanya ketika situs benar-benar menampilkan item, harga, inventory, cart, atau checkout.
+
+## Bentuk modul
+
+Pasang modul order jika brief memiliki alur pembelian; modul itu menarik dependency catalog. Catalog memiliki route produk, inventory, dan surface admin-nya. Orders memiliki cart, checkout, lifecycle order, serta widget terkait. Aplikasi memiliki halaman brand dan konten penjelasan.
+
+```sh
+bunx karsa add orders
+bunx karsa db sync
+bunx wrangler d1 migrations apply DB --local
+```
+
+Tier content menambahkan record produk yang disetujui, kategori, harga, inventory, dan copy di `seed/` sambil mempertahankan layout paket. Tier polished boleh menambah tema terarah dan gambar produk lokal; jangan menyalin route catalog atau checkout ke `src/pages/`.
+
+Gunakan helper `money()` dan `date()` yang mengikuti locale. State kosong harus jujur: tanpa data order, tampilkan state operasional kosong, bukan sales buatan.
+
+Validasi ownership modul, urutan migrasi, hasil seed lokal, key media produk, aksesibilitas route, typecheck, lint, dan build.

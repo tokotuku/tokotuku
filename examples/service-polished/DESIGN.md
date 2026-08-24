@@ -23,10 +23,10 @@ part of this fixture.
 
 | ID | Purpose | Output path | Media key / config reference | Dimensions | Format |
 | --- | --- | --- | --- | --- | --- |
-| `hero` | Storefront hero: calm, sunny pet-care scene with a dog and caregiver | `public/images/teman-ekor-hero.png` | `/images/teman-ekor-hero.png` | 1536 × 1024 | PNG |
-| `penitipan` | Service visual for safe daily pet boarding | `seed/media/products/teman-ekor-penitipan.png` | `products/teman-ekor-penitipan.png` | 1254 × 1254 | PNG |
-| `grooming` | Service visual for gentle grooming and spa care | `seed/media/products/teman-ekor-grooming.png` | `products/teman-ekor-grooming.png` | 1254 × 1254 | PNG |
-| `jalan-jalan` | Service visual for guided dog walking | `seed/media/products/teman-ekor-jalan-jalan.png` | `products/teman-ekor-jalan-jalan.png` | 1254 × 1254 | PNG |
+| `hero` | Site hero: calm, sunny pet-care scene with a dog and caregiver | `public/images/teman-ekor-hero.png` | `/images/teman-ekor-hero.png` | 1536 × 1024 | PNG |
+| `penitipan` | Service visual for safe daily pet boarding | `seed/media/services/teman-ekor-penitipan.png` | `services/teman-ekor-penitipan.png` | 1254 × 1254 | PNG |
+| `grooming` | Service visual for gentle grooming and spa care | `seed/media/services/teman-ekor-grooming.png` | `services/teman-ekor-grooming.png` | 1254 × 1254 | PNG |
+| `jalan-jalan` | Service visual for guided dog walking | `seed/media/services/teman-ekor-jalan-jalan.png` | `services/teman-ekor-jalan-jalan.png` | 1254 × 1254 | PNG |
 
 Constraints for every asset: locally stored, polished editorial photography, no stock or
 external URLs, no placeholder, no logo, no legible text, no watermark, no data URI, and no

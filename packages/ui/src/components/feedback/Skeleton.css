@@ -1,21 +1,21 @@
 .skeleton {
   display: grid;
-  gap: var(--tk-spacing-3);
+  gap: var(--karsa-spacing-3);
 }
 
 span {
   display: block;
   width: var(--line-width);
   height: 0.875rem;
-  border-radius: var(--tk-radius-full);
+  border-radius: var(--karsa-radius-full);
   background: linear-gradient(
     90deg,
-    var(--tk-color-bg-subtle),
-    color-mix(in srgb, var(--tk-color-border) 70%, var(--tk-color-bg)),
-    var(--tk-color-bg-subtle)
+    var(--karsa-color-bg-subtle),
+    color-mix(in srgb, var(--karsa-color-border) 70%, var(--karsa-color-bg)),
+    var(--karsa-color-bg-subtle)
   );
   background-size: 200% 100%;
-  animation: shimmer var(--tk-duration-slow) linear infinite;
+  animation: shimmer var(--karsa-duration-slow) linear infinite;
 }
 
 @keyframes shimmer {

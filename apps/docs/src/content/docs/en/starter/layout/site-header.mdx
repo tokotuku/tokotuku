@@ -1,0 +1,38 @@
+---
+title: SiteHeader
+description: Accessible site navigation with optional account, search, theme, and domain links.
+sidebar:
+  order: 5
+---
+
+`SiteHeader` provides a responsive, app-owned site header. Keep the default surface small and
+enable account, search, or domain links only when the selected site preset needs them.
+
+```astro
+---
+import SiteHeader from "@karsa/ui/SiteHeader.astro";
+---
+
+<SiteHeader
+  brand={{ name: "Northwind" }}
+  links={[{ label: "About", href: "/about" }, { label: "Contact", href: "/contact" }]}
+  actions={[{ label: "Account", href: "/login", icon: "user" }]}
+  showSearch
+/>
+```
+
+## Props
+
+| Prop | Type | Default |
+| --- | --- | --- |
+| `brand` | `{ name?: string; logo?: { src: string; alt?: string } }` | `{ name: "Karsa" }` |
+| `links` | `{ label: string; href: string; current?: boolean }[]` | `[]` |
+| `actions` | `{ label: string; href: string; icon?: string; badge?: boolean; current?: boolean }[]` | `[]` |
+| `current` | `string` | — |
+| `showSearch` | `boolean` | `false` |
+| `announcement` | `string \| false` | `false` |
+
+The header includes a keyboard-accessible mobile drawer, theme toggle, and optional search form.
+Pass localized `labels`, a site-owned `brand` object, and explicit `links`/`actions` rather than
+hard-coding domain vocabulary inside a reusable component. Domain actions should be contributed
+only by the guide that owns that domain.

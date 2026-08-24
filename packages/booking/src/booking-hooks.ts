@@ -1,4 +1,4 @@
-import { onOrderCreate } from "@takontuku/core";
+import { onOrderCreate } from "@karsa/core";
 
 /**
  * The shape /booking/[id].astro puts in attributes.booking when it calls
@@ -18,7 +18,7 @@ export interface BookingRequestAttributes {
 /**
  * Writes the booking_order_bookings row in the same atomic batch as the
  * order's creation. This hook fires for every order created store-wide, not
- * just bookings — a physical checkout through @takontuku/orders' createOrder
+ * just bookings — a physical checkout through @karsa/orders' createOrder
  * never sets attributes.booking, so it returns [] for those, the same way
  * catalog's inventory hook is a no-op for anything that isn't its concern.
  */

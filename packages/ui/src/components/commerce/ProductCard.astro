@@ -3,10 +3,11 @@ import Icon from "../core/Icon.astro";
 
 interface Props {
   id: number;
+  href?: string;
   name: string;
   description: string;
   price: string;
-  priceCents: number;
+  priceCents: number | null;
   imageUrl: string;
   stock?: number;
   /**
@@ -23,6 +24,7 @@ interface Props {
 
 const {
   id,
+  href = `/products/${id}`,
   name,
   description,
   price,
@@ -47,12 +49,12 @@ import "./ProductCard.css";
 ---
 
 <article class="product-card" data-product-card>
-  <a class="media" href={"/products/" + id} aria-label={(labels.view ?? "View") + " " + name}>
+  <a class="media" href={href} aria-label={(labels.view ?? "View") + " " + name}>
     <img src={imageUrl} alt={imageAlt} loading="lazy" />
     {stockLabel && <span class:list={["stock-pill", !available && "stock-pill--out"]}>{stockLabel}</span>}
   </a>
   <div class="body">
-    <div class="copy"><p class="category">{category}</p><h2><a href={"/products/" + id}>{name}</a></h2><p class="description">{description}</p></div>
+    <div class="copy"><p class="category">{category}</p><h2><a href={href}>{name}</a></h2><p class="description">{description}</p></div>
     <div class="footer"><strong>{price}</strong>{showAddToCart && <button type="button" data-add-to-cart data-product={serialized} disabled={!available} aria-label={available ? (labels.add ?? "Add to cart") + " " + name : (labels.soldOut ?? "Sold out")}>{available ? <Icon name="plus" size={16} /> : <span>{labels.soldOut ?? "Sold out"}</span>}</button>}</div>
   </div>
 </article>

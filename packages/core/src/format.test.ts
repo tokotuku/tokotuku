@@ -35,4 +35,12 @@ describe("createFormatters", () => {
     const input = new Date("2026-08-13T10:00:00Z");
     expect(date(input)).toBe(date(input.toISOString()));
   });
+
+  it("keeps dates universal while making money failures explicit without currency", () => {
+    const { money, date } = createFormatters({ locale: "en-US", timeZone: "UTC" });
+    expect(() => money(10)).toThrow(
+      "Karsa money() requires brand.currency. Add brand.currency before formatting monetary values.",
+    );
+    expect(date("2026-08-13T10:00:00Z")).toContain("2026");
+  });
 });

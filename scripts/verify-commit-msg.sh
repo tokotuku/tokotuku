@@ -25,7 +25,7 @@ if ! printf '%s\n' "$header" | grep -Eq '^(feat|fix|docs|style|refactor|perf|tes
   Allowed types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert
 
   Examples:
-    feat(elements): add tk-button component
+    feat(elements): add karsa-button component
     fix(core): correct focus trap edge case
     docs(tokens): document spacing scale
 EOF

@@ -1,19 +1,19 @@
-@scope (.tk-chart) {
+@scope (.karsa-chart) {
   figure {
     margin: 0;
-    padding: var(--tk-spacing-5);
-    border: 1px solid var(--tk-color-border);
-    border-radius: var(--tk-radius-xl);
-    background: var(--tk-color-bg);
-    box-shadow: var(--tk-shadow-sm);
+    padding: var(--karsa-spacing-5);
+    border: 1px solid var(--karsa-color-border);
+    border-radius: var(--karsa-radius-xl);
+    background: var(--karsa-color-bg);
+    box-shadow: var(--karsa-shadow-sm);
   }
 
   figcaption {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: var(--tk-spacing-4);
-    margin-bottom: var(--tk-spacing-4);
+    gap: var(--karsa-spacing-4);
+    margin-bottom: var(--karsa-spacing-4);
   }
 
   h2,
@@ -22,14 +22,14 @@
   }
 
   h2 {
-    color: var(--tk-color-fg);
-    font-size: var(--tk-font-size-lg);
+    color: var(--karsa-color-fg);
+    font-size: var(--karsa-font-size-lg);
   }
 
   figcaption p {
-    margin-top: var(--tk-spacing-1);
-    color: var(--tk-color-fg-muted);
-    font-size: var(--tk-font-size-sm);
+    margin-top: var(--karsa-spacing-1);
+    color: var(--karsa-color-fg-muted);
+    font-size: var(--karsa-font-size-sm);
   }
 
   .chart-stage {
@@ -48,13 +48,13 @@
     inset: 0;
     display: grid;
     place-items: center;
-    color: var(--tk-color-fg-muted);
-    font-size: var(--tk-font-size-sm);
+    color: var(--karsa-color-fg-muted);
+    font-size: var(--karsa-font-size-sm);
   }
 
   .error {
     display: none;
-    color: var(--tk-color-danger);
+    color: var(--karsa-color-danger);
   }
 
   figure[data-chart-state="ready"] .loading,
@@ -71,29 +71,29 @@
   }
 
   details {
-    margin-top: var(--tk-spacing-4);
-    border-top: 1px solid var(--tk-color-border);
-    padding-top: var(--tk-spacing-3);
+    margin-top: var(--karsa-spacing-4);
+    border-top: 1px solid var(--karsa-color-border);
+    padding-top: var(--karsa-spacing-3);
   }
 
   summary {
     width: fit-content;
     cursor: pointer;
-    color: var(--tk-color-accent);
-    font-size: var(--tk-font-size-sm);
-    font-weight: var(--tk-font-weight-medium);
+    color: var(--karsa-color-accent);
+    font-size: var(--karsa-font-size-sm);
+    font-weight: var(--karsa-font-weight-medium);
   }
 
   .table-frame {
-    margin-top: var(--tk-spacing-3);
+    margin-top: var(--karsa-spacing-3);
     overflow-x: auto;
   }
 
   table {
     width: 100%;
     border-collapse: collapse;
-    color: var(--tk-color-fg);
-    font-size: var(--tk-font-size-xs);
+    color: var(--karsa-color-fg);
+    font-size: var(--karsa-font-size-xs);
   }
 
   caption {
@@ -110,8 +110,8 @@
 
   th,
   td {
-    padding: var(--tk-spacing-2) var(--tk-spacing-3);
-    border-bottom: 1px solid var(--tk-color-border);
+    padding: var(--karsa-spacing-2) var(--karsa-spacing-3);
+    border-bottom: 1px solid var(--karsa-color-border);
     text-align: left;
     white-space: nowrap;
   }

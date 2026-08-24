@@ -1,26 +1,30 @@
 ---
 import { env } from "cloudflare:workers";
-import brand from "virtual:takontuku/config";
-import { createTranslator } from "@takontuku/core";
-import AdminLayout from "@takontuku/core/layouts/AdminLayout.astro";
-import AdminInspector from "@takontuku/ui/AdminInspector.astro";
-import AdminPageHeader from "@takontuku/ui/AdminPageHeader.astro";
-import Icon from "@takontuku/ui/Icon.astro";
-import InspectorMetric from "@takontuku/ui/InspectorMetric.astro";
+import brand from "virtual:karsa/config";
+import registry from "virtual:karsa/registry";
+import AdminLayout from "@karsa/core/layouts/AdminLayout.astro";
+import AdminInspector from "@karsa/ui/AdminInspector.astro";
+import AdminPageHeader from "@karsa/ui/AdminPageHeader.astro";
+import Icon from "@karsa/ui/Icon.astro";
+import InspectorMetric from "@karsa/ui/InspectorMetric.astro";
+import { catalogItemInputFromForm } from "../../../catalog-item-form";
+import { createItem } from "../../../catalog-items";
 import ProductForm from "../../../components/ProductForm.astro";
-import { catalogMessages, localizeCatalogError } from "../../../messages";
-import { productInputFromForm } from "../../../product-form";
-import { createProduct } from "../../../products";
+import { createCatalogTranslator, localizeCatalogError } from "../../../messages";
 
-const t = createTranslator(brand, catalogMessages);
+const presentation =
+  registry.clientConfig["catalog"]?.["presentation"] === "services" ? "services" : "products";
+const services = presentation === "services";
+const t = createCatalogTranslator(brand, presentation);
+const adminBase = services ? "/admin/services" : "/admin/products";
 
 let error = "";
 if (Astro.request.method === "POST") {
   try {
     const formData = await Astro.request.formData();
-    const productInput = await productInputFromForm(formData, env.MEDIA);
+    const productInput = await catalogItemInputFromForm(formData, env.MEDIA, "", presentation);
     return Astro.redirect(
-      `/admin/products/${String(await createProduct(env.DB, productInput))}/edit?saved=1`,
+      `${adminBase}/${String(await createItem(env.DB, productInput))}/edit?saved=1`,
     );
   } catch (caught) {
     error = localizeCatalogError(caught, t);
@@ -32,18 +36,18 @@ import "../../../styles/routes/catalog-admin-products-new.css";
 
 <AdminLayout title={t("catalog.products.newTitle")}>
   <AdminPageHeader eyebrow={t("catalog.products.catalogEyebrow")} title={t("catalog.products.newTitle")} description={t("catalog.products.newDescription")}>
-    <Fragment slot="actions"><a class="admin-button" href="/admin/products">{t("catalog.products.form.cancel")}</a></Fragment>
+    <Fragment slot="actions"><a class="admin-button" href={adminBase}>{t("catalog.products.form.cancel")}</a></Fragment>
   </AdminPageHeader>
-  <ProductForm error={error} />
+  <ProductForm error={error} presentation={presentation} />
   <Fragment slot="inspector">
-    <AdminInspector title={t("catalog.products.newTitle")} description="Pengaturan ringkas produk baru.">
+    <AdminInspector title={t("catalog.products.newTitle")} description={services ? "Pengaturan ringkas layanan baru." : "Pengaturan ringkas produk baru."}>
       <div class="inspector-metrics">
         <InspectorMetric label="Status" value="Aktif" tone="positive" />
         <InspectorMetric label={t("catalog.products.form.price")} value="—" />
-        <InspectorMetric label={t("catalog.products.form.fulfillmentType")} value={t("catalog.products.form.fulfillmentType.physical")} />
-        <InspectorMetric label={t("catalog.products.form.stock")} value="0" />
+        {!services && <InspectorMetric label={t("catalog.products.form.fulfillmentType")} value={t("catalog.products.form.fulfillmentType.physical")} />}
+        {!services && <InspectorMetric label={t("catalog.products.form.stock")} value="0" />}
       </div>
-      <div class="inspector-actions"><button class="admin-button admin-button--primary" type="submit" form="product-form"><Icon name="check" size={16} /> {t("catalog.products.form.save")}</button></div>
+      <div class="inspector-actions"><button class="admin-button admin-button--primary" type="submit" form="catalog-item-form"><Icon name="check" size={16} /> {t("catalog.products.form.save")}</button></div>
     </AdminInspector>
   </Fragment>
 </AdminLayout>

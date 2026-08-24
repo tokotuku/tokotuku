@@ -1,0 +1,22 @@
+---
+title: Company site guide
+description: Build a company or organization profile with app-owned Astro pages and no domain modules by default.
+---
+
+The company preset is a content-led, app-owned site. Start with the scaffold and add only the pages the brief names: home, about, capabilities, contact, or a similar profile flow.
+
+## Ownership
+
+Company pages belong in the application's `src/pages/` or a focused `src/components/` section. Compose them from `@karsa/ui` primitives and semantic `--karsa-*` tokens. Do not install a product or scheduling module merely to obtain a header, card, or marketing page.
+
+## Tiers
+
+- Install: verify the scaffold, registry, theme, and checks.
+- Content: add approved copy, metadata, navigation, and local assets while retaining packaged layout.
+- Polished: add a small, deliberate theme override and generated/local raster assets only when requested.
+
+Keep the profile's structured data and content close to its page owner. If a future feature gains routes, migrations, or admin state, promote it to a module rather than growing an untracked app abstraction.
+
+## Evidence
+
+Report the selected tier, page list, asset manifest, accessibility check, typecheck, lint, and build. Explicitly note that no optional domain module was installed and why.

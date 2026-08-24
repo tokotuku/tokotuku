@@ -5,7 +5,7 @@ layer: "tool"
 
 tasks:
   # Gate 1 ("tarball install") from the migration plan. Publishes every
-  # publishable @takontuku/* package to a real registry (Verdaccio locally,
+  # publishable @karsa/* package to a real registry (Verdaccio locally,
   # see tools/verdaccio) and installs them into a scratch client the way a
   # real client would, catching what workspace:* symlinks hide: broken
   # exports maps, missing "files" entries, missing peerDependencies, and
@@ -90,7 +90,7 @@ tasks:
     options:
       cache: false
 
-  # Proves `takontuku add`/`remove`'s rewritten astro.config.mjs and
+  # Proves `karsa add`/`remove`'s rewritten astro.config.mjs and
   # src/middleware.ts survive real Biome lint/format, real `astro check`,
   # and a real build -- no unit test can prove that, only running the
   # client's own tooling against the CLI's actual output can.

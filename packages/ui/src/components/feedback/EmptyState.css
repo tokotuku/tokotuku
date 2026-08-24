@@ -1,10 +1,10 @@
 .empty-state {
   display: grid;
   justify-items: center;
-  padding: var(--tk-spacing-8);
-  border: 1px dashed var(--tk-color-border);
-  border-radius: var(--tk-radius-xl);
-  background: var(--tk-color-bg);
+  padding: var(--karsa-spacing-8);
+  border: 1px dashed var(--karsa-color-border);
+  border-radius: var(--karsa-radius-xl);
+  background: var(--karsa-color-bg);
   text-align: center;
 }
 
@@ -13,11 +13,11 @@
   place-items: center;
   width: 3rem;
   height: 3rem;
-  margin-bottom: var(--tk-spacing-3);
-  border-radius: var(--tk-radius-full);
-  background: var(--tk-color-bg-subtle);
-  color: var(--tk-color-accent);
-  font-size: var(--tk-font-size-xl);
+  margin-bottom: var(--karsa-spacing-3);
+  border-radius: var(--karsa-radius-full);
+  background: var(--karsa-color-bg-subtle);
+  color: var(--karsa-color-accent);
+  font-size: var(--karsa-font-size-xl);
 }
 
 h2,
@@ -26,19 +26,19 @@ p {
 }
 
 h2 {
-  color: var(--tk-color-fg);
-  font-size: var(--tk-font-size-lg);
+  color: var(--karsa-color-fg);
+  font-size: var(--karsa-font-size-lg);
 }
 
 p {
   max-width: 30rem;
-  margin-top: var(--tk-spacing-2);
-  color: var(--tk-color-fg-muted);
-  line-height: var(--tk-line-height-relaxed);
+  margin-top: var(--karsa-spacing-2);
+  color: var(--karsa-color-fg-muted);
+  line-height: var(--karsa-line-height-relaxed);
 }
 
 .actions {
   display: flex;
-  gap: var(--tk-spacing-2);
-  margin-top: var(--tk-spacing-4);
+  gap: var(--karsa-spacing-2);
+  margin-top: var(--karsa-spacing-4);
 }

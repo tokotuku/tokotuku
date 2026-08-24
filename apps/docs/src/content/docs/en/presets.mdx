@@ -1,0 +1,33 @@
+---
+title: Choose a preset and tier
+description: Select a site shape and an authorized install, content, or polished tier before editing code.
+sidebar:
+  order: 4
+---
+
+Choose the site shape first, then choose the maturity tier. The tier is permission, not a guess about how much work the brief might eventually need.
+
+| Preset | Use it for | Ownership default |
+| --- | --- | --- |
+| Company | A profile, marketing site, or organization presence | App-owned Astro pages and sections |
+| Product | A site that presents purchasable items | Product and order modules own domain routes; the app owns brand pages |
+| Service | A site that presents bookable work | Booking adapters own scheduling; the app owns explanatory pages |
+| Publication | Articles, notes, documentation, or a newsroom | Content owns entries and feeds; the app owns shell and editorial landing pages |
+
+| Tier | What it permits | Stop condition |
+| --- | --- | --- |
+| Install | Packages, module wiring, and migration/registry checks | Do not add content or visual polish |
+| Content | Install plus copy, data, and page content | Keep packaged layout and tokens |
+| Polished | Content plus deliberate theme and local assets | Still respect module ownership; no speculative systems |
+
+Never raise a tier without the requester's permission. If a brief is ambiguous, ask or state the lowest reasonable tier and list what remains out of scope.
+
+## Selection checklist
+
+1. Read `AGENTS.md`, `astro.config.mjs`, `package.json`, and the resolved registry.
+2. Identify the preset from the requested user journey, not from a preferred package.
+3. Record the authorized tier and its stop condition.
+4. List pages, modules, seed data, and assets with their owner.
+5. Define validation evidence before implementation.
+
+The selected preset and tier belong in the plan and the final report so another agent can continue without guessing.

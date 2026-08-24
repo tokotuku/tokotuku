@@ -1,0 +1,47 @@
+---
+interface FooterLink {
+  label: string;
+  href: string;
+}
+interface Props {
+  brandName: string;
+  tagline?: string;
+  links?: FooterLink[] | undefined;
+  newsletterAction?: string | undefined;
+  newsletterLabel?: string | undefined;
+  newsletterHint?: string | undefined;
+  newsletterEmailLabel?: string | undefined;
+  newsletterSubmit?: string | undefined;
+  navigationLabel?: string | undefined;
+  madeWith?: string | undefined;
+  copyright?: string | undefined;
+}
+
+const {
+  brandName,
+  tagline = "A modular site for purposeful work.",
+  links = [],
+  newsletterAction,
+  newsletterLabel = "Stay in the loop",
+  newsletterHint = "Occasional news and new writing.",
+  newsletterEmailLabel = "Email address",
+  newsletterSubmit = "Subscribe",
+  navigationLabel = "Footer navigation",
+  madeWith = "Made with intention.",
+  copyright = `© ${new Date().getFullYear()} ${brandName}.`,
+} = Astro.props;
+
+import "./SiteFooter.css";
+---
+
+{newsletterAction && (
+  <section class="footer-newsletter" aria-labelledby="newsletter-title">
+    <div><p id="newsletter-title" class="newsletter-title">{newsletterLabel}</p><p>{newsletterHint}</p></div>
+    <form action={newsletterAction} method="post"><label class="sr-only" for="footer-email">{newsletterEmailLabel}</label><input id="footer-email" type="email" name="email" placeholder={newsletterEmailLabel} required /><button type="submit">{newsletterSubmit}</button></form>
+  </section>
+)}
+<footer class="site-footer">
+  <div class="footer-brand"><a href="/" class="wordmark">{brandName}</a><p>{tagline}</p></div>
+  {links.length > 0 && <nav aria-label={navigationLabel}>{links.map((link) => <a href={link.href}>{link.label}</a>)}</nav>}
+  <div class="footer-bottom"><span>{copyright}</span><span>{madeWith}</span></div>
+</footer>

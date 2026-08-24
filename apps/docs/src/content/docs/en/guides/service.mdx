@@ -1,0 +1,20 @@
+---
+title: Service site guide
+description: Build a service-oriented site with booking adapters and clear scheduling ownership.
+---
+
+This is the domain-specific service guide. Use service language when visitors choose a service, a time range, a slot, or an appointment.
+
+## Adapter boundary
+
+Install the booking module for scheduling. It composes the order and catalog dependencies, owns booking routes and admin views, and exposes the domain data the app needs. Treat the app's service description, team, pricing explanation, and contact pages as app-owned content. Connect external availability or payment providers through a narrow adapter at the module boundary; do not duplicate the booking state in a page.
+
+```sh
+bunx karsa add booking
+bunx karsa db sync
+bunx wrangler d1 migrations apply DB --local
+```
+
+Content tier adds services and scheduling seed data (`range` or `slot`) with the packaged UI. Polished tier may add a focused theme and service imagery after the user authorizes it.
+
+Check time zone, locale, availability, migrations, seeds, adapter errors, access control, and the complete build. Never claim a slot is available based on static copy alone.

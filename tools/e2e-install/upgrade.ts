@@ -17,7 +17,7 @@
 // than everything already applied, and the pre-existing product survived.
 //
 // Prerequisite: a registry reachable at REGISTRY_URL (defaults to Verdaccio
-// on http://localhost:4873). Start one locally with `moon run verdaccio:up`.
+// on http://localhost:4873). Start one locally with Docker Compose; see README.md.
 
 import { mkdtempSync, readdirSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -54,21 +54,19 @@ function migrationSequence(fileName: string): number {
 async function main(): Promise<void> {
   const version = publishAll();
 
-  const scratchParent = mkdtempSync(path.join(tmpdir(), "takontuku-e2e-upgrade-"));
+  const scratchParent = mkdtempSync(path.join(tmpdir(), "karsa-e2e-upgrade-"));
   const clientDir = scaffoldClient(scratchParent, "gate2b-fixture", version);
   console.log(`Scaffolded client (public-only default: auth) at ${clientDir}`);
 
   installClient(clientDir);
   addCatalogModule(clientDir);
-  console.log(
-    "Added the catalog module via `takontuku add` -- fixture is now auth + catalog only.",
-  );
+  console.log("Added the catalog module via `karsa add` -- fixture is now auth + catalog only.");
 
-  sh("bunx", ["takontuku", "db", "sync"], clientDir);
+  sh("bunx", ["karsa", "db", "sync"], clientDir);
   sh("bunx", ["wrangler", "d1", "migrations", "apply", "DB", "--local"], clientDir);
 
   const filesBefore = readMigrationFiles(clientDir);
-  const lockfileBefore = readJson(path.join(clientDir, "takontuku.migrations.json"));
+  const lockfileBefore = readJson(path.join(clientDir, "karsa.migrations.json"));
   console.log(`Migrations before upgrade: ${[...filesBefore.keys()].sort().join(", ")}`);
   console.log(`Lockfile before upgrade: ${JSON.stringify(lockfileBefore)}`);
   assert(filesBefore.size > 0, "expected at least one migration file before the upgrade");
@@ -85,13 +83,13 @@ async function main(): Promise<void> {
   assert(productBefore !== undefined, "expected the test product to be inserted");
   console.log(`Inserted product: ${JSON.stringify(productBefore)}`);
 
-  console.log("Adding the orders module via `takontuku add` and re-syncing...");
+  console.log("Adding the orders module via `karsa add` and re-syncing...");
   addOrdersModule(clientDir);
-  sh("bunx", ["takontuku", "db", "sync"], clientDir);
+  sh("bunx", ["karsa", "db", "sync"], clientDir);
   sh("bunx", ["wrangler", "d1", "migrations", "apply", "DB", "--local"], clientDir);
 
   const filesAfter = readMigrationFiles(clientDir);
-  const lockfileAfter = readJson(path.join(clientDir, "takontuku.migrations.json"));
+  const lockfileAfter = readJson(path.join(clientDir, "karsa.migrations.json"));
   console.log(`Migrations after upgrade: ${[...filesAfter.keys()].sort().join(", ")}`);
   console.log(`Lockfile after upgrade: ${JSON.stringify(lockfileAfter)}`);
 

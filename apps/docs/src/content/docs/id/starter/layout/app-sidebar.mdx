@@ -1,0 +1,19 @@
+---
+title: AppSidebar
+description: Navigasi aplikasi dengan active state, badge, dan konten footer.
+sidebar:
+  order: 2
+---
+
+import AppSidebar from "@karsa/ui/AppSidebar.astro";
+import ComponentPreview from "../../../../../components/ComponentPreview.astro";
+
+<ComponentPreview label="Application sidebar" layout="stack">
+  <div class="min-h-[24rem] w-full max-w-[18rem] overflow-hidden rounded-xl border border-border">
+    <AppSidebar brand="Karsa" items={[{ label: "Ringkasan", href: "#overview", active: true }, { label: "Workspace", href: "#workspace", badge: "3" }]}>
+      <small slot="footer">Masuk sebagai admin</small>
+    </AppSidebar>
+  </div>
+</ComponentPreview>
+
+`brand` opsional dan default-nya `Karsa`; `items` wajib dan setiap item memiliki `label`, `href`, serta `active` atau `badge` opsional. Slot `footer` berada di bawah pada desktop dan tersembunyi pada layout mobile ringkas.

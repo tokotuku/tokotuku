@@ -1,0 +1,26 @@
+---
+title: Chart
+description: Visualisasi ECharts dengan render responsif dan tabel aksesibel.
+sidebar:
+  order: 2
+---
+
+import Chart from "@karsa/charts/Chart.astro";
+import ComponentPreview from "../../../../../components/ComponentPreview.astro";
+
+<ComponentPreview label="Contoh chart harga" layout="stack">
+  <Chart
+    title="Harga item"
+    description="Harga dalam dolar berdasarkan item"
+    height={280}
+    input={{
+      data: { values: [{ item: "Widget", price: 19.99 }, { item: "Gadget", price: 29.99 }] },
+      semantic_types: { item: "Category", price: "Price" },
+      chart_spec: { chartType: "Bar Chart", encodings: { x: "item", y: "price" }, baseSize: { width: 720, height: 320 } },
+      field_display_names: { item: "Item", price: "Harga" },
+      options: { addTooltips: true },
+    }}
+  />
+</ComponentPreview>
+
+Props utama adalah `input`, `title`, `description`, `height`, `showTable`, dan slot `actions`. Chart mendaftarkan series bar, line, pie, scatter, dan heatmap; menyediakan ARIA, tabel data ketika values tersedia, serta event `chart-select`. Renderer SVG mengikuti token semantik Karsa dan menyesuaikan perubahan tema.

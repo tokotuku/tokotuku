@@ -1,54 +1,37 @@
-# Takontuku AI Fixture Matrix
+# Karsa AI fixture matrix
 
-Sembilan fixture ini dibuat dalam sesi baru `gpt-5.6-luna` dengan reasoning `medium`.
-Setiap hasil kemudian diaudit dalam sesi terpisah `gpt-5.6-terra` dengan reasoning `high`.
-`FACTS.json` berasal dari checker deterministik; `EVALUATION.md` dirender dari JSON Terra.
+These twelve fixtures cover four Karsa presets at three bounded tiers. Generation, bounded repair,
+and review metadata use `gpt-5.6-luna` with `max` reasoning. `FACTS.json` is produced by the
+deterministic checker; `EVALUATION.md` is rendered from schema-validated review JSON.
 
-| Fixture | Brand | Modul bisnis (+ `jarene`) | Tier | Terra |
-| --- | --- | --- | --- | ---: |
-| `compro-install` | Arunika Energi | `auth` | install | **96 PASS** |
-| `compro-content` | Arunika Energi | `auth` | content | **92 PASS** |
-| `compro-polished` | Arunika Energi | `auth` | polished | **95 PASS** |
-| `product-install` | Racik Rasa | `catalog`, `orders` | install | **100 PASS** |
-| `product-content` | Racik Rasa | `catalog`, `orders` | content | **100 PASS** |
-| `product-polished` | Racik Rasa | `catalog`, `orders` | polished | **100 PASS** |
-| `service-install` | Teman Ekor | `catalog`, `orders`, `booking` | install | **100 PASS** |
-| `service-content` | Teman Ekor | `catalog`, `orders`, `booking` | content | **97 PASS** |
-| `service-polished` | Teman Ekor | `catalog`, `orders`, `booking` | polished | **89 PASS** |
+| Fixture family | Brand | Install | Content | Polished |
+| --- | --- | --- | --- | --- |
+| Company | Arunika Energi | auth, closed registration | profile copy | profile copy, palette, 3 local assets |
+| Product | Racik Rasa | catalog + orders | 6 products + inventory | content, palette, 5 local assets |
+| Service | Teman Ekor | services + inquiries + booking | 3 services + range/slot schedules | content, palette, local service assets |
+| Publication | Karsa Journal | content + closed registration | published, draft, archived posts | content, palette, 1 local asset |
 
-## Batas tier
+The company and publication presets keep authentication closed and expose no public registration.
+Product uses public registration and module-owned products, cart, checkout, and orders. Service uses
+public registration with catalog `services`, orders `inquiries`, and booking; it has no cart,
+checkout, product, or order storefront. Publication content is owned by `@karsa/content`, including
+safe draft preview, publishing, archiving, RSS, and the canonical sitemap contribution.
 
-| Tier | Yang boleh berubah | Yang wajib tetap berhenti |
-| --- | --- | --- |
-| install | scaffold, modul melalui CLI, migration, plumbing | tidak ada seed, content custom, theme override, atau asset custom |
-| content | copy/halaman bisnis, data seed local-only dan idempoten | tidak ada theme override atau generated imagery |
-| polished | content, palette/theme terarah, `DESIGN.md`, generated asset lokal | route commerce/admin tetap milik modul; tidak ada stock URL atau external raster |
+Install fixtures stop at package/module wiring, migration collection, and registry plumbing. Content
+fixtures add only approved copy and idempotent local seed data. Polished fixtures add a focused
+palette/design manifest and deterministic local raster assets; they do not fork module-owned routes.
 
-Dependency business mengikuti urutan `orders → catalog` untuk produk dan
-`booking → orders → catalog` untuk jasa. Fixture produk content/polished berisi enam produk,
-kategori, harga minor-unit IDR, inventory, cart, dan checkout. Fixture jasa berisi tiga layanan,
-satu schedule `range`, dua schedule `slot`, dan empat slot; scheduled service tidak memiliki
-inventory.
+Every fixture contains `karsa.migrations.json`, package dependencies resolved from version `0.3.0`,
+and the five source Karsa skills copied byte-for-byte into both `.agents/skills/` and
+`.claude/skills/`. `SCREENSHOT-METADATA.json` records the desktop/mobile viewport and visual scoring
+status; absent browser captures are explicitly marked `not-captured`.
 
-Jalankan checker dari root repository:
+Run the checker from the repository root:
 
 ```sh
 bun tools/ai-fixture-eval/check.ts examples/<fixture-name>
+bun tools/ai-fixture-eval/render-review.ts examples/<fixture-name>
 ```
 
-`RUN-METADATA.json` membuktikan pin Luna generator; `REPAIR-RUN-METADATA.json` mencatat bounded
-repair jika ada; `TERRA-RUN-METADATA.json` membuktikan pin Terra reviewer. Semua fixture final
-melaporkan checker 0 error dan 0 warning. Review pertama yang gagal disimpan sebagai
-`EVALUATION.attempt-1.md` sebelum repair, sehingga kritik seed, unit harga, scope, dan brand dapat
-ditelusuri.
-
-Setiap `EVALUATION.md` memuat skor rubric 100 poin, verdict, evidence, strengths, gaps,
-rekomendasi berprioritas, production gaps, serta daftar over-engineered dan under-engineered
-dengan severity dan lokasi file. `review.schema.json` menolak output Terra yang tidak terstruktur.
-
-Polished Terra memeriksa PNG lokal yang dilampirkan pada sesi review. Browser desktop/mobile tidak
-dapat mengambil halaman lokal di environment ini, jadi evaluasi tidak membuat klaim screenshot yang
-tidak memiliki evidence. Wrangler listener juga dapat dibatasi sandbox; validasi seed memakai
-SQLite dua siklus dan route ownership/migration source tetap diperiksa secara read-only.
-
-Fixture lama sudah dihapus beserta referensi script, lockfile, README, dan test yang terkait.
+Use `bun tools/ai-fixture-eval/run-metadata.ts` before any generator or review mutation. Old fixture
+names and legacy reviewer artifacts are intentionally not part of this matrix.

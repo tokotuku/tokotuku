@@ -1,7 +1,7 @@
 ---
-import brand from "virtual:takontuku/config";
-import { createTranslator } from "@takontuku/core";
-import Icon from "@takontuku/ui/Icon.astro";
+import brand from "virtual:karsa/config";
+import { createTranslator } from "@karsa/core";
+import Icon from "@karsa/ui/Icon.astro";
 import AuthFrame from "../components/AuthFrame.astro";
 import { authMessages } from "../messages";
 
@@ -16,7 +16,7 @@ import "../styles/routes/auth-register.css";
     <p>{t("auth.register.description", { brand: brand.name })}</p>
     <div class="field"><label for="name">{t("auth.register.nameLabel")}</label><div class="input-wrap"><Icon name="user" size={16}/><input id="name" name="name" autocomplete="name" placeholder={t("auth.register.namePlaceholder")} required /></div></div>
     <div class="field"><label for="email">{t("auth.login.emailLabel")}</label><div class="input-wrap"><Icon name="mail" size={16}/><input id="email" name="email" type="email" autocomplete="email" placeholder={t("auth.login.emailPlaceholder")} required /></div></div>
-    <div class="field"><label for="password">{t("auth.register.passwordLabel")}</label><div class="input-wrap"><Icon name="lock" size={16}/><input id="password" name="password" type="password" autocomplete="new-password" minlength="8" placeholder={t("auth.register.passwordPlaceholder")} required /><button class="password-toggle" type="button" data-password-toggle data-show-label={t("auth.common.showPassword")} data-hide-label={t("auth.common.hidePassword")} aria-label={t("auth.common.showPassword")}><Icon name="eye" size={16}/></button></div></div>
+    <div class="field"><label for="password">{t("auth.register.passwordLabel")}</label><div class="input-wrap"><Icon name="lock" size={16}/><input id="password" name="password" type="password" autocomplete="new-password" minlength="8" placeholder={t("auth.register.passwordPlaceholder")} required /><button class="password-toggle" type="button" tabindex="-1" data-password-toggle data-show-label={t("auth.common.showPassword")} data-hide-label={t("auth.common.hidePassword")} aria-label={t("auth.common.showPassword")}><Icon name="eye" size={16}/></button></div></div>
     <p class="role-note">{t("auth.register.roleNote")}</p>
     <p class="auth-message" id="register-error" hidden></p>
     <button class="auth-submit" type="submit">{t("auth.register.submit")} <Icon name="arrowRight" size={16}/></button>

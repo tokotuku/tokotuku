@@ -31,7 +31,7 @@ function assertNoDependents(registry: ResolvedRegistry, moduleName: string): voi
     if (mod.name === moduleName) continue;
     if (mod.requires?.includes(moduleName)) {
       throw new Error(
-        `"${mod.name}" requires "${moduleName}", so "${moduleName}" can't be removed while "${mod.name}" is installed. Run: takontuku remove ${mod.name}`,
+        `"${mod.name}" requires "${moduleName}", so "${moduleName}" can't be removed while "${mod.name}" is installed. Run: karsa remove ${mod.name}`,
       );
     }
   }
@@ -86,7 +86,7 @@ function uninstallDependencyIfDeclared(
 }
 
 /**
- * Removes a @takontuku/* module's astro.config.mjs import + modules[]
+ * Removes a @karsa/* module's astro.config.mjs import + modules[]
  * entry, its src/middleware.ts register line if present, and (unless
  * `install` is false) the package.json dependency -- refuses if another
  * installed module still `requires` it. Never touches migrations/ or the
@@ -97,9 +97,9 @@ function uninstallDependencyIfDeclared(
 export async function removeModule(options: RemoveModuleOptions): Promise<RemoveModuleResult> {
   const { cwd, packageName, moduleName, install, registry } = options;
 
-  if (packageName === "@takontuku/core") {
+  if (packageName === "@karsa/core") {
     throw new Error(
-      '"core" is built into every takontuku app — it is never listed in modules[]. There is nothing to add or remove.',
+      '"core" is built into every karsa app — it is never listed in modules[]. There is nothing to add or remove.',
     );
   }
 

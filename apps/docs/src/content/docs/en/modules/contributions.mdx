@@ -1,0 +1,26 @@
+---
+title: Contribution contracts
+description: Define module contributions with IDs, entrypoints, order, dependency ownership, and removal behavior.
+---
+
+Contribution contracts are the seam between a module and the host app. They make composition inspectable and keep a module removable.
+
+| Contribution | Owner supplies | Host consumes |
+| --- | --- | --- |
+| Site route | pattern and entrypoint | injects only when installed |
+| Admin route | guarded pattern and entrypoint | adds access-controlled route |
+| Navigation | stable `id`, label, href, optional order | merges in dependency order |
+| Site home section/widget | stable `id`, entrypoint, optional order | renders the resolved list |
+| `clientConfig` | JSON-safe presentation/registration options | exposes resolved module configuration |
+| Required brand fields | fields such as optional `currency` | fails integration early when missing |
+| Sitemap source | stable `id`, entrypoint, optional order | contributes published URLs to `/sitemap.xml` |
+| Migration | URL and module name | emits append-only numbered SQL |
+| Seed/media | local SQL or media root and allowed prefix | loads local starting data |
+
+IDs are unique within a contribution type. Dependencies sort before dependents; `order` is a local presentation hint, not a second dependency system.
+
+## Removal test
+
+Install the module, inspect the resolved registry, then remove it and confirm that its routes, nav items, widgets, seeds, and middleware registration disappear while unrelated app pages remain. A contribution that leaves a dangling import or route fails the contract.
+
+Prefer one narrow contribution over a host-side abstraction that anticipates every future module. Record the contract and its validation evidence with the module change.

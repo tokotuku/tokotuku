@@ -14,7 +14,7 @@
   margin: 0;
 }
 .eyebrow {
-  color: var(--tk-color-accent);
+  color: var(--karsa-color-accent);
   font-size: 0.65rem;
   font-weight: 700;
   letter-spacing: 0.13em;
@@ -22,13 +22,13 @@
 }
 .widget-heading h2 {
   margin-top: 0.3rem;
-  font-family: var(--tk-font-family-display);
+  font-family: var(--karsa-font-family-display);
   font-size: 1.75rem;
   font-weight: 400;
 }
 .widget-heading a,
 .subheading a {
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
   font-size: 0.7rem;
   text-decoration: none;
 }
@@ -38,9 +38,9 @@
   gap: 1rem;
   margin-top: 1.5rem;
   padding: 1.1rem;
-  border: 1px dashed var(--tk-color-border);
-  border-radius: var(--tk-radius-md);
-  background: color-mix(in srgb, var(--tk-color-bg-subtle) 55%, var(--tk-color-surface));
+  border: 1px dashed var(--karsa-color-border);
+  border-radius: var(--karsa-radius-md);
+  background: color-mix(in srgb, var(--karsa-color-bg-subtle) 55%, var(--karsa-color-surface));
 }
 .launch-mark {
   display: grid;
@@ -48,9 +48,9 @@
   width: 2.75rem;
   height: 2.75rem;
   place-items: center;
-  border-radius: var(--tk-radius-md);
-  background: color-mix(in srgb, var(--tk-color-accent) 14%, var(--tk-color-surface));
-  color: var(--tk-color-accent);
+  border-radius: var(--karsa-radius-md);
+  background: color-mix(in srgb, var(--karsa-color-accent) 14%, var(--karsa-color-surface));
+  color: var(--karsa-color-accent);
 }
 .launch-checklist h3 {
   margin: 0;
@@ -59,7 +59,7 @@
 .launch-checklist p {
   max-width: 34rem;
   margin: 0.35rem 0 0;
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
   font-size: 0.75rem;
   line-height: 1.6;
 }
@@ -75,24 +75,24 @@
   min-height: 2.5rem;
   align-items: center;
   padding-inline: 0.8rem;
-  border-radius: var(--tk-radius-sm);
+  border-radius: var(--karsa-radius-sm);
   font-size: 0.75rem;
   font-weight: 700;
   text-decoration: none;
 }
 .admin-button--primary {
-  background: var(--tk-color-accent);
-  color: var(--tk-color-accent-fg);
+  background: var(--karsa-color-accent);
+  color: var(--karsa-color-accent-fg);
 }
 .seed-hint {
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
   font-size: 0.65rem;
 }
 .seed-hint code {
   padding: 0.2rem 0.35rem;
   border-radius: 4px;
-  background: var(--tk-color-bg-subtle);
-  font-family: var(--tk-font-family-mono);
+  background: var(--karsa-color-bg-subtle);
+  font-family: var(--karsa-font-family-mono);
 }
 .metrics {
   display: grid;
@@ -103,7 +103,7 @@
 .product-preview {
   margin-top: 1.5rem;
   padding-top: 1.2rem;
-  border-top: 1px solid var(--tk-color-border);
+  border-top: 1px solid var(--karsa-color-border);
 }
 .subheading h3 {
   font-size: 0.8rem;
@@ -114,7 +114,7 @@
   align-items: center;
   gap: 0.55rem;
   padding: 0.7rem 0;
-  border-bottom: 1px solid var(--tk-color-border);
+  border-bottom: 1px solid var(--karsa-color-border);
   font-size: 0.75rem;
 }
 .product-row:last-child {
@@ -124,14 +124,14 @@
   width: 0.45rem;
   height: 0.45rem;
   border-radius: 50%;
-  background: var(--tk-color-success);
+  background: var(--karsa-color-success);
 }
 .product-row strong {
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
   font-size: 0.7rem;
 }
 .muted {
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
   font-size: 0.75rem;
 }
 @media (max-width: 560px) {

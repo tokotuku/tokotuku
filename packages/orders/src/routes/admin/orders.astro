@@ -1,15 +1,15 @@
 ---
 import { env } from "cloudflare:workers";
-import brand from "virtual:takontuku/config";
-import { CursorError, createTranslator } from "@takontuku/core";
-import { date, money } from "@takontuku/core/brand";
-import AdminLayout from "@takontuku/core/layouts/AdminLayout.astro";
-import AdminInspector from "@takontuku/ui/AdminInspector.astro";
-import AdminPageHeader from "@takontuku/ui/AdminPageHeader.astro";
-import AdminQuickView from "@takontuku/ui/AdminQuickView.astro";
-import CursorPagination from "@takontuku/ui/CursorPagination.astro";
-import Icon from "@takontuku/ui/Icon.astro";
-import InspectorMetric from "@takontuku/ui/InspectorMetric.astro";
+import brand from "virtual:karsa/config";
+import { CursorError, createTranslator } from "@karsa/core";
+import { date, money } from "@karsa/core/brand";
+import AdminLayout from "@karsa/core/layouts/AdminLayout.astro";
+import AdminInspector from "@karsa/ui/AdminInspector.astro";
+import AdminPageHeader from "@karsa/ui/AdminPageHeader.astro";
+import AdminQuickView from "@karsa/ui/AdminQuickView.astro";
+import CursorPagination from "@karsa/ui/CursorPagination.astro";
+import Icon from "@karsa/ui/Icon.astro";
+import InspectorMetric from "@karsa/ui/InspectorMetric.astro";
 import { orderMessages } from "../../messages";
 import {
   approvePayment,
@@ -116,7 +116,7 @@ const transferPendingCount = summary.transferPendingCount;
 import "../../styles/routes/orders-admin.css";
 ---
 
-<AdminLayout title={t("orders.admin.title")} orderCount={pendingCount}>
+<AdminLayout title={t("orders.admin.title")}>
   {error && <p class="notice notice--error" role="alert">{error}</p>}
   {Astro.url.searchParams.has("updated") && <p class="notice">{t("orders.admin.updated")}</p>}
 
@@ -193,7 +193,7 @@ import "../../styles/routes/orders-admin.css";
   const addTextRow = (parent:HTMLElement, label:string, value:string) => { const row = document.createElement("div"); const dt = document.createElement("dt"); dt.textContent = label; const dd = document.createElement("dd"); dd.textContent = value || "—"; row.append(dt, dd); parent.append(row); };
   const addSection = (parent:HTMLElement, heading:string, content:HTMLElement) => { const section = document.createElement("section"); section.className = "quick-view-section"; const title = document.createElement("h3"); title.textContent = heading; section.append(title, content); parent.append(section); };
 
-  document.addEventListener("takontuku:quick-view-loaded", (event) => {
+  document.addEventListener("karsa:quick-view-loaded", (event) => {
     const detail = (event as CustomEvent<{data:OrderDetail;dialog:HTMLDialogElement}>).detail; if (detail.dialog.id !== "order-quick-view") return;
     const body = detail.dialog.querySelector<HTMLElement>("[data-quick-view-body]"); const footer = detail.dialog.querySelector<HTMLElement>("[data-quick-view-footer]"); if (!body || !footer) return; const order = detail.data; body.replaceChildren(); footer.replaceChildren();
     const wrapper = document.createElement("div"); wrapper.className = "quick-view-data";

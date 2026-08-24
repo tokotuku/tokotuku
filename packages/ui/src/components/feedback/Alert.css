@@ -1,23 +1,23 @@
 .alert {
-  --alert-color: var(--tk-color-accent);
-  padding: var(--tk-spacing-4);
+  --alert-color: var(--karsa-color-accent);
+  padding: var(--karsa-spacing-4);
   border: 1px solid color-mix(in srgb, var(--alert-color) 35%, transparent);
-  border-left-width: var(--tk-spacing-1);
-  border-radius: var(--tk-radius-lg);
-  background: color-mix(in srgb, var(--alert-color) 8%, var(--tk-color-bg));
-  color: var(--tk-color-fg);
+  border-left-width: var(--karsa-spacing-1);
+  border-radius: var(--karsa-radius-lg);
+  background: color-mix(in srgb, var(--alert-color) 8%, var(--karsa-color-bg));
+  color: var(--karsa-color-fg);
 }
 
 .alert--success {
-  --alert-color: var(--tk-color-success);
+  --alert-color: var(--karsa-color-success);
 }
 
 .alert--warning {
-  --alert-color: var(--tk-color-warning);
+  --alert-color: var(--karsa-color-warning);
 }
 
 .alert--danger {
-  --alert-color: var(--tk-color-danger);
+  --alert-color: var(--karsa-color-danger);
 }
 
 .title,
@@ -26,13 +26,13 @@
 }
 
 .title {
-  margin-bottom: var(--tk-spacing-1);
+  margin-bottom: var(--karsa-spacing-1);
   color: var(--alert-color);
-  font-weight: var(--tk-font-weight-semibold);
+  font-weight: var(--karsa-font-weight-semibold);
 }
 
 .body {
-  color: var(--tk-color-fg-muted);
-  font-size: var(--tk-font-size-sm);
-  line-height: var(--tk-line-height-relaxed);
+  color: var(--karsa-color-fg-muted);
+  font-size: var(--karsa-font-size-sm);
+  line-height: var(--karsa-line-height-relaxed);
 }

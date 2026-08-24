@@ -1,0 +1,39 @@
+---
+title: Deployment dan registry paket
+description: Siapkan binding, secret, migrasi, dan akses registry modul privat untuk deployment Karsa.
+---
+
+## Mulai dari lokal
+
+Gunakan emulator D1 dan R2 lokal Wrangler:
+
+```sh
+bunx karsa db sync
+bunx wrangler d1 migrations apply DB --local
+bunx karsa db seed
+bun run build
+```
+
+Pertahankan nama binding `DB` dan `MEDIA` di `wrangler.jsonc`. `.dev.vars` lokal di-gitignore; simpan `BETTER_AUTH_SECRET` di sana dan gunakan `bunx wrangler secret put BETTER_AUTH_SECRET` untuk environment deploy.
+
+## URL kanonis dokumentasi
+
+Atur `DOCS_SITE_URL` ke origin dokumentasi publik saat menjalankan build deployment. Build lokal sengaja memakai default `http://localhost:4321`, sedangkan nilai deployment mengendalikan URL kanonis dan sitemap tanpa meng-hardcode domain produksi yang belum dikonfirmasi.
+
+```sh
+DOCS_SITE_URL=https://docs.example.com bun run --cwd apps/docs build
+```
+
+## Akses registry
+
+Paket publik diambil dari npm. Jika modul terpilih berada di registry privat, atur scope `@karsa` dan credential di `.npmrc` user atau CI; jangan commit token. Verifikasi graph paket sebelum menjalankan CLI agar `karsa add` dapat menyelesaikan modul dan dependency-nya.
+
+## Checklist deploy
+
+1. Buat database D1 dan bucket R2 nyata, lalu perbarui binding deployment.
+2. Terapkan plan migrasi append-only ke database remote.
+3. Tambahkan secret dan periksa konfigurasi origin/allowed-host.
+4. Build dengan registry dan lockfile yang sama dengan CI.
+5. Smoke-test route publik, mode auth, route terjaga, media, dan satu alur milik modul.
+
+Jangan melakukan seed remote dengan jalur `karsa db seed` yang hanya lokal. Gunakan migrasi yang direview atau import operasional eksplisit untuk data production, lalu simpan output command sebagai bukti.

@@ -1,7 +1,8 @@
 {
   "requestedModel": "gpt-5.6-luna",
-  "requestedReasoningEffort": "medium",
+  "requestedReasoningEffort": "max",
   "effectiveModel": "gpt-5.6-luna",
-  "effectiveReasoningEffort": "medium",
-  "cwd": "/Volumes/external/Works/rivana/tokotuku/examples/service-content"
+  "effectiveReasoningEffort": "max",
+  "source": "Codex session turn_context",
+  "cwd": "examples/service-content"
 }

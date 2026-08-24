@@ -1,0 +1,15 @@
+---
+title: DataTable
+description: Data tabular responsif dengan alignment dan empty state.
+sidebar:
+  order: 2
+---
+
+import DataTable from "@karsa/ui/DataTable.astro";
+import ComponentPreview from "../../../../../components/ComponentPreview.astro";
+
+<ComponentPreview label="Contoh data table" layout="stack">
+  <DataTable caption="Item terbaru" columns={[{ key: "name", label: "Nama" }, { key: "status", label: "Status", align: "center" }]} rows={[{ name: "Widget", status: "Aktif" }, { name: "Gadget", status: "Draft" }]} />
+</ComponentPreview>
+
+Props wajibnya `caption`, `columns`, dan `rows`; `emptyMessage` opsional. Kolom memiliki `key`, `label`, serta alignment `start`, `center`, atau `end`. Caption disembunyikan secara visual tetapi tersedia untuk assistive technology. Frame dapat di-scroll horizontal pada layar sempit.

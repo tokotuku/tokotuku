@@ -1,4 +1,4 @@
-import { createVitestConfig } from "@takontuku/config/vitest";
+import { createVitestConfig } from "@karsa/config/vitest";
 
 export default createVitestConfig({
   test: {

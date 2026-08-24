@@ -1,0 +1,33 @@
+---
+title: AI workflow
+description: Use AI safely by selecting a preset and tier, checking ownership, and returning evidence with scope decisions.
+---
+
+Karsa's AI workflow is a constrained implementation loop, not a license to redesign the app.
+
+## Before editing
+
+1. Read `AGENTS.md`, `CLAUDE.md`, `astro.config.mjs`, `package.json`, and the resolved registry.
+2. Inspect existing `src/pages/`, theme overrides, `seed/`, public assets, and module-owned routes.
+3. Select the preset and authorized tier. Never raise install → content → polished without permission.
+4. Write a brief plan listing pages, modules, data, assets, ownership, assumptions, and checks.
+
+## During implementation
+
+Use `karsa-ui` for components and tokens, `karsa-modules` for registry and ownership, and `karsa-data` for migrations, seeds, media, and secrets. Service sites use adapters at their module boundary; company sites use app-owned Astro pages; publication sites use the content layer. Keep domain routes in their owning modules.
+
+Check all five surfaces before declaring success: config, registry, pages, seed data, and ownership. Prefer a small vertical slice that can be tested over speculative abstractions.
+
+## Evidence report
+
+Finish with commands and observations, not a generic “done”:
+
+- selected preset and tier, changed files, and assumptions;
+- config and resolved-registry evidence;
+- page and module ownership evidence;
+- seed/migration/media evidence, if applicable;
+- typecheck, lint, build, and relevant local runtime checks;
+- over-engineering findings (what was intentionally not generalized);
+- under-engineering findings (what the brief still needs before release).
+
+Indonesian and English prompts may describe the same request; the workflow and evidence standard do not change with the prompt language.

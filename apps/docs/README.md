@@ -1,14 +1,18 @@
-# docs
+# Karsa documentation
 
-Takontuku UI's documentation site: Astro + Starlight.
+The Karsa documentation site uses Astro and Starlight. Every guide is available under both
+`/en/` and `/id/`; `/` redirects to `/en/`.
 
 ## Development
 
 ```sh
 bun run dev
+bun run parity
+bun run typecheck
+bun run build
 ```
 
-The site documents installation, theming, the three core components shipped by
-`@takontuku/ui`, including its three core controls and 15 application components. Pages include
-live previews where document-level behavior allows it, plus properties, slots, native events,
-and accessibility notes.
+The parity check fails when a page exists in only one locale. Keep the relative path and
+frontmatter shape paired when adding a guide, then translate its title, description, sidebar
+label, examples, and links. Core guidance is site-neutral; product, service, or other domain
+terms belong in the guide that explains that domain.

@@ -1,6 +1,6 @@
 {
-  "name": "@takontuku/theme",
-  "version": "0.2.0",
+  "name": "@karsa/theme",
+  "version": "0.3.0",
   "publishConfig": {
     "registry": "https://registry.npmjs.org",
     "access": "public"
@@ -35,6 +35,7 @@
   },
   "scripts": {
     "lint": "biome check .",
+    "test": "vitest run src/palette.test.ts",
     "typecheck": "astro check"
   }
 }

@@ -22,16 +22,16 @@ export interface Palette {
 }
 
 const paletteVariables: Record<keyof PaletteColors, string> = {
-  background: "--tk-color-bg",
-  surface: "--tk-color-surface",
-  subtle: "--tk-color-bg-subtle",
-  foreground: "--tk-color-fg",
-  mutedForeground: "--tk-color-fg-muted",
-  border: "--tk-color-border",
-  accent: "--tk-color-accent",
-  accentHover: "--tk-color-accent-hover",
-  accentForeground: "--tk-color-accent-fg",
-  focusRing: "--tk-color-focus-ring",
+  background: "--karsa-color-bg",
+  surface: "--karsa-color-surface",
+  subtle: "--karsa-color-bg-subtle",
+  foreground: "--karsa-color-fg",
+  mutedForeground: "--karsa-color-fg-muted",
+  border: "--karsa-color-border",
+  accent: "--karsa-color-accent",
+  accentHover: "--karsa-color-accent-hover",
+  accentForeground: "--karsa-color-accent-fg",
+  focusRing: "--karsa-color-focus-ring",
   sidebar: "--admin-rail",
   sidebarForeground: "--admin-rail-fg",
   sidebarMutedForeground: "--admin-rail-muted",
@@ -66,12 +66,14 @@ function serializeColors(colors: PaletteColors | undefined, mode: "light" | "dar
     const normalized = value.trim();
     if (!normalized || !isSafeColor(normalized)) return [];
 
-    const suffix = variable.startsWith("--tk-") ? variable.slice(5) : variable.slice(2);
-    return [`--tk-${mode}-${suffix}:${normalized}`];
+    const suffix = variable.startsWith("--karsa-")
+      ? variable.slice("--karsa-".length)
+      : variable.slice(2);
+    return [`--karsa-${mode}-${suffix}:${normalized}`];
   });
 }
 
-/** Serialize known palette keys into the CSS variable contract used by Takontuku. */
+/** Serialize known palette keys into the CSS variable contract used by Karsa. */
 export function paletteStyle(input: { palette?: Palette }): string | undefined {
   const values = [
     ...serializeColors(input.palette?.light, "light"),

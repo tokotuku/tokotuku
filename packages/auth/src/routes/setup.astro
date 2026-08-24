@@ -1,8 +1,8 @@
 ---
 import { env } from "cloudflare:workers";
-import brand from "virtual:takontuku/config";
-import { createTranslator } from "@takontuku/core";
-import Icon from "@takontuku/ui/Icon.astro";
+import brand from "virtual:karsa/config";
+import { createTranslator } from "@karsa/core";
+import Icon from "@karsa/ui/Icon.astro";
 import { createAuth } from "../auth";
 import AuthFrame from "../components/AuthFrame.astro";
 import { authMessages } from "../messages";
@@ -38,7 +38,8 @@ if (Astro.request.method === "POST") {
     } else {
       let createdUserId: string | undefined;
       try {
-        const auth = createAuth(env, Astro.url.origin);
+        // Setup is the only closed-registration bypass and is protected by the one-time claim.
+        const auth = createAuth(env, Astro.url.origin, { disableSignUp: false });
         const result = await auth.api.signUpEmail({ body: { name, email, password } });
         createdUserId = result.user.id;
         await completeSetup(env.DB, createdUserId);
@@ -94,7 +95,7 @@ import "../styles/routes/auth-setup.css";
           minlength="8"
           required
         />
-          <button class="password-toggle" type="button" data-password-toggle data-show-label={t("auth.common.showPassword")} data-hide-label={t("auth.common.hidePassword")} aria-label={t("auth.common.showPassword")}>
+          <button class="password-toggle" type="button" tabindex="-1" data-password-toggle data-show-label={t("auth.common.showPassword")} data-hide-label={t("auth.common.hidePassword")} aria-label={t("auth.common.showPassword")}>
           <Icon name="eye" size={16} />
         </button>
       </div>

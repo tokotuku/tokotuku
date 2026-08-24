@@ -1,0 +1,57 @@
+---
+title: DataTable
+description: Responsive tabular data with alignment controls and an empty state.
+sidebar:
+  order: 2
+---
+
+import DataTable from "@karsa/ui/DataTable.astro";
+import ComponentPreview from "../../../../../components/ComponentPreview.astro";
+
+## Preview
+
+<ComponentPreview label="Data table example" layout="stack">
+  <DataTable
+    caption="Recent entries"
+    columns={[
+      { key: "name", label: "Name" },
+      { key: "status", label: "Status", align: "center" },
+      { key: "owner", label: "Owner", align: "end" },
+    ]}
+    rows={[
+      { name: "Welcome guide", status: "Published", owner: "Content" },
+      { name: "Team notes", status: "Review", owner: "Editorial" },
+      { name: "Release plan", status: "Draft", owner: "Product" },
+    ]}
+  />
+</ComponentPreview>
+
+```astro
+<DataTable
+  caption="Entries"
+  columns={[
+    { key: "name", label: "Name" },
+    { key: "status", label: "Status", align: "end" },
+  ]}
+  rows={[{ name: "Welcome guide", status: "Published" }]}
+/>
+```
+
+## Props
+
+| Prop | Type | Required | Default |
+| --- | --- | --- | --- |
+| `caption` | `string` | Yes | — |
+| `columns` | `DataTableColumn[]` | Yes | — |
+| `rows` | `Record<string, string \| number \| null \| undefined>[]` | Yes | — |
+| `emptyMessage` | `string` | No | `"No data available."` |
+
+```ts
+interface DataTableColumn {
+  key: string;
+  label: string;
+  align?: "start" | "center" | "end";
+}
+```
+
+The caption is visually hidden but remains available to assistive technology. The frame scrolls horizontally on narrow screens.

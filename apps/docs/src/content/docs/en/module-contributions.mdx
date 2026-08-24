@@ -1,0 +1,44 @@
+---
+title: Modules and contribution contracts
+description: Add optional behavior through explicit module ownership, registry contributions, migrations, and seeds.
+sidebar:
+  label: Modules and contracts
+  order: 2
+---
+
+Karsa modules are packages that contribute a known set of surfaces. A module may own site routes, admin navigation, site home sections, widgets, migrations, seeds, media prefixes, or auth-panel contributions. The registry resolves dependencies and stable contribution order before Astro builds the site.
+
+## The contract
+
+Every contribution has an `id`, an entrypoint, and an optional `order`. IDs must be unique within a contribution type. Dependency order is the stable tie-breaker, so a module never needs to reach into another module's page file.
+
+```ts
+const module = defineModule({
+  name: "reviews",
+  requires: [],
+  siteHomeSections: [{ id: "highlights", entrypoint: "./Highlights.astro", order: 40 }],
+  adminDashboardWidgets: [{ id: "reviews", entrypoint: "./ReviewsWidget.astro" }],
+  migrations: [new URL("../migrations/0001_init.sql", import.meta.url)],
+});
+```
+
+The exact fields are defined by `ModuleDefinition`; use the package's type helper instead of inventing a parallel registry.
+
+## Add or remove a module
+
+```sh
+bunx karsa add <module>
+bunx karsa remove <module>
+bunx karsa db sync
+```
+
+The CLI updates dependencies, `astro.config.mjs`, middleware registration, and migration collection together. Removing a dependency is refused while an installed module still requires it.
+
+## Ownership rules
+
+- Module-owned routes stay in the module package.
+- An app may own static pages and sections that have no module owner.
+- Optional behavior reads `virtual:karsa/registry` (or the relevant virtual contribution) and never statically imports an optional package from the base app.
+- Seeds are local starting data; migrations are append-only schema history.
+
+The useful test is simple: if removing a module should remove a surface, that surface belongs to the module and must arrive through its contribution contract.

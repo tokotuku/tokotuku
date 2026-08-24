@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 /**
- * Publishes @takontuku/catalog, @takontuku/orders, and @takontuku/booking --
+ * Publishes @karsa/catalog, @karsa/orders, @karsa/booking, and @karsa/content --
  * the packages that never go to public npm -- to the private registry. Run manually
  * from a machine with publish credentials there; this deliberately has no
  * CI counterpart (see .github/workflows/ci.yml, which only ever publishes
@@ -13,7 +13,7 @@
  * included, to a throwaway registry.
  */
 
-import { publishPackage, ROOT, sh } from "./publish-shared";
+import { publishPackage, runWorkspaceBuilds } from "./publish-shared";
 
 const DRY_RUN = process.argv.includes("--dry-run");
 
@@ -30,14 +30,21 @@ const REGISTRY = PRIVATE_REGISTRY_URL ?? "http://localhost:4873";
 
 // Publish order matters: orders' workspace:* on catalog, and booking's on
 // both catalog and orders, must each resolve to an already-published version.
-const PRIVATE_PACKAGES = ["packages/catalog", "packages/orders", "packages/booking"];
+// Content is independent of the commerce graph but remains private alongside
+// the module packages so publication preset installs can use the same registry.
+const PRIVATE_PACKAGES = [
+  "packages/catalog",
+  "packages/orders",
+  "packages/booking",
+  "packages/content",
+];
 
 function main(): void {
   console.log(`Publishing private modules to ${REGISTRY}${DRY_RUN ? " (dry run)" : ""}`);
-  sh("moon", ["run", "catalog:build", "orders:build", "booking:build"], ROOT);
-  // All three packages are scoped (@takontuku/catalog, @takontuku/orders,
-  // @takontuku/booking), so none hit the unscoped-name auth problem
-  // withDefaultRegistryForPublish exists for -- @takontuku:registry= in
+  runWorkspaceBuilds(PRIVATE_PACKAGES);
+  // All packages are scoped (@karsa/catalog, @karsa/orders,
+  // @karsa/booking), so none hit the unscoped-name auth problem
+  // withDefaultRegistryForPublish exists for -- @karsa:registry= in
   // .npmrc anchors them by itself.
   for (const dir of PRIVATE_PACKAGES) {
     publishPackage({

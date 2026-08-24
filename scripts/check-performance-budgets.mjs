@@ -36,7 +36,7 @@ async function bundledGzipBytes(entryPoint, options = {}) {
 const measured = {
   authRoot: await bundledGzipBytes("packages/auth/src/index.ts", {
     platform: "node",
-    external: ["@takontuku/core"],
+    external: ["@karsa/core"],
   }),
   authClient: await bundledGzipBytes("packages/auth/src/auth-client.ts", {
     // Measure the actual browser client payload; unlike the server-facing root

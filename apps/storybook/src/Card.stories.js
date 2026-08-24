@@ -1,4 +1,4 @@
-import Card from "@takontuku/ui/Card.astro";
+import Card from "@karsa/ui/Card.astro";
 
 export default {
   title: "Core/Card",
@@ -12,7 +12,7 @@ export const Default = {
   args: {
     slots: {
       media:
-        '<div style="display:grid;min-height:9rem;place-items:center;background:var(--tk-color-bg-subtle)">Product image</div>',
+        '<div style="display:grid;min-height:9rem;place-items:center;background:var(--karsa-color-bg-subtle)">Product image</div>',
       default: "<h2>Everyday widget</h2><p>Reliable, compact, and ready for daily use.</p>",
       footer: "Available now",
     },

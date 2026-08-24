@@ -1,0 +1,36 @@
+$schema: "https://moonrepo.dev/schemas/project.json"
+language: "typescript"
+stack: "frontend"
+layer: "library"
+
+tasks:
+  build:
+    command: "tsup"
+    deps: ["core:build"]
+    inputs:
+      - "src/**/*"
+      - "migrations/**/*"
+      - "tsup.config.ts"
+      - "tsconfig.json"
+    outputs:
+      - "dist"
+
+  lint:
+    command: "biome check ."
+    inputs:
+      - "src/**/*"
+      - "*.json"
+      - "*.yml"
+
+  test:
+    command: "vitest run"
+    inputs:
+      - "src/**/*.test.ts"
+      - "vitest.config.ts"
+
+  typecheck:
+    command: "astro check"
+    deps: ["core:build"]
+    inputs:
+      - "src/**/*"
+      - "tsconfig.json"

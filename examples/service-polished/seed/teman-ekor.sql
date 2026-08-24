@@ -16,7 +16,7 @@ WHERE sku LIKE 'TOKO-%';
 INSERT INTO catalog_items
   (name, description, price_cents, fulfillment_type, image_key, sku, category, custom_fields_json)
 VALUES
-  ('Penitipan Hewan', 'Penitipan harian yang tenang dan terawat dengan pemeriksaan rutin, waktu bermain, serta kabar untuk Anda selama bepergian.', 12500000, 'scheduled', 'products/teman-ekor-penitipan.png', 'TE-PEN-001', 'Penitipan Hewan', '{}')
+  ('Penitipan Hewan', 'Penitipan harian yang tenang dan terawat dengan pemeriksaan rutin, waktu bermain, serta kabar untuk Anda selama bepergian.', 12500000, 'scheduled', 'services/teman-ekor-penitipan.png', 'TE-PEN-001', 'Penitipan Hewan', '{}')
 ON CONFLICT(sku) DO UPDATE SET
   name = excluded.name,
   description = excluded.description,
@@ -31,7 +31,7 @@ ON CONFLICT(sku) DO UPDATE SET
 INSERT INTO catalog_items
   (name, description, price_cents, fulfillment_type, image_key, sku, category, custom_fields_json)
 VALUES
-  ('Grooming & Spa', 'Mandi, pengeringan, dan perawatan bulu dengan sentuhan lembut agar hewan kesayangan tetap bersih, segar, dan nyaman.', 15000000, 'scheduled', 'products/teman-ekor-grooming.png', 'TE-GRO-002', 'Grooming & Spa', '{}')
+  ('Grooming & Spa', 'Mandi, pengeringan, dan perawatan bulu dengan sentuhan lembut agar hewan kesayangan tetap bersih, segar, dan nyaman.', 15000000, 'scheduled', 'services/teman-ekor-grooming.png', 'TE-GRO-002', 'Grooming & Spa', '{}')
 ON CONFLICT(sku) DO UPDATE SET
   name = excluded.name,
   description = excluded.description,
@@ -46,7 +46,7 @@ ON CONFLICT(sku) DO UPDATE SET
 INSERT INTO catalog_items
   (name, description, price_cents, fulfillment_type, image_key, sku, category, custom_fields_json)
 VALUES
-  ('Jalan-Jalan', 'Jalan-jalan terarah bersama pendamping berpengalaman agar anjing tetap aktif, ceria, dan mendapatkan stimulasi yang cukup.', 7500000, 'scheduled', 'products/teman-ekor-jalan-jalan.png', 'TE-JAL-003', 'Jalan-Jalan', '{}')
+  ('Jalan-Jalan', 'Jalan-jalan terarah bersama pendamping berpengalaman agar anjing tetap aktif, ceria, dan mendapatkan stimulasi yang cukup.', 7500000, 'scheduled', 'services/teman-ekor-jalan-jalan.png', 'TE-JAL-003', 'Jalan-Jalan', '{}')
 ON CONFLICT(sku) DO UPDATE SET
   name = excluded.name,
   description = excluded.description,

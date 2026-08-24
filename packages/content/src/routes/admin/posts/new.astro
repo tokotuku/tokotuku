@@ -1,0 +1,30 @@
+---
+import { env } from "cloudflare:workers";
+import AdminLayout from "@karsa/core/layouts/AdminLayout.astro";
+import PostForm from "../../../components/admin/PostForm.astro";
+import { postInputFromForm } from "../../../content-form";
+import { createPost } from "../../../posts";
+
+let error = "";
+if (Astro.request.method === "POST") {
+  try {
+    const input = await postInputFromForm(
+      await Astro.request.formData(),
+      env.MEDIA,
+      null,
+      Astro.locals.user?.id,
+    );
+    const postId = await createPost(env.DB, input);
+    return Astro.redirect(`/admin/posts/${postId}/edit?saved=1`);
+  } catch (caught) {
+    error = caught instanceof Error ? caught.message : "Post could not be saved.";
+  }
+}
+
+import "../../../styles/routes/content-admin.css";
+---
+
+<AdminLayout title="New post">
+  <header class="content-admin-header"><div><p class="eyebrow">Content</p><h1>New post</h1><p>Save a draft or publish when it is ready.</p></div><a class="admin-button" href="/admin/posts">Cancel</a></header>
+  <PostForm error={error} />
+</AdminLayout>

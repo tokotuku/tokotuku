@@ -1,0 +1,18 @@
+---
+title: Alert
+description: Feedback kontekstual dengan tone info, sukses, peringatan, dan bahaya.
+sidebar:
+  order: 1
+---
+
+import Alert from "@karsa/ui/Alert.astro";
+import ComponentPreview from "../../../../../components/ComponentPreview.astro";
+
+<ComponentPreview label="Tone alert" layout="stack">
+  <Alert title="Perhatian">Periksa detail sebelum melanjutkan.</Alert>
+  <Alert tone="success" title="Tersimpan">Perubahan sudah aktif.</Alert>
+  <Alert tone="warning" title="Perlu aksi">Ada hal yang perlu ditinjau.</Alert>
+  <Alert tone="danger" title="Gagal">Coba lagi.</Alert>
+</ComponentPreview>
+
+`tone` menerima `info`, `success`, `warning`, atau `danger`; `title` opsional. Default slot menjadi pesan. Alert danger memakai `role="alert"`, tone lain memakai `role="status"`.

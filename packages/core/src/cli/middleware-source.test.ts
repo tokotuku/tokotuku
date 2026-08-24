@@ -3,26 +3,26 @@ import { addRegisterImport, removeRegisterImport } from "./middleware-source";
 
 // Representative scaffold middleware and the shape preserved by the CLI.
 const FIXTURE = `import { defineMiddleware } from "astro:middleware";
-import "@takontuku/auth/register";
-import "@takontuku/catalog/register";
+import "@karsa/auth/register";
+import "@karsa/catalog/register";
 
 export const onRequest = defineMiddleware((_context, next) => next());
 `;
 
 describe("addRegisterImport", () => {
   it("inserts in sorted position within the register-import block", () => {
-    const result = addRegisterImport(FIXTURE, "@takontuku/blog/register");
+    const result = addRegisterImport(FIXTURE, "@karsa/blog/register");
     expect(result).toBe(`import { defineMiddleware } from "astro:middleware";
-import "@takontuku/auth/register";
-import "@takontuku/blog/register";
-import "@takontuku/catalog/register";
+import "@karsa/auth/register";
+import "@karsa/blog/register";
+import "@karsa/catalog/register";
 
 export const onRequest = defineMiddleware((_context, next) => next());
 `);
   });
 
   it("is idempotent when already present", () => {
-    expect(addRegisterImport(FIXTURE, "@takontuku/catalog/register")).toBe(FIXTURE);
+    expect(addRegisterImport(FIXTURE, "@karsa/catalog/register")).toBe(FIXTURE);
   });
 
   it("appends after the last import when there is no existing register-import block", () => {
@@ -30,9 +30,9 @@ export const onRequest = defineMiddleware((_context, next) => next());
 
 export const onRequest = defineMiddleware((_context, next) => next());
 `;
-    const result = addRegisterImport(source, "@takontuku/blog/register");
+    const result = addRegisterImport(source, "@karsa/blog/register");
     expect(result).toBe(`import { defineMiddleware } from "astro:middleware";
-import "@takontuku/blog/register";
+import "@karsa/blog/register";
 
 export const onRequest = defineMiddleware((_context, next) => next());
 `);
@@ -41,15 +41,15 @@ export const onRequest = defineMiddleware((_context, next) => next());
 
 describe("removeRegisterImport", () => {
   it("removes exactly the matching line, leaving the rest byte-identical", () => {
-    const result = removeRegisterImport(FIXTURE, "@takontuku/catalog/register");
+    const result = removeRegisterImport(FIXTURE, "@karsa/catalog/register");
     expect(result).toBe(`import { defineMiddleware } from "astro:middleware";
-import "@takontuku/auth/register";
+import "@karsa/auth/register";
 
 export const onRequest = defineMiddleware((_context, next) => next());
 `);
   });
 
   it("is a no-op when the import isn't present", () => {
-    expect(removeRegisterImport(FIXTURE, "@takontuku/blog/register")).toBe(FIXTURE);
+    expect(removeRegisterImport(FIXTURE, "@karsa/blog/register")).toBe(FIXTURE);
   });
 });

@@ -1,5 +1,5 @@
 ---
-import Icon from "@takontuku/ui/Icon.astro";
+import Icon from "@karsa/ui/Icon.astro";
 ---
 <template data-added-icon><Icon name="check" size={16} /></template>
 <script>
@@ -7,7 +7,7 @@ import Icon from "@takontuku/ui/Icon.astro";
 
   function syncCartBadge(): void {
     const count = cartCount(readCart());
-    for (const element of document.querySelectorAll<HTMLElement>("[data-cart-count]")) {
+    for (const element of document.querySelectorAll<HTMLElement>("[data-site-action-badge]")) {
       element.textContent = String(count);
     }
   }

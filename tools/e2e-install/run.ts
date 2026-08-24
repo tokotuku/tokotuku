@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 // Gate 1 from the migration plan ("tarball install"): publishes every
-// publishable @takontuku/* package to a real registry, scaffolds a client
-// with create-takontuku in a scratch directory OUTSIDE this repo, and runs
-// the exact flow a real client would: bun install -> takontuku skills install ->
-// takontuku db sync -> wrangler d1 migrations apply --local -> astro build
+// publishable @karsa/* package to a real registry, scaffolds a client
+// with create-karsa in a scratch directory OUTSIDE this repo, and runs
+// the exact flow a real client would: bun install -> karsa skills install ->
+// karsa db sync -> wrangler d1 migrations apply --local -> astro build
 // -> a wrangler dev boot check.
 //
 // workspace:* symlinks hide broken exports maps, missing "files" entries,
@@ -13,10 +13,10 @@
 // bug in CI instead of relying on someone re-running the steps by hand.
 //
 // Prerequisite: a registry reachable at REGISTRY_URL (defaults to Verdaccio
-// on http://localhost:4873). Start one locally with `moon run verdaccio:up`.
+// on http://localhost:4873). Start one locally with
+// `docker compose -f tools/verdaccio/compose.yaml up -d verdaccio`.
 
-import { execFileSync, spawn } from "node:child_process";
-import { existsSync, mkdtempSync } from "node:fs";
+import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import {
@@ -27,52 +27,18 @@ import {
   publishAll,
   scaffoldClient,
   sh,
+  spawnWranglerDev,
+  terminateProcessGroup,
   waitForServer,
 } from "./shared.ts";
 
 const BOOT_CHECK_PORT = 8799;
 
-function resolveNodeBinary(): string {
-  const configured = process.env.TAKONTUKU_NODE_BINARY;
-  const candidate = configured ?? process.env.npm_node_execpath ?? "node";
-  try {
-    execFileSync(candidate, ["--version"], { stdio: "ignore" });
-  } catch {
-    throw new Error(
-      `Node is required to run the Wrangler boot check; set TAKONTUKU_NODE_BINARY to a Node executable (tried ${candidate})`,
-    );
-  }
-  return candidate;
-}
-
-// Keep Wrangler on Node here. Running its CLI through bunx leaves the outer
-// dev proxy waiting forever on some Bun runtimes even though the inner worker
-// is healthy and reachable.
-/** Boots the built worker with Wrangler's Node CLI and confirms it serves a request, then tears it down -- proof the tarball-installed package graph doesn't just build, it runs. */
+// Keep Wrangler on Node because some Bun versions leave its outer dev proxy
+// waiting even after the inner worker reports ready.
+/** Boots the built worker with Wrangler and confirms it serves a request, then tears it down -- proof the tarball-installed package graph doesn't just build, it runs. */
 async function bootCheck(clientDir: string): Promise<void> {
-  const wranglerCli = path.join(clientDir, "node_modules", "wrangler", "wrangler-dist", "cli.js");
-  if (!existsSync(wranglerCli)) {
-    throw new Error(`wrangler CLI is missing from the packed client: ${wranglerCli}`);
-  }
-
-  const child = spawn(
-    resolveNodeBinary(),
-    [
-      wranglerCli,
-      "dev",
-      "--local",
-      "--ip",
-      "127.0.0.1",
-      "--port",
-      String(BOOT_CHECK_PORT),
-      "--show-interactive-dev-session=false",
-    ],
-    {
-      cwd: clientDir,
-      stdio: "inherit",
-      detached: true,
-    },
-  );
+  const child = spawnWranglerDev(clientDir, BOOT_CHECK_PORT);
 
   try {
     await waitForServer(`http://127.0.0.1:${BOOT_CHECK_PORT}/setup`, 30_000);
@@ -82,21 +48,21 @@ async function bootCheck(clientDir: string): Promise<void> {
     }
     console.log(`Boot check passed: GET /setup -> ${response.status}`);
   } finally {
-    if (child.pid) process.kill(-child.pid, "SIGTERM");
+    terminateProcessGroup(child);
   }
 }
 
 async function main(): Promise<void> {
   const version = publishAll();
 
-  const scratchParent = mkdtempSync(path.join(tmpdir(), "takontuku-e2e-"));
+  const scratchParent = mkdtempSync(path.join(tmpdir(), "karsa-e2e-"));
   const clientDir = scaffoldClient(scratchParent, "e2e-client", version);
   console.log(`Scaffolded client at ${clientDir}`);
 
   installClient(clientDir);
-  sh("bunx", ["takontuku", "skills", "install"], clientDir);
+  sh("bunx", ["karsa", "skills", "install"], clientDir);
   assertAgentSetup(clientDir);
-  sh("bunx", ["takontuku", "db", "sync"], clientDir);
+  sh("bunx", ["karsa", "db", "sync"], clientDir);
   sh("bunx", ["wrangler", "d1", "migrations", "apply", "DB", "--local"], clientDir);
   sh("bun", ["run", "build"], clientDir);
   assertPackedTailwindUtilities(clientDir);

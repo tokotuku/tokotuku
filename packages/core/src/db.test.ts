@@ -22,7 +22,7 @@ describe("order hooks", () => {
 
     const result = collectOrderCreateStatements({
       db: {} as never,
-      orderNumber: "TK-1",
+      orderNumber: "KR-1",
       items: [{ itemId: 1, quantity: 2 }],
     });
 
@@ -39,7 +39,7 @@ describe("order hooks", () => {
 
     collectOrderCreateStatements({
       db: {} as never,
-      orderNumber: "TK-1",
+      orderNumber: "KR-1",
       items: [{ itemId: 1, quantity: 2 }],
       attributes: { booking: { startDate: "2026-09-03", endDate: "2026-09-07" } },
     });
@@ -55,7 +55,7 @@ describe("order hooks", () => {
 
     const result = collectOrderCreateStatements({
       db: {} as never,
-      orderNumber: "TK-1",
+      orderNumber: "KR-1",
       items: [{ itemId: 1, quantity: 1 }],
     });
 

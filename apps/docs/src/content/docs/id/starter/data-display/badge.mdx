@@ -1,0 +1,23 @@
+---
+title: Badge
+description: Label status dan kategori ringkas dalam lima tone semantik.
+sidebar:
+  order: 1
+---
+
+import Badge from "@karsa/ui/Badge.astro";
+import ComponentPreview from "../../../../../components/ComponentPreview.astro";
+
+<ComponentPreview label="Tone badge">
+  <Badge>Netral</Badge>
+  <Badge tone="accent">Unggulan</Badge>
+  <Badge tone="success">Aktif</Badge>
+  <Badge tone="warning">Perlu perhatian</Badge>
+  <Badge tone="danger">Gagal</Badge>
+</ComponentPreview>
+
+```astro
+<Badge tone="success">Aktif</Badge>
+```
+
+`tone` menerima `neutral`, `accent`, `success`, `warning`, atau `danger`. Badge bersifat presentasional; tambahkan konteks aksesibel terpisah saat warna atau status tidak cukup jelas dari teks.

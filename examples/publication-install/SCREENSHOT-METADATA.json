@@ -1,0 +1,21 @@
+{
+  "fixture": "publication-install",
+  "desktop": {
+    "status": "not-captured",
+    "path": null,
+    "viewport": { "width": 1440, "height": 1000 },
+    "score": null
+  },
+  "mobile": {
+    "status": "not-captured",
+    "path": null,
+    "viewport": { "width": 390, "height": 844 },
+    "score": null
+  },
+  "scoring": {
+    "status": "not-scored",
+    "method": "browser capture unavailable",
+    "score": null,
+    "notes": "Visual scoring is deferred until a local browser capture is supplied."
+  }
+}

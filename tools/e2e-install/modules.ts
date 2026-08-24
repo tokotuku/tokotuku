@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// New gate: proves `takontuku add`/`takontuku remove` produce output real
+// New gate: proves `karsa add`/`karsa remove` produce output real
 // tooling accepts, not just what this repo's own unit tests expect. No unit
 // test can prove the rewritten astro.config.mjs survives Biome's real
 // import sorter and formatter, or that `astro check` still likes it -- only
@@ -7,7 +7,7 @@
 // CLI's actual output proves that.
 //
 // Prerequisite: a registry reachable at REGISTRY_URL (defaults to Verdaccio
-// on http://localhost:4873). Start one locally with `moon run verdaccio:up`.
+// on http://localhost:4873). Start one locally with Docker Compose; see README.md.
 //
 // The default scaffold is public-only (auth + core + ui), so this adds
 // `orders` (pulling in catalog) before it can remove it -- the opposite
@@ -29,14 +29,14 @@ import {
 async function main(): Promise<void> {
   const version = publishAll();
 
-  const scratchParent = mkdtempSync(path.join(tmpdir(), "takontuku-e2e-modules-"));
+  const scratchParent = mkdtempSync(path.join(tmpdir(), "karsa-e2e-modules-"));
   const clientDir = scaffoldClient(scratchParent, "gate-modules", version);
   console.log(`Scaffolded client (public-only default: auth) at ${clientDir}`);
 
   installClient(clientDir);
 
   addOrdersModule(clientDir);
-  console.log("Added the orders module via `takontuku add` (pulls in catalog).");
+  console.log("Added the orders module via `karsa add` (pulls in catalog).");
 
   removeOrdersModule(clientDir);
   installClient(clientDir);

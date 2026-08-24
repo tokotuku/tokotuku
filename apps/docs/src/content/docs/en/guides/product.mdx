@@ -1,0 +1,24 @@
+---
+title: Product site guide
+description: Build a product-oriented site with catalog and order ownership kept in modules.
+---
+
+This is the domain-specific product guide. Use product language only where the site actually presents items, prices, inventory, a cart, or checkout.
+
+## Module shape
+
+Install the order module when the brief includes a purchase flow; it pulls in the catalog dependency. The catalog owns product routes, inventory, and its admin surfaces. Orders owns cart, checkout, order lifecycle, and related widgets. The app owns brand pages and explanatory content.
+
+```sh
+bunx karsa add orders
+bunx karsa db sync
+bunx wrangler d1 migrations apply DB --local
+```
+
+## Content and polish
+
+Content tier adds approved product records, categories, prices, inventory, and copy under `seed/` while preserving the packaged layout. Polished tier may add a focused theme and local product imagery; it must not copy catalog or checkout routes into `src/pages/`.
+
+Use locale-aware `money()` and `date()` helpers. Keep zero states truthful: no order data means an empty operational state, not invented sales.
+
+Validate module ownership, migration order, local seed results, product media keys, route accessibility, typecheck, lint, and build.

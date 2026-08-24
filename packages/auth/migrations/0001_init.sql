@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS verification (
   identifier TEXT NOT NULL
 );
 
--- One-time store setup state (creates the first administrator account)
+-- One-time site setup state (creates the first administrator account)
 CREATE TABLE IF NOT EXISTS setup_state (
   id INTEGER PRIMARY KEY CHECK (id = 1),
   status TEXT NOT NULL CHECK (status IN ('in_progress', 'complete')),

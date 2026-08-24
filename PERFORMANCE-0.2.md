@@ -12,10 +12,10 @@ bun run check:assets
 
 | Entry | Budget |
 | --- | ---: |
-| `@takontuku/auth` root | 5 KB |
-| `@takontuku/auth/client` | 15 KB |
-| `@takontuku/orders` cart client | 2 KB |
-| Deferred `@takontuku/charts` runtime | 300 KB |
+| `@karsa/auth` root | 5 KB |
+| `@karsa/auth/client` | 15 KB |
+| `@karsa/orders` cart client | 2 KB |
+| Deferred `@karsa/charts` runtime | 300 KB |
 
 The chart runtime is not part of the initial chunk for routes without a chart; its budget covers the
 deferred ECharts/Flint payload. Auth fallback images, dashboard artwork, and the SVG brand mark are

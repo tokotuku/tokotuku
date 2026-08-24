@@ -1,0 +1,24 @@
+---
+title: Referensi komponen
+description: Pilih primitive Karsa berdasarkan peran semantik dan buat perilaku interaktif secara eksplisit.
+---
+
+Mulai dari primitive semantik terkecil: `Button` untuk aksi, link untuk navigasi, `Input` untuk field berlabel, dan `Card` untuk region seperti artikel. Koleksi starter menambah layout, navigasi, feedback, data display, dan contoh domain.
+
+```astro
+---
+import Button from "@karsa/ui/Button.astro";
+import Card from "@karsa/ui/Card.astro";
+import "@karsa/theme/styles.css";
+---
+
+<Card>
+  <h2>Review</h2>
+  <p>Gunakan semantik paket sebelum menulis markup custom.</p>
+  <Button type="submit">Lanjut</Button>
+</Card>
+```
+
+Komponen merender HTML statis dan memakai token `--karsa-*`. Perilaku client terbatas pada komponen yang memang memerlukannya, seperti pemilih tema, chart, atau perilaku browser opt-in lainnya. Pertahankan label native, heading, keyboard behavior, focus ring, dan preferensi reduced-motion.
+
+Lihat halaman masing-masing untuk properti dan slot. Jika komponen tampak membutuhkan data domain, biarkan page atau modul owner menangani formatting dan ownership data.

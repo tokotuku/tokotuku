@@ -1,0 +1,19 @@
+---
+title: AppTopbar
+description: Judul workspace, pemilih tema, dan area aksi.
+sidebar:
+  order: 3
+---
+
+`AppTopbar` merender heading workspace ringkas, toggle terang/gelap, dan default slot untuk aksi.
+
+```astro
+---
+import Button from "@karsa/ui/Button.astro";
+import AppTopbar from "@karsa/ui/AppTopbar.astro";
+---
+
+<AppTopbar title="Content workspace"><Button variant="secondary" size="sm">Keluar</Button></AppTopbar>
+```
+
+`title` default-nya `Workspace`. Toggle menulis mode ke `document.documentElement.dataset.theme` dan menyimpan pilihan pada `karsa-theme`; mode aksesibilitas OS tetap didukung.

@@ -1,0 +1,25 @@
+---
+title: Modul
+description: Pahami paket opsional, urutan dependency, state registry, dan batas aplikasi/modul.
+---
+
+Modul adalah paket opsional yang ditemukan oleh integrasi Karsa. Modul dapat menyumbangkan route, navigasi, widget, migrasi, seed, prefix media, dan registrasi middleware.
+
+## Pilih graph terkecil
+
+`auth` adalah batas akses. Tambahkan hanya modul domain yang diperlukan brief; situs company atau publication dapat tetap pada graph dasar. Domain product dan service memiliki panduan khusus yang menjelaskan graph modul opsionalnya.
+
+Tambah dan hapus modul melalui CLI:
+
+```sh
+bunx karsa add <module>
+bunx karsa remove <module>
+```
+
+CLI memperbarui dependency paket, array `modules`, dan baris middleware `./register` dalam satu operasi. Gunakan `--no-install` atau `--no-sync` hanya ketika plan memang membutuhkan perubahan bertahap.
+
+## Perilaku opsional
+
+Baca `virtual:karsa/registry` dan virtual module kontribusi untuk mengetahui fitur terpasang. Static import dari paket opsional membuat base app gagal meskipun `if` runtime akan melewatinya. Route spesifik modul berada di paket modul.
+
+Setelah graph berubah, jalankan `bunx karsa db sync`, terapkan migrasi lokal, seed lokal bila diperlukan, dan pastikan penghapusan modul juga menghapus affordance yang dimilikinya.

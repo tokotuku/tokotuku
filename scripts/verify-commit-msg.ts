@@ -41,7 +41,7 @@ async function main(): Promise<void> {
   Allowed types: ${COMMIT_TYPES.join(", ")}
 
   Examples:
-    feat(elements): add tk-button component
+    feat(elements): add karsa-button component
     fix(core): correct focus trap edge case
     docs(tokens): document spacing scale
 `);

@@ -1,29 +1,29 @@
 .table-frame {
   overflow-x: auto;
-  border: 1px solid var(--tk-color-border);
-  border-radius: var(--tk-radius-xl);
-  background: var(--tk-color-bg);
+  border: 1px solid var(--karsa-color-border);
+  border-radius: var(--karsa-radius-xl);
+  background: var(--karsa-color-bg);
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
-  color: var(--tk-color-fg);
-  font-size: var(--tk-font-size-sm);
+  color: var(--karsa-color-fg);
+  font-size: var(--karsa-font-size-sm);
 }
 
 th,
 td {
-  padding: var(--tk-spacing-3) var(--tk-spacing-4);
-  border-bottom: 1px solid var(--tk-color-border);
+  padding: var(--karsa-spacing-3) var(--karsa-spacing-4);
+  border-bottom: 1px solid var(--karsa-color-border);
   white-space: nowrap;
 }
 
 th {
-  background: var(--tk-color-bg-subtle);
-  color: var(--tk-color-fg-muted);
-  font-size: var(--tk-font-size-xs);
-  font-weight: var(--tk-font-weight-semibold);
+  background: var(--karsa-color-bg-subtle);
+  color: var(--karsa-color-fg-muted);
+  font-size: var(--karsa-font-size-xs);
+  font-weight: var(--karsa-font-weight-semibold);
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -33,7 +33,7 @@ tbody tr:last-child td {
 }
 
 tbody tr:hover {
-  background: color-mix(in srgb, var(--tk-color-accent) 4%, var(--tk-color-bg));
+  background: color-mix(in srgb, var(--karsa-color-accent) 4%, var(--karsa-color-bg));
 }
 
 .align-start {
@@ -49,8 +49,8 @@ tbody tr:hover {
 }
 
 .empty {
-  padding: var(--tk-spacing-8);
-  color: var(--tk-color-fg-muted);
+  padding: var(--karsa-spacing-8);
+  color: var(--karsa-color-fg-muted);
   text-align: center;
 }
 

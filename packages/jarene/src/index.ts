@@ -1,4 +1,4 @@
-import { defineModule, type ModuleDefinition } from "@takontuku/core";
+import { defineModule, type ModuleDefinition } from "@karsa/core";
 
 export function jarene(): ModuleDefinition {
   return defineModule({
@@ -6,7 +6,7 @@ export function jarene(): ModuleDefinition {
     authPanelWidgets: [
       {
         id: "jarene-quote",
-        entrypoint: "@takontuku/jarene/components/JareneAuthQuote.astro",
+        entrypoint: "@karsa/jarene/components/JareneAuthQuote.astro",
         order: 10,
       },
     ],

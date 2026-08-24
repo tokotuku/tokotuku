@@ -13,6 +13,10 @@ export default {
   viteFinal(config) {
     config.plugins ??= [];
     config.plugins.push(tailwindcss());
+    // Storybook's preview runtime and accessibility tooling share a vendor chunk;
+    // keep the warning aligned with the repository's gzip performance budget.
+    config.build ??= {};
+    config.build.chunkSizeWarningLimit = 900;
     return config;
   },
 };

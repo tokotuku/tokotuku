@@ -1,7 +1,7 @@
 ---
-import BrandMark from "@takontuku/ui/BrandMark.astro";
-import Layout from "@takontuku/ui/DocumentLayout.astro";
-import Icon from "@takontuku/ui/Icon.astro";
+import BrandMark from "@karsa/ui/BrandMark.astro";
+import Layout from "@karsa/ui/DocumentLayout.astro";
+import Icon from "@karsa/ui/Icon.astro";
 import { brand } from "../../brand";
 import { coreMessages, createTranslator } from "../../messages";
 
@@ -26,7 +26,7 @@ import "../../styles/routes/core-error.css";
       <h1>{t(forbidden ? "admin.error.forbiddenTitle" : "admin.error.notFoundTitle")}</h1>
       <p>{t(forbidden ? "admin.error.forbiddenDescription" : "admin.error.notFoundDescription")}</p>
       <a class="error-primary" href={forbidden ? "/admin" : "/"}><Icon name="dashboard" size={16} /> {t(forbidden ? "admin.error.backDashboard" : "admin.error.backHome")}</a>
-      <a class="error-secondary" href={forbidden ? "/login" : "mailto:support@takontuku.dev"}>{t(forbidden ? "admin.error.switchAccount" : "admin.error.contactSupport")}</a>
+      <a class="error-secondary" href={forbidden ? "/login" : "mailto:support@karsa.dev"}>{t(forbidden ? "admin.error.switchAccount" : "admin.error.contactSupport")}</a>
     </section>
   </main>
 </Layout>
@@ -35,6 +35,6 @@ import "../../styles/routes/core-error.css";
   document.querySelector("[data-error-theme]")?.addEventListener("click", () => {
     const next = document.documentElement.dataset["theme"] === "dark" ? "light" : "dark";
     document.documentElement.dataset["theme"] = next;
-    localStorage.setItem("takontuku-theme", next);
+    localStorage.setItem("karsa-theme", next);
   });
 </script>

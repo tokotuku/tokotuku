@@ -1,10 +1,11 @@
-export type DashboardReadinessStepId = "admin" | "brand" | "logo" | "catalog" | "orders";
+export type DashboardReadinessStepId = "admin" | "brand" | "logo";
 
 export interface DashboardReadinessInput {
   hasAuthenticatedAdmin: boolean;
   brandName: string;
   hasLogo: boolean;
-  moduleNames: readonly string[];
+  /** Kept optional for callers upgrading from the module-aware API; core never reads it. */
+  moduleNames?: readonly string[];
 }
 
 export interface DashboardReadinessStep {
@@ -15,7 +16,7 @@ export interface DashboardReadinessStep {
 export interface DashboardReadiness {
   steps: DashboardReadinessStep[];
   completed: number;
-  total: 5;
+  total: 3;
   percentage: number;
 }
 
@@ -25,27 +26,20 @@ export interface DashboardReadiness {
  */
 export function calculateDashboardReadiness(input: DashboardReadinessInput): DashboardReadiness {
   const normalizedBrandName = input.brandName.trim().toLocaleLowerCase();
-  const installedModules = new Set(
-    input.moduleNames.map((moduleName) => moduleName.trim().toLocaleLowerCase()),
-  );
-  const hasModule = (needle: string) =>
-    [...installedModules].some((moduleName) => moduleName.includes(needle));
   const steps: DashboardReadinessStep[] = [
     { id: "admin", complete: input.hasAuthenticatedAdmin },
     {
       id: "brand",
-      complete: Boolean(normalizedBrandName) && normalizedBrandName !== "takontuku",
+      complete: Boolean(normalizedBrandName) && normalizedBrandName !== "karsa",
     },
     { id: "logo", complete: input.hasLogo },
-    { id: "catalog", complete: hasModule("catalog") },
-    { id: "orders", complete: hasModule("orders") },
   ];
   const completed = steps.filter((step) => step.complete).length;
 
   return {
     steps,
     completed,
-    total: 5,
-    percentage: completed * 20,
+    total: 3,
+    percentage: Math.round((completed / 3) * 100),
   };
 }

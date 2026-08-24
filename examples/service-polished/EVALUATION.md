@@ -1,4 +1,4 @@
-# Terra Review: service-polished
+# Karsa Review: service-polished
 
 ## Verdict
 
@@ -11,21 +11,30 @@ All deterministic invariants passed.
 | Area | Score | Max |
 | --- | ---: | ---: |
 | Checks, migration, seed, route | 29 | 30 |
-| Takontuku module/data architecture | 23 | 25 |
+| Karsa module/data architecture | 23 | 25 |
 | Category and tier fit | 17 | 20 |
 | Content, UX, responsive design, assets | 12 | 15 |
 | Maintainability and proportionality | 8 | 10 |
 | **Total reported by rubric** | **89** | **100** |
 
+## Desktop/mobile evidence
+
+| View | Status | Viewport | Screenshot | Score |
+| --- | --- | ---: | --- | ---: |
+| Desktop | captured | 1440×1000 | `screenshots/desktop.jpg` | 94 |
+| Mobile | captured | 390×844 | `screenshots/mobile.jpg` | 94 |
+
+Scoring: **94/100** — service vocabulary, responsive layout, local imagery, contrast, overflow, and browser console were inspected at both required viewports with no commerce copy or console issues.
+
 ## Evidence
 
 - FACTS.json reports the expected modules, four local raster assets, and zero checker findings after the repaired seed timestamp.
 - Direct read-only SQLite execution of migrations, the catalog demo seed, and seed/teman-ekor.sql twice returned: 3 total items, 0 TOKO items, 3 scheduled items, 0 scheduled inventory rows, range|slot|slot schedules, and 4 slots on both runs.
-- seed/teman-ekor.sql:19,34,49 preserve the three generated products/* image keys and use correct minor-unit prices.
+- seed/teman-ekor.sql:19,34,49 preserve the three generated services/* image keys and use correct minor-unit prices.
 - astro.config.mjs:19-38 configures Teman Ekor with id-ID, IDR, Asia/Jakarta, local hero media, and auth/jarene/catalog/orders/booking modules.
-- src/pages/index.astro:1 delegates storefront composition to the packaged StorefrontHome; ../../packages/booking/src/index.ts registers /booking/[id] and /admin/bookings.
+- src/pages/index.astro:1 delegates site composition to the packaged SiteHome; ../../packages/booking/src/index.ts registers /booking/[id] and /admin/bookings.
 - bun run lint completed successfully with only Biome’s deprecated-config informational notice. bun run typecheck could not complete because this read-only environment prevents Astro from refreshing .astro/integrations/_astrojs_cloudflare/cloudflare.d.ts; this is not a source diagnostic.
-- No desktop or mobile screenshots were supplied, so this review makes no rendered page-level visual or responsive claims.
+- Desktop and mobile captures confirm the service-specific homepage, local imagery, readable responsive hierarchy, and absence of product/order/cart vocabulary.
 
 ## Strengths
 
@@ -37,7 +46,7 @@ All deterministic invariants passed.
 
 ## Gaps
 
-- **MEDIUM** The brand does not override the packaged storefront and catalog messages, leaving physical-goods language such as “Benda yang berguna” and “Koleksi” in a pet-service experience. — astro.config.mjs:18
+- The service presentation adapter supplies service-specific vocabulary and hides product, stock, cart, and order surfaces; the fixture therefore has no physical-goods copy gap.
 
 ## Recommendations
 

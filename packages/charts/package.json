@@ -1,6 +1,6 @@
 {
-  "name": "@takontuku/charts",
-  "version": "0.2.0",
+  "name": "@karsa/charts",
+  "version": "0.3.0",
   "publishConfig": {
     "registry": "https://registry.npmjs.org",
     "access": "public"
@@ -18,7 +18,7 @@
     "./package.json": "./package.json"
   },
   "dependencies": {
-    "@takontuku/theme": "^0.2.0",
+    "@karsa/theme": "^0.3.0",
     "echarts": "^6.1.0",
     "flint-chart": "0.2.1"
   },

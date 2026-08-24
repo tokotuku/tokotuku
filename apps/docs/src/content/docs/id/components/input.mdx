@@ -1,0 +1,30 @@
+---
+title: Input
+description: Input berlabel dengan perilaku field native dan atribut HTML bertipe.
+sidebar:
+  order: 2
+---
+
+import Input from "@karsa/ui/Input.astro";
+import ComponentPreview from "../../../../components/ComponentPreview.astro";
+
+`Input` menggabungkan label opsional dengan elemen `<input>` native.
+
+## Preview
+
+<ComponentPreview label="Contoh input">
+  <div class="grid w-full max-w-[24rem] gap-4">
+    <Input label="Email" type="email" name="email" placeholder="anda@example.com" required />
+    <Input label="Field disabled" value="Contoh read-only" disabled />
+  </div>
+</ComponentPreview>
+
+```astro
+---
+import Input from "@karsa/ui/Input.astro";
+---
+
+<Input label="Email" type="email" name="email" placeholder="anda@example.com" required />
+```
+
+`label` adalah properti khusus Karsa; semua atribut input native lain diteruskan. Field menghasilkan event `input` dan `change` native, menghubungkan label dengan `id` stabil, serta mempertahankan semantik required, disabled, dan focus-visible.

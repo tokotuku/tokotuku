@@ -1,0 +1,7 @@
+{
+  "nextSequence": 2,
+  "modules": {
+    "auth": 1,
+    "content": 1
+  }
+}

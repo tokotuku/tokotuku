@@ -12,7 +12,7 @@ export interface OrderCreateContext {
   /**
    * Module-owned, order-creation-time data no hook could otherwise see —
    * e.g. `attributes.booking` carries the requested date range so
-   * `@takontuku/booking`'s hook can write `booking_order_bookings` in the
+   * `@karsa/booking`'s hook can write `booking_order_bookings` in the
    * same atomic batch. Keyed by module name so unrelated hooks never
    * collide; a hook that doesn't recognize its key just returns [].
    */
@@ -38,7 +38,7 @@ const statusChangeHooks = new Set<OrderStatusChangeHook>();
  * Registers a hook that contributes extra statements to the same atomic
  * batch as an order's creation (e.g. decrementing stock). A module that
  * isn't installed never calls this, so its statements are simply absent —
- * no flag, no branching in @takontuku/orders.
+ * no flag, no branching in @karsa/orders.
  */
 export function onOrderCreate(hook: OrderCreateHook): void {
   createHooks.add(hook);

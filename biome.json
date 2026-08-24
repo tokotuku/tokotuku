@@ -79,8 +79,8 @@
     {
       "includes": [
         "**/src/cli/**",
-        "**/create-takontuku/src/bin.ts",
-        "**/create-takontuku/src/setup.ts",
+        "**/create-karsa/src/bin.ts",
+        "**/create-karsa/src/setup.ts",
         "tools/e2e-install/*.ts",
         "scripts/publish-private.ts",
         "scripts/publish-local.ts",

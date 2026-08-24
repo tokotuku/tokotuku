@@ -1,0 +1,29 @@
+// @ts-check
+import cloudflare from "@astrojs/cloudflare";
+{{moduleImports}}
+import tailwindcss from "@tailwindcss/vite";
+import { defineConfig } from "astro/config";
+
+// Run "karsa add <module>" or "karsa remove <module>" to change
+// what this client has installed -- it edits this file, src/middleware.ts,
+// and package.json for you.
+export default defineConfig({
+  integrations: [
+    karsa({
+      brand: {
+        name: "{{brandName}}",
+        locale: "{{locale}}",
+{{currencyConfig}}        timeZone: "{{timeZone}}",
+        // Optional: use a local public asset or an absolute CDN/R2 URL.
+        // auth: { backgroundImage: "/images/auth-site.webp", backgroundPosition: "center" },
+      },
+      modules: [{{moduleList}}],
+    }),
+  ],
+  // @karsa/theme/styles.css is imported by DocumentLayout.astro and needs this plugin.
+  vite: { plugins: [tailwindcss()] },
+  output: "server",
+  adapter: cloudflare({
+    persistState: true,
+  }),
+});

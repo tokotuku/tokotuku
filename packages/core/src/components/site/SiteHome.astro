@@ -1,0 +1,57 @@
+---
+/// <reference path="../../virtual.d.ts" />
+import homeSections from "virtual:karsa/site-home-sections";
+import Layout from "@karsa/ui/DocumentLayout.astro";
+import SiteFooter from "@karsa/ui/SiteFooter.astro";
+import SiteHeader from "@karsa/ui/SiteHeader.astro";
+import SiteHero from "@karsa/ui/SiteHero.astro";
+import { brand } from "../../brand";
+import { coreMessages, createTranslator } from "../../messages";
+
+const t = createTranslator(brand, coreMessages);
+const locale = brand.locale.toLowerCase().startsWith("id") ? "id" : "en";
+const hero = brand.site?.hero;
+const siteLinks = brand.site?.links ?? [];
+
+import "../../styles/routes/core-site-home.css";
+---
+
+<Layout title={brand.name} description={hero?.description ?? t("site.hero.description")} siteName={brand.name} lang={locale} image={hero?.image} palette={brand.palette}>
+  <SiteHeader
+    brand={brand}
+    current="home"
+    announcement={brand.site?.announcement ?? false}
+    links={siteLinks}
+    labels={{
+      home: locale === "id" ? "Beranda" : "Home",
+      theme: locale === "id" ? "Ganti tema" : "Toggle theme",
+      openMenu: locale === "id" ? "Buka menu" : "Open menu",
+      closeMenu: locale === "id" ? "Tutup menu" : "Close menu",
+      navigation: locale === "id" ? "Navigasi situs" : "Site navigation",
+    }}
+  />
+  <main>
+    <SiteHero
+      eyebrow={hero?.eyebrow ?? t("site.hero.eyebrow")}
+      title={hero?.title ?? t("site.hero.title")}
+      description={hero?.description ?? t("site.hero.description")}
+      primaryHref={hero?.primaryAction?.href}
+      primaryLabel={hero?.primaryAction?.label}
+      image={hero?.image}
+      imagePosition={hero?.imagePosition}
+    />
+    {homeSections.map(({ component: HomeSection }) => <HomeSection />)}
+  </main>
+  <SiteFooter
+    brandName={brand.name}
+    tagline={t("site.footer.tagline")}
+    links={siteLinks}
+    newsletterAction={brand.site?.newsletter?.action}
+    newsletterLabel={t("site.footer.newsletterLabel")}
+    newsletterHint={t("site.footer.newsletterHint")}
+    newsletterEmailLabel={t("site.footer.newsletterEmail")}
+    newsletterSubmit={t("site.footer.newsletterSubmit")}
+    navigationLabel={t("site.footer.navigation")}
+    madeWith={t("site.footer.madeWith")}
+  />
+</Layout>

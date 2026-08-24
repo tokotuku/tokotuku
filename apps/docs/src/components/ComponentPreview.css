@@ -2,13 +2,13 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--tk-spacing-3);
-  margin-block: var(--tk-spacing-4);
-  padding: var(--tk-spacing-6);
-  border: 1px solid var(--tk-color-border);
-  border-radius: var(--tk-radius-lg);
-  background: var(--tk-color-bg);
-  color: var(--tk-color-fg);
+  gap: var(--karsa-spacing-3);
+  margin-block: var(--karsa-spacing-4);
+  padding: var(--karsa-spacing-6);
+  border: 1px solid var(--karsa-color-border);
+  border-radius: var(--karsa-radius-lg);
+  background: var(--karsa-color-bg);
+  color: var(--karsa-color-fg);
 }
 
 .preview--stack {

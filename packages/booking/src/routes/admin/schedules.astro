@@ -1,0 +1,69 @@
+---
+import { env } from "cloudflare:workers";
+import brand from "virtual:karsa/config";
+import { listItems } from "@karsa/catalog";
+import AdminLayout from "@karsa/core/layouts/AdminLayout.astro";
+import AdminPageHeader from "@karsa/ui/AdminPageHeader.astro";
+import { findItemSchedule, listSlots, saveItemSchedule } from "../../bookings";
+
+const locale = brand.locale.toLowerCase().startsWith("id") ? "id" : "en";
+const { items: services } = await listItems(env.DB, {
+  activeOnly: false,
+  pageSize: 100,
+  presentation: "services",
+});
+const selectedId = Math.trunc(Number(Astro.url.searchParams.get("item") ?? services[0]?.id ?? 0));
+let error = "";
+let saved = Astro.url.searchParams.has("saved");
+if (Astro.request.method === "POST") {
+  try {
+    const form = await Astro.request.formData();
+    const itemId = Math.trunc(Number(form.get("itemId")));
+    const ids = form.getAll("slotId").map(String);
+    const weekdays = form.getAll("weekday").map(Number);
+    const starts = form.getAll("startTime").map(String);
+    const durations = form.getAll("durationMinutes").map(Number);
+    const capacities = form.getAll("capacity").map(Number);
+    const active = new Set(form.getAll("activeSlot").map(String));
+    await saveItemSchedule(env.DB, itemId, {
+      mode: form.get("mode") === "slot" ? "slot" : "range",
+      minDays: Number(form.get("minDays")),
+      maxDays: String(form.get("maxDays") ?? "").trim() ? Number(form.get("maxDays")) : null,
+      leadTimeDays: Number(form.get("leadTimeDays")),
+      occurrencesPerDay: Number(form.get("occurrencesPerDay")),
+      slots: weekdays.map((weekday, index) => ({
+        ...(ids[index] ? { id: Number(ids[index]) } : {}),
+        weekday,
+        startTime: starts[index] ?? "09:00",
+        durationMinutes: durations[index] ?? 60,
+        capacity: capacities[index] ?? 1,
+        isActive: active.has(String(index)),
+      })),
+    });
+    return Astro.redirect(`/admin/schedules?item=${itemId}&saved=1`, 303);
+  } catch (caught) {
+    error = caught instanceof Error ? caught.message : "Schedule could not be saved.";
+  }
+}
+const schedule = selectedId ? await findItemSchedule(env.DB, selectedId) : null;
+const slots = selectedId ? await listSlots(env.DB, selectedId, { activeOnly: false }) : [];
+const weekdays =
+  locale === "id"
+    ? ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"]
+    : ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+---
+<AdminLayout title={locale === "id" ? "Jadwal layanan" : "Service schedules"}>
+  <AdminPageHeader eyebrow={locale === "id" ? "Booking" : "Booking"} title={locale === "id" ? "Jadwal layanan" : "Service schedules"} description={locale === "id" ? "Atur rentang hari atau slot berulang tanpa menghapus booking lama." : "Configure date ranges or recurring slots without deleting booking history."} />
+  <form method="get"><label>{locale === "id" ? "Layanan" : "Service"}<select name="item" onchange="this.form.submit()">{services.map((service) => <option value={service.id} selected={service.id === selectedId}>{service.name}</option>)}</select></label></form>
+  {selectedId > 0 && <form method="post" class="panel"><input type="hidden" name="itemId" value={selectedId} />
+    {error && <p role="alert">{error}</p>}{saved && <p>{locale === "id" ? "Jadwal tersimpan." : "Schedule saved."}</p>}
+    <label>Mode<select name="mode"><option value="range" selected={schedule?.mode !== "slot"}>Range</option><option value="slot" selected={schedule?.mode === "slot"}>Recurring slot</option></select></label>
+    <label>{locale === "id" ? "Minimum hari" : "Minimum days"}<input name="minDays" type="number" min="1" value={schedule?.minDays ?? 1} required /></label>
+    <label>{locale === "id" ? "Maksimum hari" : "Maximum days"}<input name="maxDays" type="number" min="1" value={schedule?.maxDays ?? undefined} /></label>
+    <label>Lead time (days)<input name="leadTimeDays" type="number" min="0" value={schedule?.leadTimeDays ?? 0} required /></label>
+    <label>{locale === "id" ? "Kunjungan per hari" : "Occurrences per day"}<input name="occurrencesPerDay" type="number" min="1" value={schedule?.occurrencesPerDay ?? 1} required /></label>
+    <h2>{locale === "id" ? "Slot berulang" : "Recurring slots"}</h2>
+    {[...slots, null].map((slot, index) => <fieldset><input type="hidden" name="slotId" value={slot?.id ?? ""} /><label>{locale === "id" ? "Hari" : "Weekday"}<select name="weekday">{weekdays.map((name, weekday) => <option value={weekday} selected={(slot?.weekday ?? 1) === weekday}>{name}</option>)}</select></label><label>{locale === "id" ? "Mulai" : "Start"}<input name="startTime" type="time" value={slot?.startTime ?? "09:00"} /></label><label>{locale === "id" ? "Durasi (menit)" : "Duration (minutes)"}<input name="durationMinutes" type="number" min="1" max="1440" value={slot?.durationMinutes ?? 60} /></label><label>{locale === "id" ? "Kapasitas" : "Capacity"}<input name="capacity" type="number" min="1" value={slot?.capacity ?? 1} /></label><label><input name="activeSlot" type="checkbox" value={index} checked={slot?.isActive ?? false} /> {locale === "id" ? "Aktif" : "Active"}</label></fieldset>)}
+    <button type="submit">{locale === "id" ? "Simpan jadwal" : "Save schedule"}</button>
+  </form>}
+</AdminLayout>

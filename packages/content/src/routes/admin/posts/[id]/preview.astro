@@ -1,0 +1,23 @@
+---
+import { env } from "cloudflare:workers";
+import AdminLayout from "@karsa/core/layouts/AdminLayout.astro";
+import { renderMarkdownSafe } from "../../../../markdown";
+import { findPostById } from "../../../../posts";
+
+// biome-ignore lint/complexity/useLiteralKeys: Astro generates params as an index-signature object
+const id = Number(Astro.params["id"]);
+const post = await findPostById(env.DB, id, { includeUnpublished: true });
+if (!post) return new Response("Post not found", { status: 404 });
+const html = renderMarkdownSafe(post.bodyMarkdown);
+
+import "../../../../styles/routes/content-admin.css";
+---
+
+<AdminLayout title={`Preview ${post.title}`}>
+  <header class="content-admin-header"><div><p class="eyebrow">Draft preview</p><h1>{post.title}</h1><p>This preview is only available to authenticated backoffice users.</p></div><a class="admin-button" href={`/admin/posts/${post.id}/edit`}>Back to edit</a></header>
+  <article class="content-preview panel">
+    {post.coverImageKey && <img class="content-preview-cover" src={`/api/images/${post.coverImageKey}`} alt="" />}
+    {post.excerpt && <p class="content-post-excerpt">{post.excerpt}</p>}
+    <div class="content-markdown" set:html={html}></div>
+  </article>
+</AdminLayout>

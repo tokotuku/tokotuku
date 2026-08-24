@@ -1,0 +1,23 @@
+---
+title: Auth registration modes
+description: Choose public or closed registration and understand the one-time setup flow.
+---
+
+The auth module has two explicit registration modes. Choose one in the module configuration; do not hide the policy in a page component.
+
+```js
+import { auth } from "@karsa/auth";
+
+karsa({ modules: [auth({ registration: "public" })] });
+```
+
+| Mode | `/register` | Intended use |
+| --- | --- | --- |
+| `public` | Available | Anyone may create an account; protect privileged routes with the session/access checks. |
+| `closed` | Not injected | An administrator or an external identity process creates accounts. |
+
+## First-run setup
+
+Both modes expose the one-time `/setup` flow for the initial administrator. It claims the setup gate before creating the account. Keep `BETTER_AUTH_SECRET` configured before deploying, and never seed a working password into a repository.
+
+The login page only links to registration in public mode. Test both modes: route injection, API behavior, login copy, access control, and the setup gate. If a product or service guide needs invite-only access, use `closed` and document the invite mechanism rather than silently rendering a public form.

@@ -1,0 +1,28 @@
+---
+import { mediaUrl } from "@karsa/core";
+import type { ContentPost } from "../../posts";
+
+interface Props {
+  post?: ContentPost | undefined;
+  error?: string | undefined;
+}
+
+const { post, error } = Astro.props;
+const formId = "content-post-form";
+---
+
+{error && <p class="content-form-error" role="alert">{error}</p>}
+<form id={formId} class="content-post-form" method="post" enctype="multipart/form-data">
+  <section class="content-form-section panel">
+    <div class="content-form-grid">
+      <label class="wide">Title <input name="title" required maxlength="180" value={post?.title} /></label>
+      <label>Slug <input name="slug" maxlength="180" value={post?.slug} placeholder="my-first-post" /></label>
+      <label>Status <select name="status">{["draft", "published", "archived"].map((status) => <option value={status} selected={(post?.status ?? "draft") === status}>{status}</option>)}</select></label>
+      <label class="wide">Excerpt <textarea name="excerpt" rows="3" maxlength="600">{post?.excerpt}</textarea></label>
+      <label class="wide">Body Markdown <textarea name="body_markdown" rows="22" required>{post?.bodyMarkdown}</textarea><small>Headings, lists, links, emphasis, quotes, and code are supported. HTML and images are disabled.</small></label>
+      <label class="wide">Cover image <input name="cover_image" type="file" accept="image/avif,image/gif,image/jpeg,image/png,image/webp" />{post?.coverImageKey && <span>Upload a new image to replace the current cover.</span>}</label>
+      {post?.coverImageKey && <img class="content-current-cover" src={mediaUrl(post.coverImageKey)} alt="Current cover" />}
+    </div>
+  </section>
+  <div class="content-form-actions"><a class="admin-button" href="/admin/posts">Cancel</a><button class="admin-button admin-button--primary" type="submit">Save post</button></div>
+</form>

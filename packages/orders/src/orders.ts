@@ -1,5 +1,5 @@
 import type { D1Database } from "@cloudflare/workers-types";
-import { findProductById, findProductsByIds } from "@takontuku/catalog";
+import { findItemById, findItemsByIds } from "@karsa/catalog";
 import {
   assertCursor,
   ConstraintViolationError,
@@ -11,11 +11,11 @@ import {
   encodeCursor,
   mapD1Error,
   normalizePageSize,
-} from "@takontuku/core";
+} from "@karsa/core";
 
 // `pending`..`delivered` is the original checkout-and-ship lifecycle.
 // `inquiry`..`in_progress`..`completed` is the lead-and-fulfill lifecycle a
-// module like @takontuku/booking creates orders into via createInquiryOrder
+// module like @karsa/booking creates orders into via createInquiryOrder
 // — a request has no total until an admin quotes it, and "delivered" (a
 // shipment concept) doesn't fit a finished visit or service. Both lifecycles
 // share `confirmed` as their convergence point and `cancelled` as their exit.
@@ -33,7 +33,7 @@ export type OrderStatus = (typeof orderStatuses)[number];
 
 /**
  * Legal next statuses for each current status — the "transisi legalnya"
- * @takontuku/orders is responsible for exporting alongside the vocabulary
+ * @karsa/orders is responsible for exporting alongside the vocabulary
  * itself (no CHECK on orders.status: SQLite can't ALTER a CHECK in place,
  * so legality lives here, in TypeScript, where it can actually change).
  * A status mapped to [] is terminal: nothing, including re-selecting the
@@ -51,7 +51,7 @@ export const orderTransitions: Record<OrderStatus, OrderStatus[]> = {
 };
 
 function generateOrderNumber(): string {
-  return `TK-${new Date().toISOString().slice(0, 10).replaceAll("-", "")}-${crypto.randomUUID().slice(0, 6).toUpperCase()}`;
+  return `KR-${new Date().toISOString().slice(0, 10).replaceAll("-", "")}-${crypto.randomUUID().slice(0, 6).toUpperCase()}`;
 }
 
 export const paymentMethods = ["cash", "transfer"] as const;
@@ -146,7 +146,7 @@ export async function createOrder(
   const cart = normalizeCart(rawCart);
   if (!cart.length) throw new Error("Keranjang belanja kosong.");
 
-  const foundProducts = await findProductsByIds(
+  const foundProducts = await findItemsByIds(
     db,
     cart.map((item) => item.id),
   );
@@ -164,6 +164,8 @@ export async function createOrder(
   for (const item of cart) {
     const product = products.get(item.id);
     if (!product) throw new Error("Ada produk yang sudah tidak tersedia.");
+    if (product.priceCents === null)
+      throw new Error("Produk tanpa harga tidak dapat masuk checkout.");
     subtotalCents += product.priceCents * item.quantity;
   }
   const orderNumber = generateOrderNumber();
@@ -192,6 +194,8 @@ export async function createOrder(
     ...cart.map((item) => {
       const product = products.get(item.id);
       if (!product) throw new Error("Ada produk yang sudah tidak tersedia.");
+      if (product.priceCents === null)
+        throw new Error("Produk tanpa harga tidak dapat masuk checkout.");
       return db
         .prepare(
           `INSERT INTO order_items
@@ -254,7 +258,7 @@ export interface InquiryDetails {
 /**
  * Creates an order for a single catalog item with no computed total and no
  * signed-in user — the entry point for a lead that hasn't been quoted yet
- * (a scheduling request from @takontuku/booking, a project inquiry, or any
+ * (a scheduling request from @karsa/booking, a project inquiry, or any
  * future channel that isn't "add to cart and pay now"). Neighbor to
  * createOrder, not a replacement: physical checkout keeps using createOrder.
  *
@@ -270,7 +274,7 @@ export async function createInquiryOrder(
   details: InquiryDetails,
   attributes?: Record<string, unknown>,
 ): Promise<{ orderNumber: string }> {
-  const product = await findProductById(db, itemId);
+  const product = await findItemById(db, itemId, { presentation: "services" });
   if (!product) throw new Error("Layanan yang diminta sudah tidak tersedia.");
 
   const orderNumber = generateOrderNumber();

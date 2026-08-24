@@ -46,11 +46,13 @@ a {
   overflow-wrap: anywhere;
   color: var(--admin-rail-fg);
   font-size: 15px;
-  font-weight: var(--tk-font-weight-bold);
+  font-weight: var(--karsa-font-weight-bold);
+  line-height: 1;
   text-decoration: none;
 }
 .brand-mark {
   display: grid;
+  flex: 0 0 24px;
   width: 24px;
   height: 24px;
   place-items: center;
@@ -101,7 +103,7 @@ a {
   margin: 0 10px 7px;
   color: var(--admin-rail-muted);
   font-size: 11px;
-  font-weight: var(--tk-font-weight-semibold);
+  font-weight: var(--karsa-font-weight-semibold);
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -142,7 +144,7 @@ a {
 .admin-nav a[aria-current="page"] {
   background: var(--admin-rail-active);
   color: var(--admin-rail-active-fg);
-  font-weight: var(--tk-font-weight-semibold);
+  font-weight: var(--karsa-font-weight-semibold);
 }
 .admin-nav a[aria-current="page"] > svg {
   color: var(--admin-rail-active-fg);
@@ -152,7 +154,7 @@ a {
   padding: 2px 6px;
   border-radius: 999px;
   background: var(--admin-accent);
-  color: var(--tk-color-accent-fg);
+  color: var(--karsa-color-accent-fg);
   font-size: 11px;
   line-height: 17px;
   text-align: center;
@@ -201,7 +203,7 @@ a {
 .profile-role {
   color: var(--admin-rail-muted);
   font-size: 11px;
-  font-weight: var(--tk-font-weight-regular);
+  font-weight: var(--karsa-font-weight-regular);
 }
 .profile-avatar {
   display: grid;
@@ -211,9 +213,9 @@ a {
   border: 1px solid color-mix(in srgb, var(--admin-rail-fg) 22%, transparent);
   border-radius: 50%;
   background: var(--admin-accent);
-  color: var(--tk-color-accent-fg);
+  color: var(--karsa-color-accent-fg);
   font-size: 10px;
-  font-weight: var(--tk-font-weight-bold);
+  font-weight: var(--karsa-font-weight-bold);
 }
 .profile-popover {
   position: absolute;
@@ -225,7 +227,7 @@ a {
   border: 1px solid color-mix(in srgb, var(--admin-rail-fg) 16%, transparent);
   border-radius: 10px;
   background: var(--admin-rail);
-  box-shadow: var(--tk-shadow-lg);
+  box-shadow: var(--karsa-shadow-lg);
 }
 .profile-popover[hidden] {
   display: none;
@@ -254,6 +256,15 @@ a {
   margin-left: 240px;
   background: var(--admin-surface);
 }
+.admin-shell[data-sidebar-visible="false"] .admin-sidebar {
+  transform: translateX(-100%);
+}
+.admin-shell[data-sidebar-visible="false"] .admin-workspace {
+  margin-left: 0;
+}
+.admin-shell[data-sidebar-visible="false"] .menu-button {
+  display: inline-grid;
+}
 .admin-topbar {
   position: sticky;
   top: 0;
@@ -276,7 +287,7 @@ a {
   flex: 1;
 }
 .topbar-link {
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
   font-size: 12px;
   text-decoration: none;
 }
@@ -292,25 +303,34 @@ a {
   border: 0;
   border-radius: 9px;
   background: transparent;
-  color: var(--tk-color-fg);
+  color: var(--karsa-color-fg);
   cursor: pointer;
 }
 .icon-button:hover {
   background: var(--admin-soft);
+}
+.admin-sidebar .sidebar-close {
+  display: inline-grid;
+  border: 1px solid color-mix(in srgb, var(--admin-rail-fg) 32%, transparent);
+  color: var(--admin-rail-fg);
+}
+.admin-sidebar .sidebar-close:hover {
+  background: color-mix(in srgb, var(--admin-rail-fg) 10%, transparent);
 }
 .menu-button {
   display: none;
 }
 .inspector-open {
   display: inline-flex;
+  width: 40px;
   min-height: 38px;
   align-items: center;
-  gap: 7px;
-  padding: 0 10px;
+  justify-content: center;
+  padding: 0;
   border: 1px solid var(--admin-line);
   border-radius: 8px;
   background: var(--admin-surface);
-  color: var(--tk-color-fg);
+  color: var(--karsa-color-fg);
   font-size: 12px;
   cursor: pointer;
 }
@@ -338,16 +358,16 @@ a {
   padding: 20px;
   overflow-y: auto;
   border-left: 1px solid var(--admin-line);
-  background: color-mix(in srgb, var(--admin-surface) 92%, var(--tk-color-bg-subtle));
+  background: color-mix(in srgb, var(--admin-surface) 92%, var(--karsa-color-bg-subtle));
 }
 .inspector-heading {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 20px;
-  color: var(--tk-color-fg);
+  color: var(--karsa-color-fg);
   font-size: 12px;
-  font-weight: var(--tk-font-weight-bold);
+  font-weight: var(--karsa-font-weight-bold);
   letter-spacing: 0.09em;
   text-transform: uppercase;
 }
@@ -374,11 +394,11 @@ a {
 .inspector-section h2,
 .inspector-section h3 {
   font-size: 13px;
-  font-weight: var(--tk-font-weight-semibold);
+  font-weight: var(--karsa-font-weight-semibold);
 }
 .inspector-section p {
   margin-top: 5px;
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
   font-size: 11px;
   line-height: 1.55;
 }
@@ -395,12 +415,12 @@ a {
   font-size: 12px;
 }
 .inspector-list dt {
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
 }
 .inspector-list dd {
   margin: 0;
-  color: var(--tk-color-fg);
-  font-weight: var(--tk-font-weight-semibold);
+  color: var(--karsa-color-fg);
+  font-weight: var(--karsa-font-weight-semibold);
   text-align: right;
 }
 .inspector-actions {
@@ -418,23 +438,23 @@ a {
 }
 .page-heading h1 {
   margin: 0;
-  color: var(--tk-color-fg);
+  color: var(--karsa-color-fg);
   font-size: clamp(28px, 3vw, 40px);
-  font-weight: var(--tk-font-weight-medium);
+  font-weight: var(--karsa-font-weight-medium);
   letter-spacing: -0.035em;
   line-height: 1.04;
 }
 .page-heading p {
   margin: 8px 0 0;
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
   font-size: 13px;
 }
 .page-heading .eyebrow,
 .eyebrow {
   margin: 0 0 7px;
-  color: var(--tk-color-accent);
+  color: var(--karsa-color-accent);
   font-size: 10px;
-  font-weight: var(--tk-font-weight-bold);
+  font-weight: var(--karsa-font-weight-bold);
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
@@ -453,9 +473,9 @@ a {
   border: 1px solid var(--admin-line);
   border-radius: 8px;
   background: var(--admin-soft);
-  color: var(--tk-color-fg);
+  color: var(--karsa-color-fg);
   font-size: 12px;
-  font-weight: var(--tk-font-weight-semibold);
+  font-weight: var(--karsa-font-weight-semibold);
   text-decoration: none;
   cursor: pointer;
 }
@@ -463,9 +483,9 @@ a {
   filter: brightness(0.98);
 }
 .admin-button--primary {
-  border-color: var(--tk-color-accent-hover);
-  background: var(--tk-color-accent);
-  color: var(--tk-color-accent-fg);
+  border-color: var(--karsa-color-accent-hover);
+  background: var(--karsa-color-accent);
+  color: var(--karsa-color-accent-fg);
   box-shadow: inset 0 0 0 1px rgb(255 255 255 / 18%);
 }
 .admin-button--ghost {
@@ -487,11 +507,11 @@ a {
 .panel-heading h2 {
   margin: 0;
   font-size: 15px;
-  font-weight: var(--tk-font-weight-semibold);
+  font-weight: var(--karsa-font-weight-semibold);
 }
 .panel-heading p {
   margin: 4px 0 0;
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
   font-size: 12px;
 }
 
@@ -503,7 +523,7 @@ a {
   padding: 4px 8px;
   border-radius: 999px;
   font-size: 11px;
-  font-weight: var(--tk-font-weight-medium);
+  font-weight: var(--karsa-font-weight-medium);
   line-height: 1.2;
   white-space: nowrap;
 }
@@ -532,7 +552,7 @@ a {
 }
 .status--neutral {
   background: var(--admin-soft);
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
 }
 
 .table-toolbar {
@@ -561,9 +581,9 @@ a {
   border: 0;
   border-radius: 7px;
   background: transparent;
-  color: var(--tk-color-fg);
+  color: var(--karsa-color-fg);
   font-size: 12px;
-  font-weight: var(--tk-font-weight-medium);
+  font-weight: var(--karsa-font-weight-medium);
   text-decoration: none;
   white-space: nowrap;
   cursor: pointer;
@@ -583,14 +603,14 @@ a {
   padding: 0 10px;
   border: 1px solid var(--admin-line);
   border-radius: 8px;
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
 }
 .table-search input {
   width: 100%;
   border: 0;
   outline: 0;
   background: transparent;
-  color: var(--tk-color-fg);
+  color: var(--karsa-color-fg);
   font-size: 12px;
 }
 .table-wrap {
@@ -607,9 +627,9 @@ a {
   height: 39px;
   padding: 0 11px;
   background: var(--admin-soft);
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
   font-size: 10px;
-  font-weight: var(--tk-font-weight-semibold);
+  font-weight: var(--karsa-font-weight-semibold);
   letter-spacing: 0.02em;
   text-align: left;
   white-space: nowrap;
@@ -618,14 +638,14 @@ a {
   height: 59px;
   padding: 8px 11px;
   border-top: 1px solid var(--admin-line);
-  color: var(--tk-color-fg);
+  color: var(--karsa-color-fg);
   white-space: nowrap;
 }
 .admin-table tbody tr:hover {
-  background: color-mix(in srgb, var(--tk-color-accent) 3%, var(--admin-surface));
+  background: color-mix(in srgb, var(--karsa-color-accent) 3%, var(--admin-surface));
 }
 .admin-table .money {
-  font-weight: var(--tk-font-weight-semibold);
+  font-weight: var(--karsa-font-weight-semibold);
   text-align: right;
 }
 .admin-table .numeric {
@@ -658,9 +678,9 @@ a {
   height: 31px;
   place-items: center;
   border-radius: 50%;
-  color: var(--tk-color-accent-fg);
+  color: var(--karsa-color-accent-fg);
   font-size: 10px;
-  font-weight: var(--tk-font-weight-bold);
+  font-weight: var(--karsa-font-weight-bold);
 }
 .entity strong,
 .entity span {
@@ -668,11 +688,11 @@ a {
 }
 .entity strong {
   font-size: 12px;
-  font-weight: var(--tk-font-weight-semibold);
+  font-weight: var(--karsa-font-weight-semibold);
 }
 .entity span {
   margin-top: 2px;
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
   font-size: 10px;
 }
 .row-actions {
@@ -689,7 +709,7 @@ a {
   border: 0;
   border-radius: 7px;
   background: transparent;
-  color: var(--tk-color-fg);
+  color: var(--karsa-color-fg);
   text-decoration: none;
   cursor: pointer;
 }
@@ -707,7 +727,7 @@ a {
   min-height: 54px;
   padding: 8px 16px;
   border-top: 1px solid var(--admin-line);
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
   font-size: 11px;
 }
 .pagination {
@@ -722,7 +742,7 @@ a {
   height: 38px;
   place-items: center;
   border-radius: 8px;
-  color: var(--tk-color-fg);
+  color: var(--karsa-color-fg);
   text-decoration: none;
 }
 .pagination .active {
@@ -740,8 +760,8 @@ a {
 }
 .dashboard-heading h1 {
   margin: 0;
-  color: var(--tk-color-fg);
-  font-family: var(--tk-font-family-display);
+  color: var(--karsa-color-fg);
+  font-family: var(--karsa-font-family-display);
   font-size: clamp(2.2rem, 4vw, 3.2rem);
   font-weight: 400;
   letter-spacing: -0.045em;
@@ -750,7 +770,7 @@ a {
 .dashboard-heading p:last-child {
   max-width: 38rem;
   margin: 8px 0 0;
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
   font-size: 13px;
 }
 .dashboard-layout {
@@ -792,20 +812,20 @@ a {
   margin: 0;
 }
 .admin-metric p {
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
   font-size: 10px;
 }
 .admin-metric strong {
   margin-top: 5px;
-  color: var(--tk-color-fg);
-  font-family: var(--tk-font-family-display);
+  color: var(--karsa-color-fg);
+  font-family: var(--karsa-font-family-display);
   font-size: 1.45rem;
   font-weight: 400;
   letter-spacing: -0.03em;
 }
 .admin-metric span {
   margin-top: 4px;
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
   font-size: 10px;
 }
 .admin-metric--positive strong {
@@ -826,8 +846,8 @@ a {
   border: 1px solid var(--admin-line);
   border-radius: 12px;
   background: var(--admin-surface);
-  color: var(--tk-color-fg);
-  box-shadow: var(--tk-shadow-xl);
+  color: var(--karsa-color-fg);
+  box-shadow: var(--karsa-shadow-xl);
 }
 .admin-quick-view::backdrop {
   background: rgb(45 33 26 / 18%);
@@ -849,7 +869,7 @@ a {
 .quick-view-header h2 {
   margin: 0;
   font-size: 15px;
-  font-weight: var(--tk-font-weight-semibold);
+  font-weight: var(--karsa-font-weight-semibold);
 }
 .quick-view-header p {
   margin: 4px 0 0;
@@ -879,7 +899,7 @@ a {
   place-items: center;
   align-content: center;
   gap: 10px;
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
   font-size: 12px;
   text-align: center;
 }
@@ -889,7 +909,7 @@ a {
 .quick-view-error button {
   color: var(--admin-accent);
   font-size: 12px;
-  font-weight: var(--tk-font-weight-semibold);
+  font-weight: var(--karsa-font-weight-semibold);
 }
 .quick-view-data {
   display: grid;
@@ -898,11 +918,11 @@ a {
 .quick-view-data h3 {
   margin: 0;
   font-size: 12px;
-  font-weight: var(--tk-font-weight-semibold);
+  font-weight: var(--karsa-font-weight-semibold);
 }
 .quick-view-data p {
   margin: 4px 0 0;
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
   font-size: 12px;
   line-height: 1.55;
 }
@@ -918,12 +938,12 @@ a {
   font-size: 12px;
 }
 .quick-view-data dt {
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
 }
 .quick-view-data dd {
   margin: 0;
-  color: var(--tk-color-fg);
-  font-weight: var(--tk-font-weight-semibold);
+  color: var(--karsa-color-fg);
+  font-weight: var(--karsa-font-weight-semibold);
   text-align: right;
 }
 .quick-view-product-image {
@@ -948,7 +968,7 @@ a {
 .quick-view-item small {
   display: block;
   margin-top: 2px;
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
 }
 .quick-view-item > strong {
   white-space: nowrap;
@@ -966,7 +986,7 @@ a {
   border: 0;
 }
 .admin-shell :is(a, button, input, select, textarea):focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--tk-color-focus-ring) 70%, transparent);
+  outline: 3px solid color-mix(in srgb, var(--karsa-color-focus-ring) 70%, transparent);
   outline-offset: 2px;
 }
 .admin-shell .nav-search input:focus {
@@ -992,8 +1012,8 @@ a {
     width: min(320px, 88vw);
     height: auto;
     transform: translateX(100%);
-    transition: transform var(--tk-duration-normal) var(--tk-easing-standard);
-    box-shadow: var(--tk-shadow-xl);
+    transition: transform var(--karsa-duration-normal) var(--karsa-easing-standard);
+    box-shadow: var(--karsa-shadow-xl);
   }
   .admin-inspector[data-inspector-visible="true"] {
     transform: translateX(0);
@@ -1006,7 +1026,7 @@ a {
 @media (max-width: 900px) {
   .admin-sidebar {
     transform: translateX(-100%);
-    transition: transform var(--tk-duration-normal) var(--tk-easing-standard);
+    transition: transform var(--karsa-duration-normal) var(--karsa-easing-standard);
   }
   .admin-workspace {
     margin-left: 0;

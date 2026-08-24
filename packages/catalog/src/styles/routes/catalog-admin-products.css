@@ -18,7 +18,7 @@
 }
 .standalone-empty .eyebrow {
   margin: 1.5rem 0 0.45rem;
-  color: var(--tk-color-accent);
+  color: var(--karsa-color-accent);
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.14em;
@@ -26,7 +26,7 @@
 }
 .standalone-empty h1 {
   margin: 0;
-  font-family: var(--tk-font-family-display);
+  font-family: var(--karsa-font-family-display);
   font-size: clamp(2.7rem, 5vw, 4.5rem);
   font-weight: 400;
   letter-spacing: -0.045em;
@@ -34,20 +34,20 @@
 .standalone-empty > p:not(.eyebrow) {
   max-width: 30rem;
   margin: 0.7rem 0 1.4rem;
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
   font-size: 0.8rem;
   line-height: 1.7;
 }
 .seed-hint {
   margin-top: 1rem;
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
   font-size: 0.65rem;
 }
 .seed-hint code {
   padding: 0.2rem 0.35rem;
   border-radius: 4px;
-  background: var(--tk-color-bg-subtle);
-  font-family: var(--tk-font-family-mono);
+  background: var(--karsa-color-bg-subtle);
+  font-family: var(--karsa-font-family-mono);
 }
 .data-panel {
   overflow: hidden;

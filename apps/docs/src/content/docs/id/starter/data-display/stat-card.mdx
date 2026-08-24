@@ -1,0 +1,19 @@
+---
+title: StatCard
+description: Metrik workspace dengan tren dan konteks pendukung.
+sidebar:
+  order: 3
+---
+
+import StatCard from "@karsa/ui/StatCard.astro";
+import ComponentPreview from "../../../../../components/ComponentPreview.astro";
+
+<ComponentPreview label="Kartu statistik" layout="stack">
+  <StatCard label="Kunjungan" value="24.580" change="+12,5%" trend="up" hint="dibanding bulan lalu" />
+</ComponentPreview>
+
+```astro
+<StatCard label="Kunjungan" value="24.580" change="+12,5%" trend="up" hint="dibanding bulan lalu" />
+```
+
+`label` dan `value` wajib; `change`, `trend` (`up`, `down`, `neutral`), `hint`, serta slot `icon` opsional.

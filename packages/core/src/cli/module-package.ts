@@ -12,14 +12,14 @@ export interface NormalizedModuleSpec {
  * ("@acme/loyalty"), or either with a trailing "@<range>" -- normalizing to
  * a package name plus an optional version range for the install step. A
  * bare name with no "/" is assumed to live under this framework's own
- * @takontuku scope.
+ * @karsa scope.
  */
 export function normalizeModuleSpec(spec: string): NormalizedModuleSpec {
   if (!spec.includes("/")) {
     const at = spec.indexOf("@", 1);
     if (at > 0)
-      return { packageName: `@takontuku/${spec.slice(0, at)}`, versionRange: spec.slice(at + 1) };
-    return { packageName: `@takontuku/${spec}`, versionRange: null };
+      return { packageName: `@karsa/${spec.slice(0, at)}`, versionRange: spec.slice(at + 1) };
+    return { packageName: `@karsa/${spec}`, versionRange: null };
   }
   const lastAt = spec.lastIndexOf("@");
   if (lastAt > 0) {
@@ -70,7 +70,7 @@ function isModuleDefinitionLike(value: unknown): value is ModuleDefinitionLike {
  * it returns a module-definition-shaped object. Exactly one candidate wins;
  * zero or more than one is a refusal, not a guess. Calling arbitrary
  * zero-arity exports here isn't a new risk: astro.config.mjs already
- * executes this same package's module code on every `takontuku db sync`.
+ * executes this same package's module code on every `karsa db sync`.
  */
 export function selectModuleFactory(
   namespace: Record<string, unknown>,
@@ -137,7 +137,7 @@ function resolveMainEntry(pkgJson: RawPackageJson): string {
 }
 
 /**
- * Reads an installed @takontuku/*-shaped package's own package.json and
+ * Reads an installed @karsa/*-shaped package's own package.json and
  * default export to determine its module factory, registry name,
  * dependencies, and whether it ships a "./register" side-effect import --
  * all four facts come from one probe, so callers never have to guess.

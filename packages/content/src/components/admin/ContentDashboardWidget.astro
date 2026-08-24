@@ -1,0 +1,14 @@
+---
+import { env } from "cloudflare:workers";
+import { getContentDashboardSummary } from "../../posts";
+
+const summary = await getContentDashboardSummary(env.DB);
+
+import "./ContentDashboardWidget.css";
+---
+
+<section class="content-dashboard-widget panel" data-dashboard-widget="content" aria-labelledby="content-dashboard-title">
+  <div class="content-dashboard-heading"><div><p class="eyebrow">Content</p><h2 id="content-dashboard-title">Editorial overview</h2></div><a href="/admin/posts">Manage posts <span aria-hidden="true">↗</span></a></div>
+  <div class="content-dashboard-metrics"><div><span>Published</span><strong>{summary.published}</strong></div><div><span>Drafts</span><strong>{summary.draft}</strong></div><div><span>Archived</span><strong>{summary.archived}</strong></div></div>
+  {summary.recentPosts.length > 0 ? <div class="content-dashboard-recent"><h3>Recently updated</h3>{summary.recentPosts.slice(0, 5).map((post) => <a href={`/admin/posts/${post.id}/edit`}><span><strong>{post.title}</strong><small>{post.slug}</small></span><span class:list={["content-status", `content-status--${post.status}`]}>{post.status}</span></a>)}</div> : <p class="content-dashboard-empty">No posts yet. Create the first draft to begin.</p>}
+</section>

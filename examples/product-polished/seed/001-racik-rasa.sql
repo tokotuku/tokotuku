@@ -1,5 +1,5 @@
 -- Racik Rasa starting catalog. Local-only and safe to run repeatedly.
--- Product media is uploaded from seed/media/products by `takontuku db seed`.
+-- Product media is uploaded from seed/media/products by `karsa db seed`.
 
 -- The catalog module's demo seed runs first. Keep its demo rows/media available
 -- to the module, but remove its catalog rows from this store's final dataset.
