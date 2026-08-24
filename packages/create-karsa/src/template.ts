@@ -1,4 +1,4 @@
-import { mkdir, readdir, readFile, stat, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, readdir, readFile, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -130,8 +130,12 @@ export async function copyTemplate(
       await copyTemplate(srcPath, path.join(destDir, entry), resolvedPlaceholders);
       continue;
     }
-    const content = await readFile(srcPath, "utf8");
     const destPath = path.join(destDir, targetFileName(entry));
+    if (!entry.endsWith(".template")) {
+      await copyFile(srcPath, destPath);
+      continue;
+    }
+    const content = await readFile(srcPath, "utf8");
     await writeFile(destPath, applyPlaceholders(content, resolvedPlaceholders));
   }
 }

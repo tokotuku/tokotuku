@@ -32,8 +32,8 @@ export default defineConfig({
         en: { label: "English", lang: "en" },
         id: { label: "Bahasa Indonesia", lang: "id" },
       },
-      favicon: "/favicon.svg",
-      logo: { src: "./src/assets/karsa-logo.svg", alt: "Karsa", replacesTitle: true },
+      favicon: "/favicon.png",
+      logo: { src: "./src/assets/karsa-logo.png", alt: "Karsa", replacesTitle: true },
       social: [{ icon: "github", label: "GitHub", href: "https://github.com/karsa-ui/karsa" }],
       sidebar: [
         group("Start", "Mulai", [

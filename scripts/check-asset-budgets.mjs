@@ -66,9 +66,8 @@ for (const filename of dashboardFiles) {
   await assertImage(join(uiAssetDir, filename), { maxBytes: 200_000, formats: ["webp"] });
 }
 
-const mark = join(uiAssetDir, "brand/karsa/karsa-mark.svg");
-const markInfo = await stat(mark);
-if (markInfo.size > 20_000) throw new Error(`${mark} exceeds the 20 KB SVG budget.`);
+const mark = join(uiAssetDir, "brand/karsa/karsa-mark.png");
+await assertImage(mark, { maxBytes: 80_000, formats: ["png"], expectedWidth: 512 });
 
 for (const filename of authFiles) {
   if (!filename.endsWith(".astro")) continue;
@@ -79,5 +78,5 @@ for (const filename of authFiles) {
 }
 
 console.log(
-  `Asset budgets passed: ${expectedAuth.size} auth variants, ${dashboardFiles.length} dashboard variants, 1 SVG mark.`,
+  `Asset budgets passed: ${expectedAuth.size} auth variants, ${dashboardFiles.length} dashboard variants, 1 PNG mark.`,
 );
