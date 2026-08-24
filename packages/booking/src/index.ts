@@ -10,6 +10,10 @@ export function booking(): ModuleDefinition {
         name: "admin-cursor-indexes",
         url: new URL("../migrations/0002_admin_cursor_indexes.sql", import.meta.url),
       },
+      {
+        name: "submission-security",
+        url: new URL("../migrations/0003_submission_security.sql", import.meta.url),
+      },
     ],
     adminNav: [
       {

@@ -25,6 +25,7 @@ import {
   installClient,
   publishAll,
   queryD1,
+  readDevVar,
   scaffoldClient,
   setupAndLogIn,
   sh,
@@ -55,7 +56,7 @@ async function bootAndFetch(clientDir: string, paths: string[]): Promise<Map<str
 
   try {
     await waitForServer(`${origin}/setup`, 30_000);
-    await setupAndLogIn(origin, ADMIN);
+    await setupAndLogIn(origin, ADMIN, readDevVar(clientDir, "KARSA_SETUP_TOKEN"));
     const responses = new Map<string, Response>();
     for (const p of paths) responses.set(p, await fetch(`${origin}${p}`));
     return responses;

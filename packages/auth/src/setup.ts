@@ -1,5 +1,35 @@
 import type { D1Database, D1PreparedStatement } from "@cloudflare/workers-types";
 
+const MIN_SETUP_TOKEN_LENGTH = 32;
+
+/** Compare setup secrets without making an early length/content decision observable. */
+export async function verifySetupToken(
+  expected: string | undefined,
+  supplied: string | undefined,
+): Promise<boolean> {
+  if (
+    !expected ||
+    !supplied ||
+    expected.length < MIN_SETUP_TOKEN_LENGTH ||
+    supplied.length > 4096
+  ) {
+    return false;
+  }
+
+  const encoder = new TextEncoder();
+  const [expectedDigest, suppliedDigest] = await Promise.all([
+    crypto.subtle.digest("SHA-256", encoder.encode(expected)),
+    crypto.subtle.digest("SHA-256", encoder.encode(supplied)),
+  ]);
+  const expectedBytes = new Uint8Array(expectedDigest);
+  const suppliedBytes = new Uint8Array(suppliedDigest);
+  let difference = expected.length ^ supplied.length;
+  for (let index = 0; index < expectedBytes.length; index += 1) {
+    difference |= (expectedBytes[index] ?? 0) ^ (suppliedBytes[index] ?? 0);
+  }
+  return difference === 0;
+}
+
 export async function isSetupComplete(db: D1Database): Promise<boolean> {
   const result = await db
     .prepare(

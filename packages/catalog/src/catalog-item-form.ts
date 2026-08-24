@@ -1,4 +1,5 @@
 import type { R2Bucket } from "@cloudflare/workers-types";
+import { extensionForMediaType, isSafeRasterImageType } from "@karsa/core";
 import type { CatalogItemInput } from "./catalog-items";
 
 /** Kept in sync with the <select> in ProductForm.astro. */
@@ -42,18 +43,13 @@ export async function catalogItemInputFromForm(
   let imageKey = existingImageKey;
   const image = form.get("image");
   if (image instanceof File && image.size > 0) {
-    if (!image.type.startsWith("image/"))
+    if (!isSafeRasterImageType(image.type))
       throw new Error(
         services ? "File layanan harus berupa gambar." : "File produk harus berupa gambar.",
       );
     if (image.size > 5 * 1024 * 1024)
       throw new Error(services ? "Ukuran gambar maksimal 5 MB." : "Ukuran gambar maksimal 5 MB.");
-    const extension =
-      image.name
-        .split(".")
-        .pop()
-        ?.replace(/[^a-zA-Z0-9]/g, "")
-        .toLowerCase() || "bin";
+    const extension = extensionForMediaType(image.type);
     imageKey = `${presentation}/${crypto.randomUUID()}.${extension}`;
     await images.put(imageKey, await image.arrayBuffer(), {
       httpMetadata: { contentType: image.type },

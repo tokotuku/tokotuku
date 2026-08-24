@@ -9,13 +9,27 @@ import { runSetup } from "./setup";
 import { copyTemplate, TEMPLATE_DIR } from "./template";
 import { defaultAnswers, runWizard } from "./wizard";
 
-async function writeGeneratedFiles(destDir: string, registry: string | undefined): Promise<void> {
+async function writeGeneratedFiles(
+  destDir: string,
+  registry: string | undefined,
+  preset: string,
+): Promise<void> {
   // @karsa/auth passes this straight to better-auth with no fallback, so
   // a scaffold without it can't serve a single authenticated request. It's
   // gitignored, per-project, and has no reason to be chosen by hand.
   await writeFile(
     path.join(destDir, ".dev.vars"),
-    `BETTER_AUTH_SECRET=${randomBytes(32).toString("base64url")}\n`,
+    `${[
+      `BETTER_AUTH_SECRET=${randomBytes(32).toString("base64url")}`,
+      `KARSA_SETUP_TOKEN=${randomBytes(32).toString("base64url")}`,
+      ...(preset === "service"
+        ? [
+            "TURNSTILE_SITE_KEY=1x00000000000000000000AA",
+            "TURNSTILE_SECRET=1x0000000000000000000000000000000AA",
+            "TURNSTILE_HOSTNAMES=localhost,127.0.0.1",
+          ]
+        : []),
+    ].join("\n")}\n`,
   );
 
   // A scoped .npmrc, only when asked for: the default scaffold resolves
@@ -63,7 +77,7 @@ async function main(): Promise<void> {
     timeZone: answers.timeZone,
     preset: answers.preset,
   });
-  await writeGeneratedFiles(destDir, registry);
+  await writeGeneratedFiles(destDir, registry, answers.preset);
 
   if (!interactive) console.log(`Created ${answers.projectName}/`);
 
@@ -85,7 +99,7 @@ async function main(): Promise<void> {
   printWarnings(warnings);
   if (failures.length > 0) printFailures(answers.projectName, failures);
   else log.success(`cd ${answers.projectName} && ${answers.manager} run dev`);
-  printFooter(answers.projectName, seed);
+  printFooter(answers.projectName, seed, answers.preset);
   if (interactive) outro("Happy building.");
 }
 

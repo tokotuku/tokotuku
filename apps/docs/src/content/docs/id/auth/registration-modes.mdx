@@ -20,4 +20,12 @@ karsa({ modules: [auth({ registration: "public" })] });
 
 Kedua mode menyediakan alur `/setup` sekali untuk administrator pertama. Alur mengklaim setup gate sebelum membuat akun. Pastikan `BETTER_AUTH_SECRET` sudah diatur sebelum deploy, dan jangan pernah melakukan seed password aktif ke repository.
 
+Form setup juga membutuhkan `KARSA_SETUP_TOKEN`. Scaffold menulis token acak ke `.dev.vars` lokal; untuk environment deploy, simpan nilai sejenis sebagai secret Wrangler tanpa mencetaknya:
+
+```sh
+bunx wrangler secret put KARSA_SETUP_TOKEN
+```
+
+Token diperiksa sebelum setup claim. Secret deployment yang hilang gagal tertutup dengan `503`, sedangkan token salah mengembalikan `403` generik. Setelah setup selesai, `/setup` tetap langsung mengarah ke `/login`. Aplikasi lama harus menambahkan secret ini sebelum setup pertama berikutnya; aplikasi yang setup gate-nya sudah selesai tidak berubah oleh pemeriksaan baru.
+
 Halaman login hanya menampilkan link registrasi pada mode public. Uji kedua mode: injection route, perilaku API, copy login, access control, dan setup gate. Jika kebutuhan invite-only muncul, gunakan `closed` dan dokumentasikan mekanisme invite, bukan merender form public diam-diam.

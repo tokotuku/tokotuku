@@ -14,7 +14,14 @@ bunx karsa db seed
 bun run build
 ```
 
-Pertahankan nama binding `DB` dan `MEDIA` di `wrangler.jsonc`. `.dev.vars` lokal di-gitignore; simpan `BETTER_AUTH_SECRET` di sana dan gunakan `bunx wrangler secret put BETTER_AUTH_SECRET` untuk environment deploy.
+Pertahankan nama binding `DB` dan `MEDIA` di `wrangler.jsonc`. `.dev.vars` lokal di-gitignore; simpan `BETTER_AUTH_SECRET` dan `KARSA_SETUP_TOKEN` hasil scaffold di sana. Gunakan Wrangler secret untuk environment deploy:
+
+```sh
+bunx wrangler secret put BETTER_AUTH_SECRET
+bunx wrangler secret put KARSA_SETUP_TOKEN
+```
+
+Jika modul booking dipasang, konfigurasikan widget Turnstile terpisah untuk aplikasi ini. Atur `TURNSTILE_SITE_KEY` dan `TURNSTILE_HOSTNAMES` production yang dipisahkan koma sebagai variable deployment, lalu simpan `TURNSTILE_SECRET` dengan Wrangler. Jangan memakai dummy key scaffold di production, jangan memasukkan `localhost` ke hostname production, dan jangan pernah mencetak secret ke log atau laporan.
 
 ## URL kanonis dokumentasi
 
@@ -31,9 +38,10 @@ Paket publik diambil dari npm. Jika modul terpilih berada di registry privat, at
 ## Checklist deploy
 
 1. Buat database D1 dan bucket R2 nyata, lalu perbarui binding deployment.
-2. Terapkan plan migrasi append-only ke database remote.
-3. Tambahkan secret dan periksa konfigurasi origin/allowed-host.
-4. Build dengan registry dan lockfile yang sama dengan CI.
-5. Smoke-test route publik, mode auth, route terjaga, media, dan satu alur milik modul.
+2. Terapkan plan migrasi append-only ke database remote, termasuk migration upload/idempotency orders, fingerprint/quota booking, dan inventory-allocation catalog.
+3. Tambahkan secret dan periksa konfigurasi origin/allowed-host. Selesaikan setup pertama memakai bootstrap token.
+4. Jika ada media SVG lama, konversi dan upload ulang sebagai raster yang diizinkan; route media publik sekarang mengembalikan `415` untuk metadata MIME tidak aman.
+5. Build dengan registry dan lockfile yang sama dengan CI.
+6. Smoke-test route publik, mode auth, route terjaga, download media, Turnstile booking, idempotency checkout, dan satu alur milik modul.
 
 Jangan melakukan seed remote dengan jalur `karsa db seed` yang hanya lokal. Gunakan migrasi yang direview atau import operasional eksplisit untuk data production, lalu simpan output command sebagai bukti.

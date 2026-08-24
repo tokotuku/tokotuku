@@ -27,6 +27,10 @@ export function orders(
         name: "admin-cursor-indexes",
         url: new URL("../migrations/0003_admin_cursor_indexes.sql", import.meta.url),
       },
+      {
+        name: "security-hardening",
+        url: new URL("../migrations/0004_security_hardening.sql", import.meta.url),
+      },
     ],
     adminNav: [
       {
@@ -86,6 +90,9 @@ export {
   type AdminOrderItem,
   approvePayment,
   attachPaymentProof,
+  type CreateOrderOptions,
+  claimPaymentProof,
+  completePaymentProof,
   createInquiryOrder,
   createOrder,
   findAdminOrderDetail,
@@ -100,5 +107,6 @@ export {
   orderTransitions,
   type PaymentMethod,
   paymentMethods,
+  releasePaymentProofClaim,
   updateOrderStatus,
 } from "./orders";

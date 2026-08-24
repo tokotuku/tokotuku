@@ -15,6 +15,19 @@ bunx karsa db sync
 bunx wrangler d1 migrations apply DB --local
 ```
 
+### Public booking security
+
+Public booking is fail-closed until the application has its own Cloudflare Turnstile widget. Configure the widget site key and production hostnames in the app, and keep the secret in Wrangler:
+
+```sh
+# local/test only: the scaffold supplies Cloudflare's documented dummy keys
+TURNSTILE_SITE_KEY=your-app-site-key
+TURNSTILE_HOSTNAMES=booking.example.com
+bunx wrangler secret put TURNSTILE_SECRET
+```
+
+Create one managed widget per Karsa application. Production hostnames must not include `localhost`; the local dummy keys are for local/test only. The booking route sends the `booking` action, verifies the token with Siteverify before any database write, and fails closed on missing configuration, replay, timeout, upstream, action, or hostname errors. It also enforces bounded contact fields, canonical calendar dates and schedule rules, five submissions per client per 15 minutes, and twenty per day. Apply the append-only booking migration before deploying a service upgrade.
+
 Content tier adds services and scheduling seed data (`range` or `slot`) with the packaged UI. Polished tier may add a focused theme and service imagery after the user authorizes it.
 
 Check time zone, locale, availability, migrations, seeds, adapter errors, access control, and the complete build. Never claim a slot is available based on static copy alone.

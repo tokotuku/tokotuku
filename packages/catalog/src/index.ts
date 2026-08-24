@@ -24,6 +24,10 @@ export function catalog(
         name: "admin-cursor-indexes",
         url: new URL("../migrations/0004_admin_cursor_indexes.sql", import.meta.url),
       },
+      {
+        name: "inventory-allocations",
+        url: new URL("../migrations/0005_inventory_allocations.sql", import.meta.url),
+      },
     ],
     mediaPrefixes: ["products/", "services/"],
     seeds: [

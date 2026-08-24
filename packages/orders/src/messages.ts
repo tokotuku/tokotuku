@@ -112,6 +112,8 @@ export const orderMessages: MessageDictionaries = {
     "orders.checkout.error.required": "{label} wajib diisi.",
     "orders.checkout.error.invalidCart": "Data keranjang tidak valid.",
     "orders.checkout.error.invalidPayment": "Metode pembayaran tidak valid.",
+    "orders.checkout.error.invalidRequest":
+      "Permintaan checkout tidak valid. Muat ulang halaman lalu coba lagi.",
     "orders.checkout.error.generic": "Checkout gagal diproses.",
   },
   en: {
@@ -222,6 +224,8 @@ export const orderMessages: MessageDictionaries = {
     "orders.checkout.error.required": "{label} is required.",
     "orders.checkout.error.invalidCart": "Cart data is invalid.",
     "orders.checkout.error.invalidPayment": "Payment method is invalid.",
+    "orders.checkout.error.invalidRequest":
+      "The checkout request is invalid. Reload the page and try again.",
     "orders.checkout.error.generic": "Checkout could not be completed.",
   },
 };

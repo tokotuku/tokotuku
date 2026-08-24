@@ -12,6 +12,7 @@ import Icon from "@karsa/ui/Icon.astro";
 import InspectorMetric from "@karsa/ui/InspectorMetric.astro";
 import { type Booking, getBookingDashboardSummary, listBookings } from "../../bookings";
 import { bookingMessages } from "../../messages";
+import { isCanonicalIsoDate } from "../../submission-security";
 
 const t = createTranslator(brand, bookingMessages);
 const locale = brand.locale.toLowerCase().startsWith("id") ? "id" : "en";
@@ -71,15 +72,21 @@ function modeHref(): string {
   return query ? `/admin/bookings?${query}` : "/admin/bookings";
 }
 function dateRangeFor(booking: Booking): string {
-  const start = date(new Date(booking.startDate));
+  if (!isCanonicalIsoDate(booking.startDate)) return "—";
+  const start = safeDisplayDate(booking.startDate);
   if (booking.mode === "slot") {
     const weekday = booking.slotWeekday === null ? "" : weekdayNames[booking.slotWeekday];
     return `${start} · ${weekday} ${booking.slotStartTime ?? ""}`;
   }
   if (booking.endDate && booking.endDate !== booking.startDate) {
-    return `${start} – ${date(new Date(booking.endDate))}`;
+    if (!isCanonicalIsoDate(booking.endDate)) return `${start} – —`;
+    return `${start} – ${safeDisplayDate(booking.endDate)}`;
   }
   return start;
+}
+function safeDisplayDate(value: string | null | undefined): string {
+  if (!value || !isCanonicalIsoDate(value)) return "—";
+  return date(new Date(`${value}T00:00:00Z`));
 }
 function adminActionLabel(showingAll: boolean, localeCode: "id" | "en"): string {
   if (showingAll) return localeCode === "id" ? "Hanya mendatang" : "Upcoming only";
@@ -99,7 +106,7 @@ function bookingStatusClass(status: Booking["status"]): string {
   return bookingStatusClassByTone[bookingStatusTone(status)] ?? "status--warning";
 }
 const upcomingCount = summary.upcomingCount;
-const nearestDate = summary.nearestDate ?? "—";
+const nearestDate = safeDisplayDate(summary.nearestDate);
 const statusCounts = new Map(Object.entries(summary.statusCounts));
 
 import "../../styles/routes/booking-admin.css";
@@ -130,7 +137,7 @@ import "../../styles/routes/booking-admin.css";
 
   <Fragment slot="inspector">
     <AdminInspector title={t("booking.admin.title")} description={t("booking.admin.description")}>
-      <div class="inspector-metrics"><InspectorMetric label={locale === "id" ? "Mendatang" : "Upcoming"} value={String(upcomingCount)} tone={upcomingCount ? "positive" : "default"} /><InspectorMetric label={locale === "id" ? "Bentrok" : "Clashes"} value={String(summary.clashCount)} tone={summary.clashCount ? "warning" : "default"} /><InspectorMetric label={locale === "id" ? "Tanggal terdekat" : "Nearest date"} value={nearestDate === "—" ? nearestDate : date(new Date(nearestDate))} /></div>
+      <div class="inspector-metrics"><InspectorMetric label={locale === "id" ? "Mendatang" : "Upcoming"} value={String(upcomingCount)} tone={upcomingCount ? "positive" : "default"} /><InspectorMetric label={locale === "id" ? "Bentrok" : "Clashes"} value={String(summary.clashCount)} tone={summary.clashCount ? "warning" : "default"} /><InspectorMetric label={locale === "id" ? "Tanggal terdekat" : "Nearest date"} value={nearestDate} /></div>
     </AdminInspector>
     <AdminInspector title={t("booking.admin.status")}><dl class="inspector-list">{[...statusCounts.entries()].map(([status, count]) => <div><dt>{status}</dt><dd>{count}</dd></div>)}{statusCounts.size === 0 && <div><dt>—</dt><dd>0</dd></div>}</dl></AdminInspector>
   </Fragment>
@@ -141,7 +148,8 @@ import "../../styles/routes/booking-admin.css";
 {bookings.length > 0 && <script>
   type BookingDetail = { orderId:number; orderNumber:string; itemId:number; itemName:string; mode:string; startDate:string; endDate:string|null; slotId:number|null; slotWeekday:number|null; slotStartTime:string|null; occurrencesPerDay:number; serviceAddress:string; note:string; status:string; customerName:string; customerPhone:string };
   const locale = document.documentElement.lang === "id" ? "id-ID" : "en-US";
+  const formatBookingDate = (value:string) => { if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return "—"; const parsed = new Date(`${value}T00:00:00Z`); return Number.isFinite(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value ? new Intl.DateTimeFormat(locale, { dateStyle:"medium" }).format(parsed) : "—"; };
   const addTextRow = (parent:HTMLElement, label:string, value:string) => { const row = document.createElement("div"); const dt = document.createElement("dt"); dt.textContent = label; const dd = document.createElement("dd"); dd.textContent = value || "—"; row.append(dt, dd); parent.append(row); };
   const addSection = (parent:HTMLElement, heading:string, content:HTMLElement) => { const section = document.createElement("section"); section.className = "quick-view-section"; const title = document.createElement("h3"); title.textContent = heading; section.append(title, content); parent.append(section); };
-  document.addEventListener("karsa:quick-view-loaded", (event) => { const detail = (event as CustomEvent<{data:BookingDetail;trigger:HTMLElement;dialog:HTMLDialogElement}>).detail; if (detail.dialog.id !== "booking-quick-view") return; const body = detail.dialog.querySelector<HTMLElement>("[data-quick-view-body]"); const footer = detail.dialog.querySelector<HTMLElement>("[data-quick-view-footer]"); if (!body || !footer) return; const booking = detail.data; body.replaceChildren(); footer.replaceChildren(); const wrapper = document.createElement("div"); wrapper.className = "quick-view-data"; const heading = document.createElement("h3"); heading.textContent = booking.itemName; wrapper.append(heading); const facts = document.createElement("dl"); addTextRow(facts, "Permintaan", `#${booking.orderNumber}`); addTextRow(facts, "Tanggal", new Intl.DateTimeFormat(locale, { dateStyle:"medium" }).format(new Date(booking.startDate))); addTextRow(facts, "Slot", [booking.slotStartTime, booking.endDate && booking.endDate !== booking.startDate ? `sampai ${booking.endDate}` : ""].filter(Boolean).join(" · ") || booking.mode); addTextRow(facts, "Status", booking.status); addSection(wrapper, "Jadwal", facts); const customer = document.createElement("dl"); addTextRow(customer, "Nama", booking.customerName); addTextRow(customer, "Telepon", booking.customerPhone); addTextRow(customer, "Alamat", booking.serviceAddress); addSection(wrapper, "Pelanggan", customer); if (booking.note) { const note = document.createElement("p"); note.className = "quick-view-note"; note.textContent = booking.note; addSection(wrapper, "Catatan", note); } if (detail.trigger.dataset["quickViewOverlap"] === "true") { const warning = document.createElement("p"); warning.className = "booking-warning"; warning.textContent = "Booking ini memiliki bentrok jadwal dengan booking lain."; wrapper.append(warning); } body.append(wrapper); const inquiryLink = document.createElement("a"); inquiryLink.className = "admin-button admin-button--primary"; inquiryLink.href = `/admin/inquiries#${booking.orderId}`; inquiryLink.textContent = "Buka permintaan"; const serviceLink = document.createElement("a"); serviceLink.className = "admin-button"; serviceLink.href = `/admin/services/${booking.itemId}/edit`; serviceLink.textContent = "Lihat layanan"; footer.append(inquiryLink, serviceLink); });
+  document.addEventListener("karsa:quick-view-loaded", (event) => { const detail = (event as CustomEvent<{data:BookingDetail;trigger:HTMLElement;dialog:HTMLDialogElement}>).detail; if (detail.dialog.id !== "booking-quick-view") return; const body = detail.dialog.querySelector<HTMLElement>("[data-quick-view-body]"); const footer = detail.dialog.querySelector<HTMLElement>("[data-quick-view-footer]"); if (!body || !footer) return; const booking = detail.data; body.replaceChildren(); footer.replaceChildren(); const wrapper = document.createElement("div"); wrapper.className = "quick-view-data"; const heading = document.createElement("h3"); heading.textContent = booking.itemName; wrapper.append(heading); const facts = document.createElement("dl"); addTextRow(facts, "Permintaan", `#${booking.orderNumber}`); addTextRow(facts, "Tanggal", formatBookingDate(booking.startDate)); addTextRow(facts, "Slot", [booking.slotStartTime, booking.endDate && booking.endDate !== booking.startDate ? `sampai ${formatBookingDate(booking.endDate)}` : ""].filter(Boolean).join(" · ") || booking.mode); addTextRow(facts, "Status", booking.status); addSection(wrapper, "Jadwal", facts); const customer = document.createElement("dl"); addTextRow(customer, "Nama", booking.customerName); addTextRow(customer, "Telepon", booking.customerPhone); addTextRow(customer, "Alamat", booking.serviceAddress); addSection(wrapper, "Pelanggan", customer); if (booking.note) { const note = document.createElement("p"); note.className = "quick-view-note"; note.textContent = booking.note; addSection(wrapper, "Catatan", note); } if (detail.trigger.dataset["quickViewOverlap"] === "true") { const warning = document.createElement("p"); warning.className = "booking-warning"; warning.textContent = "Booking ini memiliki bentrok jadwal dengan booking lain."; wrapper.append(warning); } body.append(wrapper); const inquiryLink = document.createElement("a"); inquiryLink.className = "admin-button admin-button--primary"; inquiryLink.href = `/admin/inquiries#${booking.orderId}`; inquiryLink.textContent = "Buka permintaan"; const serviceLink = document.createElement("a"); serviceLink.className = "admin-button"; serviceLink.href = `/admin/services/${booking.itemId}/edit`; serviceLink.textContent = "Lihat layanan"; footer.append(inquiryLink, serviceLink); });
 </script>}

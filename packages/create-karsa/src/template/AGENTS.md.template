@@ -27,7 +27,7 @@ truth for the selected modules.
 - Migrations are append-only. Never edit or renumber an applied migration.
 - Run `bunx karsa db sync` after changing installed modules, then apply local migrations.
 - Put site-specific starting data in `seed/` and load it with `bunx karsa db seed`.
-- Keep `BETTER_AUTH_SECRET` in `.dev.vars` locally or in Wrangler secrets when deployed.
+- Keep `BETTER_AUTH_SECRET` and `KARSA_SETUP_TOKEN` in `.dev.vars` locally or in Wrangler secrets when deployed. Service sites also require the per-app Turnstile variables documented by Karsa.
 - Format money and dates with Karsa's locale-aware helpers; do not format them by hand.
 
 ## Useful commands

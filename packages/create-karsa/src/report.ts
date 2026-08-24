@@ -42,7 +42,7 @@ export function printWarnings(warnings: string[]): void {
   log.warn(["Steps that finished, but had something to say:", ...warnings].join("\n"));
 }
 
-export function printFooter(projectName: string, seeded: boolean): void {
+export function printFooter(projectName: string, seeded: boolean, preset?: string): void {
   log.message(
     [
       // Not "demo data": `karsa db seed` runs each installed module's
@@ -59,6 +59,13 @@ export function printFooter(projectName: string, seeded: boolean): void {
       `  wrangler d1 create ${projectName}-db   # paste the UUID into wrangler.jsonc`,
       `  wrangler r2 bucket create ${projectName}-media`,
       "  wrangler secret put BETTER_AUTH_SECRET   # .dev.vars is local-only",
+      "  wrangler secret put KARSA_SETUP_TOKEN     # required before first /setup",
+      ...(preset === "service"
+        ? [
+            "  # Configure TURNSTILE_SITE_KEY and TURNSTILE_HOSTNAMES as vars, then:",
+            "  wrangler secret put TURNSTILE_SECRET",
+          ]
+        : []),
     ].join("\n"),
   );
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { findAdminOrderDetail, orderTransitions, updateOrderStatus } from "./orders";
+import { createOrder, findAdminOrderDetail, orderTransitions, updateOrderStatus } from "./orders";
 
 /**
  * Minimal fake covering only what updateOrderStatus's three queries need:
@@ -29,6 +29,59 @@ describe("orderTransitions", () => {
         expect(statuses).toContain(next);
       }
     }
+  });
+});
+
+describe("createOrder idempotency", () => {
+  it("returns the existing order before reading the cart when a key repeats", async () => {
+    let prepareCalls = 0;
+    const db = {
+      prepare: (sql: string) => {
+        prepareCalls += 1;
+        expect(sql).toContain("idempotency_key");
+        return {
+          bind: () => ({
+            first: async () => ({ orderNumber: "KR-EXISTING", totalCents: 2500 }),
+          }),
+        };
+      },
+    };
+    await expect(
+      createOrder(
+        db as never,
+        "user-1",
+        {
+          customerName: "A",
+          customerEmail: "a@example.test",
+          customerPhone: "0800",
+          address: "Street",
+          city: "City",
+          postalCode: "123",
+          note: "",
+        },
+        [],
+        "cash",
+        { idempotencyKey: "checkout-1" },
+      ),
+    ).resolves.toEqual({ orderNumber: "KR-EXISTING", totalCents: 2500 });
+    expect(prepareCalls).toBe(1);
+  });
+
+  it("rejects malformed idempotency keys before touching the database", async () => {
+    await expect(
+      createOrder(
+        {
+          prepare: () => {
+            throw new Error("database should not be called");
+          },
+        } as never,
+        "user-1",
+        {} as never,
+        [],
+        "cash",
+        { idempotencyKey: "contains spaces" },
+      ),
+    ).rejects.toThrow(/Kunci checkout/);
   });
 });
 

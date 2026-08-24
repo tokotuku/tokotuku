@@ -33,5 +33,6 @@ export function auth({ registration }: AuthOptions = { registration: "public" })
 }
 
 export { authMessages } from "./messages";
+export { safeInternalPath } from "./redirects";
 export { canAccessBackoffice, type UserRole, userRoles } from "./roles";
 export { claimSetup, completeSetup, isSetupComplete, releaseSetupClaim } from "./setup";
