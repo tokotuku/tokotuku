@@ -45,6 +45,7 @@ export const authMessages: MessageDictionaries = {
     "auth.setup.emailLabel": "Email",
     "auth.setup.passwordLabel": "Password",
     "auth.setup.confirmPasswordLabel": "Konfirmasi password",
+    "auth.setup.tokenLabel": "Kode setup bootstrap",
     "auth.setup.submit": "Buat administrator",
     "auth.setup.loading": "Menyiapkan situs…",
     "auth.setup.note": "Halaman ini akan nonaktif setelah setup selesai.",
@@ -55,6 +56,8 @@ export const authMessages: MessageDictionaries = {
     "auth.setup.error.origin": "Permintaan setup tidak berasal dari situs ini.",
     "auth.setup.error.running": "Setup sedang berjalan di jendela lain. Coba lagi sebentar.",
     "auth.setup.error.generic": "Akun administrator tidak dapat dibuat.",
+    "auth.setup.error.token": "Kode setup tidak valid.",
+    "auth.setup.error.unavailable": "Setup belum dikonfigurasi oleh operator situs.",
   },
   en: {
     "auth.hero.eyebrow": "Run your site calmly.",
@@ -101,6 +104,7 @@ export const authMessages: MessageDictionaries = {
     "auth.setup.emailLabel": "Email",
     "auth.setup.passwordLabel": "Password",
     "auth.setup.confirmPasswordLabel": "Confirm password",
+    "auth.setup.tokenLabel": "Bootstrap setup code",
     "auth.setup.submit": "Create administrator",
     "auth.setup.loading": "Setting up your site…",
     "auth.setup.note": "This page will become unavailable after setup is complete.",
@@ -112,5 +116,7 @@ export const authMessages: MessageDictionaries = {
     "auth.setup.error.running":
       "Setup is already running in another window. Try again in a moment.",
     "auth.setup.error.generic": "Could not create the administrator account.",
+    "auth.setup.error.token": "The setup code is invalid.",
+    "auth.setup.error.unavailable": "Setup has not been configured by the site operator.",
   },
 };

@@ -4,10 +4,9 @@ import { createTranslator } from "@karsa/core";
 import Icon from "@karsa/ui/Icon.astro";
 import AuthFrame from "../components/AuthFrame.astro";
 import { authMessages } from "../messages";
+import { safeInternalPath } from "../redirects";
 
-const requestedNext = Astro.url.searchParams.get("next") ?? "/admin";
-const next =
-  requestedNext.startsWith("/") && !requestedNext.startsWith("//") ? requestedNext : "/admin";
+const next = safeInternalPath(Astro.url.searchParams.get("next"), Astro.url.origin);
 const t = createTranslator(brand, authMessages);
 const setupComplete = Astro.url.searchParams.get("setup") === "complete";
 

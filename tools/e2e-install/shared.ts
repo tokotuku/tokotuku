@@ -500,10 +500,22 @@ export interface AdminCredentials {
   password: string;
 }
 
+export function readDevVar(clientDir: string, name: string): string {
+  const prefix = `${name}=`;
+  const value = readFileSync(path.join(clientDir, ".dev.vars"), "utf8")
+    .split("\n")
+    .find((line) => line.startsWith(prefix))
+    ?.slice(prefix.length)
+    .trim();
+  assert(Boolean(value), `expected ${name} in the scaffolded .dev.vars`);
+  return value as string;
+}
+
 /** Completes first-run setup and logs in, returning the session cookie. Astro's origin check rejects a cross-site-looking POST, so this needs an Origin/Referer matching the target -- a real browser sends these automatically. */
 export async function setupAndLogIn(
   origin: string,
   credentials: AdminCredentials,
+  setupToken: string,
 ): Promise<string> {
   const setupResponse = await fetch(`${origin}/setup`, {
     method: "POST",
@@ -518,6 +530,7 @@ export async function setupAndLogIn(
       email: credentials.email,
       password: credentials.password,
       confirmPassword: credentials.password,
+      setupToken,
     }),
   });
   assert(

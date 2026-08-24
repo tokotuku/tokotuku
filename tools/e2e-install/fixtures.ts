@@ -30,6 +30,7 @@ import {
   installClient,
   publishAll,
   queryTableNames,
+  readDevVar,
   scaffoldClient,
   setupAndLogIn,
   sh,
@@ -52,7 +53,7 @@ async function bootAndAssert(clientDir: string): Promise<void> {
 
   try {
     await waitForServer(`${origin}/setup`, 30_000);
-    const cookie = await setupAndLogIn(origin, ADMIN);
+    const cookie = await setupAndLogIn(origin, ADMIN, readDevVar(clientDir, "KARSA_SETUP_TOKEN"));
 
     const adminHtml = await (
       await fetch(`${origin}/admin`, { headers: { Cookie: cookie } })

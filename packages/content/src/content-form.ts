@@ -1,14 +1,8 @@
 import type { R2Bucket } from "@cloudflare/workers-types";
+import { isSafeRasterImageType } from "@karsa/core";
 import { normalizeSlug, type PostInput, postStatuses } from "./posts";
 
 const MAX_COVER_BYTES = 8 * 1024 * 1024;
-const ALLOWED_IMAGE_TYPES = new Set([
-  "image/avif",
-  "image/gif",
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-]);
 
 function requiredText(form: FormData, name: string, label: string): string {
   const value = String(form.get(name) ?? "").trim();
@@ -58,7 +52,7 @@ export async function postInputFromForm(
   let coverImageKey = existingCoverImageKey ?? null;
   const cover = form.get("cover_image") ?? form.get("cover");
   if (cover instanceof File && cover.size > 0) {
-    if (!ALLOWED_IMAGE_TYPES.has(cover.type)) throw new Error("Cover must be a supported image.");
+    if (!isSafeRasterImageType(cover.type)) throw new Error("Cover must be a supported image.");
     if (cover.size > MAX_COVER_BYTES) throw new Error("Cover must be 8 MB or smaller.");
     coverImageKey = `content/${crypto.randomUUID()}.${extensionFor(cover)}`;
     await media.put(coverImageKey, await cover.arrayBuffer(), {

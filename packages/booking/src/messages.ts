@@ -25,6 +25,9 @@ export const bookingMessages: MessageDictionaries = {
     "booking.form.error.slotRequired": "Pilih salah satu jadwal yang tersedia.",
     "booking.form.error.weekdayMismatch":
       "Tanggal yang dipilih tidak sesuai hari jadwal yang dipilih.",
+    "booking.form.error.invalidDate": "Tanggal booking tidak valid.",
+    "booking.form.error.invalidInput": "Ada data booking yang terlalu panjang atau tidak valid.",
+    "booking.form.error.securityUnavailable": "Verifikasi keamanan gagal. Coba lagi nanti.",
     "booking.form.error.generic": "Permintaan booking gagal dikirim. Coba lagi.",
     "booking.success.title": "Permintaan booking terkirim",
     "booking.success.description":
@@ -83,6 +86,10 @@ export const bookingMessages: MessageDictionaries = {
     "booking.form.error.slotRequired": "Choose one of the available time slots.",
     "booking.form.error.weekdayMismatch":
       "The selected date doesn't match the chosen slot's weekday.",
+    "booking.form.error.invalidDate": "The booking date is invalid.",
+    "booking.form.error.invalidInput": "Some booking data is too long or invalid.",
+    "booking.form.error.securityUnavailable":
+      "Security verification failed. Please try again later.",
     "booking.form.error.generic": "Your booking request could not be sent. Please try again.",
     "booking.success.title": "Booking request sent",
     "booking.success.description":

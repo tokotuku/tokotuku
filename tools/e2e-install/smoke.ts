@@ -26,6 +26,7 @@ import {
   installClient,
   publishAll,
   queryD1,
+  readDevVar,
   scaffoldClient,
   setupAndLogIn,
   sh,
@@ -66,6 +67,7 @@ async function placeOrder(origin: string, cookie: string, productId: number): Pr
     },
     body: new URLSearchParams({
       cart: JSON.stringify([{ id: productId, quantity: 1 }]),
+      checkoutRequestId: crypto.randomUUID(),
       paymentMethod: "cash",
       customerName: "Gate3 Customer",
       customerPhone: "081234567890",
@@ -118,7 +120,7 @@ async function runSmokeTest(clientDir: string, productId: number): Promise<void>
 
   try {
     await waitForServer(`${origin}/setup`, 30_000);
-    const cookie = await setupAndLogIn(origin, ADMIN);
+    const cookie = await setupAndLogIn(origin, ADMIN, readDevVar(clientDir, "KARSA_SETUP_TOKEN"));
     console.log("setup + login: ok");
 
     const listHtml = await (await fetch(`${origin}/products`)).text();

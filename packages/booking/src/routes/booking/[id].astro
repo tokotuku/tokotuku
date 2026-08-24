@@ -10,6 +10,16 @@ import SiteHeader from "@karsa/ui/SiteHeader.astro";
 import type { BookingRequestAttributes } from "../../booking-hooks";
 import { findItemSchedule, listSlots } from "../../bookings";
 import { bookingMessages } from "../../messages";
+import {
+  clientAddress,
+  clientKey,
+  consumeBookingQuota,
+  daysBetweenIso,
+  findBookingByFingerprint,
+  isCanonicalIsoDate,
+  submissionFingerprint,
+  verifyTurnstile,
+} from "../../submission-security";
 
 const t = createTranslator(brand, bookingMessages);
 const locale = brand.locale.toLowerCase().startsWith("id") ? "id" : "en";
@@ -23,6 +33,9 @@ const schedule = service ? await findItemSchedule(env.DB, itemId) : null;
 // the distinction, and it isn't a 404 (the service itself is real).
 const notBookable = service?.fulfillmentType !== "scheduled" || !schedule;
 const slots = !notBookable && schedule?.mode === "slot" ? await listSlots(env.DB, itemId) : [];
+const turnstileConfigured = Boolean(
+  env.TURNSTILE_SITE_KEY?.trim() && env.TURNSTILE_SECRET?.trim() && env.TURNSTILE_HOSTNAMES?.trim(),
+);
 const weekdayNames =
   locale === "id"
     ? ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"]
@@ -36,20 +49,19 @@ function addDays(iso: string, days: number): string {
   return date.toISOString().slice(0, 10);
 }
 
-function daysBetween(fromIso: string, toIso: string): number {
-  const msPerDay = 86_400_000;
-  return Math.round(
-    (new Date(`${toIso}T00:00:00Z`).getTime() - new Date(`${fromIso}T00:00:00Z`).getTime()) /
-      msPerDay,
-  );
-}
-
 let error = "";
 let orderNumber = Astro.url.searchParams.get("order");
 
 if (!notBookable && schedule && Astro.request.method === "POST" && !orderNumber) {
   try {
     const form = await Astro.request.formData();
+    if (!turnstileConfigured) throw new Error(t("booking.form.error.securityUnavailable"));
+    const address = clientAddress(Astro.request, Astro.clientAddress);
+    if (!address) throw new Error(t("booking.form.error.securityUnavailable"));
+    const token = String(form.get("cf-turnstile-response") ?? "");
+    if (!(await verifyTurnstile(env, token, address))) {
+      throw new Error(t("booking.form.error.securityUnavailable"));
+    }
     const required = (name: string, label: string) => {
       const value = String(form.get(name) ?? "").trim();
       if (!value) throw new Error(t("booking.form.error.required", { label }));
@@ -61,8 +73,25 @@ if (!notBookable && schedule && Astro.request.method === "POST" && !orderNumber)
     const serviceAddress = required("serviceAddress", t("booking.form.address"));
     const note = String(form.get("note") ?? "").trim();
     const startDate = required("startDate", t("booking.form.startDate"));
+    const requestTodayIso = new Date().toISOString().slice(0, 10);
 
-    if (daysBetween(todayIso, startDate) < schedule.leadTimeDays) {
+    if (
+      customerName.length > 100 ||
+      customerPhone.length > 32 ||
+      customerEmail.length > 254 ||
+      serviceAddress.length > 1000 ||
+      note.length > 2000
+    ) {
+      throw new Error(t("booking.form.error.invalidInput"));
+    }
+    if (customerEmail && !customerEmail.includes("@")) {
+      throw new Error(t("booking.form.error.invalidInput"));
+    }
+    if (!isCanonicalIsoDate(startDate)) {
+      throw new Error(t("booking.form.error.invalidDate"));
+    }
+
+    if (daysBetweenIso(requestTodayIso, startDate) < schedule.leadTimeDays) {
       throw new Error(t("booking.form.error.leadTime", { days: schedule.leadTimeDays }));
     }
 
@@ -84,8 +113,9 @@ if (!notBookable && schedule && Astro.request.method === "POST" && !orderNumber)
       };
     } else {
       const endDate = required("endDate", t("booking.form.endDate"));
+      if (!isCanonicalIsoDate(endDate)) throw new Error(t("booking.form.error.invalidDate"));
       if (endDate < startDate) throw new Error(t("booking.form.error.invalidDateRange"));
-      const days = daysBetween(startDate, endDate) + 1;
+      const days = daysBetweenIso(startDate, endDate) + 1;
       if (days < schedule.minDays) {
         throw new Error(t("booking.form.error.minDays", { days: schedule.minDays }));
       }
@@ -102,22 +132,50 @@ if (!notBookable && schedule && Astro.request.method === "POST" && !orderNumber)
       };
     }
 
-    const created = await createInquiryOrder(
-      env.DB,
+    if (!env.BETTER_AUTH_SECRET) throw new Error(t("booking.form.error.securityUnavailable"));
+    const key = await clientKey(env.BETTER_AUTH_SECRET, address);
+    const bucket = Math.floor(Date.now() / (15 * 60 * 1000));
+    const fingerprint = await submissionFingerprint(env.BETTER_AUTH_SECRET, key, bucket, {
       itemId,
-      {
-        customerName,
-        customerPhone,
-        // exactOptionalPropertyTypes: only include the key when there's a
-        // real value — an explicit `customerEmail: undefined` isn't the
-        // same as the property being absent.
-        ...(customerEmail ? { customerEmail } : {}),
-        serviceAddress,
-        note,
-      },
-      { booking: attributes },
-    );
-    return Astro.redirect(`/booking/${itemId}?order=${encodeURIComponent(created.orderNumber)}`);
+      mode: attributes.mode,
+      startDate: attributes.startDate,
+      endDate: attributes.endDate,
+      slotId: attributes.slotId,
+      customerName,
+      customerPhone,
+      customerEmail,
+      serviceAddress,
+      note,
+    });
+    const existing = await findBookingByFingerprint(env.DB, fingerprint);
+    if (existing) {
+      return Astro.redirect(`/booking/${itemId}?order=${encodeURIComponent(existing)}`);
+    }
+    await consumeBookingQuota(env.DB, key);
+
+    try {
+      const created = await createInquiryOrder(
+        env.DB,
+        itemId,
+        {
+          customerName,
+          customerPhone,
+          // exactOptionalPropertyTypes: only include the key when there's a
+          // real value — an explicit `customerEmail: undefined` isn't the
+          // same as the property being absent.
+          ...(customerEmail ? { customerEmail } : {}),
+          serviceAddress,
+          note,
+        },
+        { booking: { ...attributes, submissionFingerprint: fingerprint } },
+      );
+      return Astro.redirect(`/booking/${itemId}?order=${encodeURIComponent(created.orderNumber)}`);
+    } catch (caught) {
+      const duplicate = await findBookingByFingerprint(env.DB, fingerprint);
+      if (duplicate)
+        return Astro.redirect(`/booking/${itemId}?order=${encodeURIComponent(duplicate)}`);
+      throw caught;
+    }
   } catch (caught) {
     error = caught instanceof Error ? caught.message : t("booking.form.error.generic");
     orderNumber = null;
@@ -152,6 +210,7 @@ import "../../styles/routes/booking-id.css";
         <h1>{service?.name}</h1>
         <p class="description">{t("booking.detail.description")}</p>
         {error && <p class="booking-error" role="alert">{error}</p>}
+        {!turnstileConfigured && <p class="booking-error" role="alert">{t("booking.form.error.securityUnavailable")}</p>}
         <form method="post" class="booking-form">
           <section>
             <h2>{locale === "id" ? "Kontak" : "Contact"}</h2>
@@ -180,9 +239,12 @@ import "../../styles/routes/booking-id.css";
               <label class="wide">{t("booking.form.note")}<textarea name="note" rows="3"></textarea></label>
             </div>
           </section>
-          <button type="submit">{t("booking.form.submit")}</button>
+          {turnstileConfigured && <div class="cf-turnstile" data-sitekey={env.TURNSTILE_SITE_KEY} data-action="booking"></div>}
+          <button type="submit" disabled={!turnstileConfigured}>{t("booking.form.submit")}</button>
         </form>
       </>
     )}
   </main>
 </Layout>
+
+{turnstileConfigured && <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>}

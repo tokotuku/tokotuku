@@ -34,6 +34,7 @@ import {
   pinModuleToLatest,
   publishAll,
   ROOT,
+  readDevVar,
   scaffoldClient,
   setupAndLogIn,
   sh,
@@ -74,7 +75,7 @@ async function bootAndCheck(clientDir: string): Promise<string> {
 
   try {
     await waitForServer(`${origin}/setup`, 30_000);
-    await setupAndLogIn(origin, ADMIN);
+    await setupAndLogIn(origin, ADMIN, readDevVar(clientDir, "KARSA_SETUP_TOKEN"));
     return await fetchProductsHeading(origin);
   } finally {
     terminateProcessGroup(child);

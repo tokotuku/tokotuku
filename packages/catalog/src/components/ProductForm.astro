@@ -38,7 +38,7 @@ import "./ProductForm.css";
       </select></label>}
       {!services && <label data-stock-field hidden={fulfillmentType !== "physical"}>{t("catalog.products.form.stock")}<input name="stock" data-stock-input required={fulfillmentType === "physical"} disabled={fulfillmentType !== "physical"} type="number" min="0" step="1" value={product?.stock ?? 0} /></label>}
       <label class="wide">{t("catalog.products.form.description")}<textarea name="description" required rows="5" maxlength="2000">{product?.description}</textarea></label>
-      <label class="wide">{t("catalog.products.form.image")} {product && <span>{t("catalog.products.form.imageReplaceHint")}</span>}<input name="image" type="file" accept="image/*" required={!product} /></label>
+      <label class="wide">{t("catalog.products.form.image")} {product && <span>{t("catalog.products.form.imageReplaceHint")}</span>}<input name="image" type="file" accept="image/avif,image/gif,image/jpeg,image/png,image/webp" required={!product} /></label>
       {product && <div class="current-image"><img src={mediaUrl(product.imageKey)} alt={t("catalog.products.form.currentImageAlt")} /></div>}
       <label class="toggle wide"><input name="isActive" type="checkbox" checked={product?.isActive ?? true} /> {t("catalog.products.form.active")}</label>
     </div>
