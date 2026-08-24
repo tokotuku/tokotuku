@@ -1,0 +1,8 @@
+# Claude instructions for {{brandName}}
+
+Read and follow `AGENTS.md` before making changes. It is the canonical project guidance.
+
+Karsa skills are installed in `.claude/skills/`. Use the relevant skill for the task,
+especially `karsa-site-builder`, `karsa-ui`, `karsa-modules`, `karsa-data`, and
+`karsa-content`. Select the preset and install/content/polished tier before editing, and keep
+route, migration, seed, media, and content ownership with the module that contributes it.

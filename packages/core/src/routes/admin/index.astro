@@ -1,12 +1,12 @@
 ---
 /// <reference path="../../virtual.d.ts" />
-import widgets from "virtual:takontuku/admin-dashboard-widgets";
-import adminNav from "virtual:takontuku/admin-nav";
-import registry from "virtual:takontuku/registry";
-import AdminDashboardArtwork from "@takontuku/ui/AdminDashboardArtwork.astro";
-import AdminInspector from "@takontuku/ui/AdminInspector.astro";
-import Icon from "@takontuku/ui/Icon.astro";
-import InspectorMetric from "@takontuku/ui/InspectorMetric.astro";
+import widgets from "virtual:karsa/admin-dashboard-widgets";
+import adminNav from "virtual:karsa/admin-nav";
+import registry from "virtual:karsa/registry";
+import AdminDashboardArtwork from "@karsa/ui/AdminDashboardArtwork.astro";
+import AdminInspector from "@karsa/ui/AdminInspector.astro";
+import Icon from "@karsa/ui/Icon.astro";
+import InspectorMetric from "@karsa/ui/InspectorMetric.astro";
 import { brand } from "../../brand";
 import {
   calculateDashboardReadiness,
@@ -45,14 +45,12 @@ const readinessLabels: Record<DashboardReadinessStepId, string> = {
   admin: t("admin.dashboard.readinessAdmin"),
   brand: t("admin.dashboard.readinessBrand"),
   logo: t("admin.dashboard.readinessLogo"),
-  catalog: t("admin.dashboard.readinessCatalog"),
-  orders: t("admin.dashboard.readinessOrders"),
 };
 const nextSteps = [
   ...readiness.steps.filter((step) => !step.complete),
   ...readiness.steps.filter((step) => step.complete).reverse(),
 ].slice(0, 3);
-const artwork = brand.admin?.dashboardArtwork ?? "energy";
+const artwork = brand.admin?.dashboardArtwork ?? "abstract";
 
 import "../../styles/routes/core-admin-dashboard.css";
 ---
@@ -133,7 +131,7 @@ import "../../styles/routes/core-admin-dashboard.css";
     </AdminInspector>
     {asideWidgets.map(({ component: Widget }) => <Widget />)}
     <AdminInspector title={t("admin.dashboard.identity")}>
-      <dl class="inspector-list"><div><dt>{t("admin.dashboard.currency")}</dt><dd>{brand.currency}</dd></div><div><dt>{t("admin.dashboard.timeZone")}</dt><dd>{brand.timeZone}</dd></div></dl>
+      <dl class="inspector-list">{brand.currency && <div><dt>{t("admin.dashboard.currency")}</dt><dd>{brand.currency}</dd></div>}<div><dt>{t("admin.dashboard.timeZone")}</dt><dd>{brand.timeZone}</dd></div></dl>
     </AdminInspector>
   </Fragment>
 </AdminLayout>

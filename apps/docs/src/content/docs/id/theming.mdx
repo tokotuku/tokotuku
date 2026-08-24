@@ -1,0 +1,63 @@
+---
+title: Tema
+description: Bangun sistem visual tangguh dengan palette Karsa dan token semantik --karsa-*.
+sidebar:
+  order: 3
+---
+
+Tema Karsa menggabungkan variabel tema Tailwind CSS v4 dengan custom property semantik `--karsa-*`. Komponen memakai token semantik, bukan nilai palette mentah, sehingga mode terang, gelap, forced-colors, dan kontras tinggi dapat berbagi markup.
+
+## Muat stylesheet sekali
+
+Import tema di boundary dokumen:
+
+```astro
+---
+import "@karsa/theme/styles.css";
+---
+```
+
+`ThemeScript.astro` menangani preferensi sistem dan pilihan tersimpan. Jangan menambahkan script bootstrap local-storage kedua.
+
+## Pilih palette
+
+Atur `data-theme` pada elemen root saat halaman memerlukan mode eksplisit:
+
+```html
+<html data-theme="light">...</html>
+<html data-theme="dark">...</html>
+```
+
+Konfigurasi brand berada di `astro.config.mjs`:
+
+```js
+{
+  name: "Northwind",
+  locale: "id-ID",
+  currency: "IDR",
+  palette: {
+    light: { accent: "#3659d6", accentForeground: "#ffffff" },
+    dark: { accent: "#9db0ff", accentForeground: "#12162a" },
+  },
+}
+```
+
+Nilai yang hilang memiliki fallback independen, jadi palette parsial aman. Warna status semantik tetap dimiliki paket agar maknanya konsisten.
+
+## Gunakan token `--karsa-*`
+
+Batasi override semantik pada satu surface:
+
+```css
+.notice {
+  --karsa-color-accent: #3659d6;
+  --karsa-color-accent-fg: #ffffff;
+  --karsa-radius-md: 0.75rem;
+}
+```
+
+Utamakan `--karsa-color-background`, `--karsa-color-foreground`, `--karsa-color-border`, `--karsa-color-focus-ring`, dan `--karsa-color-danger`. Hindari hex hard-coded di komponen reusable.
+
+## Brand dan konten
+
+Identitas situs, locale, copy, logo, dan gambar berada dalam blok `brand`. Gunakan override message yang sparse daripada fork komponen. Dokumentasi tema inti tetap netral; gambar dan copy domain berada di panduan situs terkait.

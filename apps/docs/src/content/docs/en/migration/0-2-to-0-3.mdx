@@ -1,0 +1,51 @@
+---
+title: Migration 0.2 → 0.3
+description: An explicit allowlist for legacy Takontuku and Tokotuku identifiers, manifest renames, and the Karsa CLI order.
+---
+
+This page is the only documentation page that intentionally names the legacy brands. Use the old identifiers below only while migrating an existing 0.2 project; all new code, docs, prompts, and package imports use Karsa.
+
+## Legacy allowlist
+
+| Legacy identifier | 0.3 replacement | Where to change it |
+| --- | --- | --- |
+| `Takontuku` / `Tokotuku` | `Karsa` | Brand copy, project title, and generated instructions |
+| `@takontuku/*` / `@tokotuku/*` | `@karsa/*` | Package imports, dependencies, and `.npmrc` scope |
+| `takontuku` / `tokotuku` CLI | `karsa` CLI | Shell scripts and CI commands |
+| `create-takontuku` | `create-karsa` | Scaffolding command and package reference |
+| `takontuku-store-builder`, `takontuku-ui`, `takontuku-modules`, `takontuku-data` | `karsa-site-builder`, `karsa-ui`, `karsa-modules`, `karsa-data` | `.agents/skills/` and `.claude/skills/` |
+| `virtual:takontuku/*` | `virtual:karsa/*` | Virtual-module imports and ambient declarations |
+| `--tk-*` | `--karsa-*` | Theme tokens and CSS overrides |
+| `takontuku-theme`, `takontuku-cart` | `karsa-theme`, `karsa-cart` | Browser storage keys in app-owned scripts |
+| `takontuku.migrations.json` | `karsa.migrations.json` | Migration manifest filename |
+
+Do not use a broad search-and-replace for identifiers embedded in user data or historical notes. Review each match against this allowlist, then leave unrelated domain data untouched.
+
+## Rename the manifest before running the CLI
+
+The migration manifest is state, not a disposable build artifact. Rename it first so the 0.3 CLI continues the existing sequence instead of creating a second history:
+
+```sh
+mv takontuku.migrations.json karsa.migrations.json
+bun install
+bunx karsa db sync
+```
+
+Back up the manifest and `migrations/` directory before the rename. Do not edit, renumber, or delete an applied SQL file. If the old manifest is missing, stop and reconstruct the migration state from the deployed database before running `karsa db sync`.
+
+## Import and package changes
+
+Update imports to the public 0.3 subpaths, then run typecheck before changing pages:
+
+```diff
+- import Button from "@takontuku/ui/Button.astro";
++ import Button from "@karsa/ui/Button.astro";
+- import "@takontuku/ui/styles.css";
++ import "@karsa/theme/styles.css";
+```
+
+The theme stylesheet and chart package are separate public packages in 0.3. Auth clients use the explicit client subpath, and admin list helpers use cursor pages rather than numbered pages. Consult the package exports after updating imports; do not preserve a legacy alias just to make a search pass.
+
+## Verify
+
+Run the migration in a disposable local database first, inspect the resolved registry, apply local migrations, and build. Then review the diff for any legacy identifier outside this page and any accidental change to `examples/**`. Record the manifest rename, migration plan, package install output, typecheck, lint, and build in the release report.

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 336 128" role="img" aria-labelledby="karsa-logo-title karsa-logo-desc">
+  <title id="karsa-logo-title">Karsa</title>
+  <desc id="karsa-logo-desc">Karsa wordmark with an abstract woven K symbol.</desc>
+  <g fill="#7A4B32">
+    <g transform="translate(8 8) scale(.875)">
+      <path d="M30 12h10c6.6 0 12 5.4 12 12v23.7l11.4 11.4c2.7 2.7 2.7 7.1 0 9.8L52 80.3V104c0 6.6-5.4 12-12 12H30c-6.6 0-12-5.4-12-12V24c0-6.6 5.4-12 12-12Z"/>
+      <path d="M94.2 12h10.2c4.8 0 7.3 5.7 4 9.1L80.7 59.5c-2.2 2.7-2.2 6.3 0 9l27.7 38.4c3.3 3.4.8 9.1-4 9.1H94.2c-4.2 0-8.1-1.9-10.8-5.1L63.1 78.7c-1.8-2.2-1.7-5.4.3-7.4l7.3-7.3-7.3-7.3c-2-2-2.1-5.2-.3-7.4l20.3-32.2c2.7-3.2 6.6-5.1 10.8-5.1Z"/>
+    </g>
+    <text x="136" y="86" font-family="Manrope Variable, Manrope, ui-sans-serif, sans-serif" font-size="64" font-weight="600" letter-spacing="1.2">Karsa</text>
+  </g>
+</svg>

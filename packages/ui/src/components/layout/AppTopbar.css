@@ -3,26 +3,26 @@
   align-items: center;
   justify-content: space-between;
   min-height: 4rem;
-  padding-inline: var(--tk-spacing-5);
+  padding-inline: var(--karsa-spacing-5);
 }
 .title {
-  color: var(--tk-color-fg);
-  font-size: var(--tk-font-size-sm);
-  font-weight: var(--tk-font-weight-semibold);
+  color: var(--karsa-color-fg);
+  font-size: var(--karsa-font-size-sm);
+  font-weight: var(--karsa-font-weight-semibold);
 }
 .actions {
   display: flex;
   align-items: center;
-  gap: var(--tk-spacing-3);
+  gap: var(--karsa-spacing-3);
 }
 .theme-toggle {
   display: grid;
   width: 2.75rem;
   height: 2.75rem;
   place-items: center;
-  border: 1px solid var(--tk-color-border);
+  border: 1px solid var(--karsa-color-border);
   border-radius: 50%;
-  background: var(--tk-color-surface);
-  color: var(--tk-color-fg);
+  background: var(--karsa-color-surface);
+  color: var(--karsa-color-fg);
   cursor: pointer;
 }

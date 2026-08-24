@@ -1,19 +1,22 @@
 ---
-import { createTranslator } from "@takontuku/core";
-import { brand, money } from "@takontuku/core/brand";
-import Layout from "@takontuku/ui/DocumentLayout.astro";
-import Icon from "@takontuku/ui/Icon.astro";
-import StoreHeader from "@takontuku/ui/StoreHeader.astro";
+import { createTranslator } from "@karsa/core";
+import { brand, money } from "@karsa/core/brand";
+import Layout from "@karsa/ui/DocumentLayout.astro";
+import Icon from "@karsa/ui/Icon.astro";
+import SiteHeader from "@karsa/ui/SiteHeader.astro";
 import { orderMessages } from "../messages";
 
 const id = brand.locale.toLowerCase().startsWith("id");
 const t = createTranslator(brand, orderMessages);
+const headerActions = [
+  { label: id ? "Keranjang" : "Cart", href: "/cart", icon: "cart", badge: true, current: true },
+];
 
 import "../styles/routes/orders-cart.css";
 ---
 
 <Layout title={`${t("orders.cart.pageTitle")} — ${brand.name}`} siteName={brand.name} lang={id ? "id" : "en"}>
-  <StoreHeader current="cart" brand={brand} showCart={true} announcement={brand.storefront?.announcement ?? (id ? "Objek untuk ritual sehari-hari." : "Objects for everyday rituals.")} labels={{ home: id ? "Beranda" : "Home", shop: id ? "Toko" : "Shop", cart: id ? "Keranjang" : "Cart" }} />
+  <SiteHeader current="cart" brand={brand} actions={headerActions} announcement={brand.site?.announcement ?? (id ? "Objek untuk ritual sehari-hari." : "Objects for everyday rituals.")} labels={{ home: id ? "Beranda" : "Home" }} />
   <main>
     <header><p>{t("orders.cart.eyebrow")}</p><h1>{t("orders.cart.title")}</h1></header>
     <div class="cart-layout">
@@ -28,7 +31,7 @@ import "../styles/routes/orders-cart.css";
 </Layout>
 
 <script>
-  import { money } from "@takontuku/core/brand";
+  import { money } from "@karsa/core/brand";
   import { onCartChange, readCart, removeFromCart, setQuantity } from "../client/cart";
   import { appendAll } from "../client/dom";
 

@@ -1,0 +1,36 @@
+---
+import { env } from "cloudflare:workers";
+import AdminLayout from "@karsa/core/layouts/AdminLayout.astro";
+import PostForm from "../../../../components/admin/PostForm.astro";
+import { postInputFromForm } from "../../../../content-form";
+import { findPostById, updatePost } from "../../../../posts";
+
+// biome-ignore lint/complexity/useLiteralKeys: Astro generates params as an index-signature object
+const id = Number(Astro.params["id"]);
+let post = await findPostById(env.DB, id, { includeUnpublished: true });
+if (!post) return new Response("Post not found", { status: 404 });
+let error = "";
+if (Astro.request.method === "POST") {
+  try {
+    const input = await postInputFromForm(
+      await Astro.request.formData(),
+      env.MEDIA,
+      post.coverImageKey,
+      post.authorId,
+    );
+    await updatePost(env.DB, id, input);
+    return Astro.redirect(`/admin/posts/${id}/edit?saved=1`);
+  } catch (caught) {
+    error = caught instanceof Error ? caught.message : "Post could not be saved.";
+    post = (await findPostById(env.DB, id, { includeUnpublished: true })) ?? post;
+  }
+}
+
+import "../../../../styles/routes/content-admin.css";
+---
+
+<AdminLayout title={`Edit ${post.title}`}>
+  <header class="content-admin-header"><div><p class="eyebrow">Content</p><h1>Edit post</h1><p>Update the story, cover, or publication status.</p></div><div class="content-admin-header-actions"><a class="admin-button" href="/admin/posts">Back</a><a class="admin-button" href={post.status === "published" ? `/blog/${post.slug}` : `/admin/posts/${id}/preview`}>{post.status === "published" ? "View" : "Preview"}</a></div></header>
+  {Astro.url.searchParams.has("saved") && <p class="content-save-notice" role="status">Post saved.</p>}
+  <PostForm post={post} error={error} />
+</AdminLayout>

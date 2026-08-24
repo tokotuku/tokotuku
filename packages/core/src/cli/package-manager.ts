@@ -33,18 +33,18 @@ export function isDependencyDeclared(pkgJson: PackageJsonShape, name: string): b
   return Boolean(pkgJson.dependencies?.[name] ?? pkgJson.devDependencies?.[name]);
 }
 
-/** True if any sibling @takontuku/* dependency uses the workspace protocol -- the signal that `cwd` is a member of this monorepo rather than a standalone client, where a bare install would resolve from the registry and sever the workspace link. */
+/** True if any sibling @karsa/* dependency uses the workspace protocol -- the signal that `cwd` is a member of this monorepo rather than a standalone client, where a bare install would resolve from the registry and sever the workspace link. */
 export function isWorkspaceMember(pkgJson: PackageJsonShape): boolean {
   const deps = { ...pkgJson.dependencies, ...pkgJson.devDependencies };
   return Object.entries(deps).some(
-    ([name, spec]) => name.startsWith("@takontuku/") && spec.startsWith("workspace:"),
+    ([name, spec]) => name.startsWith("@karsa/") && spec.startsWith("workspace:"),
   );
 }
 
-/** The version specifier to reuse for a new @takontuku/* dependency, copied from an existing sibling so a monorepo member keeps "workspace:*" and a pinned client keeps its pinned version instead of drifting to "latest". Falls back to "latest" when there's no sibling to copy from yet. */
-export function siblingTakontukuSpecifier(pkgJson: PackageJsonShape): string {
+/** The version specifier to reuse for a new @karsa/* dependency, copied from an existing sibling so a monorepo member keeps "workspace:*" and a pinned client keeps its pinned version instead of drifting to "latest". Falls back to "latest" when there's no sibling to copy from yet. */
+export function siblingKarsaSpecifier(pkgJson: PackageJsonShape): string {
   const deps = { ...pkgJson.dependencies, ...pkgJson.devDependencies };
-  const sibling = Object.entries(deps).find(([name]) => name.startsWith("@takontuku/"));
+  const sibling = Object.entries(deps).find(([name]) => name.startsWith("@karsa/"));
   return sibling?.[1] ?? "latest";
 }
 

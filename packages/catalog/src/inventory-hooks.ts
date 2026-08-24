@@ -1,4 +1,4 @@
-import { onOrderCreate, onOrderStatusChange } from "@takontuku/core";
+import { onOrderCreate, onOrderStatusChange } from "@karsa/core";
 
 /**
  * Registers the stock-mutation side effects that used to live in D1

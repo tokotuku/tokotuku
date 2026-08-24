@@ -1,7 +1,8 @@
 # Local Verdaccio registry
 
-This registry now holds **only the private modules** (`@takontuku/catalog`, `@takontuku/orders`) —
-`core`/`ui`/`auth`/`config`/`create-takontuku` are published to real public npm instead. It's still
+This registry now holds **only the private modules** (`@karsa/catalog`, `@karsa/orders`,
+`@karsa/booking`, and `@karsa/content`) —
+`core`/`ui`/`auth`/`config`/`create-karsa` are published to real public npm instead. It's still
 used locally for development and by `tools/e2e-install/`'s gates, which publish throwaway
 `0.0.0-e2e.<timestamp>` versions of every package (public ones included) to keep the whole
 publish/install/update cycle testable without touching real npm.
@@ -30,10 +31,10 @@ npm adduser --registry http://localhost:4873
 `.npmrc` is gitignored, so add the token there instead by appending the line it prints
 (`//localhost:4873/:_authToken=...`) — do not commit it.
 
-`@takontuku/catalog` and `@takontuku/orders` require authentication just to **read** (`access:
+Private module packages require authentication just to **read** (`access:
 $authenticated` in `config.yaml`), not just to publish — verify with `npm view
-@takontuku/catalog --registry http://localhost:4873` from a machine with no token configured; it
-should 401/403. The rest of the `@takontuku/*` scope stays `access: $all` for local dev
+@karsa/catalog --registry http://localhost:4873` from a machine with no token configured; they
+should 401/403. The rest of the `@karsa/*` scope stays `access: $all` for local dev
 convenience, since it either doesn't exist here at all once published to real npm, or is meant to
 be publicly installable anyway.
 
@@ -41,13 +42,13 @@ Map the scope explicitly in `.npmrc` so `bun install` / `bun publish` route it t
 without passing `--registry` on every command:
 
 ```
-@takontuku:registry=http://localhost:4873
+@karsa:registry=http://localhost:4873
 //localhost:4873/:_authToken=<token from npm adduser>
 ```
 
-## Publishing catalog/orders for real
+## Publishing private modules for real
 
-`@takontuku/catalog` and `@takontuku/orders` never go through CI (see
+Private modules never go through CI (see
 `.github/workflows/ci.yml`, which only ever publishes the public packages) — release them manually
 from a machine with publish credentials here, after `bun run version` (`changeset version`) has
 given them a real version:
@@ -56,10 +57,10 @@ given them a real version:
 bun run release:private
 ```
 
-That runs [`scripts/publish-private.ts`](../../scripts/publish-private.ts), which rebuilds both
-packages, resolves their `workspace:*` dependencies (including on the now-public `core`/`ui`/
-`config`) to whatever version is currently checked into each one's own `package.json`, publishes,
-and restores both `package.json` files to their checked-in state afterward regardless of outcome.
+That runs [`scripts/publish-private.ts`](../../scripts/publish-private.ts), which rebuilds the
+private packages, resolves their `workspace:*` dependencies (including on the now-public
+`core`/`ui`/`config`) to whatever version is currently checked into each one's own `package.json`, publishes,
+and restores every `package.json` file to its checked-in state afterward regardless of outcome.
 Add `--dry-run` to check what would be published without actually publishing.
 
 It defaults to `http://localhost:4873`; once the Cloudflare Tunnel below is live, export

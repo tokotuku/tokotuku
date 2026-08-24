@@ -5,7 +5,7 @@ main {
 }
 .eyebrow {
   margin: 0;
-  color: var(--tk-color-accent);
+  color: var(--karsa-color-accent);
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.14em;
@@ -13,7 +13,7 @@ main {
 }
 h1 {
   margin: 0.5rem 0 1rem;
-  font-family: var(--tk-font-family-display);
+  font-family: var(--karsa-font-family-display);
   font-size: clamp(2.2rem, 5vw, 3.4rem);
   font-weight: 400;
   letter-spacing: -0.04em;
@@ -21,12 +21,12 @@ h1 {
 .description {
   max-width: 34rem;
   margin: 0 0 2rem;
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
 }
 .booking-form section {
   padding: 1.5rem;
-  border: 1px solid var(--tk-color-border);
-  border-radius: var(--tk-radius-xl);
+  border: 1px solid var(--karsa-color-border);
+  border-radius: var(--karsa-radius-xl);
 }
 .booking-form h2 {
   margin: 0 0 1rem;
@@ -43,7 +43,7 @@ h1 {
 .fields label {
   display: grid;
   gap: 0.4rem;
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
   font-size: 0.8rem;
 }
 .wide {
@@ -56,10 +56,10 @@ h1 {
   width: 100%;
   min-height: 2.75rem;
   padding: 0.65rem 0.8rem;
-  border: 1px solid var(--tk-color-border);
-  border-radius: var(--tk-radius-md);
-  background: var(--tk-color-bg);
-  color: var(--tk-color-fg);
+  border: 1px solid var(--karsa-color-border);
+  border-radius: var(--karsa-radius-md);
+  background: var(--karsa-color-bg);
+  color: var(--karsa-color-fg);
   font: inherit;
 }
 .booking-form > button {
@@ -70,9 +70,9 @@ h1 {
   align-items: center;
   justify-content: center;
   border: 0;
-  border-radius: var(--tk-radius-md);
-  background: var(--tk-color-accent);
-  color: var(--tk-color-accent-fg);
+  border-radius: var(--karsa-radius-md);
+  background: var(--karsa-color-accent);
+  color: var(--karsa-color-accent-fg);
   font-size: 0.85rem;
   font-weight: 700;
   cursor: pointer;
@@ -81,8 +81,8 @@ h1 {
   padding: 12px 14px;
   margin-bottom: 1rem;
   border-radius: 10px;
-  background: color-mix(in srgb, var(--tk-color-danger) 9%, var(--tk-color-bg));
-  color: var(--tk-color-danger);
+  background: color-mix(in srgb, var(--karsa-color-danger) 9%, var(--karsa-color-bg));
+  color: var(--karsa-color-danger);
 }
 .success-card {
   max-width: 34rem;
@@ -96,8 +96,8 @@ h1 {
   margin: 0 auto 1.25rem;
   place-items: center;
   border-radius: 50%;
-  background: color-mix(in srgb, var(--tk-color-success) 14%, var(--tk-color-bg));
-  color: var(--tk-color-success);
+  background: color-mix(in srgb, var(--karsa-color-success) 14%, var(--karsa-color-bg));
+  color: var(--karsa-color-success);
   font-size: 28px;
 }
 .primary-link {
@@ -107,9 +107,9 @@ h1 {
   min-height: 2.9rem;
   align-items: center;
   justify-content: center;
-  border-radius: var(--tk-radius-md);
-  background: var(--tk-color-accent);
-  color: var(--tk-color-accent-fg);
+  border-radius: var(--karsa-radius-md);
+  background: var(--karsa-color-accent);
+  color: var(--karsa-color-accent-fg);
   font-weight: 700;
   text-decoration: none;
 }

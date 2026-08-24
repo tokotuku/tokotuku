@@ -1,13 +1,13 @@
 ---
-/// <reference types="@takontuku/core/virtual.d.ts" />
-import "@takontuku/theme/styles.css";
-import authPanelWidgets from "virtual:takontuku/auth-panel-widgets";
-import brand from "virtual:takontuku/config";
-import { createTranslator } from "@takontuku/core";
-import { paletteStyle } from "@takontuku/theme/palette";
-import ThemeScript from "@takontuku/theme/ThemeScript.astro";
-import BrandMark from "@takontuku/ui/BrandMark.astro";
-import Icon from "@takontuku/ui/Icon.astro";
+/// <reference types="@karsa/core/virtual.d.ts" />
+import "@karsa/theme/styles.css";
+import authPanelWidgets from "virtual:karsa/auth-panel-widgets";
+import brand from "virtual:karsa/config";
+import { createTranslator } from "@karsa/core";
+import { paletteStyle } from "@karsa/theme/palette";
+import ThemeScript from "@karsa/theme/ThemeScript.astro";
+import BrandMark from "@karsa/ui/BrandMark.astro";
+import Icon from "@karsa/ui/Icon.astro";
 import defaultAuthImage480Avif from "../auth-login-background-default-v2-480.avif";
 import defaultAuthImage480 from "../auth-login-background-default-v2-480.webp";
 import defaultAuthImage768Avif from "../auth-login-background-default-v2-768.avif";
@@ -86,6 +86,6 @@ import "./AuthFrame.css";
   themeButton?.addEventListener("click", () => {
     const next = document.documentElement.dataset["theme"] === "dark" ? "light" : "dark";
     document.documentElement.dataset["theme"] = next;
-    localStorage.setItem("takontuku-theme", next);
+    localStorage.setItem("karsa-theme", next);
   });
 </script>

@@ -1,0 +1,39 @@
+---
+title: Button
+description: An accessible action control with variants, sizes, and native button semantics.
+sidebar:
+  order: 1
+---
+
+import Button from "@karsa/ui/Button.astro";
+import ComponentPreview from "../../../../components/ComponentPreview.astro";
+
+`Button` renders a native `<button>`. Use it for an action, form submission, or reset; use a link when the user is navigating.
+
+## Preview
+
+<ComponentPreview label="Button variants">
+  <Button variant="primary">Primary</Button>
+  <Button variant="secondary">Secondary</Button>
+  <Button variant="ghost">Ghost</Button>
+  <Button disabled>Disabled</Button>
+</ComponentPreview>
+
+```astro
+---
+import Button from "@karsa/ui/Button.astro";
+---
+
+<Button variant="primary" size="md">Save changes</Button>
+```
+
+## Properties
+
+| Property | Type | Default |
+| --- | --- | --- |
+| `variant` | `"primary" \| "secondary" \| "ghost"` | `"primary"` |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` |
+| `type` | native button type | `"button"` |
+| Remaining props | native `<button>` attributes | — |
+
+The default slot accepts a label or inline content. Native keyboard activation, `disabled`, `aria-*`, and focus-visible behavior are preserved.

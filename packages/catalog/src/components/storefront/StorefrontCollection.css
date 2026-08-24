@@ -12,7 +12,7 @@
 }
 .eyebrow {
   margin: 0 0 0.4rem;
-  color: var(--tk-color-accent);
+  color: var(--karsa-color-accent);
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.14em;
@@ -20,18 +20,18 @@
 }
 .collection-heading h2 {
   margin: 0;
-  font-family: var(--tk-font-family-display);
+  font-family: var(--karsa-font-family-display);
   font-size: clamp(2.2rem, 4vw, 3.5rem);
   font-weight: 400;
   letter-spacing: -0.035em;
 }
 .collection-heading a {
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
   font-size: 0.75rem;
   text-decoration: none;
 }
 .collection-heading a:hover {
-  color: var(--tk-color-accent);
+  color: var(--karsa-color-accent);
 }
 .product-grid {
   display: grid;

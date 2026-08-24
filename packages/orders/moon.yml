@@ -22,7 +22,7 @@ tasks:
 
   test:
     command: "vitest run"
-    # orders.ts imports findProductById from @takontuku/catalog, resolved
+    # orders.ts imports findItemById from @karsa/catalog, resolved
     # via its built dist/ — same reasoning as the typecheck task below.
     deps: ["core:build", "catalog:build"]
     inputs:
@@ -31,9 +31,9 @@ tasks:
 
   typecheck:
     command: "astro check"
-    # @takontuku/core and @takontuku/catalog are consumed via their built
+    # @karsa/core and @karsa/catalog are consumed via their built
     # dist/ (not raw source) for runtime values like defineModule and
-    # findProductsByIds — without this, typecheck can race tsup's
+    # findItemsByIds — without this, typecheck can race tsup's
     # clean-then-rebuild and read a briefly-missing dist/index.d.ts.
     deps: ["core:build", "catalog:build"]
     inputs:

@@ -17,7 +17,29 @@ export interface ModuleRoute {
   prerender?: boolean;
 }
 
-export interface StorefrontHomeSection {
+export type JsonValue =
+  | string
+  | number
+  | boolean
+  | null
+  | JsonValue[]
+  | { [key: string]: JsonValue };
+
+export interface SiteHomeSection {
+  id: string;
+  entrypoint: string;
+  order?: number;
+}
+
+export interface SitemapEntry {
+  url: string;
+  lastmod?: string;
+  changefreq?: "always" | "hourly" | "daily" | "weekly" | "monthly" | "yearly" | "never";
+  priority?: number;
+}
+
+/** A module exporting `getSitemapEntries(context)` from the given entrypoint. */
+export interface SitemapSourceContribution {
   id: string;
   entrypoint: string;
   order?: number;
@@ -42,7 +64,7 @@ export interface ModuleMigration {
   /**
    * Location of the migration's raw SQL, resolved relative to the module's
    * own source: `new URL("./migrations/0001_init.sql", import.meta.url)`.
-   * A URL rather than a bare specifier so `takontuku db sync` never has to
+   * A URL rather than a bare specifier so `karsa db sync` never has to
    * perform package resolution itself — the module already knows where its
    * own files are.
    */
@@ -50,7 +72,7 @@ export interface ModuleMigration {
 }
 
 export interface ModuleSeed {
-  /** Slug identifying this seed within its module, shown in `takontuku db seed` output. */
+  /** Slug identifying this seed within its module, shown in `karsa db seed` output. */
   name: string;
   /**
    * Location of the seed's raw SQL, resolved relative to the module's own
@@ -86,11 +108,17 @@ export interface ModuleDefinition {
    * Routes to inject via Astro's `injectRoute`. Omit when the module's pages
    * already exist as native files in the consuming app (nothing to inject).
    */
-  storefrontRoutes?: ModuleRoute[];
+  siteRoutes?: ModuleRoute[];
   adminRoutes?: ModuleRoute[];
   adminNav?: AdminNavItem[];
-  /** Optional packaged sections rendered by the core storefront homepage. */
-  storefrontHomeSections?: StorefrontHomeSection[];
+  /** Optional packaged sections rendered by the core site homepage. */
+  siteHomeSections?: SiteHomeSection[];
+  /** JSON-safe public configuration owned by this module. */
+  clientConfig?: Record<string, JsonValue>;
+  /** Brand fields that must exist before the integration can start. */
+  requiredBrandFields?: Array<"currency">;
+  /** URL producers merged by core's canonical sitemap route. */
+  sitemapSources?: SitemapSourceContribution[];
   /** Optional operational widgets rendered by the core admin dashboard. */
   adminDashboardWidgets?: AdminDashboardWidget[];
   /** Optional widgets rendered in the visual panel shared by auth pages. */
@@ -105,15 +133,15 @@ export interface ModuleDefinition {
   /**
    * Bare specifiers for `.astro` components that render page-wide client
    * behavior (a `<script>` tag, nothing visual) needed regardless of which
-   * page rendered — e.g. orders' cart-badge sync. `@takontuku/ui`'s Layout
+   * page rendered — e.g. orders' cart-badge sync. `@karsa/ui`'s Layout
    * renders every one of these on every page. This exists specifically so a
    * module like catalog, whose pages need cart behavior when orders is
-   * installed, never has to import from `@takontuku/orders` directly — that
+   * installed, never has to import from `@karsa/orders` directly — that
    * would make catalog un-installable without orders, breaking a-la-carte.
    */
   ambientScripts?: string[];
   /**
-   * Demo data for `takontuku db seed` — local-only, never applied to a
+   * Demo data for `karsa db seed` — local-only, never applied to a
    * remote database. Omit entirely for a module with nothing meaningful to
    * demo (auth, for instance, has no seed: publishing a working password
    * hash would ship a known credential in the npm package).

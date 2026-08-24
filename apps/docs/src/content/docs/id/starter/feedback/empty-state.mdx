@@ -1,0 +1,19 @@
+---
+title: EmptyState
+description: Fallback terpusat untuk koleksi kosong atau workflow yang belum selesai.
+sidebar:
+  order: 2
+---
+
+import Button from "@karsa/ui/Button.astro";
+import EmptyState from "@karsa/ui/EmptyState.astro";
+import ComponentPreview from "../../../../../components/ComponentPreview.astro";
+
+<ComponentPreview label="Contoh empty state" layout="stack">
+  <EmptyState title="Belum ada hasil" description="Coba ubah filter yang aktif.">
+    <span slot="icon">⌕</span>
+    <div slot="actions"><Button size="sm">Buat baru</Button></div>
+  </EmptyState>
+</ComponentPreview>
+
+`title` wajib; `description`, serta slot `icon` dan `actions` opsional. Pakai action pemulihan yang jelas dan jangan mengarang data saat koleksi memang kosong.

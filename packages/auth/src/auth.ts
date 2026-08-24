@@ -1,4 +1,4 @@
-import type { TakontukuEnv } from "@takontuku/core";
+import type { KarsaEnv } from "@karsa/core";
 import { betterAuth } from "better-auth";
 import { admin } from "better-auth/plugins";
 import { createAccessControl } from "better-auth/plugins/access";
@@ -57,11 +57,16 @@ const roles = {
 // fixed env var: `astro dev` picks whatever port is free (4321, 4322, ...),
 // and a hardcoded baseURL that doesn't match the actual origin fails Better
 // Auth's origin check with a 403 ("Invalid origin").
-export function createAuth(env: TakontukuEnv, baseURL: string) {
+export function createAuth(
+  env: KarsaEnv,
+  baseURL: string,
+  { disableSignUp = false }: { disableSignUp?: boolean } = {},
+) {
   return betterAuth({
     database: env.DB,
     emailAndPassword: {
       enabled: true,
+      disableSignUp,
     },
     plugins: [
       admin({

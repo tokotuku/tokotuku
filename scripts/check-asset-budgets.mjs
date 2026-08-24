@@ -66,7 +66,7 @@ for (const filename of dashboardFiles) {
   await assertImage(join(uiAssetDir, filename), { maxBytes: 200_000, formats: ["webp"] });
 }
 
-const mark = join(uiAssetDir, "takontuku-default-mark.svg");
+const mark = join(uiAssetDir, "brand/karsa/karsa-mark.svg");
 const markInfo = await stat(mark);
 if (markInfo.size > 20_000) throw new Error(`${mark} exceeds the 20 KB SVG budget.`);
 

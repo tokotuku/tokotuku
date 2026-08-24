@@ -1,0 +1,33 @@
+---
+title: Pilih preset dan tier
+description: Pilih bentuk situs dan tier install, content, atau polished yang diizinkan sebelum mengubah kode.
+sidebar:
+  order: 4
+---
+
+Pilih bentuk situs terlebih dahulu, lalu pilih tier kematangannya. Tier adalah izin, bukan tebakan tentang pekerjaan yang mungkin dibutuhkan nanti.
+
+| Preset | Gunakan untuk | Default ownership |
+| --- | --- | --- |
+| Company | Profil, marketing site, atau kehadiran organisasi | Halaman dan section Astro milik aplikasi |
+| Product | Situs yang menampilkan item untuk dibeli | Modul produk dan order memiliki route domain; aplikasi memiliki halaman brand |
+| Service | Situs yang menampilkan layanan untuk dipesan | Adapter booking memiliki scheduling; aplikasi memiliki halaman penjelasan |
+| Publication | Artikel, catatan, dokumentasi, atau newsroom | Content memiliki entry dan feed; aplikasi memiliki shell dan landing editorial |
+
+| Tier | Yang diizinkan | Batas berhenti |
+| --- | --- | --- |
+| Install | Paket, wiring modul, dan check migration/registry | Jangan menambah konten atau polish visual |
+| Content | Install plus copy, data, dan konten halaman | Pertahankan layout dan token paket |
+| Polished | Content plus tema dan asset lokal yang disengaja | Tetap hormati ownership; jangan membuat sistem spekulatif |
+
+Jangan menaikkan tier tanpa izin peminta. Jika brief ambigu, minta klarifikasi atau nyatakan tier terendah yang masuk akal beserta hal yang di luar scope.
+
+## Checklist pemilihan
+
+1. Baca `AGENTS.md`, `astro.config.mjs`, `package.json`, dan registry yang ter-resolve.
+2. Identifikasi preset dari user journey yang diminta, bukan dari paket favorit.
+3. Catat tier yang diizinkan dan batas berhentinya.
+4. Daftar halaman, modul, seed, dan asset beserta owner-nya.
+5. Tentukan bukti validasi sebelum implementasi.
+
+Preset dan tier terpilih harus ada dalam plan dan laporan akhir agar agent lain tidak perlu menebak.

@@ -1,0 +1,21 @@
+{
+  "fixture": "publication-polished",
+  "desktop": {
+    "status": "captured",
+    "path": "screenshots/desktop.jpg",
+    "viewport": { "width": 1440, "height": 1000 },
+    "score": 95
+  },
+  "mobile": {
+    "status": "captured",
+    "path": "screenshots/mobile.jpg",
+    "viewport": { "width": 390, "height": 844 },
+    "score": 95
+  },
+  "scoring": {
+    "status": "scored",
+    "method": "Codex browser QA at the required desktop and mobile viewports",
+    "score": 95,
+    "notes": "Responsive editorial hierarchy, publication navigation, local imagery, contrast, overflow, and browser console were inspected; no console errors or warnings were observed."
+  }
+}

@@ -1,0 +1,30 @@
+---
+title: AppTopbar
+description: Workspace title, theme selector, and action area.
+sidebar:
+  order: 3
+---
+
+`AppTopbar` renders a compact workspace heading, a light/dark toggle, and a default slot for actions.
+
+```astro
+---
+import Button from "@karsa/ui/Button.astro";
+import AppTopbar from "@karsa/ui/AppTopbar.astro";
+---
+
+<AppTopbar title="Content workspace">
+  <Button variant="secondary" size="sm">Sign out</Button>
+</AppTopbar>
+```
+
+## Props and slots
+
+| Name | Kind | Default | Purpose |
+| --- | --- | --- | --- |
+| `title` | Prop (`string`) | `"Workspace"` | Workspace label |
+| default | Slot | — | Actions aligned to the right |
+
+## Theme behavior
+
+The toggle writes light or dark to document.documentElement.dataset.theme and persists the choice under `karsa-theme` in local storage. OS accessibility modes remain available.

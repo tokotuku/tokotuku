@@ -24,7 +24,7 @@ tasks:
     command: "vitest run"
     # bookings.test.ts only exercises pure functions and needs no sibling
     # dist, but keeping deps aligned with build/typecheck avoids surprises
-    # if a future test imports from @takontuku/catalog or @takontuku/orders.
+    # if a future test imports from @karsa/catalog or @karsa/orders.
     deps: ["core:build", "catalog:build", "orders:build"]
     inputs:
       - "src/**/*"
@@ -32,9 +32,9 @@ tasks:
 
   typecheck:
     command: "astro check"
-    # @takontuku/core, @takontuku/catalog, and @takontuku/orders are consumed
+    # @karsa/core, @karsa/catalog, and @karsa/orders are consumed
     # via their built dist/ (not raw source) for runtime values like
-    # defineModule, findProductById, and createInquiryOrder — without this,
+    # defineModule, findItemById, and createInquiryOrder — without this,
     # typecheck can race tsup's clean-then-rebuild and read a briefly-missing
     # dist/index.d.ts.
     deps: ["core:build", "catalog:build", "orders:build"]

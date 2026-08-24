@@ -1,30 +1,30 @@
 .badge {
-  --badge-color: var(--tk-color-fg-muted);
+  --badge-color: var(--karsa-color-fg-muted);
   display: inline-flex;
   align-items: center;
   width: fit-content;
-  padding: var(--tk-spacing-1) var(--tk-spacing-2);
+  padding: var(--karsa-spacing-1) var(--karsa-spacing-2);
   border: 1px solid color-mix(in srgb, var(--badge-color) 30%, transparent);
-  border-radius: var(--tk-radius-full);
-  background: color-mix(in srgb, var(--badge-color) 10%, var(--tk-color-bg));
+  border-radius: var(--karsa-radius-full);
+  background: color-mix(in srgb, var(--badge-color) 10%, var(--karsa-color-bg));
   color: var(--badge-color);
-  font-size: var(--tk-font-size-xs);
-  font-weight: var(--tk-font-weight-semibold);
-  line-height: var(--tk-line-height-tight);
+  font-size: var(--karsa-font-size-xs);
+  font-weight: var(--karsa-font-weight-semibold);
+  line-height: var(--karsa-line-height-tight);
 }
 
 .badge--accent {
-  --badge-color: var(--tk-color-accent);
+  --badge-color: var(--karsa-color-accent);
 }
 
 .badge--success {
-  --badge-color: var(--tk-color-success);
+  --badge-color: var(--karsa-color-success);
 }
 
 .badge--warning {
-  --badge-color: var(--tk-color-warning);
+  --badge-color: var(--karsa-color-warning);
 }
 
 .badge--danger {
-  --badge-color: var(--tk-color-danger);
+  --badge-color: var(--karsa-color-danger);
 }

@@ -74,7 +74,7 @@ describe("findAdminOrderDetail", () => {
               results: [
                 {
                   id: 7,
-                  order_number: "TK-7",
+                  order_number: "KR-7",
                   customer_name: "Ratri",
                   customer_email: "ratri@example.test",
                   customer_phone: "0800",
@@ -104,7 +104,7 @@ describe("findAdminOrderDetail", () => {
     };
 
     await expect(findAdminOrderDetail(db as never, 7)).resolves.toMatchObject({
-      orderNumber: "TK-7",
+      orderNumber: "KR-7",
       customerPhone: "0800",
       paymentMethod: "transfer",
       items: [{ itemId: 3, quantity: 1, lineTotalCents: 125000 }],

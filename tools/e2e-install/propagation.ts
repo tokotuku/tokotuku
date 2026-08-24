@@ -2,7 +2,7 @@
 // Gate 5 (verification slice) from the migration plan: proves the actual
 // business reason this migration exists -- "framework harus jadi package
 // supaya perbaikan bisa didorong lewat bun update." Publishes a baseline,
-// scaffolds a client the way create-takontuku actually leaves it
+// scaffolds a client the way create-karsa actually leaves it
 // (dependencies pinned to the literal "latest" specifier, not a fixed
 // version -- see scaffoldClient's `version: null`), makes a real code
 // change, republishes, and asserts `bun update` in that SAME client picks
@@ -11,19 +11,18 @@
 // This deliberately stops short of the plan's full Gate 5, which also
 // calls for wiring `changeset version` + publish into CI (Verdaccio on
 // `dev`, real npm on `main`). That's a release-engineering decision with
-// real external consequences -- claiming the @takontuku scope on the public
+// real external consequences -- claiming the @karsa scope on the public
 // registry, npm publish credentials in CI -- not something to set up
 // unilaterally. This script only proves the update mechanism itself works,
 // entirely against the local registry.
 //
 // Prerequisite: a registry reachable at REGISTRY_URL (defaults to Verdaccio
-// on http://localhost:4873). Start one locally with `moon run verdaccio:up`.
+// on http://localhost:4873). Start one locally with Docker Compose; see README.md.
 //
 // The default scaffold is public-only (auth + core + ui), so this adds
-// `catalog` via `takontuku add` right after install -- the patch below
+// `catalog` via `karsa add` right after install -- the patch below
 // targets catalog's own source, so the gate needs it installed either way.
 
-import { spawn } from "node:child_process";
 import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -38,6 +37,8 @@ import {
   scaffoldClient,
   setupAndLogIn,
   sh,
+  spawnWranglerDev,
+  terminateProcessGroup,
   updateClient,
   waitForServer,
 } from "./shared.ts";
@@ -51,9 +52,9 @@ const ADMIN = {
 
 const MARKER_FILE = path.join(ROOT, "packages/catalog/src/messages.ts");
 // This client is never seeded (no `db seed` call below), so /products
-// renders the empty-catalog state (StorefrontEmptyCollection via
+// renders the empty-catalog state (CatalogEmptyState via
 // t("catalog.storefront.emptyTitle")), not the listing heading -- that one
-// only renders once catalogCount > 0. create-takontuku scaffolds clients
+// only renders once catalogCount > 0. create-karsa scaffolds clients
 // with locale "id-ID" by default, so the "id" dictionary entry is what
 // actually renders and is what this patches.
 const ORIGINAL_HEADING = "Koleksi segera hadir";
@@ -69,25 +70,21 @@ async function fetchProductsHeading(origin: string): Promise<string> {
 /** /products needs no auth, but every route redirects to /setup until setup completes, so this always runs it -- harmless and idempotent on the second boot, since D1 --local state (including the admin account) persists across separate `wrangler dev` invocations in the same client dir. */
 async function bootAndCheck(clientDir: string): Promise<string> {
   const origin = `http://localhost:${BOOT_CHECK_PORT}`;
-  const child = spawn("bunx", ["wrangler", "dev", "--port", String(BOOT_CHECK_PORT)], {
-    cwd: clientDir,
-    stdio: "inherit",
-    detached: true,
-  });
+  const child = spawnWranglerDev(clientDir, BOOT_CHECK_PORT);
 
   try {
     await waitForServer(`${origin}/setup`, 30_000);
     await setupAndLogIn(origin, ADMIN);
     return await fetchProductsHeading(origin);
   } finally {
-    if (child.pid) process.kill(-child.pid, "SIGTERM");
+    terminateProcessGroup(child);
   }
 }
 
 async function main(): Promise<void> {
   publishAll();
 
-  const scratchParent = mkdtempSync(path.join(tmpdir(), "takontuku-e2e-propagation-"));
+  const scratchParent = mkdtempSync(path.join(tmpdir(), "karsa-e2e-propagation-"));
   const clientDir = scaffoldClient(scratchParent, "gate5-client", null);
   console.log(
     `Scaffolded client (dependencies pinned to "latest", like a real client) at ${clientDir}`,
@@ -96,11 +93,9 @@ async function main(): Promise<void> {
   installClient(clientDir);
   addCatalogModule(clientDir);
   pinModuleToLatest(clientDir, "catalog");
-  console.log(
-    'Added the catalog module via `takontuku add`, pinned to "latest" like its siblings.',
-  );
+  console.log('Added the catalog module via `karsa add`, pinned to "latest" like its siblings.');
 
-  sh("bunx", ["takontuku", "db", "sync"], clientDir);
+  sh("bunx", ["karsa", "db", "sync"], clientDir);
   sh("bunx", ["wrangler", "d1", "migrations", "apply", "DB", "--local"], clientDir);
   sh("bun", ["run", "build"], clientDir);
 

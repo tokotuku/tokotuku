@@ -1,11 +1,11 @@
 .save-notice {
   padding: 11px 14px;
   border-radius: 10px;
-  background: color-mix(in srgb, var(--tk-color-success) 10%, var(--admin-surface));
-  color: var(--tk-color-success);
+  background: color-mix(in srgb, var(--karsa-color-success) 10%, var(--admin-surface));
+  color: var(--karsa-color-success);
 }
 .danger-button {
-  color: var(--tk-color-danger);
+  color: var(--karsa-color-danger);
 }
 .movement-panel {
   margin-top: 18px;
@@ -18,7 +18,7 @@
 }
 .movement-panel > div p {
   margin-top: 5px;
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
   font-size: 12px;
 }
 .movement-panel table {
@@ -34,19 +34,19 @@
   text-align: left;
 }
 .movement-panel th {
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
 }
 .positive {
-  color: var(--tk-color-success);
-  font-weight: var(--tk-font-weight-bold);
+  color: var(--karsa-color-success);
+  font-weight: var(--karsa-font-weight-bold);
 }
 .negative {
-  color: var(--tk-color-danger);
-  font-weight: var(--tk-font-weight-bold);
+  color: var(--karsa-color-danger);
+  font-weight: var(--karsa-font-weight-bold);
 }
 .empty-movements {
-  margin-top: 18px !important;
-  color: var(--tk-color-fg-muted);
+  margin-top: 18px;
+  color: var(--karsa-color-fg-muted);
 }
 .inspector-metrics {
   display: grid;

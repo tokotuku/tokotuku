@@ -1,18 +1,22 @@
 #!/usr/bin/env bun
 /**
- * Publishes every @takontuku/* package -- public and private alike -- to a
+ * Publishes every @karsa/* package -- public and private alike -- to a
  * single local registry at whatever version is currently checked into its
  * package.json. Lets you rehearse an entire release, including the public
  * packages that normally only ever reach real npm via CI, without touching
  * npmjs.org at all.
  *
- * Complements publish-private.ts, which only ever targets catalog/orders
+ * Complements publish-private.ts, which only ever targets the private modules
  * against a real private registry. This one is for local rehearsal only: it
- * publishes all seven packages and defaults to the same local Verdaccio
+ * publishes all private/public packages and defaults to the same local Verdaccio
  * every other local tool in this repo talks to.
  */
 
-import { publishPackage, ROOT, sh, withDefaultRegistryForPublish } from "./publish-shared";
+import {
+  publishPackage,
+  runWorkspaceBuilds,
+  withDefaultRegistryForPublish,
+} from "./publish-shared";
 
 const DRY_RUN = process.argv.includes("--dry-run");
 const { LOCAL_REGISTRY_URL } = process.env;
@@ -31,24 +35,21 @@ const PACKAGES = [
   "packages/catalog",
   "packages/orders",
   "packages/booking",
-  "packages/create-takontuku",
+  "packages/content",
+  "packages/create-karsa",
 ];
 
 function main(): void {
   console.log(`Publishing every package to ${REGISTRY}${DRY_RUN ? " (dry run)" : ""}`);
-  sh(
-    "moon",
-    [
-      "run",
-      "core:build",
-      "auth:build",
-      "catalog:build",
-      "orders:build",
-      "booking:build",
-      "create-takontuku:build",
-    ],
-    ROOT,
-  );
+  runWorkspaceBuilds([
+    "packages/core",
+    "packages/auth",
+    "packages/catalog",
+    "packages/orders",
+    "packages/booking",
+    "packages/content",
+    "packages/create-karsa",
+  ]);
   withDefaultRegistryForPublish(REGISTRY, () => {
     for (const dir of PACKAGES) {
       publishPackage({ dir, registry: REGISTRY, dryRun: DRY_RUN });

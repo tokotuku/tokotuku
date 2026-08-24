@@ -1,0 +1,20 @@
+---
+title: Panduan situs layanan
+description: Bangun situs berorientasi layanan dengan adapter booking dan ownership scheduling yang jelas.
+---
+
+Ini adalah panduan domain layanan. Gunakan istilah layanan ketika pengunjung memilih layanan, rentang waktu, slot, atau janji temu.
+
+## Batas adapter
+
+Pasang modul booking untuk scheduling. Modul ini menyusun dependency order dan catalog, memiliki route booking dan tampilan admin, serta mengekspos data domain untuk aplikasi. Halaman deskripsi layanan, tim, penjelasan harga, dan kontak adalah konten milik aplikasi. Hubungkan availability atau payment provider eksternal melalui adapter sempit di batas modul; jangan menggandakan state booking di halaman.
+
+```sh
+bunx karsa add booking
+bunx karsa db sync
+bunx wrangler d1 migrations apply DB --local
+```
+
+Tier content menambahkan layanan dan seed scheduling (`range` atau `slot`) dengan UI paket. Tier polished boleh menambah tema terarah dan imagery layanan setelah diizinkan.
+
+Periksa timezone, locale, availability, migrasi, seed, error adapter, access control, dan build lengkap. Jangan menyatakan slot tersedia hanya berdasarkan copy statis.

@@ -19,7 +19,7 @@ const serialized = JSON.stringify({ input, title, description }).replaceAll("<",
 import "./Chart.css";
 ---
 
-<figure class="tk-chart" data-chart-root data-chart-state="loading" style={`--chart-height:${height}px`}>
+<figure class="karsa-chart" data-chart-root data-chart-state="loading" style={`--chart-height:${height}px`}>
   <figcaption>
     <div>
       <h2>{title}</h2>
@@ -65,4 +65,3 @@ import "./Chart.css";
   document.addEventListener("astro:page-load", () => mountCharts());
   document.addEventListener("astro:before-swap", disposeCharts);
 </script>
-

@@ -1,0 +1,24 @@
+---
+title: Component reference
+description: Choose Karsa primitives by semantic role and keep interactive behavior explicit.
+---
+
+Start with the smallest semantic primitive: `Button` for an action, a link for navigation, `Input` for a labeled field, and `Card` for an article-like region. The starter collection adds layout, navigation, feedback, data display, and domain-specific examples.
+
+```astro
+---
+import Button from "@karsa/ui/Button.astro";
+import Card from "@karsa/ui/Card.astro";
+import "@karsa/theme/styles.css";
+---
+
+<Card>
+  <h2>Review</h2>
+  <p>Use the packaged semantics before adding custom markup.</p>
+  <Button type="submit">Continue</Button>
+</Card>
+```
+
+Components render static HTML and consume `--karsa-*` tokens. Client behavior is limited to components that explicitly need it, such as theme selection, charts, or other opt-in browser behavior. Preserve native labels, headings, keyboard behavior, focus rings, and reduced-motion preferences.
+
+See the individual pages for properties and slots. When a component appears to need domain data, keep the data formatting and ownership in the page or module that owns that domain.

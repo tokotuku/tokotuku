@@ -2,7 +2,7 @@
 
 ## Palette
 
-Warm Indonesian pantry editorial: grounded terracotta and toasted coffee in light mode,
+Warm Indonesian pantry editorial: grounded burnt clay and toasted coffee in light mode,
 with a dark mode that keeps the same spice-and-tea character without lowering contrast.
 
 | Token | Light | Dark | Use |

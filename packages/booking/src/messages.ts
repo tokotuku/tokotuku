@@ -1,4 +1,4 @@
-import type { MessageDictionaries } from "@takontuku/core";
+import type { MessageDictionaries } from "@karsa/core";
 
 export const bookingMessages: MessageDictionaries = {
   id: {
@@ -35,7 +35,7 @@ export const bookingMessages: MessageDictionaries = {
     "booking.admin.description": "Pantau permintaan booking yang masuk.",
     "booking.admin.empty": "Belum ada permintaan booking",
     "booking.admin.emptyDescription": "Permintaan booking dari pelanggan akan muncul di sini.",
-    "booking.admin.order": "Order",
+    "booking.admin.order": "Permintaan",
     "booking.admin.service": "Layanan",
     "booking.admin.customer": "Pelanggan",
     "booking.admin.date": "Tanggal",
@@ -48,10 +48,10 @@ export const bookingMessages: MessageDictionaries = {
     "booking.admin.previewLoading": "Memuat booking…",
     "booking.admin.previewError": "Ringkasan booking tidak dapat dimuat.",
     "booking.admin.previewRetry": "Coba lagi",
-    "booking.admin.openOrder": "Buka pesanan",
+    "booking.admin.openOrder": "Buka permintaan",
     "booking.admin.openService": "Lihat layanan",
     "booking.admin.overlap": "Bentrok jadwal",
-    "booking.admin.viewOrder": "Lihat order",
+    "booking.admin.viewOrder": "Lihat permintaan",
     "booking.dashboard.eyebrow": "Booking",
     "booking.dashboard.title": "Booking Mendatang",
     "booking.dashboard.manage": "Kelola",
@@ -93,7 +93,7 @@ export const bookingMessages: MessageDictionaries = {
     "booking.admin.description": "Track incoming booking requests.",
     "booking.admin.empty": "No booking requests yet",
     "booking.admin.emptyDescription": "Customer booking requests will show up here.",
-    "booking.admin.order": "Order",
+    "booking.admin.order": "Inquiry",
     "booking.admin.service": "Service",
     "booking.admin.customer": "Customer",
     "booking.admin.date": "Date",
@@ -106,10 +106,10 @@ export const bookingMessages: MessageDictionaries = {
     "booking.admin.previewLoading": "Loading booking…",
     "booking.admin.previewError": "The booking summary could not be loaded.",
     "booking.admin.previewRetry": "Try again",
-    "booking.admin.openOrder": "Open order",
+    "booking.admin.openOrder": "Open inquiry",
     "booking.admin.openService": "View service",
     "booking.admin.overlap": "Schedule clash",
-    "booking.admin.viewOrder": "View order",
+    "booking.admin.viewOrder": "View inquiry",
     "booking.dashboard.eyebrow": "Booking",
     "booking.dashboard.title": "Upcoming Bookings",
     "booking.dashboard.manage": "Manage",

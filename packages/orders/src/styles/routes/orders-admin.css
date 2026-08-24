@@ -18,7 +18,7 @@
 }
 .standalone-empty .eyebrow {
   margin: 1.5rem 0 0.45rem;
-  color: var(--tk-color-accent);
+  color: var(--karsa-color-accent);
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.14em;
@@ -26,7 +26,7 @@
 }
 .standalone-empty h1 {
   margin: 0;
-  font-family: var(--tk-font-family-display);
+  font-family: var(--karsa-font-family-display);
   font-size: clamp(2.7rem, 5vw, 4.5rem);
   font-weight: 400;
   letter-spacing: -0.045em;
@@ -34,7 +34,7 @@
 .standalone-empty > p:not(.eyebrow) {
   max-width: 30rem;
   margin: 0.7rem 0 1.4rem;
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
   font-size: 0.8rem;
   line-height: 1.7;
 }
@@ -54,7 +54,7 @@
   display: inline-flex;
   min-height: 40px;
   align-items: center;
-  color: var(--tk-color-accent);
+  color: var(--karsa-color-accent);
   font-size: 11px;
 }
 .approve-form button {
@@ -62,13 +62,13 @@
   padding: 0 9px;
   border: 0;
   border-radius: 7px;
-  background: var(--tk-color-success);
-  color: var(--tk-color-accent-fg);
+  background: var(--karsa-color-success);
+  color: var(--karsa-color-accent-fg);
   font-size: 11px;
   cursor: pointer;
 }
 .entity-avatar {
-  background: var(--tk-color-accent);
+  background: var(--karsa-color-accent);
 }
 .status-form {
   display: flex;
@@ -80,13 +80,13 @@
   border: 1px solid var(--admin-line);
   border-radius: 7px;
   background: var(--admin-surface);
-  color: var(--tk-color-fg);
+  color: var(--karsa-color-fg);
   font-size: 11px;
 }
 .status-form button {
   padding: 0 9px;
-  background: var(--tk-color-accent);
-  color: var(--tk-color-accent-fg);
+  background: var(--karsa-color-accent);
+  color: var(--karsa-color-accent-fg);
   cursor: pointer;
 }
 .status-form :disabled {
@@ -97,20 +97,20 @@
   padding: 0;
   border: 0;
   background: none;
-  color: var(--tk-color-fg);
+  color: var(--karsa-color-fg);
   font: inherit;
-  font-weight: var(--tk-font-weight-semibold);
+  font-weight: var(--karsa-font-weight-semibold);
   cursor: pointer;
 }
 .notice {
   padding: 11px 14px;
   border-radius: 10px;
-  background: color-mix(in srgb, var(--tk-color-success) 10%, var(--admin-surface));
-  color: var(--tk-color-success);
+  background: color-mix(in srgb, var(--karsa-color-success) 10%, var(--admin-surface));
+  color: var(--karsa-color-success);
 }
 .notice--error {
-  background: color-mix(in srgb, var(--tk-color-danger) 8%, var(--admin-surface));
-  color: var(--tk-color-danger);
+  background: color-mix(in srgb, var(--karsa-color-danger) 8%, var(--admin-surface));
+  color: var(--karsa-color-danger);
 }
 .quick-view-section {
   display: grid;
@@ -118,9 +118,9 @@
 }
 .quick-view-section h3 {
   margin: 0;
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
   font-size: 10px;
-  font-weight: var(--tk-font-weight-bold);
+  font-weight: var(--karsa-font-weight-bold);
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -130,7 +130,7 @@
 }
 .quick-view-note {
   margin: 0;
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
   font-size: 12px;
   line-height: 1.6;
   white-space: pre-wrap;

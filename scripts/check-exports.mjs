@@ -4,7 +4,7 @@ import { dirname, resolve } from "node:path";
 const repositoryRoot = resolve(dirname(new URL(import.meta.url).pathname), "..");
 
 const expected = {
-  "@takontuku/theme": [
+  "@karsa/theme": [
     "./styles.css",
     "./tokens.css",
     "./fonts.css",
@@ -12,18 +12,14 @@ const expected = {
     "./palette",
     "./ThemeScript.astro",
   ],
-  "@takontuku/charts": ["./Chart.astro", "./types"],
-  "@takontuku/ui": [
-    "./DocumentLayout.astro",
-    "./InspectorMetric.astro",
-    "./CursorPagination.astro",
-  ],
-  "@takontuku/core": ["./components/*", "./layouts/*"],
-  "@takontuku/auth": ["./client", "./components/*"],
+  "@karsa/charts": ["./Chart.astro", "./types"],
+  "@karsa/ui": ["./DocumentLayout.astro", "./InspectorMetric.astro", "./CursorPagination.astro"],
+  "@karsa/core": ["./components/*", "./layouts/*"],
+  "@karsa/auth": ["./client", "./components/*"],
 };
 
 const removed = {
-  "@takontuku/ui": [
+  "@karsa/ui": [
     "./Layout.astro",
     "./AdminMetric.astro",
     "./Chart.astro",
@@ -35,7 +31,7 @@ const removed = {
 };
 
 function packageDirectory(packageName) {
-  const shortName = packageName.replace("@takontuku/", "");
+  const shortName = packageName.replace("@karsa/", "");
   return shortName === "config"
     ? resolve(repositoryRoot, "configs")
     : resolve(repositoryRoot, "packages", shortName);
@@ -95,5 +91,5 @@ if (errors.length > 0) {
 }
 
 process.stdout.write(
-  "Export map passed: new 0.2.0 subpaths resolve and removed exports are absent.\n",
+  "Export map passed: Karsa 0.3.0 subpaths resolve and removed exports are absent.\n",
 );

@@ -49,12 +49,13 @@ describe("shipped agent skills", () => {
     expect(directories.length).toBeGreaterThan(0);
   });
 
-  it("ships the complete Takontuku workflow set", () => {
+  it("ships the complete Karsa workflow set", () => {
     expect(directories).toEqual([
-      "takontuku-data",
-      "takontuku-modules",
-      "takontuku-store-builder",
-      "takontuku-ui",
+      "karsa-content",
+      "karsa-data",
+      "karsa-modules",
+      "karsa-site-builder",
+      "karsa-ui",
     ]);
   });
 

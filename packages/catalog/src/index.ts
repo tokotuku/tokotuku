@@ -1,8 +1,21 @@
-import { defineModule, type ModuleDefinition } from "@takontuku/core";
+import { defineModule, type ModuleDefinition } from "@karsa/core";
 
-export function catalog(): ModuleDefinition {
+export type CatalogPresentation = "products" | "services";
+export interface CatalogOptions {
+  presentation: CatalogPresentation;
+}
+
+/** Products remain the backwards-compatible default for `karsa add catalog`. */
+export function catalog(
+  { presentation }: CatalogOptions = { presentation: "products" },
+): ModuleDefinition {
+  const services = presentation === "services";
+  const publicBase = services ? "/services" : "/products";
+  const adminBase = services ? "/admin/services" : "/admin/products";
   return defineModule({
     name: "catalog",
+    clientConfig: { presentation },
+    requiredBrandFields: ["currency"],
     migrations: [
       { name: "init", url: new URL("../migrations/0001_init.sql", import.meta.url) },
       { name: "inventory", url: new URL("../migrations/0002_inventory.sql", import.meta.url) },
@@ -12,7 +25,7 @@ export function catalog(): ModuleDefinition {
         url: new URL("../migrations/0004_admin_cursor_indexes.sql", import.meta.url),
       },
     ],
-    mediaPrefixes: ["products/"],
+    mediaPrefixes: ["products/", "services/"],
     seeds: [
       {
         name: "demo-catalog",
@@ -22,68 +35,79 @@ export function catalog(): ModuleDefinition {
     ],
     adminNav: [
       {
-        label: "Products",
-        labelByLocale: { id: "Produk", en: "Products" },
-        descriptionByLocale: { id: "Kelola produk dan stok.", en: "Manage products and stock." },
-        href: "/admin/products",
+        label: services ? "Services" : "Products",
+        labelByLocale: services
+          ? { id: "Layanan", en: "Services" }
+          : { id: "Produk", en: "Products" },
+        descriptionByLocale: services
+          ? { id: "Kelola layanan dan harga.", en: "Manage services and pricing." }
+          : { id: "Kelola produk dan stok.", en: "Manage products and stock." },
+        href: adminBase,
         icon: "products",
         order: 30,
       },
     ],
-    storefrontRoutes: [
-      { pattern: "/products", entrypoint: "@takontuku/catalog/routes/products/index.astro" },
-      { pattern: "/products/[id]", entrypoint: "@takontuku/catalog/routes/products/[id].astro" },
-      { pattern: "/sitemap.xml", entrypoint: "@takontuku/catalog/routes/sitemap.xml.ts" },
+    siteRoutes: [
+      { pattern: publicBase, entrypoint: "@karsa/catalog/routes/products/index.astro" },
+      { pattern: `${publicBase}/[id]`, entrypoint: "@karsa/catalog/routes/products/[id].astro" },
     ],
-    storefrontHomeSections: [
+    sitemapSources: [
+      { id: "catalog-items", entrypoint: "@karsa/catalog/sitemap-source", order: 20 },
+    ],
+    siteHomeSections: [
       {
         id: "catalog-collection",
-        entrypoint: "@takontuku/catalog/components/storefront/StorefrontCollection.astro",
+        entrypoint: "@karsa/catalog/components/storefront/StorefrontCollection.astro",
         order: 20,
       },
     ],
     adminDashboardWidgets: [
       {
         id: "catalog-overview",
-        entrypoint: "@takontuku/catalog/components/admin/CatalogDashboardWidget.astro",
+        entrypoint: "@karsa/catalog/components/admin/CatalogDashboardWidget.astro",
         area: "main",
         order: 20,
       },
     ],
     adminRoutes: [
-      { pattern: "/admin/products", entrypoint: "@takontuku/catalog/routes/admin/products.astro" },
       {
-        pattern: "/admin/api/products/[id]",
-        entrypoint: "@takontuku/catalog/routes/api/admin/products/[id].ts",
+        pattern: adminBase,
+        entrypoint: services
+          ? "@karsa/catalog/routes/admin/services.astro"
+          : "@karsa/catalog/routes/admin/products.astro",
       },
       {
-        pattern: "/admin/products/new",
-        entrypoint: "@takontuku/catalog/routes/admin/products/new.astro",
+        pattern: services ? "/admin/api/services/[id]" : "/admin/api/products/[id]",
+        entrypoint: "@karsa/catalog/routes/api/admin/products/[id].ts",
       },
       {
-        pattern: "/admin/products/[id]/edit",
-        entrypoint: "@takontuku/catalog/routes/admin/products/[id]/edit.astro",
+        pattern: `${adminBase}/new`,
+        entrypoint: "@karsa/catalog/routes/admin/products/new.astro",
+      },
+      {
+        pattern: `${adminBase}/[id]/edit`,
+        entrypoint: "@karsa/catalog/routes/admin/products/[id]/edit.astro",
       },
     ],
   });
 }
 
-export { catalogMessages } from "./messages";
-export { productInputFromForm } from "./product-form";
+export { catalogItemInputFromForm } from "./catalog-item-form";
 export {
-  archiveProduct,
+  archiveItem,
   type CatalogDashboardSummary,
-  countProducts,
-  createProduct,
-  findProductById,
-  findProductsByIds,
+  type CatalogItem,
+  type CatalogItemInput,
+  countItems,
+  createItem,
+  findItemById,
+  findItemsByIds,
   getCatalogDashboardSummary,
   type InventoryMovement,
-  type ListProductsOptions,
+  type ListItemsOptions,
   listCategories,
   listInventoryMovements,
-  listProducts,
-  type Product,
-  type ProductInput,
-  updateProduct,
-} from "./products";
+  listItems,
+  updateItem,
+} from "./catalog-items";
+export { catalogMessages, createCatalogTranslator } from "./messages";

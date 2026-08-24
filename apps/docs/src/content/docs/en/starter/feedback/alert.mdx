@@ -1,0 +1,33 @@
+---
+title: Alert
+description: Contextual feedback with informational, success, warning, and danger tones.
+sidebar:
+  order: 1
+---
+
+import Alert from "@karsa/ui/Alert.astro";
+import ComponentPreview from "../../../../../components/ComponentPreview.astro";
+
+## Preview
+
+<ComponentPreview label="Alert tones" layout="stack">
+  <Alert title="Heads up">Review these details before continuing.</Alert>
+  <Alert tone="success" title="Saved">Your changes are now live.</Alert>
+  <Alert tone="warning" title="Action needed">Review the pending details.</Alert>
+  <Alert tone="danger" title="Unable to save">Try again after checking the fields.</Alert>
+</ComponentPreview>
+
+```astro
+<Alert tone="success" title="Changes saved">
+  The updated content is ready to review.
+</Alert>
+```
+
+## Props
+
+| Prop | Type | Default |
+| --- | --- | --- |
+| `tone` | `"info" \| "success" \| "warning" \| "danger"` | `"info"` |
+| `title` | `string` | — |
+
+The default slot contains the message. Danger alerts use `role="alert"`; other tones use `role="status"`.

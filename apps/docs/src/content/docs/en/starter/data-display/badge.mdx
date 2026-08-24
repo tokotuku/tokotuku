@@ -1,0 +1,31 @@
+---
+title: Badge
+description: Compact status and category labels in five semantic tones.
+sidebar:
+  order: 1
+---
+
+import Badge from "@karsa/ui/Badge.astro";
+import ComponentPreview from "../../../../../components/ComponentPreview.astro";
+
+## Preview
+
+<ComponentPreview label="Badge tones">
+  <Badge>Neutral</Badge>
+  <Badge tone="accent">Featured</Badge>
+  <Badge tone="success">Active</Badge>
+  <Badge tone="warning">Low stock</Badge>
+  <Badge tone="danger">Failed</Badge>
+</ComponentPreview>
+
+```astro
+<Badge tone="success">Active</Badge>
+```
+
+## Props
+
+| Prop | Type | Default |
+| --- | --- | --- |
+| `tone` | `"neutral" \| "accent" \| "success" \| "warning" \| "danger"` | `"neutral"` |
+
+The default slot contains the label. A badge is presentational text; add separate accessible context when color or status is not already clear from its wording.

@@ -1,39 +1,42 @@
 ---
-import brand from "virtual:takontuku/config";
-import { createTranslator, mediaUrl } from "@takontuku/core";
-import { catalogMessages } from "../messages";
-import { fulfillmentTypes } from "../product-form";
-import type { Product } from "../products";
+import brand from "virtual:karsa/config";
+import { mediaUrl } from "@karsa/core";
+import { fulfillmentTypes } from "../catalog-item-form";
+import type { CatalogItem } from "../catalog-items";
+import { createCatalogTranslator } from "../messages";
 
 interface Props {
-  product?: Product;
+  product?: CatalogItem;
   error?: string;
   formId?: string;
+  presentation?: "products" | "services";
 }
 
-const { product, error, formId = "product-form" } = Astro.props;
+const { product, error, formId = "catalog-item-form", presentation = "products" } = Astro.props;
+const services = presentation === "services";
 const fields = Object.entries(product?.customFields ?? {});
-const t = createTranslator(brand, catalogMessages);
-const fulfillmentType = product?.fulfillmentType ?? "physical";
+const t = createCatalogTranslator(brand, presentation);
+const fulfillmentType = services ? "scheduled" : (product?.fulfillmentType ?? "physical");
+const adminBase = services ? "/admin/services" : "/admin/products";
 
 import "./ProductForm.css";
 ---
 
 {error && <p class="form-error" role="alert">{error}</p>}
-<form id={formId} method="post" enctype="multipart/form-data" class="product-form" data-remove-label={t("catalog.products.form.removeField")}>
+<form id={formId} method="post" enctype="multipart/form-data" class="catalog-item-form" data-remove-label={t("catalog.products.form.removeField")}>
   <section class="panel form-section">
     <div class="section-heading"><div><h2>{t("catalog.products.form.infoTitle")}</h2><p>{t("catalog.products.form.infoDescription")}</p></div></div>
     <div class="form-grid">
       <label class="wide">{t("catalog.products.form.name")}<input name="name" required maxlength="120" value={product?.name} /></label>
       <label>{t("catalog.products.form.sku")}<input name="sku" required maxlength="60" value={product?.sku} placeholder={t("catalog.products.form.skuPlaceholder")} /></label>
       <label>{t("catalog.products.form.category")}<input name="category" required maxlength="80" value={product?.category} placeholder={t("catalog.products.form.categoryPlaceholder")} /></label>
-      <label>{t("catalog.products.form.price")}<input name="price" required type="number" min="0" step="0.01" value={product ? product.priceCents / 100 : undefined} /></label>
-      <label>{t("catalog.products.form.fulfillmentType")}<select name="fulfillmentType" data-fulfillment-type>
+      <label>{t("catalog.products.form.price")}<input name="price" required={presentation === "products"} type="number" min="0" step="0.01" value={product?.priceCents == null ? undefined : product.priceCents / 100} /></label>
+      {services ? <input type="hidden" name="fulfillmentType" value="scheduled" /> : <label>{t("catalog.products.form.fulfillmentType")}<select name="fulfillmentType" data-fulfillment-type>
         {fulfillmentTypes.map((type) => (
           <option value={type} selected={fulfillmentType === type}>{t(`catalog.products.form.fulfillmentType.${type}`)}</option>
         ))}
-      </select></label>
-      <label data-stock-field hidden={fulfillmentType !== "physical"}>{t("catalog.products.form.stock")}<input name="stock" data-stock-input required={fulfillmentType === "physical"} disabled={fulfillmentType !== "physical"} type="number" min="0" step="1" value={product?.stock ?? 0} /></label>
+      </select></label>}
+      {!services && <label data-stock-field hidden={fulfillmentType !== "physical"}>{t("catalog.products.form.stock")}<input name="stock" data-stock-input required={fulfillmentType === "physical"} disabled={fulfillmentType !== "physical"} type="number" min="0" step="1" value={product?.stock ?? 0} /></label>}
       <label class="wide">{t("catalog.products.form.description")}<textarea name="description" required rows="5" maxlength="2000">{product?.description}</textarea></label>
       <label class="wide">{t("catalog.products.form.image")} {product && <span>{t("catalog.products.form.imageReplaceHint")}</span>}<input name="image" type="file" accept="image/*" required={!product} /></label>
       {product && <div class="current-image"><img src={mediaUrl(product.imageKey)} alt={t("catalog.products.form.currentImageAlt")} /></div>}
@@ -51,7 +54,7 @@ import "./ProductForm.css";
     <template data-field-template><div class="custom-row"><input name="customKey" placeholder={t("catalog.products.form.fieldName")} /><input name="customValue" placeholder={t("catalog.products.form.fieldValue")} /><button type="button" aria-label={t("catalog.products.form.removeField")} data-remove-field>×</button></div></template>
   </section>
 
-  <div class="form-actions"><a class="admin-button" href="/admin/products">{t("catalog.products.form.cancel")}</a><button class="admin-button admin-button--primary" type="submit">{t("catalog.products.form.save")}</button></div>
+  <div class="form-actions"><a class="admin-button" href={adminBase}>{t("catalog.products.form.cancel")}</a><button class="admin-button admin-button--primary" type="submit">{t("catalog.products.form.save")}</button></div>
 </form>
 
 <script>
@@ -77,4 +80,3 @@ import "./ProductForm.css";
     }
   });
 </script>
-

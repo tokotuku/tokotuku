@@ -1,0 +1,88 @@
+---
+import { env } from "cloudflare:workers";
+import registry from "virtual:karsa/registry";
+import { mediaUrl } from "@karsa/core";
+import { brand } from "@karsa/core/brand";
+import Layout from "@karsa/ui/DocumentLayout.astro";
+import SiteFooter from "@karsa/ui/SiteFooter.astro";
+import SiteHeader from "@karsa/ui/SiteHeader.astro";
+import { listPublishedPosts } from "../../posts";
+
+const page = Math.max(1, Math.trunc(Number(Astro.url.searchParams.get("page"))) || 1);
+const pageSize = 12;
+const posts = await listPublishedPosts(env.DB, { limit: pageSize, offset: (page - 1) * pageSize });
+const locale = brand.locale.toLowerCase().startsWith("id") ? "id" : "en";
+const site = brand.site;
+const hasCatalog = registry.moduleNames.includes("catalog");
+const catalogPresentation =
+  registry.clientConfig["catalog"]?.["presentation"] === "services" ? "services" : "products";
+const localized = (idText: string, enText: string) => (locale === "id" ? idText : enText);
+const catalogHref = catalogPresentation === "services" ? "/services" : "/products";
+const catalogLabel =
+  catalogPresentation === "services"
+    ? localized("Layanan", "Services")
+    : localized("Produk", "Products");
+const catalogFooterLink = hasCatalog ? [{ label: catalogLabel, href: catalogHref }] : [];
+const footerLinks = [
+  ...catalogFooterLink,
+  { label: locale === "id" ? "RSS" : "RSS", href: "/rss.xml" },
+  ...(site?.links ?? []),
+];
+const headerLinks = [
+  { label: localized("Blog", "Journal"), href: "/blog", current: true },
+  ...(site?.links ?? []),
+];
+const headerActions = hasCatalog ? [{ label: catalogLabel, href: catalogHref, icon: "box" }] : [];
+
+import "../../styles/routes/content-blog.css";
+---
+
+<Layout
+  title={`${locale === "id" ? "Blog" : "Journal"} — ${brand.name}`}
+  description={locale === "id" ? "Catatan dan cerita terbaru." : "Notes and stories from the team."}
+  siteName={brand.name}
+  lang={locale}
+  palette={brand.palette}
+>
+  <SiteHeader
+    brand={brand}
+    announcement={site?.announcement ?? (locale === "id" ? "Cerita dan catatan." : "Stories and notes.")}
+    links={headerLinks}
+    actions={headerActions}
+    labels={{
+      home: locale === "id" ? "Beranda" : "Home",
+      navigation: locale === "id" ? "Navigasi situs" : "Site navigation",
+    }}
+  />
+  <main class="content-page content-blog-index">
+    <header class="content-heading">
+      <p class="eyebrow">{brand.name}</p>
+      <h1>{locale === "id" ? "Blog" : "Journal"}</h1>
+      <p>{locale === "id" ? "Gagasan, proses, dan cerita di balik karya kami." : "Ideas, process, and stories behind the work."}</p>
+    </header>
+    {posts.length === 0 ? (
+      <section class="content-empty"><h2>{locale === "id" ? "Belum ada tulisan" : "No posts yet"}</h2><p>{locale === "id" ? "Kembali lagi segera." : "Check back soon for new writing."}</p></section>
+    ) : (
+      <div class="content-post-grid">
+        {posts.map((post) => (
+          <article class="content-post-card">
+            {post.coverImageKey && <img src={mediaUrl(post.coverImageKey)} alt="" loading="lazy" />}
+            <div class="content-post-card-copy">
+              <p class="content-post-date">{post.publishedAt ?? post.updatedAt}</p>
+              <h2><a href={`/blog/${post.slug}`}>{post.title}</a></h2>
+              {post.excerpt && <p>{post.excerpt}</p>}
+              <a class="content-read-more" href={`/blog/${post.slug}`}>{locale === "id" ? "Baca selengkapnya" : "Read more"} <span aria-hidden="true">↗</span></a>
+            </div>
+          </article>
+        ))}
+      </div>
+    )}
+  </main>
+  <SiteFooter
+    brandName={brand.name}
+    tagline={locale === "id" ? "Catatan yang dibuat dengan niat." : "Writing made with intention."}
+    links={footerLinks}
+    newsletterAction={site?.newsletter?.action}
+    navigationLabel={locale === "id" ? "Navigasi footer" : "Footer navigation"}
+  />
+</Layout>

@@ -1,5 +1,5 @@
 // Shared helpers for publish-private.ts and publish-local.ts: both publish
-// @takontuku/* packages to a registry by stamping `private` off and
+// @karsa/* packages to a registry by stamping `private` off and
 // workspace:* dependencies to real versions in memory, then restoring the
 // file from disk afterward regardless of outcome. This is that shared
 // mechanism, factored out once both scripts turned out to need the exact
@@ -34,19 +34,31 @@ export interface PackageJson {
 
 const DEP_FIELDS = ["dependencies", "devDependencies", "peerDependencies"] as const;
 
-/** Maps an @takontuku/* package name to the directory it lives in, for resolving workspace:* references. */
+/** Maps an @karsa/* package name to the directory it lives in, for resolving workspace:* references. */
 export const DIR_BY_PACKAGE_NAME: Record<string, string> = {
-  "@takontuku/core": "packages/core",
-  "@takontuku/ui": "packages/ui",
-  "@takontuku/auth": "packages/auth",
-  "@takontuku/config": "configs",
-  "@takontuku/catalog": "packages/catalog",
-  "@takontuku/orders": "packages/orders",
+  "@karsa/core": "packages/core",
+  "@karsa/theme": "packages/theme",
+  "@karsa/ui": "packages/ui",
+  "@karsa/auth": "packages/auth",
+  "@karsa/config": "configs",
+  "@karsa/charts": "packages/charts",
+  "@karsa/jarene": "packages/jarene",
+  "@karsa/catalog": "packages/catalog",
+  "@karsa/orders": "packages/orders",
+  "@karsa/booking": "packages/booking",
+  "@karsa/content": "packages/content",
 };
 
 export function sh(command: string, args: string[], cwd: string): void {
   console.log(`+ ${command} ${args.join(" ")}  (in ${path.relative(ROOT, cwd) || "."})`);
   execFileSync(command, args, { cwd, stdio: "inherit" });
+}
+
+/** Build a dependency-ordered set without requiring Moon's remote toolchain plugins. */
+export function runWorkspaceBuilds(directories: string[]): void {
+  for (const directory of directories) {
+    sh("bun", ["run", "build"], path.join(ROOT, directory));
+  }
 }
 
 export function readJson(filePath: string): PackageJson {
@@ -68,11 +80,11 @@ const NPMRC_PATH = path.join(ROOT, ".npmrc");
 
 /**
  * `bun publish`'s auth-token lookup for an UNSCOPED package name (only
- * create-takontuku, of everything these scripts publish) needs a literal
+ * create-karsa, of everything these scripts publish) needs a literal
  * default `registry=` line in .npmrc to anchor to -- verified empirically
  * that neither `--registry` on the command line nor `npm_config_registry` /
  * `npm_config__authtoken` env vars are enough on their own. Scoped
- * @takontuku/* packages don't have this problem: `@takontuku:registry=`
+ * @karsa/* packages don't have this problem: `@karsa:registry=`
  * already gives bun that anchor by itself.
  *
  * The persistent repo .npmrc deliberately has no default `registry=` line

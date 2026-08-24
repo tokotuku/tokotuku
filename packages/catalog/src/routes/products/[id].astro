@@ -1,21 +1,26 @@
 ---
 import { env } from "cloudflare:workers";
-import registry from "virtual:takontuku/registry";
-import { createTranslator, mediaUrl } from "@takontuku/core";
-import { brand, money } from "@takontuku/core/brand";
-import Layout from "@takontuku/ui/DocumentLayout.astro";
-import StoreHeader from "@takontuku/ui/StoreHeader.astro";
-import { catalogMessages } from "../../messages";
-import { findProductById } from "../../products";
+import registry from "virtual:karsa/registry";
+import { mediaUrl } from "@karsa/core";
+import { brand, money } from "@karsa/core/brand";
+import Layout from "@karsa/ui/DocumentLayout.astro";
+import SiteHeader from "@karsa/ui/SiteHeader.astro";
+import { findItemById } from "../../catalog-items";
+import { createCatalogTranslator } from "../../messages";
 
 const id = Number(Astro.params["id"]);
-const product = await findProductById(env.DB, id);
-if (!product) return new Response("Product not found", { status: 404 });
-const t = createTranslator(brand, catalogMessages);
-const hasOrders = registry.moduleNames.includes("orders");
+const presentation =
+  registry.clientConfig["catalog"]?.["presentation"] === "services" ? "services" : "products";
+const services = presentation === "services";
+const publicBase = services ? "/services" : "/products";
+const product = await findItemById(env.DB, id, { presentation });
+if (!product)
+  return new Response(services ? "Service not found" : "Product not found", { status: 404 });
+const t = createCatalogTranslator(brand, presentation);
+const hasOrders = registry.clientConfig["orders"]?.["presentation"] === "orders";
 // A scheduled item is booked, not carted or stocked — capability-checked by
 // name only, same as hasOrders above, so catalog never imports
-// @takontuku/booking and stays installable without it.
+// @karsa/booking and stays installable without it.
 const isPhysical = product.fulfillmentType === "physical";
 const hasBooking = registry.moduleNames.includes("booking");
 const imageUrl = mediaUrl(product.imageKey);
@@ -26,36 +31,59 @@ const serialized = JSON.stringify({
   imageUrl,
 });
 const locale = brand.locale.toLowerCase().startsWith("id") ? "id" : "en";
+const localized = (idText: string, enText: string) => (locale === "id" ? idText : enText);
+const shopLabel = services ? localized("Layanan", "Services") : localized("Produk", "Products");
+const navigationLinks = [{ label: shopLabel, href: publicBase, current: true }];
+const headerActions = [
+  { label: localized("Akun", "Account"), href: "/login", icon: "user" },
+  ...(hasOrders
+    ? [{ label: localized("Keranjang", "Cart"), href: "/cart", icon: "cart", badge: true }]
+    : []),
+];
+const priceLabel =
+  product.priceCents === null
+    ? localized("Harga berdasarkan kebutuhan", "Pricing on request")
+    : money(product.priceCents / 100);
+const bookingLabel = localized("Ajukan jadwal", "Request a schedule");
+const stockLabel =
+  product.stock > 0
+    ? t("catalog.detail.inStock", { count: product.stock })
+    : t("catalog.detail.outOfStock");
+const cartLabel = product.stock > 0 ? t("catalog.detail.add") : t("catalog.detail.soldOut");
 const productJsonLd = {
   "@context": "https://schema.org",
-  "@type": "Product",
+  "@type": services ? "Service" : "Product",
   name: product.name,
   description: product.description,
   sku: product.sku,
   category: product.category,
   image: new URL(imageUrl, Astro.url.origin).toString(),
-  offers: {
-    "@type": "Offer",
-    url: new URL(Astro.url.pathname, Astro.url.origin).toString(),
-    priceCurrency: brand.currency,
-    price: (product.priceCents / 100).toFixed(2),
-    availability:
-      !isPhysical || product.stock > 0
-        ? "https://schema.org/InStock"
-        : "https://schema.org/OutOfStock",
-  },
+  ...(product.priceCents === null
+    ? {}
+    : {
+        offers: {
+          "@type": "Offer",
+          url: new URL(Astro.url.pathname, Astro.url.origin).toString(),
+          priceCurrency: brand.currency,
+          price: (product.priceCents / 100).toFixed(2),
+          availability:
+            !isPhysical || product.stock > 0
+              ? "https://schema.org/InStock"
+              : "https://schema.org/OutOfStock",
+        },
+      }),
 };
 
 import "../../styles/routes/catalog-product-detail.css";
 ---
 
-<Layout title={product.name + " — " + brand.name} description={product.description} image={imageUrl} type="product" jsonLd={productJsonLd} siteName={brand.name} lang={locale}>
-  <StoreHeader current="products" brand={brand} showCart={hasOrders} announcement={brand.storefront?.announcement ?? (locale === "id" ? "Objek untuk ritual sehari-hari." : "Objects for everyday rituals.")} labels={{ home: t("catalog.detail.home"), shop: t("catalog.detail.shop"), cart: locale === "id" ? "Keranjang" : "Cart" }} />
+<Layout title={product.name + " — " + brand.name} description={product.description} image={imageUrl} type={services ? "website" : "product"} jsonLd={productJsonLd} siteName={brand.name} lang={locale}>
+  <SiteHeader current={presentation} brand={brand} links={navigationLinks} actions={headerActions} announcement={brand.site?.announcement ?? false} labels={{ home: t("catalog.detail.home"), navigation: localized("Navigasi situs", "Site navigation") }} />
   <main>
-    <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="/">{t("catalog.detail.home")}</a><span>/</span><a href="/products">{t("catalog.detail.shop")}</a><span>/</span><span>{product.name}</span></nav>
+    <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="/">{t("catalog.detail.home")}</a><span>/</span><a href={publicBase}>{shopLabel}</a><span>/</span><span>{product.name}</span></nav>
     <div class="product-detail">
       <div class="media"><img src={imageUrl} alt={product.name} /></div>
-      <section class="product-copy"><p class="eyebrow">{product.category}</p><h1>{product.name}</h1><p class="price">{money(product.priceCents / 100)}</p><p class="description">{product.description}</p>{isPhysical ? <><p class:list={["stock", product.stock <= 5 && "stock--low"]}>{product.stock > 0 ? t("catalog.detail.inStock", { count: product.stock }) : t("catalog.detail.outOfStock")}</p>{hasOrders && <button type="button" data-add-to-cart data-product={serialized} disabled={product.stock <= 0}>{product.stock > 0 ? t("catalog.detail.add") : t("catalog.detail.soldOut")}</button>}</> : hasBooking && <a class="book-now" href={`/booking/${product.id}`}>{t("catalog.detail.bookNow")}</a>}{Object.keys(product.customFields).length > 0 && <dl>{Object.entries(product.customFields).map(([key, value]) => <div><dt>{key}</dt><dd>{value}</dd></div>)}</dl>}{isPhysical && hasOrders && <ul><li>{t("catalog.detail.cash")}</li><li>{t("catalog.detail.reassurance")}</li></ul>}</section>
+      <section class="product-copy"><p class="eyebrow">{product.category}</p><h1>{product.name}</h1><p class="price">{priceLabel}</p><p class="description">{product.description}</p>{isPhysical && <><p class:list={["stock", product.stock <= 5 && "stock--low"]}>{stockLabel}</p>{hasOrders && <button type="button" data-add-to-cart data-product={serialized} disabled={product.stock <= 0}>{cartLabel}</button>}</>}{!isPhysical && hasBooking && <a class="book-now" href={`/booking/${product.id}`}>{bookingLabel}</a>}{Object.keys(product.customFields).length > 0 && <dl>{Object.entries(product.customFields).map(([key, value]) => <div><dt>{key}</dt><dd>{value}</dd></div>)}</dl>}{isPhysical && hasOrders && <ul><li>{t("catalog.detail.cash")}</li><li>{t("catalog.detail.reassurance")}</li></ul>}</section>
     </div>
   </main>
 </Layout>

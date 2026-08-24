@@ -2,31 +2,31 @@
 
 Seven scripts, sharing `shared.ts` for the publish/scaffold/assert mechanics.
 
-The default scaffold `create-takontuku` produces is **public-only**: `auth` + `core` + `ui`.
+The default scaffold `create-karsa` produces is **public-only**: `auth` + `core` + `ui`.
 `catalog` and `orders` are private modules that never ship in the scaffold, so every gate below
-that needs one adds it explicitly with the real `takontuku add` command (`shared.ts`'s
+that needs one adds it explicitly with the real `karsa add` command (`shared.ts`'s
 `addCatalogModule`/`addOrdersModule` helpers) rather than assuming it's already there.
 
 ## Gate 1 — `run.ts`, "tarball install"
 
-Publishes every publishable `@takontuku/*` package to a real registry and installs them into a
-scratch client the way a real client would — `create-takontuku` → `bun install` → `takontuku
-skills install` → `takontuku db sync` → `wrangler d1 migrations apply --local` → `astro build`
+Publishes every publishable `@karsa/*` package to a real registry and installs them into a
+scratch client the way a real client would — `create-karsa` → `bun install` → `karsa
+skills install` → `karsa db sync` → `wrangler d1 migrations apply --local` → `astro build`
 → a `wrangler dev` boot check. Gate 1 also verifies the generated `AGENTS.md`, `CLAUDE.md`,
 `README.md`, both local skill directories, and the emitted Tailwind utilities sourced from the
-packed `@takontuku/*` packages.
+packed `@karsa/*` packages.
 
 This exists because `workspace:*` symlinks hide problems that only surface once packages are
 actually installed from tarballs: broken `exports` maps, missing `files` entries, missing
 `peerDependencies`, and `node_modules` module resolution failures. Every package in this repo can
-pass `moon ci :lint :typecheck :test :build` and still be broken for a real client — this is the
+pass the workspace `lint`, `typecheck`, `test`, and `build` scripts and still be broken for a real client — this is the
 gate that catches that class of bug. The public-only scaffold is enough on its own here; no
 `add` needed.
 
 ## Gate 2 — `fixtures.ts`, "a-la-carte nyata"
 
 Gate 1 only proves the "everything installed" case works. Gate 2 proves the actual a-la-carte
-seam: it scaffolds a public-only client, adds just the `catalog` module with `takontuku add`, and
+seam: it scaffolds a public-only client, adds just the `catalog` module with `karsa add`, and
 asserts nothing `orders`-shaped leaked in as a side effect — no
 `orders`/`order_items`/`payments_bank_transfer_proofs` tables, no Orders entry in the admin
 nav, no cart affordances on storefront pages — while `catalog` and `auth` work correctly on their
@@ -67,28 +67,28 @@ that step is skipped.
 ## Gate 5 (verification slice) — `propagation.ts`, "update propagation"
 
 The actual business reason this migration exists: "framework harus jadi package supaya perbaikan
-bisa didorong lewat `bun update`." Scaffolds a client the way `create-takontuku` actually leaves
-one — `@takontuku/*` dependencies pinned to the literal `"latest"` specifier, not a fixed version
+bisa didorong lewat `bun update`." Scaffolds a client the way `create-karsa` actually leaves
+one — `@karsa/*` dependencies pinned to the literal `"latest"` specifier, not a fixed version
 — adds `catalog` (also pinned to `"latest"`, matching its siblings), confirms a baseline, patches
 a string in `catalog`'s product listing, republishes, and asserts `bun update` **in that same
 client directory** (not a fresh install) picks up the change.
 
 This is a verification slice, not the plan's full Gate 5. The rest of Gate 5 calls for wiring
 `changeset version` + publish into CI — the private registry on `dev`, real npm on `main`. That
-means claiming the `@takontuku` scope on the public npm registry and putting publish credentials
+means claiming the `@karsa` scope on the public npm registry and putting publish credentials
 in CI: a release-engineering decision with real external consequences, not something to set up
 unilaterally. This script only proves the update *mechanism* itself works, entirely against the
 local registry.
 
 ## Demo walkthrough — `demo.ts`, "bare install, seed, change the design"
 
-The concrete client experience none of the other gates exercise: `create-takontuku`, add
-`catalog`, then `takontuku db seed`, then a theme override — in that order, on the same client,
+The concrete client experience none of the other gates exercise: `create-karsa`, add
+`catalog`, then `karsa db seed`, then a theme override — in that order, on the same client,
 asserting each step's effect before moving to the next.
 
 1. **Bare install.** A public-only scaffold with just `catalog` added shows the empty-catalog
    state — zero products, by design (no `db seed` yet).
-2. **Seed.** `takontuku db seed` inserts `@takontuku/catalog`'s 3 demo products (+ stock), uploads
+2. **Seed.** `karsa db seed` inserts `@karsa/catalog`'s 3 demo products (+ stock), uploads
    their images to R2, the storefront lists them, and the seeded image serves `200` with the
    right content type.
 3. **Change the design.** Writing `src/theme/ProductCard.astro` and rebuilding replaces the stock
@@ -97,7 +97,7 @@ asserting each step's effect before moving to the next.
 
 ## `modules.ts`, "real tooling accepts the CLI's output"
 
-No unit test can prove `takontuku add`/`remove`'s rewritten `astro.config.mjs` and
+No unit test can prove `karsa add`/`remove`'s rewritten `astro.config.mjs` and
 `src/middleware.ts` survive Biome's real import sorter and formatter, or that `astro check` still
 likes them — only running the client's own `lint`/`typecheck`/`build` scripts against the CLI's
 actual output proves that. Scaffolds a public-only client, adds `orders` (pulling in `catalog`),
@@ -117,10 +117,10 @@ the actual `.replace()` output, so it passed while the feature was silently brok
 Start a local registry first:
 
 ```sh
-moon run verdaccio:up
+docker compose -f tools/verdaccio/compose.yaml up -d verdaccio
 ```
 
-`@takontuku/catalog` and `@takontuku/orders` require authentication to even read
+Private module packages require authentication to even read
 (`tools/verdaccio/config.yaml`), so every gate that adds one now needs `REGISTRY_AUTH_TOKEN` set to
 an account's token -- self-registration is closed (`max_users: -1`), so create one first if you
 haven't (see `tools/verdaccio/README.md`):
@@ -129,30 +129,29 @@ haven't (see `tools/verdaccio/README.md`):
 export REGISTRY_AUTH_TOKEN=<token from npm adduser, or the _authToken line in this repo's own .npmrc>
 ```
 
-Gates that never touch catalog/orders (Gate 1) don't need it, but setting it doesn't hurt them
+Gates that never touch private modules (Gate 1) don't need it, but setting it doesn't hurt them
 either -- set it once per shell and forget about it.
 
 Then:
 
 ```sh
-moon run e2e-install:run           # Gate 1
-moon run e2e-install:fixtures      # Gate 2
-moon run e2e-install:upgrade       # Gate 2b
-moon run e2e-install:smoke         # Gate 3
-moon run e2e-install:propagation   # Gate 5 (verification slice)
-moon run e2e-install:demo          # Demo walkthrough
-moon run e2e-install:modules       # real lint/typecheck/build against add/remove output
+bun tools/e2e-install/run.ts           # Gate 1
+bun tools/e2e-install/fixtures.ts      # Gate 2
+bun tools/e2e-install/upgrade.ts       # Gate 2b
+bun tools/e2e-install/smoke.ts         # Gate 3
+bun tools/e2e-install/propagation.ts   # Gate 5 (verification slice)
+bun tools/e2e-install/demo.ts          # Demo walkthrough
+bun tools/e2e-install/modules.ts       # real lint/typecheck/build against add/remove output
 ```
 
-Gate 1 launches the packed client's Wrangler CLI through Node so the local dev proxy is exercised
-the same way it is in a normal client environment. If Node is not on `PATH` (for example when the
-gate itself is started by Bun), point it at the runtime explicitly:
+Runtime gates launch the packed client's Wrangler CLI through Node because Wrangler's outer dev
+proxy can hang under Bun even after the inner worker reports ready. If Node is not on `PATH`, set:
 
 ```sh
-TAKONTUKU_NODE_BINARY=/path/to/node moon run e2e-install:run
+KARSA_NODE_BINARY=/path/to/node bun tools/e2e-install/run.ts
 ```
 
-Each run publishes at a unique version (`0.0.0-e2e.<timestamp>`), so all seven are safe to run
+Each run publishes at a unique version (`0.0.0-e2e.<timestamp>`), so all twelve are safe to run
 repeatedly against a registry that already has earlier runs' packages — reusing a version across
 runs would either be rejected by the registry or, worse, serve a stale tarball from a package
 manager's local cache even after a fresh publish.

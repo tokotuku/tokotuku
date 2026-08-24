@@ -1,20 +1,20 @@
 // @ts-check
 import cloudflare from "@astrojs/cloudflare";
+import { auth } from "@karsa/auth";
+import { booking } from "@karsa/booking";
+import { catalog } from "@karsa/catalog";
+import { karsa } from "@karsa/core";
+import { jarene } from "@karsa/jarene";
+import { orders } from "@karsa/orders";
 import tailwindcss from "@tailwindcss/vite";
-import { auth } from "@takontuku/auth";
-import { booking } from "@takontuku/booking";
-import { catalog } from "@takontuku/catalog";
-import { takontuku } from "@takontuku/core";
-import { jarene } from "@takontuku/jarene";
-import { orders } from "@takontuku/orders";
 import { defineConfig } from "astro/config";
 
-// Run "takontuku add <module>" or "takontuku remove <module>" to change
+// Run "karsa add <module>" or "karsa remove <module>" to change
 // what this client has installed -- it edits this file, src/middleware.ts,
 // and package.json for you.
 export default defineConfig({
   integrations: [
-    takontuku({
+    karsa({
       brand: {
         name: "Teman Ekor",
         locale: "id-ID",
@@ -24,7 +24,7 @@ export default defineConfig({
           light: { accent: "#176B67", accentForeground: "#FFFDF8" },
           dark: { accent: "#73D1C2", accentForeground: "#102B2A" },
         },
-        storefront: {
+        site: {
           announcement: "Perawatan penuh perhatian untuk setiap ekor",
           hero: {
             eyebrow: "Teman Ekor",
@@ -35,10 +35,16 @@ export default defineConfig({
           },
         },
       },
-      modules: [auth(), jarene(), catalog(), orders(), booking()],
+      modules: [
+        auth({ registration: "public" }),
+        jarene(),
+        catalog({ presentation: "services" }),
+        orders({ presentation: "inquiries" }),
+        booking(),
+      ],
     }),
   ],
-  // @takontuku/ui's Layout.astro imports its own CSS, which needs this plugin.
+  // @karsa/ui's Layout.astro imports its own CSS, which needs this plugin.
   vite: { plugins: [tailwindcss()] },
   output: "server",
   adapter: cloudflare({

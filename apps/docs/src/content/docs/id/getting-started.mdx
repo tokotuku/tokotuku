@@ -1,0 +1,81 @@
+---
+title: Mulai cepat
+description: Instal Karsa, pilih preset situs, dan render komponen Astro bertipe pertama.
+sidebar:
+  order: 1
+---
+
+## Instalasi
+
+Paket Karsa bersifat independen. Instal dependency workspace sekali, atau tambahkan paket yang dipilih oleh preset:
+
+```sh
+bun install
+```
+
+Untuk proyek baru, buat base sekecil mungkin lalu biarkan CLI mengatur modul:
+
+```sh
+bunx create-karsa my-site
+cd my-site
+bunx karsa skills install
+```
+
+## Render komponen
+
+Import komponen dan stylesheet tema di boundary dokumen:
+
+```astro
+---
+import Button from "@karsa/ui/Button.astro";
+import "@karsa/theme/styles.css";
+---
+
+<Button variant="primary">Simpan perubahan</Button>
+```
+
+HTML yang dihasilkan semantik dan statis secara default. Letakkan boundary komponen di layout aplikasi agar semua halaman memakai token yang sama.
+
+## Peran paket
+
+| Paket | Kegunaan |
+| --- | --- |
+| `@karsa/theme` | Token Tailwind, font, palette, dan bootstrap tema |
+| `@karsa/ui` | Primitive Astro dan surface aplikasi |
+| `@karsa/core` | Integrasi, registry, CLI, formatter, dan virtual module |
+| `@karsa/charts` | Komponen dan tipe chart opsional |
+| `@karsa/auth` | Registrasi, session, dan kontrol akses |
+| `@karsa/catalog` | Catalog privat produk/layanan dan presentation adapter |
+| `@karsa/orders` | Lifecycle checkout/order atau inquiry privat |
+| `@karsa/booking` | Jadwal layanan dan permintaan booking privat |
+| `@karsa/content` | Post publikasi privat, preview, RSS, dan kontribusi sitemap |
+
+## Instruksi agent
+
+Proyek hasil generate memiliki `AGENTS.md` sebagai instruksi kanonis dan bridge `CLAUDE.md` yang ringkas. Skill Karsa yang sama dipasang di `.agents/skills/` dan `.claude/skills/`:
+
+- `karsa-site-builder` — memilih preset dan tier, lalu merencanakan ownership serta bukti.
+- `karsa-ui` — memakai komponen, token `--karsa-*`, konfigurasi brand, dan formatter locale.
+- `karsa-modules` — menambah, menghapus, dan mengintegrasikan modul opsional lewat kontrak registry.
+- `karsa-data` — menangani migrasi, seed, media, binding, dan secret dengan aman.
+- `karsa-content` — menulis post Markdown aman dan menjaga data editorial di content layer.
+
+Mulai task AI dengan meminta agent membaca `AGENTS.md`, menyatakan preset dan tier, serta mencantumkan check yang akan dijalankan.
+
+Contoh prompt Indonesia:
+
+```text
+Baca AGENTS.md. Pilih preset dan tier yang diizinkan, jelaskan asumsi serta kepemilikan halaman, lalu implementasikan irisan vertikal terkecil dan jalankan typecheck serta lint.
+```
+
+Contoh prompt English:
+
+```text
+Read AGENTS.md. Choose the authorized preset and tier, explain assumptions and page ownership, implement the smallest vertical slice, and run typecheck and lint.
+```
+
+Setelah upgrade `@karsa/core`, perbarui skill:
+
+```sh
+bunx karsa skills install
+```

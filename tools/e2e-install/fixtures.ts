@@ -14,13 +14,12 @@
 // module set: a client with {auth, catalog} only, built by scaffolding the
 // public-only default (auth + core + ui -- catalog and orders are private
 // and never ship in the scaffold) and adding just the catalog module via
-// `takontuku add` -- proving both that an a-la-carte install pulls in
+// `karsa add` -- proving both that an a-la-carte install pulls in
 // nothing extra and that `add` itself works end to end.
 //
 // Prerequisite: a registry reachable at REGISTRY_URL (defaults to Verdaccio
-// on http://localhost:4873). Start one locally with `moon run verdaccio:up`.
+// on http://localhost:4873). Start one locally with Docker Compose; see README.md.
 
-import { spawn } from "node:child_process";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -34,6 +33,8 @@ import {
   scaffoldClient,
   setupAndLogIn,
   sh,
+  spawnWranglerDev,
+  terminateProcessGroup,
   waitForServer,
 } from "./shared.ts";
 
@@ -47,11 +48,7 @@ const ADMIN = {
 /** Boots the fixture, completes setup, and asserts orders-shaped affordances are absent from both the admin nav and a storefront product page while catalog itself still works. */
 async function bootAndAssert(clientDir: string): Promise<void> {
   const origin = `http://localhost:${BOOT_CHECK_PORT}`;
-  const child = spawn("bunx", ["wrangler", "dev", "--port", String(BOOT_CHECK_PORT)], {
-    cwd: clientDir,
-    stdio: "inherit",
-    detached: true,
-  });
+  const child = spawnWranglerDev(clientDir, BOOT_CHECK_PORT);
 
   try {
     await waitForServer(`${origin}/setup`, 30_000);
@@ -77,24 +74,22 @@ async function bootAndAssert(clientDir: string): Promise<void> {
 
     console.log("Boot check passed: setup, login, and both absence assertions.");
   } finally {
-    if (child.pid) process.kill(-child.pid, "SIGTERM");
+    terminateProcessGroup(child);
   }
 }
 
 async function main(): Promise<void> {
   const version = publishAll();
 
-  const scratchParent = mkdtempSync(path.join(tmpdir(), "takontuku-e2e-fixture-"));
+  const scratchParent = mkdtempSync(path.join(tmpdir(), "karsa-e2e-fixture-"));
   const clientDir = scaffoldClient(scratchParent, "gate2-fixture", version);
   console.log(`Scaffolded client (public-only default: auth) at ${clientDir}`);
 
   installClient(clientDir);
   addCatalogModule(clientDir);
-  console.log(
-    "Added the catalog module via `takontuku add` -- fixture is now auth + catalog only.",
-  );
+  console.log("Added the catalog module via `karsa add` -- fixture is now auth + catalog only.");
 
-  sh("bunx", ["takontuku", "db", "sync"], clientDir);
+  sh("bunx", ["karsa", "db", "sync"], clientDir);
   sh("bunx", ["wrangler", "d1", "migrations", "apply", "DB", "--local"], clientDir);
 
   const tables = queryTableNames(clientDir);

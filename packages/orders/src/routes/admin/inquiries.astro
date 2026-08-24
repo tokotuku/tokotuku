@@ -1,0 +1,23 @@
+---
+import { env } from "cloudflare:workers";
+import { brand, date } from "@karsa/core/brand";
+import AdminLayout from "@karsa/core/layouts/AdminLayout.astro";
+import EmptyState from "@karsa/ui/EmptyState.astro";
+import { listOrders } from "../../orders";
+
+const id = brand.locale.toLowerCase().startsWith("id");
+const page = await listOrders(env.DB, { pageSize: 50 });
+const inquiries = page.items.filter((order) =>
+  ["inquiry", "quoted", "confirmed", "in_progress", "completed", "cancelled"].includes(
+    order.status,
+  ),
+);
+---
+<AdminLayout title={id ? "Permintaan" : "Inquiries"}>
+  <main class="admin-page">
+    <header><p>{id ? "Layanan" : "Services"}</p><h1>{id ? "Permintaan" : "Inquiries"}</h1><p>{id ? "Tindak lanjuti permintaan layanan dari satu tempat." : "Follow up service requests from one place."}</p></header>
+    {inquiries.length === 0 ? <EmptyState title={id ? "Belum ada permintaan" : "No inquiries yet"} description={id ? "Permintaan booking dan layanan akan muncul di sini." : "Booking and service requests will appear here."} /> : (
+      <div class="table-wrap"><table><thead><tr><th>{id ? "Nomor" : "Number"}</th><th>{id ? "Klien" : "Client"}</th><th>Status</th><th>{id ? "Dibuat" : "Created"}</th></tr></thead><tbody>{inquiries.map((inquiry) => <tr><td>{inquiry.orderNumber}</td><td>{inquiry.customerName}</td><td>{inquiry.status}</td><td>{date(inquiry.createdAt)}</td></tr>)}</tbody></table></div>
+    )}
+  </main>
+</AdminLayout>

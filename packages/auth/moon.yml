@@ -22,7 +22,7 @@ tasks:
 
   typecheck:
     command: "astro check"
-    # @takontuku/core is consumed via its built dist/ (not raw source) for
+    # @karsa/core is consumed via its built dist/ (not raw source) for
     # runtime values like defineModule — without this, typecheck can race
     # tsup's clean-then-rebuild and read a briefly-missing dist/index.d.ts.
     deps: ["core:build"]

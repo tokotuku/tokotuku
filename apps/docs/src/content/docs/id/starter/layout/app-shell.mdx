@@ -1,0 +1,21 @@
+---
+title: AppShell
+description: Shell workspace dua kolom responsif dengan slot sidebar, topbar, dan konten.
+sidebar:
+  order: 1
+---
+
+import AppShell from "@karsa/ui/AppShell.astro";
+import ComponentPreview from "../../../../../components/ComponentPreview.astro";
+
+<ComponentPreview label="Application shell" layout="stack">
+  <div class="h-[28rem] overflow-hidden rounded-lg">
+    <AppShell>
+      <div slot="sidebar" class="p-5"><strong>Karsa</strong><p>Ringkasan</p><p>Workspace</p></div>
+      <div slot="header" class="p-5"><strong>Content workspace</strong></div>
+      <div class="rounded-lg border border-dashed border-border p-4">Konten workspace</div>
+    </AppShell>
+  </div>
+</ComponentPreview>
+
+Slot `sidebar` menjadi kolom navigasi, `header` menjadi topbar, dan default menjadi konten utama. Di bawah `48rem`, shell menjadi satu kolom dan sidebar berada di bagian atas.

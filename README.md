@@ -1,77 +1,48 @@
-# Takontuku
+# Karsa
 
-An a-la-carte e-commerce framework built on Astro, Cloudflare (D1 + R2), and Better Auth. The goal
-is a set of installable `@takontuku/*` packages — storefront, admin, and migrations shipped
-together per feature — so a client project stays a handful of config and theme files instead of a
-forked copy of the whole app.
+Karsa is a site-neutral, Astro-first foundation for accessible interfaces, editorial content,
+and modular applications. It combines typed `@karsa/*` packages, semantic `--karsa-*` theme
+tokens, optional modules, and a CLI that keeps configuration, middleware, migrations, and the
+resolved registry in agreement.
 
 ## Workspace layout
 
-```
+```text
 apps/
-  docs/             Documentation site (Astro + Starlight)
-  storybook/        Isolated Astro component development and accessibility checks
-examples/
-  compro-*/         Company-profile AI fixture matrix
-  product-*/        Product-commerce AI fixture matrix
-  service-*/        Service-commerce AI fixture matrix
+  docs/             Bilingual Astro + Starlight documentation (`/en/`, `/id/`)
+  storybook/        Isolated component development and accessibility checks
+examples/           Preset/tier fixture matrix; treat as generated acceptance fixtures
 packages/
-  core/             Integration, registry, middleware, admin shell (@takontuku/core, public)
-  auth/             Better Auth + roles (@takontuku/auth, public)
-  jarene/           Server-rendered auth-panel quote module (@takontuku/jarene, public)
-  theme/            Tailwind tokens, palette API, fonts, and theme bootstrap (@takontuku/theme, public)
-  ui/               Astro component primitives (@takontuku/ui, public)
-  charts/           Deferred ECharts/Flint chart component (@takontuku/charts, public)
-  catalog/          Product catalog + admin + demo seed (@takontuku/catalog, private)
-  orders/           Orders lifecycle + checkout + cart (@takontuku/orders, private)
-  booking/          Service scheduling and booking (@takontuku/booking, private)
-  create-takontuku/  `bunx create-takontuku` scaffolding CLI
-configs/            Shared TypeScript, tsup, and vitest configuration (@takontuku/config)
-scripts/            Repo maintenance scripts (e.g. commit message validation)
-tools/              Local dev infrastructure (Verdaccio private registry, e2e install gates)
+  core/             Integration, registry, middleware, CLI, and Karsa skills
+  auth/             Registration, sessions, and access control
+  jarene/           Optional server-rendered auth-panel contribution
+  theme/            Tokens, palettes, fonts, and theme bootstrap
+  ui/               Astro component primitives and site surfaces
+  charts/           Optional chart component and types
+  catalog/          Product-domain module (private registry)
+  orders/           Order-domain module (private registry)
+  booking/          Scheduling-domain module (private registry)
+  content/          Publication/blog content module (private registry)
+  create-karsa/     `bunx create-karsa` scaffolding CLI
+configs/             Shared TypeScript, tsup, and vitest configuration
+tools/               Fixture evaluation, local registry, and end-to-end gates
 ```
 
-Every `@takontuku/*` package is consumed by the `apps/*` and `examples/*` fixtures as a local
-workspace package. Release `0.2.0` uses breaking subpath exports: theme styles come from
-`@takontuku/theme`, charts from `@takontuku/charts`, and admin lists expose cursor pages.
-The `examples/**` matrix is intentionally frozen as a pre-release fixture and is excluded from
-the 0.2.0 refactor and release gates.
-
-See [`MIGRATION-0.2.md`](MIGRATION-0.2.md) before upgrading an existing application.
-
-## AI fixture matrix
-
-The `examples/` directory is a nine-case acceptance matrix for the AI-first scaffold. Each
-fixture is generated in a fresh Luna-medium session and reviewed by a separate Terra-high session.
-The three rows within each business type deliberately share a brand so install-only, content, and
-polished behavior can be compared directly. See [`examples/README.md`](examples/README.md) for
-the prompts, module expectations, checks, scores, and review findings.
-
-## Modules
-
-A client changes which `@takontuku/*` modules it has installed with the `takontuku` CLI, which
-ships on `@takontuku/core`:
-
-```sh
-bunx takontuku add orders      # installs the package, wires astro.config.mjs and
-                                # src/middleware.ts, pulls in modules it requires, then
-                                # runs `db sync`
-bunx takontuku remove orders   # reverses the above -- refuses if another installed
-                                # module still requires it, and never touches
-                                # migrations/ or the lockfile
-```
-
-Both edit `astro.config.mjs` and `src/middleware.ts` in place rather than asking for a manual
-edit; see [`packages/core/src/cli/astro-config.ts`](packages/core/src/cli/astro-config.ts) for how.
+Each `@karsa/*` package is consumed by workspace apps and fixtures. Public package exports are
+the source of truth; do not copy package routes into an application page. Read the [bilingual
+documentation](apps/docs/README.md) for the full preset, module, content, theme, auth, AI, and
+deployment contracts.
 
 ## Requirements
 
 - [Bun](https://bun.sh) >= 1.3.0
 - [Node.js](https://nodejs.org) 20.16+, 22.19+, or 24+ for Storybook 10
-- [Moon](https://moonrepo.dev) (task runner / task graph across the workspace)
-- git (Moon needs at least one commit — `HEAD` must resolve — before any `moon run`/`moon check` command will work)
+- git
 
-## Getting started
+Workspace gates use Bun directly, so lint, typecheck, test, build, and local-registry rehearsals
+also work in offline environments without downloading a task-runner toolchain plugin.
+
+## Development
 
 ```sh
 bun install
@@ -80,16 +51,70 @@ bun run lint
 bun run typecheck
 ```
 
+For docs-specific work:
+
+```sh
+bun run --cwd apps/docs parity
+bun run --cwd apps/docs typecheck
+bun run --cwd apps/docs build
+```
+
+The docs parity check requires every `/en/` page to have an `/id/` pair at the same relative
+path, and vice versa.
+
+## Modules and data
+
+Use the CLI to change the module graph:
+
+```sh
+bunx karsa add <module>
+bunx karsa remove <module>
+bunx karsa db sync
+bunx karsa db seed
+```
+
+The add/remove command updates the package dependency, `astro.config.mjs`, and any middleware
+registration together. `db sync` collects module migrations into append-only `migrations/` and
+`karsa.migrations.json`; review the diff before applying local or remote migrations. `db seed` is
+local-only and loads idempotent starting data and allowed media keys.
+
+Cloudflare runtime bindings are `DB` (D1) and `MEDIA` (R2). Keep local secrets in gitignored
+`.dev.vars` and deployed secrets in Wrangler. Format dates and money with Karsa's locale-aware
+helpers rather than in a component.
+
 ## AI-first client scaffolds
 
-`bunx create-takontuku` generates `AGENTS.md` as the canonical project guide, a small
-`CLAUDE.md` bridge, and a README with AI starter prompts. A normal install also runs
-`takontuku skills install`, which puts the four Takontuku skills into `.agents/skills/` and
-`.claude/skills/` for Codex, Cursor, and Claude. Run that command again after upgrading
-`@takontuku/core`.
+`bunx create-karsa` generates `AGENTS.md` as the canonical project guide, a short `CLAUDE.md`
+bridge, and a README with starter prompts. `bunx karsa skills install` puts the five Karsa skills
+into `.agents/skills/` and `.claude/skills/` for Codex, Claude, and Cursor. The source of truth is
+`packages/core/skills/`; refresh both target directories after upgrading `@karsa/core`.
+
+Indonesian starter prompt:
+
+```text
+Baca AGENTS.md. Pilih preset dan tier yang diizinkan, jelaskan asumsi serta kepemilikan halaman,
+periksa config, registry, pages, seed, dan ownership, lalu implementasikan irisan vertikal terkecil.
+Jalankan typecheck, lint, dan build yang relevan. Laporkan bukti serta temuan over-engineering dan
+under-engineering.
+```
+
+English starter prompt:
+
+```text
+Read AGENTS.md. Choose the authorized preset and tier, explain assumptions and page ownership,
+check config, registry, pages, seed, and ownership, then implement the smallest vertical slice.
+Run the relevant typecheck, lint, and build. Report evidence plus over-engineering and
+under-engineering findings.
+```
 
 ## Conventions
 
-- npm scope: `@takontuku/*`
-- Commits follow [Conventional Commits](https://www.conventionalcommits.org/); enforced by a Lefthook `commit-msg` hook
-- Never rebase `dev` after it has been merged into `main` -- pull `main` back into `dev` with a merge commit instead. Rebasing after the fact gives the same commits different SHAs on each branch, so a later `dev` → `main` merge sees every shared file as changed on both sides and conflicts everywhere even when the trees agree
+- npm scope: `@karsa/*`
+- CLI: `karsa` and `create-karsa`
+- Theme tokens: semantic `--karsa-*`
+- Commits follow [Conventional Commits](https://www.conventionalcommits.org/) and are checked by Lefthook
+- Do not edit generated fixture output or `examples/**` during normal package/docs work
+- The [0.2 → 0.3 migration guide](apps/docs/src/content/docs/en/migration/0-2-to-0-3.mdx) is the explicit historical allowlist for legacy identifiers and manifest renaming
+
+Never rebase `dev` after it has been merged into `main`; pull `main` back into `dev` with a merge
+commit so shared commits retain their identity.

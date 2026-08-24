@@ -1,12 +1,12 @@
 ---
 import { env } from "cloudflare:workers";
-import { findProductById } from "@takontuku/catalog";
-import { createTranslator } from "@takontuku/core";
-import { brand } from "@takontuku/core/brand";
-import { createInquiryOrder } from "@takontuku/orders";
-import Layout from "@takontuku/ui/DocumentLayout.astro";
-import Icon from "@takontuku/ui/Icon.astro";
-import StoreHeader from "@takontuku/ui/StoreHeader.astro";
+import { findItemById } from "@karsa/catalog";
+import { createTranslator } from "@karsa/core";
+import { brand } from "@karsa/core/brand";
+import { createInquiryOrder } from "@karsa/orders";
+import Layout from "@karsa/ui/DocumentLayout.astro";
+import Icon from "@karsa/ui/Icon.astro";
+import SiteHeader from "@karsa/ui/SiteHeader.astro";
 import type { BookingRequestAttributes } from "../../booking-hooks";
 import { findItemSchedule, listSlots } from "../../bookings";
 import { bookingMessages } from "../../messages";
@@ -15,13 +15,13 @@ const t = createTranslator(brand, bookingMessages);
 const locale = brand.locale.toLowerCase().startsWith("id") ? "id" : "en";
 
 const itemId = Number(Astro.params["id"]);
-const product = await findProductById(env.DB, itemId);
-const schedule = product ? await findItemSchedule(env.DB, itemId) : null;
-// A product that exists but isn't fulfillmentType 'scheduled', or one that
+const service = await findItemById(env.DB, itemId, { presentation: "services" });
+const schedule = service ? await findItemSchedule(env.DB, itemId) : null;
+// A service that exists but isn't fulfillmentType 'scheduled', or one that
 // is but has no booking_item_schedule row yet (the admin hasn't configured
 // it), gets the same "not bookable" state — the customer has no use for
-// the distinction, and it isn't a 404 (the product itself is real).
-const notBookable = product?.fulfillmentType !== "scheduled" || !schedule;
+// the distinction, and it isn't a 404 (the service itself is real).
+const notBookable = service?.fulfillmentType !== "scheduled" || !schedule;
 const slots = !notBookable && schedule?.mode === "slot" ? await listSlots(env.DB, itemId) : [];
 const weekdayNames =
   locale === "id"
@@ -128,7 +128,7 @@ import "../../styles/routes/booking-id.css";
 ---
 
 <Layout title={t("booking.detail.title") + " — " + brand.name} siteName={brand.name} lang={locale}>
-  <StoreHeader brand={brand} announcement={brand.storefront?.announcement} labels={{ home: locale === "id" ? "Beranda" : "Home", shop: locale === "id" ? "Toko" : "Shop" }} />
+  <SiteHeader brand={brand} announcement={brand.site?.announcement} links={[{ href: "/services", label: locale === "id" ? "Layanan" : "Services" }]} labels={{ home: locale === "id" ? "Beranda" : "Home" }} />
   <main>
     {orderNumber && (
       <section class="success-card">
@@ -143,13 +143,13 @@ import "../../styles/routes/booking-id.css";
       <section class="success-card">
         <p class="eyebrow">{t("booking.detail.eyebrow")}</p>
         <h1>{t("booking.detail.notFound")}</h1>
-        <a class="primary-link" href="/products">{t("booking.detail.backToService")}</a>
+        <a class="primary-link" href="/services">{t("booking.detail.backToService")}</a>
       </section>
     )}
     {!orderNumber && !notBookable && (
       <>
         <p class="eyebrow">{t("booking.detail.eyebrow")}</p>
-        <h1>{product?.name}</h1>
+        <h1>{service?.name}</h1>
         <p class="description">{t("booking.detail.description")}</p>
         {error && <p class="booking-error" role="alert">{error}</p>}
         <form method="post" class="booking-form">

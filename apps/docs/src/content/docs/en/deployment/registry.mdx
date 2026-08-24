@@ -1,0 +1,39 @@
+---
+title: Deployment and package registry
+description: Prepare Karsa bindings, secrets, migrations, and private module registry access for a deploy.
+---
+
+## Local first
+
+Use Wrangler's local D1 and R2 emulators while developing:
+
+```sh
+bunx karsa db sync
+bunx wrangler d1 migrations apply DB --local
+bunx karsa db seed
+bun run build
+```
+
+Keep `wrangler.jsonc` bindings named `DB` and `MEDIA`. Local `.dev.vars` is gitignored; put `BETTER_AUTH_SECRET` there and use `bunx wrangler secret put BETTER_AUTH_SECRET` for a deployed environment.
+
+## Documentation canonical URL
+
+Set `DOCS_SITE_URL` to the public documentation origin when building the docs deployment. Local builds intentionally default to `http://localhost:4321`, while the deployment value drives canonical URLs and the generated sitemap without hard-coding an unconfirmed production domain.
+
+```sh
+DOCS_SITE_URL=https://docs.example.com bun run --cwd apps/docs build
+```
+
+## Registry access
+
+Public packages resolve from npm. If a selected module is hosted in a private registry, configure the `@karsa` scope and credentials in a user or CI `.npmrc`; never commit a token. Verify the package graph before running the CLI so `karsa add` can resolve the module and its dependencies.
+
+## Deploy checklist
+
+1. Create the real D1 database and R2 bucket, then update deployment bindings.
+2. Apply the append-only migration plan to the remote database.
+3. Add deployment secrets and confirm the origin/allowed-host configuration.
+4. Build with the same registry and lockfile used by CI.
+5. Smoke-test public routes, auth mode, guarded routes, media, and one module-owned flow.
+
+Do not seed remote data with the local-only `karsa db seed` path. Use a reviewed migration or explicit operational import for production data, and record the command output as evidence.

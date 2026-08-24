@@ -6,7 +6,7 @@ import {
   cursorFilterSignature,
   encodeCursor,
   normalizePageSize,
-} from "@takontuku/core";
+} from "@karsa/core";
 
 export interface ItemSchedule {
   itemId: number;
@@ -61,6 +61,131 @@ export interface BookingSlot {
   durationMinutes: number;
   capacity: number;
   isActive: boolean;
+}
+
+export interface BookingScheduleInput {
+  mode: "range" | "slot";
+  minDays: number;
+  maxDays: number | null;
+  leadTimeDays: number;
+  occurrencesPerDay: number;
+  slots: Array<{
+    id?: number;
+    weekday: number;
+    startTime: string;
+    durationMinutes: number;
+    capacity: number;
+    isActive: boolean;
+  }>;
+}
+
+function validateSchedule(input: BookingScheduleInput): void {
+  if (input.mode !== "range" && input.mode !== "slot") throw new Error("Mode jadwal tidak valid.");
+  if (!Number.isInteger(input.minDays) || input.minDays < 1)
+    throw new Error("Minimum hari minimal 1.");
+  if (input.maxDays !== null && (!Number.isInteger(input.maxDays) || input.maxDays < input.minDays))
+    throw new Error("Maksimum hari harus lebih besar atau sama dengan minimum hari.");
+  if (!Number.isInteger(input.leadTimeDays) || input.leadTimeDays < 0)
+    throw new Error("Lead time tidak valid.");
+  if (!Number.isInteger(input.occurrencesPerDay) || input.occurrencesPerDay < 1)
+    throw new Error("Jumlah kunjungan per hari minimal 1.");
+  for (const slot of input.slots) {
+    if (typeof slot.isActive !== "boolean") throw new Error("Status slot tidak valid.");
+    if (!Number.isInteger(slot.weekday) || slot.weekday < 0 || slot.weekday > 6)
+      throw new Error("Hari slot tidak valid.");
+    if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(slot.startTime))
+      throw new Error("Waktu slot harus berformat HH:MM.");
+    if (
+      !Number.isInteger(slot.durationMinutes) ||
+      slot.durationMinutes < 1 ||
+      slot.durationMinutes > 1440
+    )
+      throw new Error("Durasi slot harus 1–1440 menit.");
+    if (!Number.isInteger(slot.capacity) || slot.capacity < 1)
+      throw new Error("Kapasitas slot minimal 1.");
+  }
+}
+
+/** Atomically updates configuration while retaining referenced historical slot rows. */
+export async function saveItemSchedule(
+  db: D1Database,
+  itemId: number,
+  input: BookingScheduleInput,
+): Promise<void> {
+  if (!Number.isInteger(itemId) || itemId <= 0) throw new Error("Layanan tidak valid.");
+  validateSchedule(input);
+  const item = await db
+    .prepare("SELECT fulfillment_type FROM catalog_items WHERE id = ?")
+    .bind(itemId)
+    .first<{ fulfillment_type: string }>();
+  if (!item || item.fulfillment_type !== "scheduled") {
+    throw new Error("Jadwal hanya dapat dibuat untuk layanan terjadwal.");
+  }
+  const existing = await listSlots(db, itemId, { activeOnly: false });
+  const existingIds = new Set(existing.map((slot) => slot.id));
+  for (const slot of input.slots) {
+    if (slot.id !== undefined && !existingIds.has(slot.id))
+      throw new Error("Slot tidak dimiliki layanan ini.");
+  }
+  const retainedIds = new Set(
+    input.slots.flatMap((slot) => (slot.id === undefined ? [] : [slot.id])),
+  );
+  const statements = [
+    db
+      .prepare(
+        `INSERT INTO booking_item_schedule (item_id, mode, min_days, max_days, lead_time_days, occurrences_per_day, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
+       ON CONFLICT(item_id) DO UPDATE SET mode=excluded.mode, min_days=excluded.min_days,
+       max_days=excluded.max_days, lead_time_days=excluded.lead_time_days,
+       occurrences_per_day=excluded.occurrences_per_day, updated_at=datetime('now')`,
+      )
+      .bind(
+        itemId,
+        input.mode,
+        input.minDays,
+        input.maxDays,
+        input.leadTimeDays,
+        input.occurrencesPerDay,
+      ),
+    ...existing
+      .filter((slot) => !retainedIds.has(slot.id))
+      .map((slot) =>
+        db
+          .prepare("UPDATE booking_slots SET is_active = 0 WHERE id = ? AND item_id = ?")
+          .bind(slot.id, itemId),
+      ),
+    ...input.slots.map((slot) => {
+      const isActive = slot.isActive ? 1 : 0;
+      if (slot.id === undefined) {
+        return db
+          .prepare(
+            "INSERT INTO booking_slots (item_id, weekday, start_time, duration_minutes, capacity, is_active) VALUES (?, ?, ?, ?, ?, ?)",
+          )
+          .bind(
+            itemId,
+            slot.weekday,
+            slot.startTime,
+            slot.durationMinutes,
+            slot.capacity,
+            isActive,
+          );
+      }
+      return db
+        .prepare(
+          "UPDATE booking_slots SET weekday = ?, start_time = ?, duration_minutes = ?, capacity = ?, is_active = ? WHERE id = ? AND item_id = ?",
+        )
+        .bind(
+          slot.weekday,
+          slot.startTime,
+          slot.durationMinutes,
+          slot.capacity,
+          isActive,
+          slot.id,
+          itemId,
+        );
+    }),
+  ];
+  await db.batch(statements);
 }
 
 interface BookingSlotRow {

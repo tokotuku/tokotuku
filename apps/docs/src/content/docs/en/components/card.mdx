@@ -1,0 +1,47 @@
+---
+title: Card
+description: A composable content container with media, body, and footer regions.
+sidebar:
+  order: 3
+---
+
+import Button from "@karsa/ui/Button.astro";
+import Card from "@karsa/ui/Card.astro";
+import ComponentPreview from "../../../../components/ComponentPreview.astro";
+
+`Card` provides semantic `<article>` structure without imposing domain-specific interactions.
+
+## Preview
+
+<ComponentPreview label="Card example">
+  <div class="w-full max-w-[22rem]">
+    <Card>
+      <div slot="media" class="grid min-h-[9rem] place-items-center bg-subtle font-bold">Preview media</div>
+      <strong>Everyday object</strong>
+      <span>Reliable, compact, and ready for daily use.</span>
+      <div slot="footer"><Button size="sm">View details</Button></div>
+    </Card>
+  </div>
+</ComponentPreview>
+
+```astro
+---
+import Button from "@karsa/ui/Button.astro";
+import Card from "@karsa/ui/Card.astro";
+---
+
+<Card>
+  <img slot="media" src="/object.jpg" alt="Everyday object" />
+  <h2>Everyday object</h2>
+  <p>Reliable, compact, and ready for daily use.</p>
+  <div slot="footer"><Button size="sm">View details</Button></div>
+</Card>
+```
+
+| Slot | Purpose |
+| --- | --- |
+| `media` | Image, video, illustration, or other leading media |
+| default | Main body content |
+| `footer` | Actions, metadata, or supporting content |
+
+The footer is omitted when empty. Supply your own semantic heading; `Card` does not invent one.

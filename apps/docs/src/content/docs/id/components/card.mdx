@@ -1,0 +1,47 @@
+---
+title: Card
+description: Container konten komposabel dengan region media, body, dan footer.
+sidebar:
+  order: 3
+---
+
+import Button from "@karsa/ui/Button.astro";
+import Card from "@karsa/ui/Card.astro";
+import ComponentPreview from "../../../../components/ComponentPreview.astro";
+
+`Card` menyediakan struktur semantik `<article>` tanpa memaksakan interaksi domain.
+
+## Preview
+
+<ComponentPreview label="Contoh card">
+  <div class="w-full max-w-[22rem]">
+    <Card>
+      <div slot="media" class="grid min-h-[9rem] place-items-center bg-subtle font-bold">Media preview</div>
+      <strong>Objek sehari-hari</strong>
+      <span>Andal, ringkas, dan siap dipakai.</span>
+      <div slot="footer"><Button size="sm">Lihat detail</Button></div>
+    </Card>
+  </div>
+</ComponentPreview>
+
+```astro
+---
+import Button from "@karsa/ui/Button.astro";
+import Card from "@karsa/ui/Card.astro";
+---
+
+<Card>
+  <img slot="media" src="/object.jpg" alt="Objek sehari-hari" />
+  <h2>Objek sehari-hari</h2>
+  <p>Andal, ringkas, dan siap dipakai.</p>
+  <div slot="footer"><Button size="sm">Lihat detail</Button></div>
+</Card>
+```
+
+| Slot | Kegunaan |
+| --- | --- |
+| `media` | Gambar, video, ilustrasi, atau media pembuka |
+| default | Konten body |
+| `footer` | Aksi, metadata, atau informasi pendukung |
+
+Footer tidak dirender ketika kosong. Sediakan heading semantik sendiri; `Card` tidak membuatnya otomatis.

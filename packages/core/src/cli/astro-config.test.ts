@@ -17,10 +17,10 @@ import {
 const FIXTURE = `// @ts-check
 import cloudflare from "@astrojs/cloudflare";
 import tailwindcss from "@tailwindcss/vite";
-import { auth } from "@takontuku/auth";
-import { catalog } from "@takontuku/catalog";
-import { takontuku } from "@takontuku/core";
-import { orders } from "@takontuku/orders";
+import { auth } from "@karsa/auth";
+import { catalog } from "@karsa/catalog";
+import { karsa } from "@karsa/core";
+import { orders } from "@karsa/orders";
 import { defineConfig } from "astro/config";
 
 // Remove a module here (and its matching import above + middleware.ts
@@ -28,7 +28,7 @@ import { defineConfig } from "astro/config";
 // package too. Nothing else references an uninstalled module by name.
 export default defineConfig({
   integrations: [
-    takontuku({
+    karsa({
       brand: {
         name: "Example Styled",
         locale: "id-ID",
@@ -40,7 +40,7 @@ export default defineConfig({
       modules: [auth(), catalog(), orders()],
     }),
   ],
-  // @takontuku/theme/styles.css is imported by DocumentLayout.astro and needs this plugin.
+  // @karsa/theme/styles.css is imported by DocumentLayout.astro and needs this plugin.
   vite: { plugins: [tailwindcss()] },
   output: "server",
   // A dedicated port keeps this neutral inline fixture isolated during tests.
@@ -60,19 +60,19 @@ describe("scanImports", () => {
     expect(imports.map((i) => i.specifier)).toEqual([
       "@astrojs/cloudflare",
       "@tailwindcss/vite",
-      "@takontuku/auth",
-      "@takontuku/catalog",
-      "@takontuku/core",
-      "@takontuku/orders",
+      "@karsa/auth",
+      "@karsa/catalog",
+      "@karsa/core",
+      "@karsa/orders",
       "astro/config",
     ]);
-    expect(imports.find((i) => i.specifier === "@takontuku/catalog")?.namedLocals).toEqual([
+    expect(imports.find((i) => i.specifier === "@karsa/catalog")?.namedLocals).toEqual([
       { imported: "catalog", local: "catalog" },
     ]);
   });
 
   it("resolves an aliased named import's local name separately from its imported name", () => {
-    const source = 'import { catalog as cat } from "@takontuku/catalog";\ncat();\n';
+    const source = 'import { catalog as cat } from "@karsa/catalog";\ncat();\n';
     const imports = scanImports(source);
     expect(imports[0]?.namedLocals).toEqual([{ imported: "catalog", local: "cat" }]);
   });
@@ -80,62 +80,62 @@ describe("scanImports", () => {
 
 describe("findImport", () => {
   it("finds the declaration for a given specifier", () => {
-    expect(findImport(FIXTURE, "@takontuku/orders")?.namedLocals[0]?.local).toBe("orders");
+    expect(findImport(FIXTURE, "@karsa/orders")?.namedLocals[0]?.local).toBe("orders");
   });
 
   it("returns null when the specifier isn't imported", () => {
-    expect(findImport(FIXTURE, "@takontuku/blog")).toBeNull();
+    expect(findImport(FIXTURE, "@karsa/blog")).toBeNull();
   });
 });
 
 describe("addImport", () => {
   it("inserts a new import in sorted position among the existing ones", () => {
-    const { source, local } = addImport(FIXTURE, "@takontuku/blog", "blog");
+    const { source, local } = addImport(FIXTURE, "@karsa/blog", "blog");
     expect(local).toBe("blog");
     const imports = scanImports(source);
     expect(imports.map((i) => i.specifier)).toEqual([
       "@astrojs/cloudflare",
+      "@karsa/blog",
       "@tailwindcss/vite",
-      "@takontuku/auth",
-      "@takontuku/blog",
-      "@takontuku/catalog",
-      "@takontuku/core",
-      "@takontuku/orders",
+      "@karsa/auth",
+      "@karsa/catalog",
+      "@karsa/core",
+      "@karsa/orders",
       "astro/config",
     ]);
   });
 
   it("is idempotent when the import already exists", () => {
-    const { source, local } = addImport(FIXTURE, "@takontuku/catalog", "catalog");
+    const { source, local } = addImport(FIXTURE, "@karsa/catalog", "catalog");
     expect(source).toBe(FIXTURE);
     expect(local).toBe("catalog");
   });
 
   it("refuses when the desired local name is already bound", () => {
-    expect(() => addImport(FIXTURE, "@takontuku/gift-cards", "catalog")).toThrow(
+    expect(() => addImport(FIXTURE, "@karsa/gift-cards", "catalog")).toThrow(
       /"catalog" is already bound/,
     );
   });
 
   it("refuses when the specifier is already imported without the requested name", () => {
-    expect(() => addImport(FIXTURE, "@takontuku/catalog", "somethingElse")).toThrow(
-      /already imports from "@takontuku\/catalog"/,
+    expect(() => addImport(FIXTURE, "@karsa/catalog", "somethingElse")).toThrow(
+      /already imports from "@karsa\/catalog"/,
     );
   });
 });
 
 describe("removeImport", () => {
   it("removes the import when its local binding is unused elsewhere", () => {
-    const source = 'import { blog } from "@takontuku/blog";\nconsole.log("noop");\n';
-    expect(removeImport(source, "@takontuku/blog")).toBe('console.log("noop");\n');
+    const source = 'import { blog } from "@karsa/blog";\nconsole.log("noop");\n';
+    expect(removeImport(source, "@karsa/blog")).toBe('console.log("noop");\n');
   });
 
   it("leaves the import in place when its local binding is still referenced", () => {
-    expect(removeImport(FIXTURE, "@takontuku/orders")).toBe(FIXTURE);
+    expect(removeImport(FIXTURE, "@karsa/orders")).toBe(FIXTURE);
   });
 
   it("no-ops when the specifier isn't imported", () => {
-    expect(removeImport(FIXTURE, "@takontuku/blog")).toBe(FIXTURE);
+    expect(removeImport(FIXTURE, "@karsa/blog")).toBe(FIXTURE);
   });
 });
 
@@ -146,31 +146,31 @@ describe("locateModulesArray / listModuleEntries", () => {
     expect(entries.map((e) => e.calleeName)).toEqual(["auth", "catalog", "orders"]);
   });
 
-  it("refuses when there's no takontuku() call", () => {
+  it("refuses when there's no karsa() call", () => {
     expect(() => locateModulesArray('import { defineConfig } from "astro/config";\n')).toThrow(
-      /Could not find an import of the takontuku\(\) integration/,
+      /Could not find an import of the karsa\(\) integration/,
     );
   });
 
-  it("refuses when there's more than one takontuku() call", () => {
-    const source = `import { takontuku } from "@takontuku/core";
-takontuku({ modules: [] });
-takontuku({ modules: [] });
+  it("refuses when there's more than one karsa() call", () => {
+    const source = `import { karsa } from "@karsa/core";
+karsa({ modules: [] });
+karsa({ modules: [] });
 `;
-    expect(() => locateModulesArray(source)).toThrow(/more than one takontuku\(\) call/);
+    expect(() => locateModulesArray(source)).toThrow(/more than one karsa\(\) call/);
   });
 
   it('refuses when "modules" is not an array literal', () => {
-    const source = `import { takontuku } from "@takontuku/core";
+    const source = `import { karsa } from "@karsa/core";
 const MODULES = [];
-takontuku({ modules: MODULES });
+karsa({ modules: MODULES });
 `;
     expect(() => locateModulesArray(source)).toThrow(/is not an array literal/);
   });
 
   it('refuses when there is no "modules" key', () => {
-    const source = `import { takontuku } from "@takontuku/core";
-takontuku({ brand: { name: "x" } });
+    const source = `import { karsa } from "@karsa/core";
+karsa({ brand: { name: "x" } });
 `;
     expect(() => locateModulesArray(source)).toThrow(/no "modules: \[\.\.\.\]" array/);
   });
@@ -212,24 +212,24 @@ describe("addModuleEntry", () => {
   });
 
   it("adds to an empty array without a leading comma", () => {
-    const source = 'import { takontuku } from "@takontuku/core";\ntakontuku({ modules: [] });\n';
+    const source = 'import { karsa } from "@karsa/core";\nkarsa({ modules: [] });\n';
     const result = addModuleEntry(source, "blog");
     expect(result).toContain("modules: [blog()]");
   });
 
   it("inserts a new line, with matching indent and a trailing comma, into a multi-line array", () => {
-    const source = `import { auth } from "@takontuku/auth";
-import { takontuku } from "@takontuku/core";
-takontuku({
+    const source = `import { auth } from "@karsa/auth";
+import { karsa } from "@karsa/core";
+karsa({
   modules: [
     auth(),
   ],
 });
 `;
     const result = addModuleEntry(source, "blog");
-    expect(result).toBe(`import { auth } from "@takontuku/auth";
-import { takontuku } from "@takontuku/core";
-takontuku({
+    expect(result).toBe(`import { auth } from "@karsa/auth";
+import { karsa } from "@karsa/core";
+karsa({
   modules: [
     auth(),
     blog(),
@@ -240,7 +240,7 @@ takontuku({
 
   it("does not corrupt a string value containing a closing paren", () => {
     const source =
-      'import { takontuku } from "@takontuku/core";\ntakontuku({ modules: [catalog({ label: "a ) b" })] });\n';
+      'import { karsa } from "@karsa/core";\nkarsa({ modules: [catalog({ label: "a ) b" })] });\n';
     const result = addModuleEntry(source, "blog");
     expect(result).toContain('catalog({ label: "a ) b" })');
     expect(result).toContain("blog()");
@@ -286,15 +286,14 @@ describe("removeModuleEntry", () => {
 
   it("does not corrupt a string value containing a closing paren while removing a different entry", () => {
     const source =
-      'import { takontuku } from "@takontuku/core";\ntakontuku({ modules: [catalog({ label: "a ) b" }), orders()] });\n';
+      'import { karsa } from "@karsa/core";\nkarsa({ modules: [catalog({ label: "a ) b" }), orders()] });\n';
     const result = removeModuleEntry(source, "orders");
     expect(result).toContain('catalog({ label: "a ) b" })');
     expect(result).not.toContain("orders()");
   });
 
   it("refuses when the array contains an entry it can't identify", () => {
-    const source =
-      'import { takontuku } from "@takontuku/core";\ntakontuku({ modules: [auth(), ...rest] });\n';
+    const source = 'import { karsa } from "@karsa/core";\nkarsa({ modules: [auth(), ...rest] });\n';
     expect(() => removeModuleEntry(source, "auth")).toThrow(/entry this CLI can't identify/);
   });
 });

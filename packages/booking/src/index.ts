@@ -1,4 +1,4 @@
-import { defineModule, type ModuleDefinition } from "@takontuku/core";
+import { defineModule, type ModuleDefinition } from "@karsa/core";
 
 export function booking(): ModuleDefinition {
   return defineModule({
@@ -20,7 +20,7 @@ export function booking(): ModuleDefinition {
           en: "Track incoming booking requests.",
         },
         href: "/admin/bookings",
-        // @takontuku/ui's icon set has no booking/calendar glyph yet, so
+        // @karsa/ui's icon set has no booking/calendar glyph yet, so
         // this ships its own raw path data rather than forcing an edit
         // there — see AdminNavItem.icon's doc comment.
         icon: [
@@ -31,21 +31,38 @@ export function booking(): ModuleDefinition {
         ],
         order: 25,
       },
+      {
+        label: "Schedules",
+        labelByLocale: { id: "Jadwal", en: "Schedules" },
+        descriptionByLocale: {
+          id: "Atur ketersediaan layanan.",
+          en: "Manage service availability.",
+        },
+        href: "/admin/schedules",
+        icon: [
+          "M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z",
+          "M8 2v4",
+          "M16 2v4",
+          "M3 10h18",
+        ],
+        order: 26,
+      },
     ],
-    storefrontRoutes: [
-      { pattern: "/booking/[id]", entrypoint: "@takontuku/booking/routes/booking/[id].astro" },
+    siteRoutes: [
+      { pattern: "/booking/[id]", entrypoint: "@karsa/booking/routes/booking/[id].astro" },
     ],
     adminRoutes: [
-      { pattern: "/admin/bookings", entrypoint: "@takontuku/booking/routes/admin/bookings.astro" },
+      { pattern: "/admin/bookings", entrypoint: "@karsa/booking/routes/admin/bookings.astro" },
+      { pattern: "/admin/schedules", entrypoint: "@karsa/booking/routes/admin/schedules.astro" },
       {
         pattern: "/admin/api/bookings/[orderId]",
-        entrypoint: "@takontuku/booking/routes/api/admin/bookings/[orderId].ts",
+        entrypoint: "@karsa/booking/routes/api/admin/bookings/[orderId].ts",
       },
     ],
     adminDashboardWidgets: [
       {
         id: "booking-upcoming",
-        entrypoint: "@takontuku/booking/components/admin/BookingDashboardWidget.astro",
+        entrypoint: "@karsa/booking/components/admin/BookingDashboardWidget.astro",
         area: "main",
         order: 25,
       },
@@ -57,6 +74,7 @@ export type { BookingRequestAttributes } from "./booking-hooks";
 export {
   type Booking,
   type BookingDashboardSummary,
+  type BookingScheduleInput,
   type BookingSlot,
   findBookingByOrderId,
   findItemSchedule,
@@ -66,5 +84,6 @@ export {
   type ListBookingsOptions,
   listBookings,
   listSlots,
+  saveItemSchedule,
 } from "./bookings";
 export { bookingMessages } from "./messages";

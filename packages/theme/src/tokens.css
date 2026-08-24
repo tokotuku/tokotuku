@@ -1,136 +1,136 @@
 @theme inline {
-  --color-background: var(--tk-color-bg);
-  --color-surface: var(--tk-color-surface);
-  --color-subtle: var(--tk-color-bg-subtle);
-  --color-foreground: var(--tk-color-fg);
-  --color-muted: var(--tk-color-fg-muted);
-  --color-border: var(--tk-color-border);
-  --color-accent: var(--tk-color-accent);
-  --color-accent-foreground: var(--tk-color-accent-fg);
-  --color-danger: var(--tk-color-danger);
-  --color-warning: var(--tk-color-warning);
-  --color-success: var(--tk-color-success);
-  --color-focus: var(--tk-color-focus-ring);
-  --font-tk-sans: var(--tk-font-family-sans);
-  --font-tk-display: var(--tk-font-family-display);
-  --font-tk-mono: var(--tk-font-family-mono);
-  --radius-tk-sm: var(--tk-radius-sm);
-  --radius-tk-md: var(--tk-radius-md);
-  --radius-tk-lg: var(--tk-radius-lg);
-  --radius-tk-xl: var(--tk-radius-xl);
-  --radius-tk-2xl: var(--tk-radius-2xl);
-  --radius-tk-full: var(--tk-radius-full);
-  --shadow-tk-sm: var(--tk-shadow-sm);
-  --shadow-tk-md: var(--tk-shadow-md);
-  --shadow-tk-lg: var(--tk-shadow-lg);
-  --shadow-tk-xl: var(--tk-shadow-xl);
+  --color-background: var(--karsa-color-bg);
+  --color-surface: var(--karsa-color-surface);
+  --color-subtle: var(--karsa-color-bg-subtle);
+  --color-foreground: var(--karsa-color-fg);
+  --color-muted: var(--karsa-color-fg-muted);
+  --color-border: var(--karsa-color-border);
+  --color-accent: var(--karsa-color-accent);
+  --color-accent-foreground: var(--karsa-color-accent-fg);
+  --color-danger: var(--karsa-color-danger);
+  --color-warning: var(--karsa-color-warning);
+  --color-success: var(--karsa-color-success);
+  --color-focus: var(--karsa-color-focus-ring);
+  --font-karsa-sans: var(--karsa-font-family-sans);
+  --font-karsa-display: var(--karsa-font-family-display);
+  --font-karsa-mono: var(--karsa-font-family-mono);
+  --radius-karsa-sm: var(--karsa-radius-sm);
+  --radius-karsa-md: var(--karsa-radius-md);
+  --radius-karsa-lg: var(--karsa-radius-lg);
+  --radius-karsa-xl: var(--karsa-radius-xl);
+  --radius-karsa-2xl: var(--karsa-radius-2xl);
+  --radius-karsa-full: var(--karsa-radius-full);
+  --shadow-karsa-sm: var(--karsa-shadow-sm);
+  --shadow-karsa-md: var(--karsa-shadow-md);
+  --shadow-karsa-lg: var(--karsa-shadow-lg);
+  --shadow-karsa-xl: var(--karsa-shadow-xl);
 }
 
 :root {
-  --tk-spacing-0: 0px;
-  --tk-spacing-1: 0.25rem;
-  --tk-spacing-2: 0.5rem;
-  --tk-spacing-3: 0.75rem;
-  --tk-spacing-4: 1rem;
-  --tk-spacing-5: 1.25rem;
-  --tk-spacing-6: 1.5rem;
-  --tk-spacing-8: 2rem;
-  --tk-spacing-10: 2.5rem;
-  --tk-spacing-12: 3rem;
-  --tk-spacing-16: 4rem;
-  --tk-spacing-20: 5rem;
-  --tk-spacing-24: 6rem;
-  --tk-radius-none: 0px;
-  --tk-radius-sm: 6px;
-  --tk-radius-md: 10px;
-  --tk-radius-lg: 14px;
-  --tk-radius-xl: 14px;
-  --tk-radius-2xl: 20px;
-  --tk-radius-full: 9999px;
-  --tk-shadow-sm: 0 1px 2px rgb(36 28 18 / 5%);
-  --tk-shadow-md: 0 8px 24px -16px rgb(36 28 18 / 22%);
-  --tk-shadow-lg: 0 20px 44px -24px rgb(36 28 18 / 28%);
-  --tk-shadow-xl: 0 28px 60px -28px rgb(36 28 18 / 30%);
-  --tk-duration-instant: 0ms;
-  --tk-duration-fast: 120ms;
-  --tk-duration-normal: 180ms;
-  --tk-duration-slow: 220ms;
-  --tk-duration-slower: 420ms;
-  --tk-easing-standard: cubic-bezier(0.2, 0, 0, 1);
-  --tk-easing-decelerate: cubic-bezier(0, 0, 0, 1);
-  --tk-easing-accelerate: cubic-bezier(0.3, 0, 1, 1);
-  --tk-font-family-sans: "Manrope Variable", Manrope, ui-sans-serif, system-ui, sans-serif;
-  --tk-font-family-display: "Newsreader Variable", Newsreader, Georgia, serif;
-  --tk-font-family-mono: ui-monospace, "SFMono-Regular", menlo, consolas, monospace;
-  --tk-font-size-xs: 0.75rem;
-  --tk-font-size-sm: 0.875rem;
-  --tk-font-size-base: 1rem;
-  --tk-font-size-lg: 1.125rem;
-  --tk-font-size-xl: 1.25rem;
-  --tk-font-size-2xl: 1.5rem;
-  --tk-font-size-3xl: 1.875rem;
-  --tk-font-size-4xl: 2.25rem;
-  --tk-font-weight-regular: 400;
-  --tk-font-weight-medium: 500;
-  --tk-font-weight-semibold: 600;
-  --tk-font-weight-bold: 700;
-  --tk-line-height-tight: 1.12;
-  --tk-line-height-snug: 1.3;
-  --tk-line-height-normal: 1.5;
-  --tk-line-height-relaxed: 1.7;
-  --tk-color-bg: var(--tk-light-color-bg, #f4f0e7);
-  --tk-color-surface: var(--tk-light-color-surface, #fffdf8);
-  --tk-color-bg-subtle: var(--tk-light-color-bg-subtle, #ede5d9);
-  --tk-color-fg: var(--tk-light-color-fg, #2d211a);
-  --tk-color-fg-muted: var(--tk-light-color-fg-muted, #74695f);
-  --tk-color-border: var(--tk-light-color-border, #d8cfc2);
-  --tk-color-accent: var(--tk-light-color-accent, #765038);
-  --tk-color-accent-hover: var(--tk-light-color-accent-hover, #5e3d2b);
-  --tk-color-accent-fg: var(--tk-light-color-accent-fg, #fff9f0);
-  --tk-color-danger: #a3453d;
-  --tk-color-warning: #966827;
-  --tk-color-success: #4f7458;
-  --tk-color-focus-ring: var(--tk-light-color-focus-ring, #9a6847);
+  --karsa-spacing-0: 0px;
+  --karsa-spacing-1: 0.25rem;
+  --karsa-spacing-2: 0.5rem;
+  --karsa-spacing-3: 0.75rem;
+  --karsa-spacing-4: 1rem;
+  --karsa-spacing-5: 1.25rem;
+  --karsa-spacing-6: 1.5rem;
+  --karsa-spacing-8: 2rem;
+  --karsa-spacing-10: 2.5rem;
+  --karsa-spacing-12: 3rem;
+  --karsa-spacing-16: 4rem;
+  --karsa-spacing-20: 5rem;
+  --karsa-spacing-24: 6rem;
+  --karsa-radius-none: 0px;
+  --karsa-radius-sm: 6px;
+  --karsa-radius-md: 10px;
+  --karsa-radius-lg: 14px;
+  --karsa-radius-xl: 14px;
+  --karsa-radius-2xl: 20px;
+  --karsa-radius-full: 9999px;
+  --karsa-shadow-sm: 0 1px 2px rgb(36 28 18 / 5%);
+  --karsa-shadow-md: 0 8px 24px -16px rgb(36 28 18 / 22%);
+  --karsa-shadow-lg: 0 20px 44px -24px rgb(36 28 18 / 28%);
+  --karsa-shadow-xl: 0 28px 60px -28px rgb(36 28 18 / 30%);
+  --karsa-duration-instant: 0ms;
+  --karsa-duration-fast: 120ms;
+  --karsa-duration-normal: 180ms;
+  --karsa-duration-slow: 220ms;
+  --karsa-duration-slower: 420ms;
+  --karsa-easing-standard: cubic-bezier(0.2, 0, 0, 1);
+  --karsa-easing-decelerate: cubic-bezier(0, 0, 0, 1);
+  --karsa-easing-accelerate: cubic-bezier(0.3, 0, 1, 1);
+  --karsa-font-family-sans: "Manrope Variable", Manrope, ui-sans-serif, system-ui, sans-serif;
+  --karsa-font-family-display: "Newsreader Variable", Newsreader, Georgia, serif;
+  --karsa-font-family-mono: ui-monospace, "SFMono-Regular", menlo, consolas, monospace;
+  --karsa-font-size-xs: 0.75rem;
+  --karsa-font-size-sm: 0.875rem;
+  --karsa-font-size-base: 1rem;
+  --karsa-font-size-lg: 1.125rem;
+  --karsa-font-size-xl: 1.25rem;
+  --karsa-font-size-2xl: 1.5rem;
+  --karsa-font-size-3xl: 1.875rem;
+  --karsa-font-size-4xl: 2.25rem;
+  --karsa-font-weight-regular: 400;
+  --karsa-font-weight-medium: 500;
+  --karsa-font-weight-semibold: 600;
+  --karsa-font-weight-bold: 700;
+  --karsa-line-height-tight: 1.12;
+  --karsa-line-height-snug: 1.3;
+  --karsa-line-height-normal: 1.5;
+  --karsa-line-height-relaxed: 1.7;
+  --karsa-color-bg: var(--karsa-light-color-bg, #f4f0e7);
+  --karsa-color-surface: var(--karsa-light-color-surface, #fffdf8);
+  --karsa-color-bg-subtle: var(--karsa-light-color-bg-subtle, #ede5d9);
+  --karsa-color-fg: var(--karsa-light-color-fg, #2d211a);
+  --karsa-color-fg-muted: var(--karsa-light-color-fg-muted, #74695f);
+  --karsa-color-border: var(--karsa-light-color-border, #d8cfc2);
+  --karsa-color-accent: var(--karsa-light-color-accent, #765038);
+  --karsa-color-accent-hover: var(--karsa-light-color-accent-hover, #5e3d2b);
+  --karsa-color-accent-fg: var(--karsa-light-color-accent-fg, #fff9f0);
+  --karsa-color-danger: #a3453d;
+  --karsa-color-warning: #966827;
+  --karsa-color-success: #4f7458;
+  --karsa-color-focus-ring: var(--karsa-light-color-focus-ring, #9a6847);
   color-scheme: light;
 }
 
 [data-theme="dark"] {
-  --tk-color-bg: var(--tk-dark-color-bg, #191511);
-  --tk-color-surface: var(--tk-dark-color-surface, #211b17);
-  --tk-color-bg-subtle: var(--tk-dark-color-bg-subtle, #2b241e);
-  --tk-color-fg: var(--tk-dark-color-fg, #f7f0e6);
-  --tk-color-fg-muted: var(--tk-dark-color-fg-muted, #bbae9f);
-  --tk-color-border: var(--tk-dark-color-border, #493c32);
-  --tk-color-accent: var(--tk-dark-color-accent, #c58b63);
-  --tk-color-accent-hover: var(--tk-dark-color-accent-hover, #d7a17b);
-  --tk-color-accent-fg: var(--tk-dark-color-accent-fg, #22150f);
-  --tk-color-danger: #ffaaa0;
-  --tk-color-warning: #edc275;
-  --tk-color-success: #9fca9e;
-  --tk-color-focus-ring: var(--tk-dark-color-focus-ring, #c58b63);
+  --karsa-color-bg: var(--karsa-dark-color-bg, #191511);
+  --karsa-color-surface: var(--karsa-dark-color-surface, #211b17);
+  --karsa-color-bg-subtle: var(--karsa-dark-color-bg-subtle, #2b241e);
+  --karsa-color-fg: var(--karsa-dark-color-fg, #f7f0e6);
+  --karsa-color-fg-muted: var(--karsa-dark-color-fg-muted, #bbae9f);
+  --karsa-color-border: var(--karsa-dark-color-border, #493c32);
+  --karsa-color-accent: var(--karsa-dark-color-accent, #c58b63);
+  --karsa-color-accent-hover: var(--karsa-dark-color-accent-hover, #d7a17b);
+  --karsa-color-accent-fg: var(--karsa-dark-color-accent-fg, #22150f);
+  --karsa-color-danger: #ffaaa0;
+  --karsa-color-warning: #edc275;
+  --karsa-color-success: #9fca9e;
+  --karsa-color-focus-ring: var(--karsa-dark-color-focus-ring, #c58b63);
   color-scheme: dark;
 }
 
 [data-theme="dark"] {
-  --tk-color-accent: var(--tk-dark-color-accent, var(--tk-dark-accent, #c58b63));
-  --tk-color-accent-fg: var(--tk-dark-color-accent-fg, var(--tk-dark-accent-fg, #22150f));
+  --karsa-color-accent: var(--karsa-dark-color-accent, var(--karsa-dark-accent, #c58b63));
+  --karsa-color-accent-fg: var(--karsa-dark-color-accent-fg, var(--karsa-dark-accent-fg, #22150f));
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme]) {
-    --tk-color-bg: var(--tk-dark-color-bg, #191511);
-    --tk-color-surface: var(--tk-dark-color-surface, #211b17);
-    --tk-color-bg-subtle: var(--tk-dark-color-bg-subtle, #2b241e);
-    --tk-color-fg: var(--tk-dark-color-fg, #f7f0e6);
-    --tk-color-fg-muted: var(--tk-dark-color-fg-muted, #bbae9f);
-    --tk-color-border: var(--tk-dark-color-border, #493c32);
-    --tk-color-accent: var(--tk-dark-color-accent, #c58b63);
-    --tk-color-accent-hover: var(--tk-dark-color-accent-hover, #d7a17b);
-    --tk-color-accent-fg: var(--tk-dark-color-accent-fg, #22150f);
-    --tk-color-danger: #ffaaa0;
-    --tk-color-warning: #edc275;
-    --tk-color-success: #9fca9e;
-    --tk-color-focus-ring: var(--tk-dark-color-focus-ring, #c58b63);
+    --karsa-color-bg: var(--karsa-dark-color-bg, #191511);
+    --karsa-color-surface: var(--karsa-dark-color-surface, #211b17);
+    --karsa-color-bg-subtle: var(--karsa-dark-color-bg-subtle, #2b241e);
+    --karsa-color-fg: var(--karsa-dark-color-fg, #f7f0e6);
+    --karsa-color-fg-muted: var(--karsa-dark-color-fg-muted, #bbae9f);
+    --karsa-color-border: var(--karsa-dark-color-border, #493c32);
+    --karsa-color-accent: var(--karsa-dark-color-accent, #c58b63);
+    --karsa-color-accent-hover: var(--karsa-dark-color-accent-hover, #d7a17b);
+    --karsa-color-accent-fg: var(--karsa-dark-color-accent-fg, #22150f);
+    --karsa-color-danger: #ffaaa0;
+    --karsa-color-warning: #edc275;
+    --karsa-color-success: #9fca9e;
+    --karsa-color-focus-ring: var(--karsa-dark-color-focus-ring, #c58b63);
     color-scheme: dark;
   }
 }
@@ -142,16 +142,16 @@
     box-sizing: border-box;
   }
   html {
-    background: var(--tk-color-bg);
+    background: var(--karsa-color-bg);
   }
   body {
     min-width: 320px;
     margin: 0;
-    background: var(--tk-color-bg);
-    color: var(--tk-color-fg);
-    font-family: var(--tk-font-family-sans);
-    font-size: var(--tk-font-size-base);
-    line-height: var(--tk-line-height-normal);
+    background: var(--karsa-color-bg);
+    color: var(--karsa-color-fg);
+    font-family: var(--karsa-font-family-sans);
+    font-size: var(--karsa-font-size-base);
+    line-height: var(--karsa-line-height-normal);
     text-rendering: optimizeLegibility;
   }
   a {
@@ -168,11 +168,11 @@
     -webkit-tap-highlight-color: transparent;
   }
   :focus-visible {
-    outline: 2px solid var(--tk-color-focus-ring);
+    outline: 2px solid var(--karsa-color-focus-ring);
     outline-offset: 3px;
   }
   ::selection {
-    background: color-mix(in srgb, var(--tk-color-accent) 24%, transparent);
+    background: color-mix(in srgb, var(--karsa-color-accent) 24%, transparent);
   }
 }
 
@@ -194,7 +194,7 @@
 
 @media (forced-colors: active) {
   :root {
-    --tk-color-focus-ring: Highlight;
+    --karsa-color-focus-ring: Highlight;
   }
   * {
     forced-color-adjust: auto;
@@ -203,7 +203,7 @@
 
 @media (prefers-contrast: more) {
   :root {
-    --tk-color-border: color-mix(in srgb, var(--tk-color-fg) 45%, var(--tk-color-bg));
+    --karsa-color-border: color-mix(in srgb, var(--karsa-color-fg) 45%, var(--karsa-color-bg));
   }
 }
 

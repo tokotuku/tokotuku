@@ -3,30 +3,30 @@
   min-width: 0;
   flex-direction: column;
   overflow: hidden;
-  border: 1px solid var(--tk-color-border);
-  border-radius: var(--tk-radius-md);
-  background: var(--tk-color-surface);
+  border: 1px solid var(--karsa-color-border);
+  border-radius: var(--karsa-radius-md);
+  background: var(--karsa-color-surface);
   transition:
-    transform var(--tk-duration-normal) var(--tk-easing-standard),
-    box-shadow var(--tk-duration-normal) var(--tk-easing-standard);
+    transform var(--karsa-duration-normal) var(--karsa-easing-standard),
+    box-shadow var(--karsa-duration-normal) var(--karsa-easing-standard);
 }
 .product-card:hover {
   transform: translateY(-2px);
-  box-shadow: var(--tk-shadow-md);
+  box-shadow: var(--karsa-shadow-md);
 }
 .media {
   position: relative;
   display: block;
   aspect-ratio: 1 / 1;
   overflow: hidden;
-  background: var(--tk-color-bg-subtle);
+  background: var(--karsa-color-bg-subtle);
 }
 .media img {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform var(--tk-duration-slow) var(--tk-easing-standard);
+  transition: transform var(--karsa-duration-slow) var(--karsa-easing-standard);
 }
 .product-card:hover .media img {
   transform: scale(1.025);
@@ -36,14 +36,14 @@
   top: 0.75rem;
   left: 0.75rem;
   padding: 0.3rem 0.5rem;
-  border-radius: var(--tk-radius-full);
-  background: color-mix(in srgb, var(--tk-color-surface) 88%, transparent);
-  color: var(--tk-color-success);
+  border-radius: var(--karsa-radius-full);
+  background: color-mix(in srgb, var(--karsa-color-surface) 88%, transparent);
+  color: var(--karsa-color-success);
   font-size: 0.62rem;
   font-weight: 700;
 }
 .stock-pill--out {
-  color: var(--tk-color-danger);
+  color: var(--karsa-color-danger);
 }
 .body {
   display: flex;
@@ -58,13 +58,13 @@
   margin: 0;
 }
 .category {
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
   font-size: 0.65rem;
   letter-spacing: 0.03em;
 }
 .copy h2 {
   margin-top: 0.25rem;
-  font-family: var(--tk-font-family-display);
+  font-family: var(--karsa-font-family-display);
   font-size: 1.25rem;
   font-weight: 500;
   line-height: 1.05;
@@ -76,7 +76,7 @@
   display: -webkit-box;
   margin-top: 0.45rem;
   overflow: hidden;
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
   font-size: 0.76rem;
   line-height: 1.5;
   -webkit-box-orient: vertical;
@@ -98,22 +98,22 @@
   min-height: 2.4rem;
   padding: 0.35rem;
   place-items: center;
-  border: 1px solid var(--tk-color-border);
+  border: 1px solid var(--karsa-color-border);
   border-radius: 50%;
   background: transparent;
-  color: var(--tk-color-fg);
+  color: var(--karsa-color-fg);
   font-size: 1.1rem;
   cursor: pointer;
 }
 .footer button:hover:not(:disabled) {
-  border-color: var(--tk-color-accent);
-  color: var(--tk-color-accent);
+  border-color: var(--karsa-color-accent);
+  color: var(--karsa-color-accent);
 }
 .footer button:disabled {
   min-width: auto;
   padding-inline: 0.55rem;
-  border-radius: var(--tk-radius-sm);
-  color: var(--tk-color-fg-muted);
+  border-radius: var(--karsa-radius-sm);
+  color: var(--karsa-color-fg-muted);
   font-size: 0.62rem;
   cursor: not-allowed;
 }

@@ -1,25 +1,27 @@
-# Takontuku 0.2 migration
+# Karsa 0.3 migration from Takontuku/Tokotuku 0.2
 
-`0.2.0` is a breaking release. The `examples/` fixtures remain unchanged, but application imports
-must move to the new public subpaths.
+Karsa 0.3 is a deliberate breaking cutover. There are no package aliases, forwarded events,
+dual CSS variables, storage fallbacks, or automatic codemod.
 
-| Before | 0.2.0 |
-| --- | --- |
-| `@takontuku/ui/styles.css` | `@takontuku/theme/styles.css` |
-| `@takontuku/ui/admin.css` | `@takontuku/theme/admin.css` |
-| `@takontuku/ui/theme` | `@takontuku/theme/palette` |
-| `@takontuku/ui/Chart.astro` | `@takontuku/charts/Chart.astro` |
-| `@takontuku/ui/chart` | `@takontuku/charts/types` |
-| `@takontuku/ui/Layout.astro` | `@takontuku/ui/DocumentLayout.astro` |
-| `@takontuku/ui/AdminMetric.astro` | `@takontuku/ui/InspectorMetric.astro` |
-| `@takontuku/core/routes/AdminLayout.astro` | `@takontuku/core/layouts/AdminLayout.astro` |
-| `@takontuku/core/routes/StorefrontHome.astro` | `@takontuku/core/components/storefront/StorefrontHome.astro` |
-| `import { authClient } from "@takontuku/auth"` | `import { authClient } from "@takontuku/auth/client"` |
+1. Create a backup or migration branch.
+2. Rename `@takontuku/*` or `@tokotuku/*` packages and imports to `@karsa/*`.
+3. Rename `create-takontuku`/`create-tokotuku` to `create-karsa`, the CLI and integration
+   function to `karsa`, and `virtual:takontuku/*`/`virtual:tokotuku/*` to `virtual:karsa/*`.
+4. Rename `takontuku.migrations.json` or `tokotuku.migrations.json` to
+   `karsa.migrations.json` **before** running the new CLI. Preserve every logical module name,
+   migration name, and sequence so applied migrations are not replayed.
+5. Change `brand.storefront` to `brand.site`, `--tk-*` to `--karsa-*`,
+   `takontuku-theme`/`tokotuku-theme` to `karsa-theme`, and `takontuku:*`/`tokotuku:*`
+   DOM events and storage keys to `karsa:*`/`karsa-theme`.
+6. Rename `storefrontRoutes` to `siteRoutes`, `storefrontHomeSections` to
+   `siteHomeSections`, and import `SiteHome` from
+   `@karsa/core/components/site/SiteHome.astro`.
+7. Configure every module explicitly: `auth({ registration: "public" | "closed" })`,
+   `catalog({ presentation: "products" | "services" })`, and
+   `orders({ presentation: "orders" | "inquiries" })`.
+8. Run dependency installation and type generation, then `karsa db sync`, apply the
+   generated migration files, and run tests plus a production build.
 
-Admin catalog, orders, and booking list helpers now return `CursorPage<T>` with 25-item route pages.
-Use `?after=<cursor>` and `?before=<cursor>`; changing a filter invalidates the old cursor. The
-numbered `Pagination.astro` component remains available for unrelated storefront lists.
-
-Theme bootstrap is centralized in `ThemeScript.astro`. Do not add a second local-storage or
-`prefers-color-scheme` bootstrap script, and import the theme stylesheet once at the document
-boundary.
+Existing business and auth database table names are unchanged in 0.3. Never rewrite an applied
+SQL migration merely to replace branding in comments; append migrations only when the schema
+actually changes.
