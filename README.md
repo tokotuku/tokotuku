@@ -1,4 +1,4 @@
-# Karsa
+![Karsa — Astro-first foundations for accessible, modular applications](.github/assets/karsa-readme-header.png)
 
 Karsa is a site-neutral, Astro-first foundation for accessible interfaces, editorial content,
 and modular applications. It combines typed `@karsa/*` packages, semantic `--karsa-*` theme
@@ -61,6 +61,17 @@ bun run --cwd apps/docs build
 
 The docs parity check requires every `/en/` page to have an `/id/` pair at the same relative
 path, and vice versa.
+
+To run the complete 12-fixture example matrix with stable local ports:
+
+```sh
+moon run scripts:examples
+```
+
+The examples are served on `http://localhost:4301` through `http://localhost:4312` in the
+order listed under `scripts/run-examples.ts`. Astro requires Node.js 22.12+; if `node` is not on
+`PATH`, set `KARSA_NODE_BINARY=/path/to/node` before running the task. Press Ctrl+C to stop the
+whole matrix.
 
 ## Modules and data
 

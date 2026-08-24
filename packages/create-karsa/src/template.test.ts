@@ -111,9 +111,8 @@ describe("copyTemplate", () => {
         );
         const home = await readFile(path.join(outputDir, "src/pages/index.astro"), "utf8");
         expect(home).toContain("@karsa/core/components/site/SiteHome.astro");
-        await expect(
-          readFile(path.join(outputDir, "public/favicon.svg"), "utf8"),
-        ).resolves.toContain("Karsa");
+        const favicon = await readFile(path.join(outputDir, "public/favicon.png"));
+        expect([...favicon.subarray(0, 8)]).toEqual([137, 80, 78, 71, 13, 10, 26, 10]);
         if (preset === "service") expect(config).toContain('presentation: "inquiries"');
         if (preset === "publication") expect(config).toContain("content()");
       } finally {
