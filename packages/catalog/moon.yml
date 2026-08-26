@@ -26,6 +26,8 @@ tasks:
       - "tsconfig.json"
 
   test:
-    command: "vitest run"
+    # This suite imports bun:sqlite, so force Vitest itself to run under Bun
+    # instead of following its Node shebang when Moon launches the task.
+    command: "bun --bun vitest run"
     inputs:
       - "src/**/*.test.ts"

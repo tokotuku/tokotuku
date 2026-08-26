@@ -2,6 +2,7 @@ export const NAME_PATTERN = /^[a-z0-9-]+$/;
 export const NAME_RULE = "Use lowercase letters, digits, and hyphens only.";
 
 const KNOWN_FLAGS = new Set(["--yes", "--no-install", "--seed"]);
+const PRESETS = new Set(["company", "product", "service", "publication"]);
 
 export interface ParsedArgs {
   projectName: string | undefined;
@@ -11,6 +12,30 @@ export interface ParsedArgs {
 }
 
 export type ParseResult = { ok: true; args: ParsedArgs } | { ok: false; error: string };
+
+type ValueOption =
+  | { kind: "unhandled" }
+  | { kind: "error"; error: string }
+  | { kind: "registry"; value: string }
+  | { kind: "preset"; value: NonNullable<ParsedArgs["preset"]> };
+
+function parseValueOption(arg: string, value: string | undefined): ValueOption {
+  if (arg === "--registry") {
+    if (!value || value.startsWith("--")) {
+      return {
+        kind: "error",
+        error: "--registry needs a URL, e.g. --registry http://localhost:4873",
+      };
+    }
+    return { kind: "registry", value };
+  }
+
+  if (arg !== "--preset") return { kind: "unhandled" };
+  if (!value || !PRESETS.has(value)) {
+    return { kind: "error", error: "--preset must be company, product, service, or publication" };
+  }
+  return { kind: "preset", value: value as NonNullable<ParsedArgs["preset"]> };
+}
 
 /**
  * A hand-rolled parser rather than string.includes/find checks scattered
@@ -27,24 +52,15 @@ export function parseArgs(argv: string[]): ParseResult {
 
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i] as string;
-    if (arg === "--registry") {
-      const value = argv[i + 1];
-      if (!value || value.startsWith("--")) {
-        return {
-          ok: false,
-          error: "--registry needs a URL, e.g. --registry http://localhost:4873",
-        };
-      }
-      registry = value;
+    const option = parseValueOption(arg, argv[i + 1]);
+    if (option.kind === "error") return { ok: false, error: option.error };
+    if (option.kind === "registry") {
+      registry = option.value;
       i++;
       continue;
     }
-    if (arg === "--preset") {
-      const value = argv[i + 1];
-      if (!value || !["company", "product", "service", "publication"].includes(value)) {
-        return { ok: false, error: "--preset must be company, product, service, or publication" };
-      }
-      preset = value as ParsedArgs["preset"];
+    if (option.kind === "preset") {
+      preset = option.value;
       i++;
       continue;
     }
