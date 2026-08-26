@@ -20,7 +20,9 @@ tasks:
       - "*.json"
 
   test:
-    command: "vitest run"
+    # submission-security.test.ts imports bun:sqlite; keep the runner on Bun
+    # even when Moon launches the executable directly.
+    command: "bun --bun vitest run"
     inputs:
       - "src/**/*"
       - "vitest.config.ts"

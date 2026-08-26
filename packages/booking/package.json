@@ -46,7 +46,7 @@
     "build": "tsup",
     "dev": "tsup --watch",
     "lint": "biome check .",
-    "test": "vitest run",
+    "test": "bun --bun vitest run",
     "typecheck": "astro check"
   }
 }
