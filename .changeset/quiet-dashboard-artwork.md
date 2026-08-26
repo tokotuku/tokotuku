@@ -1,6 +1,6 @@
 ---
-"@takontuku/core": minor
-"@takontuku/ui": minor
+"@karsa/core": minor
+"@karsa/ui": minor
 ---
 
 Redesign the admin dashboard around a factual setup-readiness model and the Operational Split

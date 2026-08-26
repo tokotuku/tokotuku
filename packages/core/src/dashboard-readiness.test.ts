@@ -2,15 +2,15 @@ import { describe, expect, it } from "vitest";
 import { calculateDashboardReadiness } from "./dashboard-readiness";
 
 describe("calculateDashboardReadiness", () => {
-  it("keeps the default Takontuku workspace at admin-only progress", () => {
+  it("keeps the default Karsa workspace at admin-only progress", () => {
     expect(
       calculateDashboardReadiness({
         hasAuthenticatedAdmin: true,
-        brandName: "Takontuku",
+        brandName: "Karsa",
         hasLogo: false,
         moduleNames: [],
       }),
-    ).toMatchObject({ completed: 1, total: 5, percentage: 20 });
+    ).toMatchObject({ completed: 1, total: 3, percentage: 33 });
   });
 
   it("reports 40 percent for Arunika with Auth and Jarene only", () => {
@@ -21,17 +21,15 @@ describe("calculateDashboardReadiness", () => {
       moduleNames: ["auth", "jarene"],
     });
 
-    expect(readiness.percentage).toBe(40);
+    expect(readiness.percentage).toBe(67);
     expect(readiness.steps).toEqual([
       { id: "admin", complete: true },
       { id: "brand", complete: true },
       { id: "logo", complete: false },
-      { id: "catalog", complete: false },
-      { id: "orders", complete: false },
     ]);
   });
 
-  it("normalizes module names and reaches 80 percent with a logo and Catalog", () => {
+  it("reaches 100 percent once the neutral identity is complete", () => {
     expect(
       calculateDashboardReadiness({
         hasAuthenticatedAdmin: true,
@@ -39,7 +37,7 @@ describe("calculateDashboardReadiness", () => {
         hasLogo: true,
         moduleNames: ["AUTH", "JARENE", "Catalog"],
       }).percentage,
-    ).toBe(80);
+    ).toBe(100);
   });
 
   it("ignores custom modules for launch readiness", () => {
@@ -50,10 +48,10 @@ describe("calculateDashboardReadiness", () => {
         hasLogo: false,
         moduleNames: ["auth", "jarene", "booking"],
       }).percentage,
-    ).toBe(40);
+    ).toBe(67);
   });
 
-  it("reaches 100 percent when Orders is installed too", () => {
+  it("does not make readiness depend on installed business modules", () => {
     expect(
       calculateDashboardReadiness({
         hasAuthenticatedAdmin: true,
@@ -61,7 +59,7 @@ describe("calculateDashboardReadiness", () => {
         hasLogo: true,
         moduleNames: ["auth", "jarene", "catalog", "orders", "booking"],
       }),
-    ).toMatchObject({ completed: 5, total: 5, percentage: 100 });
+    ).toMatchObject({ completed: 3, total: 3, percentage: 100 });
   });
 
   it("does not treat whitespace-only names or an absent logo as configured", () => {
@@ -76,8 +74,6 @@ describe("calculateDashboardReadiness", () => {
       { id: "admin", complete: true },
       { id: "brand", complete: false },
       { id: "logo", complete: false },
-      { id: "catalog", complete: true },
-      { id: "orders", complete: false },
     ]);
   });
 });

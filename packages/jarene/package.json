@@ -1,6 +1,6 @@
 {
-  "name": "@takontuku/jarene",
-  "version": "0.2.0",
+  "name": "@karsa/jarene",
+  "version": "0.3.0",
   "publishConfig": {
     "registry": "https://registry.npmjs.org",
     "access": "public"
@@ -22,12 +22,12 @@
     "./package.json": "./package.json"
   },
   "dependencies": {
-    "@takontuku/core": "^0.2.0"
+    "@karsa/core": "workspace:*"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.4",
     "@cloudflare/workers-types": "^5.20260710.1",
-    "@takontuku/config": "^0.2.0",
+    "@karsa/config": "workspace:*",
     "astro": "^7.0.9"
   },
   "peerDependencies": {

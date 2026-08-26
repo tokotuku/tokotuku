@@ -1,10 +1,10 @@
 ---
 import { env } from "cloudflare:workers";
-import { createTranslator } from "@takontuku/core";
-import { brand, money } from "@takontuku/core/brand";
-import Layout from "@takontuku/ui/DocumentLayout.astro";
-import Icon from "@takontuku/ui/Icon.astro";
-import StoreHeader from "@takontuku/ui/StoreHeader.astro";
+import { createTranslator } from "@karsa/core";
+import { brand, money } from "@karsa/core/brand";
+import Layout from "@karsa/ui/DocumentLayout.astro";
+import Icon from "@karsa/ui/Icon.astro";
+import SiteHeader from "@karsa/ui/SiteHeader.astro";
 import { orderMessages } from "../messages";
 import {
   type CartLineInput,
@@ -14,18 +14,26 @@ import {
   paymentMethods,
 } from "../orders";
 
-const bankAccount = { bank: "BCA", accountNumber: "1234567890", accountName: "Takontuku" };
+const bankAccount = { bank: "BCA", accountNumber: "1234567890", accountName: "Karsa" };
 const id = brand.locale.toLowerCase().startsWith("id");
 const t = createTranslator(brand, orderMessages);
+const headerActions = [
+  { label: id ? "Keranjang" : "Cart", href: "/cart", icon: "cart", badge: true, current: true },
+];
 
 const { user } = Astro.locals;
 if (!user) return Astro.redirect("/login?next=/checkout");
 
 let error = "";
+let checkoutRequestId: string = crypto.randomUUID();
 
 if (Astro.request.method === "POST") {
   try {
     const form = await Astro.request.formData();
+    checkoutRequestId = String(form.get("checkoutRequestId") ?? "").trim();
+    if (!/^[A-Za-z0-9._:-]{1,128}$/.test(checkoutRequestId)) {
+      throw new Error(t("orders.checkout.error.invalidRequest"));
+    }
     const required = (name: string, label: string) => {
       const value = String(form.get(name) ?? "").trim();
       if (!value) throw new Error(t("orders.checkout.error.required", { label }));
@@ -58,6 +66,7 @@ if (Astro.request.method === "POST") {
             },
             cart,
             paymentMethod,
+            { idempotencyKey: checkoutRequestId },
           )
         ).orderNumber,
       )}`,
@@ -77,7 +86,7 @@ import "../styles/routes/orders-checkout.css";
 ---
 
 <Layout title={`Checkout — ${brand.name}`} siteName={brand.name} lang={id ? "id" : "en"}>
-  <StoreHeader brand={brand} showCart={true} current="cart" announcement={brand.storefront?.announcement ?? (id ? "Objek untuk ritual sehari-hari." : "Objects for everyday rituals.")} labels={{ home: id ? "Beranda" : "Home", shop: id ? "Toko" : "Shop", cart: id ? "Keranjang" : "Cart" }} />
+  <SiteHeader brand={brand} actions={headerActions} current="cart" announcement={brand.site?.announcement ?? (id ? "Objek untuk ritual sehari-hari." : "Objects for everyday rituals.")} labels={{ home: id ? "Beranda" : "Home" }} />
   <main>
     {completedOrder && (
       <section class="success-card">
@@ -99,7 +108,7 @@ import "../styles/routes/orders-checkout.css";
             {proofError && <p class="checkout-error" role="alert">{proofError}</p>}
             <form method="post" action="/api/orders/proof" enctype="multipart/form-data" class="proof-form">
               <input type="hidden" name="orderNumber" value={completedOrder.orderNumber} />
-              <label>{t("orders.checkout.uploadProof")}<input type="file" name="proof" accept="image/*,application/pdf" required /></label>
+              <label>{t("orders.checkout.uploadProof")}<input type="file" name="proof" accept="image/avif,image/gif,image/jpeg,image/png,image/webp,application/pdf" required /></label>
               <button type="submit">{t("orders.checkout.sendProof")}</button>
             </form>
           </div>
@@ -112,6 +121,7 @@ import "../styles/routes/orders-checkout.css";
         <p class="eyebrow">{t("orders.checkout.eyebrow")}</p><h1>{t("orders.checkout.title")}</h1>
         {error && <p class="checkout-error" role="alert">{error}</p>}
         <form method="post" data-checkout-form>
+          <input type="hidden" name="checkoutRequestId" value={checkoutRequestId} />
           <input type="hidden" name="cart" data-cart-payload />
           <div class="checkout-grid">
             <section>
@@ -149,7 +159,7 @@ import "../styles/routes/orders-checkout.css";
   clearCart();
 </script>}
 {!completedOrder && <script>
-  import { money } from "@takontuku/core/brand";
+  import { money } from "@karsa/core/brand";
   import { readCart } from "../client/cart";
   import { appendAll } from "../client/dom";
 

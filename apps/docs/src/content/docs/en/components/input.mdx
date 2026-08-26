@@ -1,0 +1,30 @@
+---
+title: Input
+description: A labeled input with native field behavior and typed HTML attributes.
+sidebar:
+  order: 2
+---
+
+import Input from "@karsa/ui/Input.astro";
+import ComponentPreview from "../../../../components/ComponentPreview.astro";
+
+`Input` combines an optional label with a native `<input>` element.
+
+## Preview
+
+<ComponentPreview label="Input examples">
+  <div class="grid w-full max-w-[24rem] gap-4">
+    <Input label="Email" type="email" name="email" placeholder="you@example.com" required />
+    <Input label="Disabled field" value="Read-only example" disabled />
+  </div>
+</ComponentPreview>
+
+```astro
+---
+import Input from "@karsa/ui/Input.astro";
+---
+
+<Input label="Email" type="email" name="email" placeholder="you@example.com" required />
+```
+
+`label` is the only Karsa-specific property; all remaining native input attributes pass through. The rendered field emits native `input` and `change` events, associates the generated label with a stable `id`, and preserves required, disabled, and focus-visible semantics.

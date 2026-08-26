@@ -1,5 +1,0 @@
----
-import StorefrontHome from "@takontuku/core/components/storefront/StorefrontHome.astro";
----
-
-<StorefrontHome />

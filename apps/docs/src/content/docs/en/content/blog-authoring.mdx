@@ -1,0 +1,43 @@
+---
+title: Content and blog authoring
+description: Author bilingual articles with predictable frontmatter, ownership, and review evidence.
+---
+
+The `@karsa/content` module owns posts and their editorial routes. It stores `slug`, `title`,
+`excerpt`, `body_markdown`, an optional `cover_image_key`, `status` (`draft`, `published`, or
+`archived`), an optional `author_id`, and publication timestamps. Pair an English file with an
+Indonesian file at the same relative path when both locales are enabled.
+
+## Admin fields
+
+```text
+slug: a-useful-article
+title: A useful article
+excerpt: A sentence for cards, search, and the feed.
+body_markdown: Headings, lists, links, emphasis, quotes, and code.
+status: draft | published | archived
+cover_image_key: content/<generated-key>
+```
+
+Use the admin editor and repository schema rather than adding fields ad hoc. Keep a post in
+`draft` until copy, links, attribution, and imagery are approved. Cover uploads are stored under
+the R2 `content/` prefix; Markdown images are intentionally not supported in 0.3.
+
+The same `renderMarkdownSafe()` function serves public pages and authenticated previews. It allows
+headings, paragraphs, lists, HTTP(S) links, blockquotes, emphasis, inline code, and fenced code.
+Raw HTML, scripts, iframes, styles, event handlers, unsafe URLs, and image syntax are removed.
+
+## Editorial checklist
+
+- One clear title and a useful description.
+- A single H1 followed by an ordered heading hierarchy.
+- Links that work in both `/en/` and `/id/` routes.
+- Locale-aware dates and translated navigation labels.
+- A paired translation or an explicit note that the page is intentionally single-locale.
+- No invented quotes, metrics, or customer claims.
+- Draft and archived posts stay out of `/blog`, RSS, and the canonical sitemap.
+- v0.3 does not include pages CMS, tags/categories, comments, rich-text editing, author archives,
+  or slug redirect history.
+
+Use `bun run parity` in the docs app to catch missing locale pairs. The AI workflow should attach
+the content source and reviewer evidence to the final report.

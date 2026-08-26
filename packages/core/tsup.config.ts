@@ -1,8 +1,8 @@
-import { createTsupConfig } from "@takontuku/config/tsup";
+import { createTsupConfig } from "@karsa/config/tsup";
 
 export default [
   createTsupConfig(),
-  // `takontuku db sync` — a node CLI, not app code, so it gets its own
+  // `karsa db sync` — a node CLI, not app code, so it gets its own
   // platform/entry/clean settings rather than joining the browser-targeted
   // build above (clean: false so it doesn't wipe that build's dist/ output).
   createTsupConfig({

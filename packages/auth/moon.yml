@@ -6,7 +6,6 @@ layer: "library"
 tasks:
   build:
     command: "tsup"
-    deps: ["core:build"]
     inputs:
       - "src/**/*"
       - "tsup.config.ts"
@@ -22,10 +21,6 @@ tasks:
 
   typecheck:
     command: "astro check"
-    # @takontuku/core is consumed via its built dist/ (not raw source) for
-    # runtime values like defineModule — without this, typecheck can race
-    # tsup's clean-then-rebuild and read a briefly-missing dist/index.d.ts.
-    deps: ["core:build"]
     inputs:
       - "src/**/*"
       - "tsconfig.json"

@@ -4,6 +4,15 @@ stack: "infrastructure"
 layer: "tool"
 
 tasks:
+  examples:
+    command: "bun run-examples.ts"
+    inputs:
+      - "run-examples.ts"
+    options:
+      persistent: true
+      runInCI: false
+      cache: false
+
   lint:
     command: "bunx biome check ."
     inputs:

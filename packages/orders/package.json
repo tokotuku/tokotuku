@@ -1,7 +1,7 @@
 {
-  "name": "@takontuku/orders",
+  "name": "@karsa/orders",
   "private": true,
-  "version": "0.2.0",
+  "version": "0.3.0",
   "type": "module",
   "files": [
     "dist",
@@ -22,14 +22,14 @@
     "./package.json": "./package.json"
   },
   "dependencies": {
-    "@takontuku/catalog": "^0.2.0",
-    "@takontuku/core": "^0.2.0",
-    "@takontuku/ui": "^0.2.0"
+    "@karsa/catalog": "workspace:*",
+    "@karsa/core": "workspace:*",
+    "@karsa/ui": "workspace:*"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.4",
     "@cloudflare/workers-types": "^5.20260710.1",
-    "@takontuku/config": "^0.2.0",
+    "@karsa/config": "workspace:*",
     "astro": "^7.0.9"
   },
   "peerDependencies": {
@@ -45,6 +45,7 @@
     "build": "tsup",
     "dev": "tsup --watch",
     "lint": "biome check .",
+    "test": "vitest run",
     "typecheck": "astro check"
   }
 }

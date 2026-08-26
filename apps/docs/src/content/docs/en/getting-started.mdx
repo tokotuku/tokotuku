@@ -1,0 +1,81 @@
+---
+title: Getting started
+description: Install Karsa, choose a site preset, and render a first typed Astro component.
+sidebar:
+  order: 1
+---
+
+## Install
+
+Karsa packages are independent. Install the workspace dependencies once, or add the packages selected by your preset:
+
+```sh
+bun install
+```
+
+For a new project, scaffold the smallest base and let the CLI own module wiring:
+
+```sh
+bunx create-karsa my-site
+cd my-site
+bunx karsa skills install
+```
+
+## Render a component
+
+Import a component and the theme stylesheet at the document boundary:
+
+```astro
+---
+import Button from "@karsa/ui/Button.astro";
+import "@karsa/theme/styles.css";
+---
+
+<Button variant="primary">Save changes</Button>
+```
+
+The HTML is semantic and static by default. Keep the component boundary in the app's layout so every page shares the same tokens.
+
+## Package roles
+
+| Package | Purpose |
+| --- | --- |
+| `@karsa/theme` | Tailwind tokens, fonts, palettes, and theme bootstrap |
+| `@karsa/ui` | Astro primitives and app-level surfaces |
+| `@karsa/core` | Integration, registry, CLI, formatters, and virtual modules |
+| `@karsa/charts` | Optional chart component and chart types |
+| `@karsa/auth` | Registration, sessions, and access control |
+| `@karsa/catalog` | Private product/service catalog and presentation adapter |
+| `@karsa/orders` | Private checkout/order or inquiry lifecycle |
+| `@karsa/booking` | Private service schedules and booking requests |
+| `@karsa/content` | Private publication posts, preview, RSS, and sitemap contributions |
+
+## Agent instructions
+
+Generated projects contain `AGENTS.md` as the canonical instructions and a small `CLAUDE.md` bridge. The same Karsa skills are installed in `.agents/skills/` and `.claude/skills/`:
+
+- `karsa-site-builder` — choose a preset and maturity tier, then plan ownership and evidence.
+- `karsa-ui` — use components, `--karsa-*` tokens, brand config, and locale-aware formatters.
+- `karsa-modules` — add, remove, and integrate optional modules through the registry contract.
+- `karsa-data` — handle migrations, seeds, media, bindings, and secrets safely.
+- `karsa-content` — author safe Markdown posts and keep editorial data in the content layer.
+
+Start an AI task by asking it to read `AGENTS.md`, state the chosen preset and tier, and list the checks it will run.
+
+Indonesian prompt:
+
+```text
+Baca AGENTS.md. Pilih preset dan tier yang diizinkan, jelaskan asumsi serta kepemilikan halaman, lalu implementasikan irisan vertikal terkecil dan jalankan typecheck serta lint.
+```
+
+English prompt:
+
+```text
+Read AGENTS.md. Choose the authorized preset and tier, explain assumptions and page ownership, implement the smallest vertical slice, and run typecheck and lint.
+```
+
+Refresh the installed skills after upgrading `@karsa/core`:
+
+```sh
+bunx karsa skills install
+```

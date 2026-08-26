@@ -1,36 +1,45 @@
 ---
 import { env } from "cloudflare:workers";
-import { createTranslator } from "@takontuku/core";
-import { brand } from "@takontuku/core/brand";
-import DashboardMetric from "@takontuku/ui/DashboardMetric.astro";
-import Icon from "@takontuku/ui/Icon.astro";
-import { catalogMessages } from "../../messages";
-import { getCatalogDashboardSummary, listCategories, listProducts } from "../../products";
+import registry from "virtual:karsa/registry";
+import { brand } from "@karsa/core/brand";
+import DashboardMetric from "@karsa/ui/DashboardMetric.astro";
+import Icon from "@karsa/ui/Icon.astro";
+import { getCatalogDashboardSummary, listCategories, listItems } from "../../catalog-items";
+import { createCatalogTranslator } from "../../messages";
 
-const [summary, categories, productPage] = await Promise.all([
-  getCatalogDashboardSummary(env.DB),
-  listCategories(env.DB),
-  listProducts(env.DB, { pageSize: 6 }),
+const presentation =
+  registry.clientConfig["catalog"]?.["presentation"] === "services" ? "services" : "products";
+const services = presentation === "services";
+const publicBase = services ? "/services" : "/products";
+const adminBase = services ? "/admin/services" : "/admin/products";
+const [summary, categories, itemPage] = await Promise.all([
+  getCatalogDashboardSummary(env.DB, presentation),
+  listCategories(env.DB, presentation),
+  listItems(env.DB, { pageSize: 6, presentation }),
 ]);
-const products = productPage.items;
-const productCount = summary.active;
-const t = createTranslator(brand, catalogMessages);
+const items = itemPage.items;
+const itemCount = summary.active;
+const t = createCatalogTranslator(brand, presentation);
+const itemMeta = (item: (typeof itemPage.items)[number]): string => {
+  if (services) return "";
+  return item.fulfillmentType === "physical" ? String(item.stock) : "—";
+};
 
 import "./CatalogDashboardWidget.css";
 ---
 
 <section class="catalog-widget panel" data-dashboard-widget="catalog" aria-labelledby="catalog-widget-title">
-  <div class="widget-heading"><div><p class="eyebrow">{t("catalog.dashboard.eyebrow")}</p><h2 id="catalog-widget-title">{t("catalog.dashboard.title")}</h2></div><a href="/admin/products">{t("catalog.dashboard.manage")} <span aria-hidden="true">↗</span></a></div>
-  {productCount === 0 && (
+  <div class="widget-heading"><div><p class="eyebrow">{t("catalog.dashboard.eyebrow")}</p><h2 id="catalog-widget-title">{t("catalog.dashboard.title")}</h2></div><a href={adminBase}>{t("catalog.dashboard.manage")} <span aria-hidden="true">↗</span></a></div>
+  {itemCount === 0 && (
     <div class="launch-checklist" data-catalog-onboarding>
-      <div class="launch-mark"><Icon name="products" size={22} /></div>
-      <div><h3>{t("catalog.dashboard.startTitle")}</h3><p>{t("catalog.dashboard.startDescription")}</p><div class="launch-actions"><a class="admin-button admin-button--primary" href="/admin/products/new">{t("catalog.dashboard.addFirst")}</a>{import.meta.env.DEV && <span class="seed-hint">{t("catalog.dashboard.seedHint")} <code>bun run db:seed</code></span>}</div></div>
+      <div class="launch-mark"><Icon name="catalog-items" size={22} /></div>
+      <div><h3>{t("catalog.dashboard.startTitle")}</h3><p>{t("catalog.dashboard.startDescription")}</p><div class="launch-actions"><a class="admin-button admin-button--primary" href={`${adminBase}/new`}>{t("catalog.dashboard.addFirst")}</a>{import.meta.env.DEV && !services && <span class="seed-hint">{t("catalog.dashboard.seedHint")} <code>bun run db:seed</code></span>}</div></div>
     </div>
   )}
-  {productCount > 0 && (
+  {itemCount > 0 && (
     <>
-      <div class="metrics"><DashboardMetric label={t("catalog.dashboard.activeProducts")} value={String(productCount)} hint={t("catalog.dashboard.acrossCategories", { count: categories.length })} /><DashboardMetric label={t("catalog.dashboard.categories")} value={String(categories.length)} /><DashboardMetric label={t("catalog.dashboard.lowStock")} value={String(summary.lowStock)} tone="warning" hint={t("catalog.dashboard.lowStockHint")} /></div>
-      <div class="product-preview"><div class="subheading"><h3>{t("catalog.dashboard.featured")}</h3><a href="/products">{t("catalog.dashboard.viewStore")} ↗</a></div>{products.length ? products.slice(0, 4).map((product) => <div class="product-row"><span class="product-dot"></span><span>{product.name}</span><strong>{product.fulfillmentType === "physical" ? product.stock : "—"}</strong></div>) : <p class="muted">{t("catalog.dashboard.noActiveProducts")}</p>}</div>
+      <div class="metrics"><DashboardMetric label={t("catalog.dashboard.activeProducts")} value={String(itemCount)} hint={t("catalog.dashboard.acrossCategories", { count: categories.length })} /><DashboardMetric label={t("catalog.dashboard.categories")} value={String(categories.length)} />{!services && <DashboardMetric label={t("catalog.dashboard.lowStock")} value={String(summary.lowStock)} tone="warning" hint={t("catalog.dashboard.lowStockHint")} />}</div>
+      <div class="product-preview"><div class="subheading"><h3>{t("catalog.dashboard.featured")}</h3><a href={services ? adminBase : publicBase}>{t("catalog.dashboard.viewStore")} ↗</a></div>{items.length ? items.slice(0, 4).map((item) => <div class="product-row"><span class="product-dot"></span><span>{item.name}</span><strong>{itemMeta(item)}</strong></div>) : <p class="muted">{t("catalog.dashboard.noActiveProducts")}</p>}</div>
     </>
   )}
 </section>

@@ -1,0 +1,44 @@
+---
+import { env } from "cloudflare:workers";
+import AdminLayout from "@karsa/core/layouts/AdminLayout.astro";
+import { getContentDashboardSummary, listPosts, type PostStatus, postStatuses } from "../../posts";
+
+const selectedStatus = Astro.url.searchParams.get("status") as PostStatus | null;
+const status = selectedStatus && postStatuses.includes(selectedStatus) ? selectedStatus : undefined;
+const search = Astro.url.searchParams.get("q")?.trim() || undefined;
+const posts = await listPosts(env.DB, {
+  limit: 50,
+  ...(status ? { status } : {}),
+  ...(search ? { search } : {}),
+});
+const summary = await getContentDashboardSummary(env.DB);
+
+import "../../styles/routes/content-admin.css";
+---
+
+<AdminLayout title="Posts">
+  <header class="content-admin-header">
+    <div><p class="eyebrow">Content</p><h1>Posts</h1><p>Write, preview, and publish the stories on your site.</p></div>
+    <a class="admin-button admin-button--primary" href="/admin/posts/new">New post</a>
+  </header>
+
+  <section class="content-admin-metrics" aria-label="Post totals">
+    <div><span>Total</span><strong>{summary.total}</strong></div>
+    <div><span>Published</span><strong>{summary.published}</strong></div>
+    <div><span>Drafts</span><strong>{summary.draft}</strong></div>
+    <div><span>Archived</span><strong>{summary.archived}</strong></div>
+  </section>
+
+  <section class="content-admin-panel panel">
+    <form class="content-admin-toolbar" method="get">
+      <label>Status <select name="status"><option value="">All statuses</option>{postStatuses.map((item) => <option value={item} selected={status === item}>{item}</option>)}</select></label>
+      <label>Search <input type="search" name="q" value={search ?? ""} placeholder="Title or slug" /></label>
+      <button class="admin-button" type="submit">Filter</button>
+    </form>
+    {posts.length === 0 ? (
+      <div class="content-admin-empty"><h2>No posts found</h2><p>Create a draft to start your editorial workflow.</p><a class="admin-button admin-button--primary" href="/admin/posts/new">Create a post</a></div>
+    ) : (
+      <div class="content-admin-table-wrap"><table class="admin-table"><thead><tr><th>Post</th><th>Status</th><th>Updated</th><th><span class="sr-only">Actions</span></th></tr></thead><tbody>{posts.map((post) => <tr><td><strong>{post.title}</strong><span class="content-admin-slug">/{post.slug}</span></td><td><span class:list={["content-status", `content-status--${post.status}`]}>{post.status}</span></td><td>{post.updatedAt}</td><td class="content-admin-actions"><a href={`/admin/posts/${post.id}/edit`}>Edit</a>{post.status === "published" ? <a href={`/blog/${post.slug}`}>View</a> : <a href={`/admin/posts/${post.id}/preview`}>Preview</a>}</td></tr>)}</tbody></table></div>
+    )}
+  </section>
+</AdminLayout>

@@ -2,7 +2,7 @@ import { scanImports } from "./astro-config";
 
 /**
  * Inserts `import "specifier";` among the contiguous block of existing
- * `@takontuku/*\/register` side-effect imports at the top of middleware.ts,
+ * `@karsa/*\/register` side-effect imports at the top of middleware.ts,
  * sorted by specifier -- falls back to appending after the last import
  * declaration when that block is empty. No-op if already present.
  */

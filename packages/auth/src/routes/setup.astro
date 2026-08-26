@@ -1,12 +1,18 @@
 ---
 import { env } from "cloudflare:workers";
-import brand from "virtual:takontuku/config";
-import { createTranslator } from "@takontuku/core";
-import Icon from "@takontuku/ui/Icon.astro";
+import brand from "virtual:karsa/config";
+import { createTranslator } from "@karsa/core";
+import Icon from "@karsa/ui/Icon.astro";
 import { createAuth } from "../auth";
 import AuthFrame from "../components/AuthFrame.astro";
 import { authMessages } from "../messages";
-import { claimSetup, completeSetup, isSetupComplete, releaseSetupClaim } from "../setup";
+import {
+  claimSetup,
+  completeSetup,
+  isSetupComplete,
+  releaseSetupClaim,
+  verifySetupToken,
+} from "../setup";
 
 const t = createTranslator(brand, authMessages);
 let errorMessage = "";
@@ -15,38 +21,48 @@ let values = { name: "", email: "" };
 if (await isSetupComplete(env.DB)) return Astro.redirect("/login", 302);
 
 if (Astro.request.method === "POST") {
-  const origin = Astro.request.headers.get("origin");
-  if (origin !== Astro.url.origin) {
-    errorMessage = t("auth.setup.error.origin");
+  const form = await Astro.request.formData();
+  const setupToken = String(form.get("setupToken") ?? "");
+  if (!env.KARSA_SETUP_TOKEN) {
+    Astro.response.status = 503;
+    errorMessage = t("auth.setup.error.unavailable");
+  } else if (!(await verifySetupToken(env.KARSA_SETUP_TOKEN, setupToken))) {
+    Astro.response.status = 403;
+    errorMessage = t("auth.setup.error.token");
   } else {
-    const form = await Astro.request.formData();
-    const name = String(form.get("name") ?? "").trim();
-    const email = String(form.get("email") ?? "")
-      .trim()
-      .toLowerCase();
-    const password = String(form.get("password") ?? "");
-    const confirmPassword = String(form.get("confirmPassword") ?? "");
-    values = { name, email };
-
-    if (name.length < 2) errorMessage = t("auth.setup.error.name");
-    else if (!email?.includes("@")) errorMessage = t("auth.setup.error.email");
-    else if (password.length < 8) errorMessage = t("auth.setup.error.password");
-    else if (password !== confirmPassword) errorMessage = t("auth.setup.error.confirm");
-    else if (await isSetupComplete(env.DB)) return Astro.redirect("/login", 302);
-    else if (!(await claimSetup(env.DB))) {
-      errorMessage = t("auth.setup.error.running");
+    const origin = Astro.request.headers.get("origin");
+    if (origin !== Astro.url.origin) {
+      errorMessage = t("auth.setup.error.origin");
     } else {
-      let createdUserId: string | undefined;
-      try {
-        const auth = createAuth(env, Astro.url.origin);
-        const result = await auth.api.signUpEmail({ body: { name, email, password } });
-        createdUserId = result.user.id;
-        await completeSetup(env.DB, createdUserId);
-        return Astro.redirect("/login?setup=complete", 303);
-      } catch (error) {
-        await releaseSetupClaim(env.DB, createdUserId);
-        errorMessage =
-          error instanceof Error && error.message ? error.message : t("auth.setup.error.generic");
+      const name = String(form.get("name") ?? "").trim();
+      const email = String(form.get("email") ?? "")
+        .trim()
+        .toLowerCase();
+      const password = String(form.get("password") ?? "");
+      const confirmPassword = String(form.get("confirmPassword") ?? "");
+      values = { name, email };
+
+      if (name.length < 2) errorMessage = t("auth.setup.error.name");
+      else if (!email?.includes("@")) errorMessage = t("auth.setup.error.email");
+      else if (password.length < 8) errorMessage = t("auth.setup.error.password");
+      else if (password !== confirmPassword) errorMessage = t("auth.setup.error.confirm");
+      else if (await isSetupComplete(env.DB)) return Astro.redirect("/login", 302);
+      else if (!(await claimSetup(env.DB))) {
+        errorMessage = t("auth.setup.error.running");
+      } else {
+        let createdUserId: string | undefined;
+        try {
+          // Setup is the only closed-registration bypass and is protected by the one-time claim.
+          const auth = createAuth(env, Astro.url.origin, { disableSignUp: false });
+          const result = await auth.api.signUpEmail({ body: { name, email, password } });
+          createdUserId = result.user.id;
+          await completeSetup(env.DB, createdUserId);
+          return Astro.redirect("/login?setup=complete", 303);
+        } catch (error) {
+          await releaseSetupClaim(env.DB, createdUserId);
+          errorMessage =
+            error instanceof Error && error.message ? error.message : t("auth.setup.error.generic");
+        }
       }
     }
   }
@@ -94,7 +110,7 @@ import "../styles/routes/auth-setup.css";
           minlength="8"
           required
         />
-          <button class="password-toggle" type="button" data-password-toggle data-show-label={t("auth.common.showPassword")} data-hide-label={t("auth.common.hidePassword")} aria-label={t("auth.common.showPassword")}>
+          <button class="password-toggle" type="button" tabindex="-1" data-password-toggle data-show-label={t("auth.common.showPassword")} data-hide-label={t("auth.common.hidePassword")} aria-label={t("auth.common.showPassword")}>
           <Icon name="eye" size={16} />
         </button>
       </div>
@@ -111,6 +127,13 @@ import "../styles/routes/auth-setup.css";
           minlength="8"
           required
         />
+      </div>
+    </div>
+    <div class="field">
+      <label for="setup-token">{t("auth.setup.tokenLabel")}</label>
+      <div class="input-wrap">
+        <Icon name="lock" size={16} />
+        <input id="setup-token" name="setupToken" type="password" autocomplete="off" required />
       </div>
     </div>
 

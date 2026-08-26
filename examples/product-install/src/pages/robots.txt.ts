@@ -1,6 +1,6 @@
-/// <reference types="@takontuku/core/virtual.d.ts" />
+/// <reference types="@karsa/core/virtual.d.ts" />
 
-import registry from "virtual:takontuku/registry";
+import registry from "virtual:karsa/registry";
 import type { APIRoute } from "astro";
 
 export const GET: APIRoute = ({ url }) => {

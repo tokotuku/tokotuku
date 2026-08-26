@@ -1,0 +1,37 @@
+---
+title: Button
+description: Kontrol aksi aksesibel dengan varian, ukuran, dan semantik button native.
+sidebar:
+  order: 1
+---
+
+import Button from "@karsa/ui/Button.astro";
+import ComponentPreview from "../../../../components/ComponentPreview.astro";
+
+`Button` menghasilkan `<button>` native. Gunakan untuk aksi, submit form, atau reset; gunakan link ketika pengguna berpindah halaman.
+
+## Preview
+
+<ComponentPreview label="Varian button">
+  <Button variant="primary">Primary</Button>
+  <Button variant="secondary">Secondary</Button>
+  <Button variant="ghost">Ghost</Button>
+  <Button disabled>Disabled</Button>
+</ComponentPreview>
+
+```astro
+---
+import Button from "@karsa/ui/Button.astro";
+---
+
+<Button variant="primary" size="md">Simpan perubahan</Button>
+```
+
+| Properti | Tipe | Default |
+| --- | --- | --- |
+| `variant` | `"primary" \| "secondary" \| "ghost"` | `"primary"` |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"` |
+| `type` | tipe button native | `"button"` |
+| Properti lain | atribut `<button>` native | — |
+
+Default slot menerima label atau konten inline. Aktivasi keyboard, `disabled`, `aria-*`, dan focus-visible native tetap dipertahankan.

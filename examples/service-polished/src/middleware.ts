@@ -1,6 +1,6 @@
 import { defineMiddleware } from "astro:middleware";
-import "@takontuku/auth/register";
-import "@takontuku/booking/register";
-import "@takontuku/catalog/register";
+import "@karsa/auth/register";
+import "@karsa/booking/register";
+import "@karsa/catalog/register";
 
 export const onRequest = defineMiddleware((_context, next) => next());

@@ -1,29 +1,34 @@
 ---
 import { env } from "cloudflare:workers";
-import brand from "virtual:takontuku/config";
-import { createTranslator } from "@takontuku/core";
-import { date, money } from "@takontuku/core/brand";
-import AdminLayout from "@takontuku/core/layouts/AdminLayout.astro";
-import AdminInspector from "@takontuku/ui/AdminInspector.astro";
-import AdminPageHeader from "@takontuku/ui/AdminPageHeader.astro";
-import Icon from "@takontuku/ui/Icon.astro";
-import InspectorMetric from "@takontuku/ui/InspectorMetric.astro";
-import ProductForm from "../../../../components/ProductForm.astro";
-import { catalogMessages, localizeCatalogError } from "../../../../messages";
-import { productInputFromForm } from "../../../../product-form";
+import brand from "virtual:karsa/config";
+import registry from "virtual:karsa/registry";
+import { date, money } from "@karsa/core/brand";
+import AdminLayout from "@karsa/core/layouts/AdminLayout.astro";
+import AdminInspector from "@karsa/ui/AdminInspector.astro";
+import AdminPageHeader from "@karsa/ui/AdminPageHeader.astro";
+import Icon from "@karsa/ui/Icon.astro";
+import InspectorMetric from "@karsa/ui/InspectorMetric.astro";
+import { catalogItemInputFromForm } from "../../../../catalog-item-form";
 import {
-  archiveProduct,
-  findProductById,
+  archiveItem,
+  findItemById,
   listInventoryMovements,
-  updateProduct,
-} from "../../../../products";
+  updateItem,
+} from "../../../../catalog-items";
+import ProductForm from "../../../../components/ProductForm.astro";
+import { createCatalogTranslator, localizeCatalogError } from "../../../../messages";
 
-const t = createTranslator(brand, catalogMessages);
+const presentation =
+  registry.clientConfig["catalog"]?.["presentation"] === "services" ? "services" : "products";
+const services = presentation === "services";
+const t = createCatalogTranslator(brand, presentation);
+const adminBase = services ? "/admin/services" : "/admin/products";
+const locale = brand.locale.toLowerCase().startsWith("id") ? "id" : "en";
 
 // Astro's generated params type is an index-signature object here.
 // biome-ignore lint/complexity/useLiteralKeys: keep the generated Astro params access explicit
 const id = Number(Astro.params["id"]);
-let product = await findProductById(env.DB, id, { includeInactive: true });
+let product = await findItemById(env.DB, id, { includeInactive: true, presentation });
 if (!product) return new Response(t("catalog.products.error.notFound"), { status: 404 });
 let error = "";
 
@@ -31,46 +36,57 @@ if (Astro.request.method === "POST") {
   try {
     const form = await Astro.request.formData();
     if (form.get("intent") === "archive") {
-      await archiveProduct(env.DB, id);
-      return Astro.redirect("/admin/products?archived=1");
+      await archiveItem(env.DB, id);
+      return Astro.redirect(`${adminBase}?archived=1`);
     }
-    const input = await productInputFromForm(form, env.MEDIA, product.imageKey);
-    await updateProduct(env.DB, id, input);
-    return Astro.redirect(`/admin/products/${id}/edit?saved=1`);
+    const input = await catalogItemInputFromForm(form, env.MEDIA, product.imageKey, presentation);
+    await updateItem(env.DB, id, input);
+    return Astro.redirect(`${adminBase}/${id}/edit?saved=1`);
   } catch (caught) {
     error = localizeCatalogError(caught, t);
-    product = (await findProductById(env.DB, id, { includeInactive: true })) ?? product;
+    product = (await findItemById(env.DB, id, { includeInactive: true, presentation })) ?? product;
   }
 }
-const movements = await listInventoryMovements(env.DB, id);
+const movements = services ? [] : await listInventoryMovements(env.DB, id);
 const movementReason = (reason: (typeof movements)[number]["reason"]) =>
   t(`catalog.products.movements.reason.${reason}`);
+const movementTone = (quantityChange: number) => (quantityChange > 0 ? "positive" : "negative");
+const movementSign = (quantityChange: number) => (quantityChange > 0 ? "+" : "");
+const statusLabel = product.isActive ? "Aktif" : "Nonaktif";
+const statusTone = product.isActive ? "positive" : "warning";
+let priceLabel: string;
+if (product.priceCents === null) {
+  priceLabel = locale === "id" ? "Penawaran" : "Quote";
+} else {
+  priceLabel = money(product.priceCents / 100);
+}
+const entityLabel = services ? "Layanan" : "Produk";
 
 import "../../../../styles/routes/catalog-admin-products-edit.css";
 ---
 
 <AdminLayout title={`${t("catalog.products.editTitle")} ${product.name}`}>
   <AdminPageHeader eyebrow={t("catalog.products.catalogEyebrow")} title={t("catalog.products.editTitle")} description={t("catalog.products.editDescription", { name: product.name })}>
-    <Fragment slot="actions"><a class="admin-button" href="/admin/products">{t("catalog.products.form.cancel")}</a></Fragment>
+    <Fragment slot="actions"><a class="admin-button" href={adminBase}>{t("catalog.products.form.cancel")}</a></Fragment>
   </AdminPageHeader>
   {Astro.url.searchParams.has("saved") && <p class="save-notice">{t("catalog.products.saved")}</p>}
-  <ProductForm product={product} error={error} />
-  <section class="panel movement-panel">
+  <ProductForm product={product} error={error} presentation={presentation} />
+  {!services && <section class="panel movement-panel">
     <div><h2>{t("catalog.products.movements.title")}</h2><p>{t("catalog.products.movements.description")}</p></div>
-    {movements.length ? <table><thead><tr><th>{t("catalog.products.movements.time")}</th><th>{t("catalog.products.movements.reason")}</th><th>{t("catalog.products.movements.note")}</th><th>{t("catalog.products.movements.change")}</th></tr></thead><tbody>{movements.map((movement) => <tr><td>{date(new Date(`${movement.createdAt}Z`))}</td><td>{movementReason(movement.reason)}</td><td>{movement.note}</td><td class:list={[movement.quantityChange > 0 ? "positive" : "negative"]}>{movement.quantityChange > 0 ? "+" : ""}{movement.quantityChange}</td></tr>)}</tbody></table> : <p class="empty-movements">{t("catalog.products.movements.empty")}</p>}
-  </section>
+    {movements.length ? <table><thead><tr><th>{t("catalog.products.movements.time")}</th><th>{t("catalog.products.movements.reason")}</th><th>{t("catalog.products.movements.note")}</th><th>{t("catalog.products.movements.change")}</th></tr></thead><tbody>{movements.map((movement) => <tr><td>{date(new Date(`${movement.createdAt}Z`))}</td><td>{movementReason(movement.reason)}</td><td>{movement.note}</td><td class:list={[movementTone(movement.quantityChange)]}>{movementSign(movement.quantityChange)}{movement.quantityChange}</td></tr>)}</tbody></table> : <p class="empty-movements">{t("catalog.products.movements.empty")}</p>}
+  </section>}
   <Fragment slot="inspector">
-    <AdminInspector title={product.name} description="Pengaturan utama produk.">
+    <AdminInspector title={product.name} description={`Pengaturan utama ${entityLabel.toLowerCase()}.`}>
       <div class="inspector-metrics">
-        <InspectorMetric label="Status" value={product.isActive ? "Aktif" : "Nonaktif"} tone={product.isActive ? "positive" : "warning"} />
-        <InspectorMetric label={t("catalog.products.form.price")} value={money(product.priceCents / 100)} />
-        <InspectorMetric label={t("catalog.products.form.fulfillmentType")} value={t(`catalog.products.form.fulfillmentType.${product.fulfillmentType}`)} />
-        {product.fulfillmentType === "physical" && <InspectorMetric label={t("catalog.products.form.stock")} value={String(product.stock)} tone={product.stock <= 5 ? "warning" : "default"} />}
+        <InspectorMetric label="Status" value={statusLabel} tone={statusTone} />
+        <InspectorMetric label={t("catalog.products.form.price")} value={priceLabel} />
+        {!services && <InspectorMetric label={t("catalog.products.form.fulfillmentType")} value={t(`catalog.products.form.fulfillmentType.${product.fulfillmentType}`)} />}
+        {!services && product.fulfillmentType === "physical" && <InspectorMetric label={t("catalog.products.form.stock")} value={String(product.stock)} tone={product.stock <= 5 ? "warning" : "default"} />}
       </div>
-      <div class="inspector-actions"><button class="admin-button admin-button--primary" type="submit" form="product-form"><Icon name="check" size={16} /> {t("catalog.products.form.save")}</button></div>
+      <div class="inspector-actions"><button class="admin-button admin-button--primary" type="submit" form="catalog-item-form"><Icon name="check" size={16} /> {t("catalog.products.form.save")}</button></div>
     </AdminInspector>
     <AdminInspector title="Danger zone">
-      <p>Produk akan disembunyikan dari toko, tetapi riwayatnya tetap tersimpan.</p>
+      <p>{services ? "Layanan akan disembunyikan dari situs, tetapi riwayatnya tetap tersimpan." : "Produk akan disembunyikan dari situs, tetapi riwayatnya tetap tersimpan."}</p>
       <form method="post" onsubmit={`return confirm(${JSON.stringify(t("catalog.products.archiveConfirm"))})`}><input type="hidden" name="intent" value="archive" /><button class="admin-button danger-button" type="submit">{t("catalog.products.archive")}</button></form>
     </AdminInspector>
   </Fragment>

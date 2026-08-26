@@ -2,22 +2,22 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--tk-spacing-4);
-  color: var(--tk-color-fg-muted);
-  font-size: var(--tk-font-size-sm);
+  gap: var(--karsa-spacing-4);
+  color: var(--karsa-color-fg-muted);
+  font-size: var(--karsa-font-size-sm);
 }
 
 a {
-  padding: var(--tk-spacing-2) var(--tk-spacing-3);
-  border: 1px solid var(--tk-color-border);
-  border-radius: var(--tk-radius-md);
-  color: var(--tk-color-fg);
+  padding: var(--karsa-spacing-2) var(--karsa-spacing-3);
+  border: 1px solid var(--karsa-color-border);
+  border-radius: var(--karsa-radius-md);
+  color: var(--karsa-color-fg);
   text-decoration: none;
 }
 
 a:hover:not([aria-disabled="true"]) {
-  border-color: var(--tk-color-accent);
-  color: var(--tk-color-accent);
+  border-color: var(--karsa-color-accent);
+  color: var(--karsa-color-accent);
 }
 
 a[aria-disabled="true"] {

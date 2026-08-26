@@ -10,13 +10,12 @@
 // `inquiry` package yet, so that step is skipped here.
 //
 // The default scaffold is public-only (auth + core + ui), so this adds
-// `orders` via `takontuku add` right after install -- which pulls in
+// `orders` via `karsa add` right after install -- which pulls in
 // `catalog` too, since orders' own package.json depends on it.
 //
 // Prerequisite: a registry reachable at REGISTRY_URL (defaults to Verdaccio
-// on http://localhost:4873). Start one locally with `moon run verdaccio:up`.
+// on http://localhost:4873). Start one locally with Docker Compose; see README.md.
 
-import { spawn } from "node:child_process";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -27,9 +26,12 @@ import {
   installClient,
   publishAll,
   queryD1,
+  readDevVar,
   scaffoldClient,
   setupAndLogIn,
   sh,
+  spawnWranglerDev,
+  terminateProcessGroup,
   waitForServer,
 } from "./shared.ts";
 
@@ -65,6 +67,7 @@ async function placeOrder(origin: string, cookie: string, productId: number): Pr
     },
     body: new URLSearchParams({
       cart: JSON.stringify([{ id: productId, quantity: 1 }]),
+      checkoutRequestId: crypto.randomUUID(),
       paymentMethod: "cash",
       customerName: "Gate3 Customer",
       customerPhone: "081234567890",
@@ -113,15 +116,11 @@ async function transitionStatus(
 
 async function runSmokeTest(clientDir: string, productId: number): Promise<void> {
   const origin = `http://localhost:${BOOT_CHECK_PORT}`;
-  const child = spawn("bunx", ["wrangler", "dev", "--port", String(BOOT_CHECK_PORT)], {
-    cwd: clientDir,
-    stdio: "inherit",
-    detached: true,
-  });
+  const child = spawnWranglerDev(clientDir, BOOT_CHECK_PORT);
 
   try {
     await waitForServer(`${origin}/setup`, 30_000);
-    const cookie = await setupAndLogIn(origin, ADMIN);
+    const cookie = await setupAndLogIn(origin, ADMIN, readDevVar(clientDir, "KARSA_SETUP_TOKEN"));
     console.log("setup + login: ok");
 
     const listHtml = await (await fetch(`${origin}/products`)).text();
@@ -167,22 +166,22 @@ async function runSmokeTest(clientDir: string, productId: number): Promise<void>
     );
     console.log("status transition (pending -> confirmed): ok");
   } finally {
-    if (child.pid) process.kill(-child.pid, "SIGTERM");
+    terminateProcessGroup(child);
   }
 }
 
 async function main(): Promise<void> {
   const version = publishAll();
 
-  const scratchParent = mkdtempSync(path.join(tmpdir(), "takontuku-e2e-smoke-"));
+  const scratchParent = mkdtempSync(path.join(tmpdir(), "karsa-e2e-smoke-"));
   const clientDir = scaffoldClient(scratchParent, "gate3-smoke", version);
   console.log(`Scaffolded client (public-only default: auth) at ${clientDir}`);
 
   installClient(clientDir);
   addOrdersModule(clientDir);
-  console.log("Added the orders module via `takontuku add` (pulls in catalog).");
+  console.log("Added the orders module via `karsa add` (pulls in catalog).");
 
-  sh("bunx", ["takontuku", "db", "sync"], clientDir);
+  sh("bunx", ["karsa", "db", "sync"], clientDir);
   sh("bunx", ["wrangler", "d1", "migrations", "apply", "DB", "--local"], clientDir);
   const productId = seedProduct(clientDir);
   sh("bun", ["run", "build"], clientDir);

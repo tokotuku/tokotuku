@@ -8,7 +8,7 @@ main {
   flex-wrap: wrap;
   gap: 0.55rem;
   margin-bottom: 2rem;
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
   font-size: 0.72rem;
 }
 .breadcrumbs a {
@@ -23,8 +23,8 @@ main {
 .media {
   aspect-ratio: 1;
   overflow: hidden;
-  border-radius: var(--tk-radius-md);
-  background: var(--tk-color-bg-subtle);
+  border-radius: var(--karsa-radius-md);
+  background: var(--karsa-color-bg-subtle);
 }
 .media img {
   display: block;
@@ -34,7 +34,7 @@ main {
 }
 .eyebrow {
   margin: 0;
-  color: var(--tk-color-accent);
+  color: var(--karsa-color-accent);
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.14em;
@@ -43,7 +43,7 @@ main {
 .product-copy h1 {
   max-width: 10ch;
   margin: 0.55rem 0 0.8rem;
-  font-family: var(--tk-font-family-display);
+  font-family: var(--karsa-font-family-display);
   font-size: clamp(3rem, 7vw, 6.2rem);
   font-weight: 400;
   letter-spacing: -0.05em;
@@ -57,18 +57,18 @@ main {
 .description {
   max-width: 32rem;
   margin: 1.2rem 0 0;
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
   font-size: 1rem;
   line-height: 1.7;
 }
 .stock {
   margin: 1.2rem 0 0;
-  color: var(--tk-color-success);
+  color: var(--karsa-color-success);
   font-size: 0.8rem;
   font-weight: 700;
 }
 .stock--low {
-  color: var(--tk-color-warning);
+  color: var(--karsa-color-warning);
 }
 .product-copy button,
 .product-copy .book-now {
@@ -79,9 +79,9 @@ main {
   min-height: 3.2rem;
   margin-top: 1.2rem;
   border: 0;
-  border-radius: var(--tk-radius-sm);
-  background: var(--tk-color-accent);
-  color: var(--tk-color-accent-fg);
+  border-radius: var(--karsa-radius-sm);
+  background: var(--karsa-color-accent);
+  color: var(--karsa-color-accent-fg);
   font-size: 0.8rem;
   font-weight: 700;
   text-decoration: none;
@@ -93,18 +93,18 @@ main {
 }
 dl {
   margin: 1.5rem 0 0;
-  border-top: 1px solid var(--tk-color-border);
+  border-top: 1px solid var(--karsa-color-border);
 }
 dl div {
   display: flex;
   justify-content: space-between;
   gap: 1.5rem;
   padding: 0.75rem 0;
-  border-bottom: 1px solid var(--tk-color-border);
+  border-bottom: 1px solid var(--karsa-color-border);
   font-size: 0.75rem;
 }
 dt {
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
 }
 dd {
   margin: 0;
@@ -115,8 +115,8 @@ ul {
   gap: 0.45rem;
   margin: 1.5rem 0 0;
   padding: 1.2rem 0 0 1rem;
-  border-top: 1px solid var(--tk-color-border);
-  color: var(--tk-color-fg-muted);
+  border-top: 1px solid var(--karsa-color-border);
+  color: var(--karsa-color-fg-muted);
   font-size: 0.75rem;
 }
 @media (max-width: 760px) {

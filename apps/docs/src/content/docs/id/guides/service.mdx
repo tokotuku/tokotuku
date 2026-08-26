@@ -1,0 +1,33 @@
+---
+title: Panduan situs layanan
+description: Bangun situs berorientasi layanan dengan adapter booking dan ownership scheduling yang jelas.
+---
+
+Ini adalah panduan domain layanan. Gunakan istilah layanan ketika pengunjung memilih layanan, rentang waktu, slot, atau janji temu.
+
+## Batas adapter
+
+Pasang modul booking untuk scheduling. Modul ini menyusun dependency order dan catalog, memiliki route booking dan tampilan admin, serta mengekspos data domain untuk aplikasi. Halaman deskripsi layanan, tim, penjelasan harga, dan kontak adalah konten milik aplikasi. Hubungkan availability atau payment provider eksternal melalui adapter sempit di batas modul; jangan menggandakan state booking di halaman.
+
+```sh
+bunx karsa add booking
+bunx karsa db sync
+bunx wrangler d1 migrations apply DB --local
+```
+
+### Keamanan booking publik
+
+Booking publik gagal tertutup sampai aplikasi memiliki widget Cloudflare Turnstile sendiri. Atur site key widget dan hostname production pada aplikasi, lalu simpan secret di Wrangler:
+
+```sh
+# hanya lokal/test: scaffold menyediakan dummy key resmi Cloudflare
+TURNSTILE_SITE_KEY=site-key-aplikasi
+TURNSTILE_HOSTNAMES=booking.example.com
+bunx wrangler secret put TURNSTILE_SECRET
+```
+
+Buat satu managed widget untuk setiap aplikasi Karsa. Hostname production tidak boleh memuat `localhost`; dummy key lokal hanya untuk local/test. Route booking mengirim action `booking`, menjalankan Siteverify sebelum write database apa pun, dan gagal tertutup bila konfigurasi hilang, token replay, timeout, upstream, action, atau hostname bermasalah. Route juga membatasi field kontak, tanggal kalender canonical, dan aturan jadwal, serta menegakkan lima submission per klien per 15 menit dan dua puluh per hari. Terapkan migration booking append-only sebelum deploy upgrade service.
+
+Tier content menambahkan layanan dan seed scheduling (`range` atau `slot`) dengan UI paket. Tier polished boleh menambah tema terarah dan imagery layanan setelah diizinkan.
+
+Periksa timezone, locale, availability, migrasi, seed, error adapter, access control, dan build lengkap. Jangan menyatakan slot tersedia hanya berdasarkan copy statis.

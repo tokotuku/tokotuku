@@ -8,8 +8,8 @@ let sourceDir: string;
 let cwd: string;
 
 beforeEach(async () => {
-  sourceDir = await mkdtemp(path.join(tmpdir(), "takontuku-skills-source-"));
-  cwd = await mkdtemp(path.join(tmpdir(), "takontuku-skills-cwd-"));
+  sourceDir = await mkdtemp(path.join(tmpdir(), "karsa-skills-source-"));
+  cwd = await mkdtemp(path.join(tmpdir(), "karsa-skills-cwd-"));
 });
 
 afterEach(async () => {
@@ -27,14 +27,15 @@ async function writeSkill(name: string, description = "A test skill."): Promise<
 }
 
 describe("installSkills", () => {
-  it("installs every bundled Takontuku skill by default", async () => {
+  it("installs every bundled Karsa skill by default", async () => {
     const result = installSkills(cwd);
 
     expect(result.skills).toEqual([
-      "takontuku-data",
-      "takontuku-modules",
-      "takontuku-store-builder",
-      "takontuku-ui",
+      "karsa-content",
+      "karsa-data",
+      "karsa-modules",
+      "karsa-site-builder",
+      "karsa-ui",
     ]);
     for (const target of result.targets) {
       for (const skill of result.skills) {
@@ -45,12 +46,12 @@ describe("installSkills", () => {
   });
 
   it("copies every bundled skill into both agent-skill directories", async () => {
-    await writeSkill("takontuku-modules");
-    await writeSkill("takontuku-data");
+    await writeSkill("karsa-modules");
+    await writeSkill("karsa-data");
 
     const result = installSkills(cwd, sourceDir);
 
-    expect(result.skills).toEqual(["takontuku-data", "takontuku-modules"]);
+    expect(result.skills).toEqual(["karsa-data", "karsa-modules"]);
     expect(result.targets).toEqual([".agents/skills", ".claude/skills"]);
     for (const target of result.targets) {
       for (const skill of result.skills) {
@@ -61,22 +62,22 @@ describe("installSkills", () => {
   });
 
   it("ignores entries in the source directory that aren't skills", async () => {
-    await writeSkill("takontuku-modules");
+    await writeSkill("karsa-modules");
     await mkdir(path.join(sourceDir, "not-a-skill"), { recursive: true });
     await writeFile(path.join(sourceDir, "README.md"), "not a skill either");
 
     const result = installSkills(cwd, sourceDir);
 
-    expect(result.skills).toEqual(["takontuku-modules"]);
+    expect(result.skills).toEqual(["karsa-modules"]);
   });
 
   it("replaces an existing installed skill wholesale rather than merging", async () => {
-    await writeSkill("takontuku-modules");
+    await writeSkill("karsa-modules");
     installSkills(cwd, sourceDir);
 
     // Simulate a stale file left by an older version of this skill, and a
     // local file the user placed there themselves.
-    const installedDir = path.join(cwd, ".claude", "skills", "takontuku-modules");
+    const installedDir = path.join(cwd, ".claude", "skills", "karsa-modules");
     await writeFile(path.join(installedDir, "stale-reference.md"), "old content");
 
     installSkills(cwd, sourceDir);
@@ -85,7 +86,7 @@ describe("installSkills", () => {
   });
 
   it("leaves a directory it doesn't own alone", async () => {
-    await writeSkill("takontuku-modules");
+    await writeSkill("karsa-modules");
     await mkdir(path.join(cwd, ".claude", "skills", "my-own-skill"), { recursive: true });
     await writeFile(
       path.join(cwd, ".claude", "skills", "my-own-skill", "SKILL.md"),
@@ -99,6 +100,27 @@ describe("installSkills", () => {
       "utf8",
     );
     expect(content).toContain("mine");
+  });
+
+  it("removes only legacy framework skill directories", async () => {
+    await writeSkill("karsa-modules");
+    for (const target of [".agents/skills", ".claude/skills"]) {
+      const legacyDirectory = `${["tako", "ntuku"].join("")}-data`;
+      await mkdir(path.join(cwd, target, legacyDirectory), { recursive: true });
+      await writeFile(path.join(cwd, target, legacyDirectory, "SKILL.md"), "legacy");
+      await mkdir(path.join(cwd, target, "my-custom-skill"), { recursive: true });
+      await writeFile(path.join(cwd, target, "my-custom-skill", "SKILL.md"), "custom");
+    }
+    installSkills(cwd, sourceDir);
+    for (const target of [".agents/skills", ".claude/skills"]) {
+      const legacyDirectory = `${["tako", "ntuku"].join("")}-data`;
+      await expect(
+        readFile(path.join(cwd, target, legacyDirectory, "SKILL.md"), "utf8"),
+      ).rejects.toThrow();
+      await expect(
+        readFile(path.join(cwd, target, "my-custom-skill", "SKILL.md"), "utf8"),
+      ).resolves.toBe("custom");
+    }
   });
 
   it("throws when the source directory does not exist", () => {

@@ -9,7 +9,7 @@ import {
   isDependencyDeclared,
   isWorkspaceMember,
   readPackageJson,
-  siblingTakontukuSpecifier,
+  siblingKarsaSpecifier,
 } from "./package-manager";
 
 const CONFIG_FILE = "astro.config.mjs";
@@ -65,12 +65,12 @@ async function ensureDependencyDeclared(
       throw new Error(
         `Could not install ${packageName} with "${manager} add". If this is a private module, ` +
           `your .npmrc needs to route its scope to the registry that hosts it, and you need to be ` +
-          `authenticated there -- a public "npm create takontuku" scaffold won't have this configured.`,
+          `authenticated there -- a public "npm create karsa" scaffold won't have this configured.`,
         { cause: error },
       );
     }
   } else {
-    const versionSpec = versionRange ?? siblingTakontukuSpecifier(pkgJson);
+    const versionSpec = versionRange ?? siblingKarsaSpecifier(pkgJson);
     pkgJson.dependencies = { ...pkgJson.dependencies, [packageName]: versionSpec };
     await writeFile(path.join(cwd, "package.json"), `${JSON.stringify(pkgJson, null, 2)}\n`);
   }
@@ -87,7 +87,7 @@ async function addRequiredDependencies(
 ): Promise<AddedModule[]> {
   const added: AddedModule[] = [];
   for (const depName of requires) {
-    const depPackage = `@takontuku/${depName}`;
+    const depPackage = `@karsa/${depName}`;
     const result = await addOne(cwd, depPackage, null, install, filesChanged, seen);
     // Only announce it if addOne actually did something -- it returns []
     // both when already wired and when already visited earlier in this same
@@ -106,7 +106,7 @@ async function readMiddlewareOrThrow(middlewarePath: string, packageName: string
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") {
       throw new Error(
-        `${packageName} needs a register line, but ${middlewarePath} does not exist. Create it from the create-takontuku template, then re-run.`,
+        `${packageName} needs a register line, but ${middlewarePath} does not exist. Create it from the create-karsa template, then re-run.`,
       );
     }
     throw error;
@@ -155,9 +155,9 @@ async function addOne(
   filesChanged: Set<string>,
   seen: Set<string>,
 ): Promise<AddedModule[]> {
-  if (packageName === "@takontuku/core") {
+  if (packageName === "@karsa/core") {
     throw new Error(
-      '"core" is built into every takontuku app — it is never listed in modules[]. There is nothing to add or remove.',
+      '"core" is built into every karsa app — it is never listed in modules[]. There is nothing to add or remove.',
     );
   }
   if (seen.has(packageName)) return [];
@@ -192,7 +192,7 @@ export interface AddModuleOptions {
 }
 
 /**
- * Installs a @takontuku/* module package and wires it into
+ * Installs a @karsa/* module package and wires it into
  * astro.config.mjs (import + modules[] entry) and, if the package ships
  * one, src/middleware.ts's register import -- then recurses into any
  * modules it `requires` that aren't installed yet. Never touches
@@ -201,7 +201,7 @@ export interface AddModuleOptions {
 export async function addModule(options: AddModuleOptions): Promise<AddModuleResult> {
   const { cwd, packageName, versionRange, install } = options;
   const config = await readFile(path.join(cwd, CONFIG_FILE), "utf8");
-  if (packageName !== "@takontuku/core" && isAlreadyWired(config, packageName)) {
+  if (packageName !== "@karsa/core" && isAlreadyWired(config, packageName)) {
     return { alreadyInstalled: true, added: [], filesChanged: [] };
   }
 

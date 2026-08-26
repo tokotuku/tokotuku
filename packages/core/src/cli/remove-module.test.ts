@@ -8,7 +8,7 @@ import { removeModule } from "./remove-module";
 let dir: string;
 
 beforeEach(async () => {
-  dir = await mkdtemp(path.join(tmpdir(), "takontuku-remove-module-"));
+  dir = await mkdtemp(path.join(tmpdir(), "karsa-remove-module-"));
 });
 
 afterEach(async () => {
@@ -21,25 +21,28 @@ function emptyRegistry(overrides: Partial<ResolvedRegistry> = {}): ResolvedRegis
     guardedPrefixes: [],
     mediaPrefixes: [],
     adminNav: [],
-    storefrontRoutes: [],
+    siteRoutes: [],
     adminRoutes: [],
     ambientScripts: [],
-    storefrontHomeSections: [],
+    siteHomeSections: [],
     adminDashboardWidgets: [],
     authPanelWidgets: [],
+    clientConfig: {},
+    requiredBrandFields: [],
+    sitemapSources: [],
     modules: [],
     ...overrides,
   };
 }
 
-const WIRED_ASTRO_CONFIG = `import { auth } from "@takontuku/auth";
-import { blog } from "@takontuku/blog";
-import { takontuku } from "@takontuku/core";
+const WIRED_ASTRO_CONFIG = `import { auth } from "@karsa/auth";
+import { blog } from "@karsa/blog";
+import { karsa } from "@karsa/core";
 import { defineConfig } from "astro/config";
 
 export default defineConfig({
   integrations: [
-    takontuku({
+    karsa({
       brand: { name: "Test", locale: "id-ID", currency: "IDR", timeZone: "Asia/Jakarta" },
       modules: [auth(), blog()],
     }),
@@ -48,8 +51,8 @@ export default defineConfig({
 `;
 
 const WIRED_MIDDLEWARE = `import { defineMiddleware } from "astro:middleware";
-import "@takontuku/auth/register";
-import "@takontuku/blog/register";
+import "@karsa/auth/register";
+import "@karsa/blog/register";
 
 export const onRequest = defineMiddleware((_context, next) => next());
 `;
@@ -64,7 +67,7 @@ async function writeWiredClient(): Promise<void> {
     JSON.stringify(
       {
         name: "test-client",
-        dependencies: { "@takontuku/core": "1.0.0", "@takontuku/blog": "1.0.0" },
+        dependencies: { "@karsa/core": "1.0.0", "@karsa/blog": "1.0.0" },
       },
       null,
       2,
@@ -72,7 +75,7 @@ async function writeWiredClient(): Promise<void> {
   );
   await writeFile(path.join(dir, "migrations", "0000_blog_init.sql"), "-- blog init\n");
   await writeFile(
-    path.join(dir, "takontuku.migrations.json"),
+    path.join(dir, "karsa.migrations.json"),
     JSON.stringify({ nextSequence: 1, modules: { blog: 1 } }, null, 2),
   );
 }
@@ -84,7 +87,7 @@ describe("removeModule", () => {
       path.join(dir, "migrations", "0000_blog_init.sql"),
       "utf8",
     );
-    const lockfileBefore = await readFile(path.join(dir, "takontuku.migrations.json"), "utf8");
+    const lockfileBefore = await readFile(path.join(dir, "karsa.migrations.json"), "utf8");
 
     const registry = emptyRegistry({
       moduleNames: ["core", "auth", "blog"],
@@ -96,7 +99,7 @@ describe("removeModule", () => {
 
     const result = await removeModule({
       cwd: dir,
-      packageName: "@takontuku/blog",
+      packageName: "@karsa/blog",
       moduleName: "blog",
       install: false,
       registry,
@@ -109,22 +112,22 @@ describe("removeModule", () => {
     ]);
 
     const config = await readFile(path.join(dir, "astro.config.mjs"), "utf8");
-    expect(config).not.toContain("@takontuku/blog");
+    expect(config).not.toContain("@karsa/blog");
     expect(config).toContain("modules: [auth()]");
 
     const middleware = await readFile(path.join(dir, "src", "middleware.ts"), "utf8");
-    expect(middleware).not.toContain("@takontuku/blog");
-    expect(middleware).toContain("@takontuku/auth/register");
+    expect(middleware).not.toContain("@karsa/blog");
+    expect(middleware).toContain("@karsa/auth/register");
 
     // package.json untouched since install: false.
     const pkgJson = JSON.parse(await readFile(path.join(dir, "package.json"), "utf8"));
-    expect(pkgJson.dependencies["@takontuku/blog"]).toBe("1.0.0");
+    expect(pkgJson.dependencies["@karsa/blog"]).toBe("1.0.0");
 
     const migrationAfter = await readFile(
       path.join(dir, "migrations", "0000_blog_init.sql"),
       "utf8",
     );
-    const lockfileAfter = await readFile(path.join(dir, "takontuku.migrations.json"), "utf8");
+    const lockfileAfter = await readFile(path.join(dir, "karsa.migrations.json"), "utf8");
     expect(migrationAfter).toBe(migrationBefore);
     expect(lockfileAfter).toBe(lockfileBefore);
   });
@@ -142,7 +145,7 @@ describe("removeModule", () => {
     await expect(
       removeModule({
         cwd: dir,
-        packageName: "@takontuku/catalog",
+        packageName: "@karsa/catalog",
         moduleName: "catalog",
         install: false,
         registry,
@@ -156,7 +159,7 @@ describe("removeModule", () => {
 
     const result = await removeModule({
       cwd: dir,
-      packageName: "@takontuku/orders",
+      packageName: "@karsa/orders",
       moduleName: "orders",
       install: false,
       registry,
@@ -171,7 +174,7 @@ describe("removeModule", () => {
     await expect(
       removeModule({
         cwd: dir,
-        packageName: "@takontuku/core",
+        packageName: "@karsa/core",
         moduleName: "core",
         install: false,
         registry: emptyRegistry(),

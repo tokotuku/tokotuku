@@ -1,0 +1,15 @@
+---
+title: Tabs
+description: Link section halaman dengan active state dan jumlah opsional.
+sidebar:
+  order: 2
+---
+
+import Tabs from "@karsa/ui/Tabs.astro";
+import ComponentPreview from "../../../../../components/ComponentPreview.astro";
+
+<ComponentPreview label="Tab section" layout="stack">
+  <Tabs label="Bagian halaman" items={[{ label: "Ringkasan", href: "#overview", active: true }, { label: "Aktivitas", href: "#activity", count: 4 }]} />
+</ComponentPreview>
+
+`items` wajib dan memiliki `label`, `href`, serta `active` atau `count` opsional. `label` opsional default-nya “Page sections”. Ini adalah link navigasi, bukan widget ARIA tab, sehingga bekerja untuk halaman server-rendered dan URL fragment tanpa state client.

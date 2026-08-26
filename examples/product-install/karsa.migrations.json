@@ -1,0 +1,8 @@
+{
+  "nextSequence": 8,
+  "modules": {
+    "auth": 1,
+    "catalog": 4,
+    "orders": 3
+  }
+}

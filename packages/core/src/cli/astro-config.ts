@@ -397,12 +397,12 @@ function findTopLevelKey(
   return null;
 }
 
-function findTakontukuLocal(source: string): string {
-  const coreImport = findImport(source, "@takontuku/core");
-  const local = coreImport?.namedLocals.find((n) => n.imported === "takontuku")?.local;
+function findKarsaLocal(source: string): string {
+  const coreImport = findImport(source, "@karsa/core");
+  const local = coreImport?.namedLocals.find((n) => n.imported === "karsa")?.local;
   if (!local) {
     throw new Error(
-      'Could not find an import of the takontuku() integration from "@takontuku/core" in astro.config.mjs. Add or remove the module by hand.',
+      'Could not find an import of the karsa() integration from "@karsa/core" in astro.config.mjs. Add or remove the module by hand.',
     );
   }
   return local;
@@ -450,13 +450,13 @@ function locateCallObject(
 }
 
 /**
- * Finds the single `takontuku({ ... modules: [...] ... })` call's modules
+ * Finds the single `karsa({ ... modules: [...] ... })` call's modules
  * array, returning the index of its `[` and the index just past its
  * matching `]`. Refuses (throws, naming manual editing as the fallback)
  * rather than guess when the shape isn't one this scanner understands.
  */
 export function locateModulesArray(source: string): { open: number; close: number } {
-  const local = findTakontukuLocal(source);
+  const local = findKarsaLocal(source);
   const callSites = findCallSites(source, local);
   if (callSites.length !== 1) {
     throw new Error(
@@ -469,7 +469,7 @@ export function locateModulesArray(source: string): { open: number; close: numbe
   const modulesValueStart = findTopLevelKey(source, objOpen, objClose, "modules");
   if (modulesValueStart === null) {
     throw new Error(
-      'astro.config.mjs has no "modules: [...]" array inside takontuku(). Add the module by hand.',
+      'astro.config.mjs has no "modules: [...]" array inside karsa(). Add the module by hand.',
     );
   }
   const arrayOpen = skipTrivia(source, modulesValueStart);

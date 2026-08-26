@@ -10,7 +10,7 @@ describe("paletteStyle", () => {
   it("keeps the legacy accent-only palette valid", () => {
     expect(
       paletteStyle({ palette: { light: { accent: "#765038", accentForeground: "#fff9f0" } } }),
-    ).toBe("--tk-light-color-accent:#765038;--tk-light-color-accent-fg:#fff9f0");
+    ).toBe("--karsa-light-color-accent:#765038;--karsa-light-color-accent-fg:#fff9f0");
   });
 
   it("serializes every supported light and dark key to mode-scoped variables", () => {
@@ -32,30 +32,30 @@ describe("paletteStyle", () => {
       sidebarActiveForeground: "#ffffff",
     };
     const output = paletteStyle({ palette: { light, dark: { accent: "#abc" } } });
-    expect(output).toContain("--tk-light-color-bg:#111111");
-    expect(output).toContain("--tk-light-admin-rail-active-fg:#ffffff");
-    expect(output).toContain("--tk-dark-color-accent:#abc");
+    expect(output).toContain("--karsa-light-color-bg:#111111");
+    expect(output).toContain("--karsa-light-admin-rail-active-fg:#ffffff");
+    expect(output).toContain("--karsa-dark-color-accent:#abc");
   });
 
   it("drops unknown keys instead of emitting arbitrary custom properties", () => {
     const output = paletteStyle({
       palette: { light: { accent: "#765038", unknown: "red" } as never },
     });
-    expect(output).toBe("--tk-light-color-accent:#765038");
+    expect(output).toBe("--karsa-light-color-accent:#765038");
     expect(output).not.toContain("unknown");
   });
 
   it("rejects malformed or injectable color values", () => {
     expect(
       paletteStyle({
-        palette: { light: { accent: "#12", border: "red;--tk-dark-color-bg:black" } },
+        palette: { light: { accent: "#12", border: "red;--karsa-dark-color-bg:black" } },
       }),
     ).toBeUndefined();
     expect(paletteStyle({ palette: { dark: { accent: "rgb(10 20 30 / 50%)" } } })).toContain(
-      "--tk-dark-color-accent:rgb(10 20 30 / 50%)",
+      "--karsa-dark-color-accent:rgb(10 20 30 / 50%)",
     );
     expect(
       paletteStyle({ palette: { light: { border: "color-mix(in srgb, red 20%, blue)" } } }),
-    ).toContain("--tk-light-color-border:color-mix(in srgb, red 20%, blue)");
+    ).toContain("--karsa-light-color-border:color-mix(in srgb, red 20%, blue)");
   });
 });

@@ -2,7 +2,7 @@
   "name": "storybook",
   "private": true,
   "type": "module",
-  "version": "0.0.1",
+  "version": "0.3.0",
   "engines": {
     "node": ">=20.16.0 <21 || >=22.19.0 <23 || >=24.0.0"
   },
@@ -12,8 +12,8 @@
     "lint": "biome check ."
   },
   "dependencies": {
-    "@takontuku/theme": "^0.2.0",
-    "@takontuku/ui": "^0.2.0",
+    "@karsa/theme": "workspace:*",
+    "@karsa/ui": "workspace:*",
     "astro": "^7.0.9"
   },
   "devDependencies": {

@@ -1,18 +1,30 @@
 // Shared helpers for the e2e scripts in this directory (Gate 1's run.ts,
 // Gate 2's fixtures.ts, Gate 2b's upgrade.ts): publishing every publishable
-// @takontuku/* package to a real registry, scaffolding a client with
-// create-takontuku, and driving/asserting against a booted client.
+// @karsa/* package to a real registry, scaffolding a client with
+// create-karsa, and driving/asserting against a booted client.
 
-import { execFileSync } from "node:child_process";
+import { type ChildProcess, execFileSync, spawn } from "node:child_process";
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 export const ROOT = fileURLToPath(new URL("../../", import.meta.url));
 export const REGISTRY = process.env.REGISTRY_URL ?? "http://localhost:4873";
+const NPMRC_PATH = path.join(ROOT, ".npmrc");
+
+function readRepositoryRegistryToken(): string | undefined {
+  if (!existsSync(NPMRC_PATH)) return undefined;
+  const registry = new URL(REGISTRY);
+  const prefix = `//${registry.host}${registry.pathname.replace(/\/?$/, "/")}:_authToken=`;
+  return readFileSync(NPMRC_PATH, "utf8")
+    .split("\n")
+    .find((line) => line.startsWith(prefix))
+    ?.slice(prefix.length)
+    .trim();
+}
 /**
- * Auth token for REGISTRY, needed now that @takontuku/catalog and
- * @takontuku/orders require authentication just to read, not only to
+ * Auth token for REGISTRY, needed now that private module packages require
+ * authentication just to read, not only to
  * publish (tools/verdaccio/config.yaml). CI's Verdaccio service container
  * runs stock, unauthenticated-read defaults (no custom config mounted), so
  * this stays unset there and every .npmrc write below just omits the auth
@@ -21,7 +33,7 @@ export const REGISTRY = process.env.REGISTRY_URL ?? "http://localhost:4873";
  * the token `npm adduser` prints, or copy the `_authToken` line already in
  * this repo's own gitignored .npmrc.
  */
-export const REGISTRY_AUTH_TOKEN = process.env.REGISTRY_AUTH_TOKEN;
+export const REGISTRY_AUTH_TOKEN = process.env.REGISTRY_AUTH_TOKEN ?? readRepositoryRegistryToken();
 
 export type Json = Record<string, unknown>;
 
@@ -34,6 +46,52 @@ export function assert(condition: boolean, message: string): asserts condition {
 export function sh(command: string, args: string[], cwd: string): void {
   console.log(`+ ${command} ${args.join(" ")}  (in ${path.relative(ROOT, cwd) || "."})`);
   execFileSync(command, args, { cwd, stdio: "inherit" });
+}
+
+export function resolveNodeBinary(): string {
+  const configured = process.env.KARSA_NODE_BINARY;
+  const candidates = configured
+    ? [configured]
+    : [process.env.npm_node_execpath, "node"].filter((candidate): candidate is string =>
+        Boolean(candidate),
+      );
+  for (const candidate of candidates) {
+    try {
+      execFileSync(candidate, ["--version"], { stdio: "ignore" });
+      return candidate;
+    } catch {
+      // Try the next installed Node executable.
+    }
+  }
+  throw new Error("Wrangler boot checks need Node; set KARSA_NODE_BINARY to a Node executable.");
+}
+
+export function spawnWranglerDev(clientDir: string, port: number): ChildProcess {
+  const wranglerCli = path.join(clientDir, "node_modules", "wrangler", "wrangler-dist", "cli.js");
+  assert(existsSync(wranglerCli), `wrangler CLI is missing from the packed client: ${wranglerCli}`);
+  return spawn(
+    resolveNodeBinary(),
+    [
+      wranglerCli,
+      "dev",
+      "--local",
+      "--ip",
+      "127.0.0.1",
+      "--port",
+      String(port),
+      "--show-interactive-dev-session=false",
+    ],
+    { cwd: clientDir, stdio: "inherit", detached: true },
+  );
+}
+
+export function terminateProcessGroup(child: ChildProcess): void {
+  if (!child.pid) return;
+  try {
+    process.kill(-child.pid, "SIGTERM");
+  } catch (error) {
+    if (!(error instanceof Error && "code" in error && error.code === "ESRCH")) throw error;
+  }
 }
 
 export function readJson(filePath: string): Json {
@@ -61,7 +119,7 @@ export function installClient(clientDir: string): void {
 
 /**
  * A packed install must let Tailwind v4 see utility classes inside the
- * @takontuku packages themselves. Checking the built CSS catches a missing
+ * @karsa packages themselves. Checking the built CSS catches a missing
  * `@source` declaration that a workspace symlink can hide.
  */
 export function assertPackedTailwindUtilities(clientDir: string): void {
@@ -78,8 +136,8 @@ export function assertPackedTailwindUtilities(clientDir: string): void {
   visit(distDir);
   const css = cssFiles.map((filePath) => readFileSync(filePath, "utf8")).join("\n");
   assert(
-    /\.rounded-tk-md(?:[,{])/.test(css),
-    "packed build is missing theme utility rounded-tk-md",
+    /\.rounded-karsa-md(?:[,{])/.test(css),
+    "packed build is missing theme utility rounded-karsa-md",
   );
   assert(
     /\.text-foreground(?:[,{])/.test(css),
@@ -92,7 +150,7 @@ export function assertAgentSetup(clientDir: string): void {
     assert(existsSync(path.join(clientDir, fileName)), `scaffold is missing ${fileName}`);
   }
 
-  const skills = ["takontuku-data", "takontuku-modules", "takontuku-store-builder", "takontuku-ui"];
+  const skills = ["karsa-content", "karsa-data", "karsa-modules", "karsa-site-builder", "karsa-ui"];
   for (const target of [".agents/skills", ".claude/skills"]) {
     for (const skill of skills) {
       const skillPath = path.join(clientDir, target, skill, "SKILL.md");
@@ -111,7 +169,7 @@ export function updateClient(clientDir: string): void {
 }
 
 // Keep the publish order dependency-friendly so a real registry can resolve
-// each tarball's internal Takontuku references as soon as it is published.
+// each tarball's internal Karsa references as soon as it is published.
 const PUBLISHABLE_PACKAGES = [
   "configs",
   "packages/theme",
@@ -123,18 +181,17 @@ const PUBLISHABLE_PACKAGES = [
   "packages/catalog",
   "packages/orders",
   "packages/booking",
-  "packages/create-takontuku",
+  "packages/content",
+  "packages/create-karsa",
 ];
-
-const NPMRC_PATH = path.join(ROOT, ".npmrc");
 
 /**
  * `bun publish`'s auth-token lookup for an UNSCOPED package name (only
- * create-takontuku, of PUBLISHABLE_PACKAGES) needs an actual default
+ * create-karsa, of PUBLISHABLE_PACKAGES) needs an actual default
  * `registry=` line in .npmrc to anchor to -- verified empirically that
  * neither `--registry` on the command line nor `npm_config_registry` /
  * `npm_config__authtoken` env vars are enough on their own. Scoped
- * @takontuku/* packages don't have this problem: `@takontuku:registry=`
+ * @karsa/* packages don't have this problem: `@karsa:registry=`
  * already gives bun that anchor by itself.
  *
  * The persistent repo .npmrc deliberately has no default `registry=` line
@@ -194,7 +251,7 @@ function publishWithRetry(cwd: string, attempts = 3): void {
 
 /**
  * Registries refuse `private: true`, and the isolated e2e version must be
- * used for every internal Takontuku dependency instead of the release range
+ * used for every internal Karsa dependency instead of the release range
  * checked into the workspace. Stamps both in memory, publishes, and restores
  * the file from disk afterward regardless of outcome.
  */
@@ -209,7 +266,7 @@ function publishPackage(dir: string, version: string): void {
       const deps = pkg[depField] as Record<string, string> | undefined;
       if (!deps) continue;
       for (const name of Object.keys(deps)) {
-        if (name.startsWith("@takontuku/")) deps[name] = version;
+        if (name.startsWith("@karsa/")) deps[name] = version;
       }
     }
     writeJson(pkgPath, pkg);
@@ -220,7 +277,7 @@ function publishPackage(dir: string, version: string): void {
 }
 
 /**
- * Publishes every publishable @takontuku/* package at a fresh, unique
+ * Publishes every publishable @karsa/* package at a fresh, unique
  * version and returns it. Rebuilds dist/ first so a stale or missing build
  * doesn't silently get published.
  *
@@ -232,20 +289,18 @@ function publishPackage(dir: string, version: string): void {
  * fresh publish.
  */
 export function publishAll(): string {
-  sh(
-    "moon",
-    [
-      "run",
-      "core:build",
-      "auth:build",
-      "catalog:build",
-      "orders:build",
-      "booking:build",
-      "jarene:build",
-      "create-takontuku:build",
-    ],
-    ROOT,
-  );
+  for (const directory of [
+    "packages/core",
+    "packages/auth",
+    "packages/catalog",
+    "packages/orders",
+    "packages/booking",
+    "packages/content",
+    "packages/jarene",
+    "packages/create-karsa",
+  ]) {
+    sh("bun", ["run", "build"], path.join(ROOT, directory));
+  }
 
   const version = `0.0.0-e2e.${Date.now()}`;
   console.log(`Publishing at ${version} to ${REGISTRY}`);
@@ -258,7 +313,7 @@ export function publishAll(): string {
 }
 
 /**
- * Scaffolds a client with create-takontuku and points its @takontuku/* deps
+ * Scaffolds a client with create-karsa and points its @karsa/* deps
  * at `version` instead of the template's "latest". Pass `null` to leave the
  * template's literal "latest" specifiers untouched -- the state a real
  * client's package.json is actually in, needed for testing that `bun
@@ -273,16 +328,16 @@ export function scaffoldClient(
   // Both flags are mandatory, for different reasons. `--yes` suppresses the
   // interactive wizard: these gates inherit this process's stdin, so run from
   // a terminal they would otherwise sit waiting on a prompt forever.
-  // `--no-install` stops create-takontuku installing and migrating on its own,
+  // `--no-install` stops create-karsa installing and migrating on its own,
   // which would run before the .npmrc written below exists and so resolve
-  // @takontuku/* from public npm (or fail) instead of this run's registry --
+  // @karsa/* from public npm (or fail) instead of this run's registry --
   // the gates drive those steps themselves, at the pinned e2e version.
   sh(
-    "node",
-    [path.join(ROOT, "packages/create-takontuku/dist/bin.js"), clientName, "--yes", "--no-install"],
+    process.execPath,
+    [path.join(ROOT, "packages/create-karsa/dist/bin.js"), clientName, "--yes", "--no-install"],
     scratchParent,
   );
-  const npmrcLines = [`@takontuku:registry=${REGISTRY}`, `registry=${REGISTRY}`];
+  const npmrcLines = [`@karsa:registry=${REGISTRY}`, `registry=${REGISTRY}`];
   if (REGISTRY_AUTH_TOKEN) {
     npmrcLines.push(`//${new URL(REGISTRY).host}/:_authToken=${REGISTRY_AUTH_TOKEN}`);
   }
@@ -293,7 +348,7 @@ export function scaffoldClient(
     const clientPkg = readJson(clientPkgPath);
     const deps = clientPkg.dependencies as Record<string, string>;
     for (const name of Object.keys(deps)) {
-      if (name.startsWith("@takontuku/")) deps[name] = version;
+      if (name.startsWith("@karsa/")) deps[name] = version;
     }
     writeJson(clientPkgPath, clientPkg);
   }
@@ -302,28 +357,28 @@ export function scaffoldClient(
 }
 
 /**
- * Removes @takontuku/orders from an already-installed scaffolded client via
- * the real `takontuku remove` command, rather than hand-editing files --
+ * Removes @karsa/orders from an already-installed scaffolded client via
+ * the real `karsa remove` command, rather than hand-editing files --
  * this is what actually proves the CLI's rewriter works against a client
- * `create-takontuku` produced for real, not just against fixtures. Must run
- * after `installClient`: `bunx takontuku` doesn't resolve before that.
+ * `create-karsa` produced for real, not just against fixtures. Must run
+ * after `installClient`: `bunx karsa` doesn't resolve before that.
  * `--no-install` is mandatory, not optional -- a bare `bun remove` here
- * would still work, but a subsequent `takontuku add orders` in the same
+ * would still work, but a subsequent `karsa add orders` in the same
  * gate would run a bare `bun add` that resolves "latest" from the registry
  * and silently overwrites the pinned e2e version `scaffoldClient` wrote
  * into package.json. Callers that need node_modules actually pruned
  * afterward should call `installClient` again themselves.
  */
 export function removeOrdersModule(clientDir: string): void {
-  sh("bunx", ["takontuku", "remove", "orders", "--no-install"], clientDir);
+  sh("bunx", ["karsa", "remove", "orders", "--no-install"], clientDir);
 }
 
 /**
- * Adds a @takontuku/* module this scratch client has never had before --
+ * Adds a @karsa/* module this scratch client has never had before --
  * the default scaffold is public-only (auth + core + ui), so catalog and
  * orders always start out genuinely absent, not just removed.
  *
- * `takontuku add --no-install` alone can't do this: it only writes
+ * `karsa add --no-install` alone can't do this: it only writes
  * package.json, and the CLI's own inspection step needs the package
  * already resolvable in node_modules to read its export shape and
  * `requires`. So this fetches the package for real first -- with the same
@@ -331,7 +386,7 @@ export function removeOrdersModule(clientDir: string): void {
  * reason: the client's own `.npmrc` already routes the scope correctly,
  * but Bun's registry-manifest cache would otherwise serve a stale "latest"
  * left over from an earlier e2e run against this same registry -- then
- * runs `takontuku add --no-install --no-sync`, which at that point is a
+ * runs `karsa add --no-install --no-sync`, which at that point is a
  * pure config/middleware wiring step against an already-correct
  * package.json and already-populated node_modules. For a module like
  * orders, whose own package.json depends on catalog, that dependency rides
@@ -339,17 +394,33 @@ export function removeOrdersModule(clientDir: string): void {
  * fresh never needs to add catalog first.
  */
 function addFreshModule(clientDir: string, moduleName: string): void {
-  sh("bun", ["add", `@takontuku/${moduleName}`, "--registry", REGISTRY, "--force"], clientDir);
-  sh("bunx", ["takontuku", "add", moduleName, "--no-install", "--no-sync"], clientDir);
+  // Company is the `--yes` scaffold default and intentionally omits currency.
+  // Commerce modules fail early without it, so this gate explicitly performs
+  // the same small configuration step a real consumer must perform before
+  // adding catalog/orders.
+  if (moduleName === "catalog" || moduleName === "orders") {
+    const configPath = path.join(clientDir, "astro.config.mjs");
+    const source = readFileSync(configPath, "utf8");
+    if (!/\bcurrency\s*:/.test(source)) {
+      const localeLine = source.match(/^\s*locale:\s*"[^"]+",\s*$/m)?.[0];
+      assert(localeLine !== undefined, "scaffold brand locale is missing before adding commerce");
+      writeFileSync(
+        configPath,
+        source.replace(localeLine, `${localeLine}\n        currency: "IDR",`),
+      );
+    }
+  }
+  sh("bun", ["add", `@karsa/${moduleName}`, "--registry", REGISTRY, "--force"], clientDir);
+  sh("bunx", ["karsa", "add", moduleName, "--no-install", "--no-sync"], clientDir);
 }
 
-/** Adds @takontuku/catalog for the first time. See addFreshModule. */
+/** Adds @karsa/catalog for the first time. See addFreshModule. */
 export function addCatalogModule(clientDir: string): void {
   addFreshModule(clientDir, "catalog");
 }
 
 /**
- * Adds @takontuku/orders for the first time, pulling in catalog
+ * Adds @karsa/orders for the first time, pulling in catalog
  * transitively (orders' own package.json depends on it). See
  * addFreshModule.
  */
@@ -358,11 +429,11 @@ export function addOrdersModule(clientDir: string): void {
 }
 
 /**
- * Pins an already-added @takontuku/* dependency to the literal "latest"
+ * Pins an already-added @karsa/* dependency to the literal "latest"
  * specifier, matching the rest of a client scaffolded with
  * `scaffoldClient`'s `version: null` -- needed because the raw `bun add`
  * inside `addFreshModule` writes a resolved version range instead, and
- * propagation.ts's whole premise depends on every @takontuku/* dependency
+ * propagation.ts's whole premise depends on every @karsa/* dependency
  * being pinned to "latest" so `bun update` has something to re-resolve.
  * Re-installs afterward so node_modules/bun.lock reconcile with the
  * rewritten manifest.
@@ -371,7 +442,7 @@ export function pinModuleToLatest(clientDir: string, moduleName: string): void {
   const pkgPath = path.join(clientDir, "package.json");
   const pkg = readJson(pkgPath);
   const deps = pkg.dependencies as Record<string, string>;
-  deps[`@takontuku/${moduleName}`] = "latest";
+  deps[`@karsa/${moduleName}`] = "latest";
   writeJson(pkgPath, pkg);
   installClient(clientDir);
 }
@@ -429,10 +500,22 @@ export interface AdminCredentials {
   password: string;
 }
 
+export function readDevVar(clientDir: string, name: string): string {
+  const prefix = `${name}=`;
+  const value = readFileSync(path.join(clientDir, ".dev.vars"), "utf8")
+    .split("\n")
+    .find((line) => line.startsWith(prefix))
+    ?.slice(prefix.length)
+    .trim();
+  assert(Boolean(value), `expected ${name} in the scaffolded .dev.vars`);
+  return value as string;
+}
+
 /** Completes first-run setup and logs in, returning the session cookie. Astro's origin check rejects a cross-site-looking POST, so this needs an Origin/Referer matching the target -- a real browser sends these automatically. */
 export async function setupAndLogIn(
   origin: string,
   credentials: AdminCredentials,
+  setupToken: string,
 ): Promise<string> {
   const setupResponse = await fetch(`${origin}/setup`, {
     method: "POST",
@@ -447,6 +530,7 @@ export async function setupAndLogIn(
       email: credentials.email,
       password: credentials.password,
       confirmPassword: credentials.password,
+      setupToken,
     }),
   });
   assert(

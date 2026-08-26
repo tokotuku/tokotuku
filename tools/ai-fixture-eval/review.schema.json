@@ -11,7 +11,8 @@
     "production_gaps",
     "over_engineered",
     "under_engineered",
-    "evidence"
+    "evidence",
+    "screenshots"
   ],
   "properties": {
     "score": { "type": "integer", "minimum": 0, "maximum": 100 },
@@ -40,7 +41,8 @@
     "production_gaps": { "$ref": "#/$defs/issueList" },
     "over_engineered": { "$ref": "#/$defs/issueList" },
     "under_engineered": { "$ref": "#/$defs/issueList" },
-    "evidence": { "type": "array", "items": { "type": "string" } }
+    "evidence": { "type": "array", "items": { "type": "string" } },
+    "screenshots": { "$ref": "#/$defs/screenshots" }
   },
   "$defs": {
     "issue": {
@@ -64,6 +66,45 @@
         "location": { "type": "string" }
       }
     },
-    "recommendationList": { "type": "array", "items": { "$ref": "#/$defs/recommendation" } }
+    "recommendationList": { "type": "array", "items": { "$ref": "#/$defs/recommendation" } },
+    "screenshotEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "path", "viewport", "score"],
+      "properties": {
+        "status": { "type": "string", "enum": ["captured", "not-captured"] },
+        "path": { "type": ["string", "null"] },
+        "viewport": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["width", "height"],
+          "properties": {
+            "width": { "type": "integer", "minimum": 1 },
+            "height": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "score": { "type": ["number", "null"], "minimum": 0, "maximum": 100 }
+      }
+    },
+    "screenshots": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["desktop", "mobile", "scoring"],
+      "properties": {
+        "desktop": { "$ref": "#/$defs/screenshotEvidence" },
+        "mobile": { "$ref": "#/$defs/screenshotEvidence" },
+        "scoring": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "method", "score", "notes"],
+          "properties": {
+            "status": { "type": "string", "enum": ["scored", "not-scored"] },
+            "method": { "type": "string" },
+            "score": { "type": ["number", "null"], "minimum": 0, "maximum": 100 },
+            "notes": { "type": "string" }
+          }
+        }
+      }
+    }
   }
 }

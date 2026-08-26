@@ -41,7 +41,7 @@ describe("createTranslator", () => {
     process.env.NODE_ENV = "development";
     const warning = vi.spyOn(console, "warn").mockImplementation(() => {});
     const t = createTranslator({ locale: "id-ID", messages: { missing: "Nope" } }, dictionaries);
-    expect(warning).toHaveBeenCalledWith("[takontuku] Unknown message override: missing");
+    expect(warning).toHaveBeenCalledWith("[karsa] Unknown message override: missing");
     expect(t("greeting")).toBe("Halo {name}");
   });
 

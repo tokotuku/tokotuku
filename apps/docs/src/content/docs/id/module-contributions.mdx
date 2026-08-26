@@ -1,0 +1,44 @@
+---
+title: Modul dan kontrak kontribusi
+description: Tambahkan perilaku opsional melalui ownership modul, kontribusi registry, migrasi, dan seed yang eksplisit.
+sidebar:
+  label: Modul dan kontrak
+  order: 2
+---
+
+Modul Karsa adalah paket yang menyumbangkan surface yang diketahui. Modul dapat memiliki site route, navigasi admin, site home section, widget, migrasi, seed, prefix media, atau kontribusi panel auth. Registry menyelesaikan dependency dan urutan kontribusi yang stabil sebelum Astro melakukan build.
+
+## Kontrak
+
+Setiap kontribusi memiliki `id`, entrypoint, dan `order` opsional. ID harus unik dalam setiap jenis kontribusi. Urutan dependency menjadi tie-breaker stabil sehingga modul tidak perlu membaca file halaman modul lain.
+
+```ts
+const module = defineModule({
+  name: "reviews",
+  requires: [],
+  siteHomeSections: [{ id: "highlights", entrypoint: "./Highlights.astro", order: 40 }],
+  adminDashboardWidgets: [{ id: "reviews", entrypoint: "./ReviewsWidget.astro" }],
+  migrations: [new URL("../migrations/0001_init.sql", import.meta.url)],
+});
+```
+
+Gunakan helper tipe `ModuleDefinition`, bukan registry paralel buatan sendiri.
+
+## Tambah atau hapus modul
+
+```sh
+bunx karsa add <module>
+bunx karsa remove <module>
+bunx karsa db sync
+```
+
+CLI memperbarui dependency, `astro.config.mjs`, registrasi middleware, dan pengumpulan migrasi secara bersama. Penghapusan dependency ditolak jika modul terpasang masih membutuhkannya.
+
+## Aturan ownership
+
+- Route milik modul tetap berada di paket modul.
+- Aplikasi boleh memiliki halaman dan section statis yang belum punya owner modul.
+- Perilaku opsional membaca `virtual:karsa/registry` dan virtual contribution terkait, bukan static import paket opsional dari base app.
+- Seed adalah data awal lokal; migrasi adalah riwayat schema append-only.
+
+Jika menghapus modul seharusnya menghapus sebuah surface, surface itu milik modul dan harus tiba melalui kontrak kontribusinya.

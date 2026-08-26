@@ -1,0 +1,38 @@
+---
+title: Karsa
+description: Fondasi Astro yang netral untuk berbagai jenis situs, antarmuka aksesibel, konten, dan aplikasi modular.
+template: splash
+hero:
+  tagline: Susun situs cepat dan aksesibel dengan komponen Astro bertipe, modul opsional, dan kepemilikan yang jelas.
+  actions:
+    - text: Mulai cepat
+      link: /id/getting-started/
+      icon: right-arrow
+      variant: primary
+    - text: Pilih preset
+      link: /id/presets/
+      icon: open-book
+---
+
+import { Card, CardGrid } from "@astrojs/starlight/components";
+
+<CardGrid>
+  <Card title="Native Astro" icon="puzzle">
+    Import komponen `.astro` bertipe secara langsung. Output statis adalah default; tambahkan perilaku client hanya saat interaksi memang membutuhkannya.
+  </Card>
+  <Card title="Netral untuk situs" icon="rocket">
+    Mulai dari brief perusahaan, produk, layanan, atau publikasi. Panduan inti tetap dapat digunakan ulang dan trade-off domain dijelaskan di halaman khusus.
+  </Card>
+  <Card title="Komposabel" icon="seti:css">
+    Instal modul yang diperlukan saja, pertahankan kepemilikan eksplisit, dan gunakan token semantik `--karsa-*` untuk sistem visual yang konsisten.
+  </Card>
+</CardGrid>
+
+## Yang disediakan Karsa
+
+- UI dan theme Astro bertipe dengan primitive aksesibel.
+- Modul opsional dengan kontribusi registry, urutan dependency, migrasi, dan seed.
+- Pola konten serta halaman yang memisahkan halaman milik aplikasi dari route milik modul.
+- Alur kerja AI dengan asumsi, bukti, validasi, serta keputusan scope yang tercatat.
+
+Gunakan panduan untuk memilih preset, lalu ikuti kontrak yang sesuai untuk konten, data, dan deployment situs.

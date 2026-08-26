@@ -1,0 +1,89 @@
+export const NAME_PATTERN = /^[a-z0-9-]+$/;
+export const NAME_RULE = "Use lowercase letters, digits, and hyphens only.";
+
+const KNOWN_FLAGS = new Set(["--yes", "--no-install", "--seed"]);
+const PRESETS = new Set(["company", "product", "service", "publication"]);
+
+export interface ParsedArgs {
+  projectName: string | undefined;
+  flags: Set<string>;
+  registry: string | undefined;
+  preset: "company" | "product" | "service" | "publication" | undefined;
+}
+
+export type ParseResult = { ok: true; args: ParsedArgs } | { ok: false; error: string };
+
+type ValueOption =
+  | { kind: "unhandled" }
+  | { kind: "error"; error: string }
+  | { kind: "registry"; value: string }
+  | { kind: "preset"; value: NonNullable<ParsedArgs["preset"]> };
+
+function parseValueOption(arg: string, value: string | undefined): ValueOption {
+  if (arg === "--registry") {
+    if (!value || value.startsWith("--")) {
+      return {
+        kind: "error",
+        error: "--registry needs a URL, e.g. --registry http://localhost:4873",
+      };
+    }
+    return { kind: "registry", value };
+  }
+
+  if (arg !== "--preset") return { kind: "unhandled" };
+  if (!value || !PRESETS.has(value)) {
+    return { kind: "error", error: "--preset must be company, product, service, or publication" };
+  }
+  return { kind: "preset", value: value as NonNullable<ParsedArgs["preset"]> };
+}
+
+/**
+ * A hand-rolled parser rather than string.includes/find checks scattered
+ * through main(): those silently swallowed a mistyped flag (--see instead
+ * of --seed exited 0, having done nothing different) and a second
+ * positional argument (create-karsa app1 app2 quietly used only app1).
+ * Both fail loudly here instead.
+ */
+export function parseArgs(argv: string[]): ParseResult {
+  const positional: string[] = [];
+  const flags = new Set<string>();
+  let registry: string | undefined;
+  let preset: ParsedArgs["preset"];
+
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i] as string;
+    const option = parseValueOption(arg, argv[i + 1]);
+    if (option.kind === "error") return { ok: false, error: option.error };
+    if (option.kind === "registry") {
+      registry = option.value;
+      i++;
+      continue;
+    }
+    if (option.kind === "preset") {
+      preset = option.value;
+      i++;
+      continue;
+    }
+    if (arg.startsWith("--")) {
+      if (!KNOWN_FLAGS.has(arg)) {
+        return {
+          ok: false,
+          error: `Unknown flag: ${arg}\nKnown flags: ${[...KNOWN_FLAGS, "--registry <url>"].join(", ")}`,
+        };
+      }
+      flags.add(arg);
+      continue;
+    }
+    positional.push(arg);
+  }
+
+  if (positional.length > 1) {
+    return { ok: false, error: `Expected a single project name, got: ${positional.join(", ")}` };
+  }
+  const projectName = positional[0];
+  if (projectName !== undefined && !NAME_PATTERN.test(projectName)) {
+    return { ok: false, error: `Project name is invalid. ${NAME_RULE}` };
+  }
+
+  return { ok: true, args: { projectName, flags, registry, preset } };
+}

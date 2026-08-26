@@ -1,0 +1,28 @@
+---
+title: ProductCard
+description: Ringkasan produk dengan media, harga, dan data add-to-cart.
+sidebar:
+  order: 1
+---
+
+import ProductCard from "@karsa/ui/ProductCard.astro";
+import ComponentPreview from "../../../../../components/ComponentPreview.astro";
+
+<ComponentPreview label="Product card" layout="stack">
+  <div class="w-full max-w-[24rem]">
+    <ProductCard id={1} name="Widget sehari-hari" description="Widget ringkas dan andal." price="$19.99" priceCents={1999} imageUrl="/favicon.png" />
+  </div>
+</ComponentPreview>
+
+```astro
+<ProductCard
+  id={product.id}
+  name={product.name}
+  description={product.description}
+  price={currency.format(product.priceCents / 100)}
+  priceCents={product.priceCents}
+  imageUrl={`/api/images/${product.imageKey}`}
+/>
+```
+
+`id`, `name`, `description`, `price`, `priceCents`, dan `imageUrl` diperlukan. Tombol add menyerialisasi data produk ke `data-product`; `SiteHeader` menangani event dan cart lokal.

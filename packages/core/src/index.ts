@@ -3,15 +3,15 @@ export * from "./db";
 export * from "./env";
 export * from "./format";
 export {
-  type TakontukuAdminBrand,
-  type TakontukuAdminDashboardArtwork,
-  type TakontukuAuthBrand,
-  type TakontukuBrand,
-  type TakontukuIntegration,
-  type TakontukuOptions,
-  type TakontukuPaletteColors,
-  type TakontukuStorefrontBrand,
-  takontuku,
+  type KarsaAdminBrand,
+  type KarsaAdminDashboardArtwork,
+  type KarsaAuthBrand,
+  type KarsaBrand,
+  type KarsaIntegration,
+  type KarsaOptions,
+  type KarsaPaletteColors,
+  type KarsaSiteBrand,
+  karsa,
 } from "./integration";
 export * from "./media";
 export * from "./messages";

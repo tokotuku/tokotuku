@@ -45,7 +45,7 @@ function wranglerBinaryPath(cwd: string): string {
 }
 
 interface LabeledSqlFile {
-  /** Shown in `takontuku db seed` output, e.g. "catalog: demo-catalog.sql". */
+  /** Shown in `karsa db seed` output, e.g. "catalog: demo-catalog.sql". */
   label: string;
   path: string;
 }

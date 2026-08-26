@@ -1,6 +1,6 @@
 {
   "name": "docs",
-  "version": "0.0.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -8,15 +8,16 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
+    "parity": "bun run --bun src/content/parity.ts",
     "typecheck": "astro check",
     "lint": "biome check ."
   },
   "dependencies": {
     "@astrojs/starlight": "0.41.3",
     "astro": "7.0.9",
-    "@takontuku/charts": "^0.2.0",
-    "@takontuku/theme": "^0.2.0",
-    "@takontuku/ui": "^0.2.0"
+    "@karsa/charts": "workspace:*",
+    "@karsa/theme": "workspace:*",
+    "@karsa/ui": "workspace:*"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.4",

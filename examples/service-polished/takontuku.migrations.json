@@ -1,9 +1,0 @@
-{
-  "nextSequence": 7,
-  "modules": {
-    "auth": 1,
-    "catalog": 3,
-    "orders": 2,
-    "booking": 1
-  }
-}

@@ -1,0 +1,83 @@
+---
+import { env } from "cloudflare:workers";
+import registry from "virtual:karsa/registry";
+import { mediaUrl } from "@karsa/core";
+import { brand } from "@karsa/core/brand";
+import Layout from "@karsa/ui/DocumentLayout.astro";
+import SiteFooter from "@karsa/ui/SiteFooter.astro";
+import SiteHeader from "@karsa/ui/SiteHeader.astro";
+import { renderMarkdownSafe } from "../../markdown";
+import { findPostBySlug } from "../../posts";
+
+// biome-ignore lint/complexity/useLiteralKeys: Astro generates params as an index-signature object
+const slug = Astro.params["slug"] ?? "";
+const post = await findPostBySlug(env.DB, slug);
+if (!post) return new Response("Post not found", { status: 404 });
+const html = renderMarkdownSafe(post.bodyMarkdown);
+const locale = brand.locale.toLowerCase().startsWith("id") ? "id" : "en";
+const site = brand.site;
+const hasCatalog = registry.moduleNames.includes("catalog");
+const catalogPresentation =
+  registry.clientConfig["catalog"]?.["presentation"] === "services" ? "services" : "products";
+const catalogHref = catalogPresentation === "services" ? "/services" : "/products";
+const localized = (idText: string, enText: string) => (locale === "id" ? idText : enText);
+const catalogLabel =
+  catalogPresentation === "services"
+    ? localized("Layanan", "Services")
+    : localized("Produk", "Products");
+const image = post.coverImageKey ? mediaUrl(post.coverImageKey) : undefined;
+const articleJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  headline: post.title,
+  description: post.excerpt,
+  datePublished: post.publishedAt ?? undefined,
+  dateModified: post.updatedAt,
+  url: new URL(`/blog/${post.slug}`, Astro.url.origin).toString(),
+  ...(image ? { image: new URL(image, Astro.url.origin).toString() } : {}),
+};
+
+import "../../styles/routes/content-blog.css";
+---
+
+<Layout
+  title={`${post.title} — ${brand.name}`}
+  description={post.excerpt || post.title}
+  image={image}
+  type="article"
+  jsonLd={articleJsonLd}
+  siteName={brand.name}
+  lang={locale}
+  palette={brand.palette}
+>
+  <SiteHeader
+    brand={brand}
+    announcement={site?.announcement ?? (locale === "id" ? "Cerita dan catatan." : "Stories and notes.")}
+    links={[{ label: locale === "id" ? "Blog" : "Journal", href: "/blog" }, ...(site?.links ?? [])]}
+    actions={hasCatalog ? [{ label: catalogLabel, href: catalogHref, icon: "box" }] : []}
+    labels={{
+      home: locale === "id" ? "Beranda" : "Home",
+      navigation: locale === "id" ? "Navigasi situs" : "Site navigation",
+    }}
+  />
+  <main class="content-page content-blog-post">
+    <nav class="content-breadcrumbs" aria-label={locale === "id" ? "Jejak navigasi" : "Breadcrumb"}>
+      <a href="/blog">{locale === "id" ? "Blog" : "Journal"}</a><span aria-hidden="true">/</span><span>{post.title}</span>
+    </nav>
+    <article>
+      <header class="content-post-heading">
+        <p class="content-post-date">{post.publishedAt ?? post.updatedAt}</p>
+        <h1>{post.title}</h1>
+        {post.excerpt && <p class="content-post-excerpt">{post.excerpt}</p>}
+      </header>
+      {image && <img class="content-cover" src={image} alt="" />}
+      <div class="content-markdown" set:html={html}></div>
+    </article>
+  </main>
+  <SiteFooter
+    brandName={brand.name}
+    tagline={locale === "id" ? "Catatan yang dibuat dengan niat." : "Writing made with intention."}
+    links={[{ label: locale === "id" ? "Blog" : "Journal", href: "/blog" }, ...(site?.links ?? [])]}
+    navigationLabel={locale === "id" ? "Navigasi footer" : "Footer navigation"}
+  />
+</Layout>

@@ -1,0 +1,25 @@
+---
+title: Modules
+description: Understand optional packages, dependency order, registry state, and app/module boundaries.
+---
+
+Modules are optional packages discovered by the Karsa integration. They can contribute routes, navigation, widgets, migrations, seeds, media prefixes, and middleware registration.
+
+## Choose the smallest graph
+
+`auth` is the access boundary. Add only the domain modules required by the brief; a company or publication site can remain on the base graph. Product and service domains have dedicated guides that describe their optional module graphs.
+
+Add and remove modules through the CLI:
+
+```sh
+bunx karsa add <module>
+bunx karsa remove <module>
+```
+
+The CLI updates the package dependency, `modules` array, and any `./register` middleware line as one operation. Use `--no-install` or `--no-sync` only when the plan explicitly calls for a staged change.
+
+## Optional behavior
+
+Read `virtual:karsa/registry` and contribution virtual modules to detect installed features. A static import from an optional package makes the base app fail even if a runtime `if` would skip it. Module-specific routes belong in the module package.
+
+After changing the graph, run `bunx karsa db sync`, apply local migrations, seed locally when needed, and verify that removing the module removes its owned affordances too.

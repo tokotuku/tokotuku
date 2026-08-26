@@ -1,0 +1,22 @@
+---
+title: Panduan situs perusahaan
+description: Bangun profil perusahaan atau organisasi dengan halaman Astro milik aplikasi dan tanpa modul domain secara default.
+---
+
+Preset company adalah situs berbasis konten dan dimiliki aplikasi. Mulai dari scaffold lalu tambahkan hanya halaman yang disebut dalam brief: home, about, capability, contact, atau alur profil sejenis.
+
+## Ownership
+
+Halaman company berada di `src/pages/` aplikasi atau section terarah di `src/components/`. Susun dengan primitive `@karsa/ui` dan token semantik `--karsa-*`. Jangan memasang modul produk atau scheduling hanya untuk mendapatkan header, card, atau halaman marketing.
+
+## Tier
+
+- Install: verifikasi scaffold, registry, tema, dan check.
+- Content: tambahkan copy, metadata, navigasi, dan asset lokal yang disetujui dengan layout paket.
+- Polished: tambahkan override tema kecil dan asset raster lokal hanya bila diminta.
+
+Simpan data terstruktur dan konten profil dekat owner halamannya. Jika fitur berikutnya membutuhkan route, migrasi, atau state admin, promosikan menjadi modul.
+
+## Bukti
+
+Laporkan tier, daftar halaman, manifest asset, check aksesibilitas, typecheck, lint, dan build. Jelaskan bahwa tidak ada modul domain opsional yang dipasang dan alasannya.

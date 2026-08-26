@@ -2,6 +2,25 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
+interface Issue {
+  summary: string;
+  severity: "blocker" | "high" | "medium" | "low" | "info";
+  location: string;
+}
+
+interface Recommendation {
+  priority: "P0" | "P1" | "P2" | "P3";
+  action: string;
+  location: string;
+}
+
+interface ScreenshotEvidence {
+  status: "captured" | "not-captured";
+  path: string | null;
+  viewport: { width: number; height: number };
+  score: number | null;
+}
+
 interface Review {
   score: number;
   verdict: "pass" | "needs_revision" | "blocked";
@@ -19,16 +38,16 @@ interface Review {
   over_engineered: Issue[];
   under_engineered: Issue[];
   evidence: string[];
-}
-interface Issue {
-  summary: string;
-  severity: "blocker" | "high" | "medium" | "low" | "info";
-  location: string;
-}
-interface Recommendation {
-  priority: "P0" | "P1" | "P2" | "P3";
-  action: string;
-  location: string;
+  screenshots: {
+    desktop: ScreenshotEvidence;
+    mobile: ScreenshotEvidence;
+    scoring: {
+      status: "scored" | "not-scored";
+      method: string;
+      score: number | null;
+      notes: string;
+    };
+  };
 }
 
 const fixtureRoot = path.resolve(process.argv[2] ?? "");
@@ -53,7 +72,10 @@ const recommendations = (items: Recommendation[]) =>
     ? items.map((item) => `- **${item.priority}** ${item.action} — ${item.location}`).join("\n")
     : "- None reported";
 const rubricTotal = Object.values(review.rubric).reduce((sum, value) => sum + value, 0);
-const markdown = `# Terra Review: ${path.basename(fixtureRoot)}
+const visual = review.screenshots;
+const screenshotRow = (label: string, evidence: ScreenshotEvidence) =>
+  `| ${label} | ${evidence.status} | ${evidence.viewport.width}×${evidence.viewport.height} | ${evidence.path ?? "—"} | ${evidence.score ?? "—"} |`;
+const markdown = `# Karsa Review: ${path.basename(fixtureRoot)}
 
 ## Verdict
 
@@ -66,11 +88,20 @@ ${blockingFacts.length ? `Deterministic checker blockers: ${blockingFacts.map((f
 | Area | Score | Max |
 | --- | ---: | ---: |
 | Checks, migration, seed, route | ${review.rubric.checks_routes} | 30 |
-| Takontuku module/data architecture | ${review.rubric.architecture} | 25 |
+| Karsa module/data architecture | ${review.rubric.architecture} | 25 |
 | Category and tier fit | ${review.rubric.tier_fit} | 20 |
 | Content, UX, responsive design, assets | ${review.rubric.content_ux_assets} | 15 |
 | Maintainability and proportionality | ${review.rubric.maintainability} | 10 |
 | **Total reported by rubric** | **${rubricTotal}** | **100** |
+
+## Desktop/mobile evidence
+
+| View | Status | Viewport | Screenshot | Score |
+| --- | --- | ---: | --- | ---: |
+${screenshotRow("Desktop", visual.desktop)}
+${screenshotRow("Mobile", visual.mobile)}
+
+Scoring: **${visual.scoring.status}** — ${visual.scoring.method}. ${visual.scoring.notes}
 
 ## Evidence
 

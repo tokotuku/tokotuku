@@ -1,0 +1,16 @@
+---
+title: PageHeader
+description: Heading halaman, copy pendukung, eyebrow, dan aksi.
+sidebar:
+  order: 4
+---
+
+import Button from "@karsa/ui/Button.astro";
+import PageHeader from "@karsa/ui/PageHeader.astro";
+import ComponentPreview from "../../../../../components/ComponentPreview.astro";
+
+<ComponentPreview label="Page header" layout="stack">
+  <PageHeader eyebrow="Workspace" title="Ringkasan" description="Kelola konten dan pengaturan."><div slot="actions"><Button size="sm">Tambah</Button></div></PageHeader>
+</ComponentPreview>
+
+`title` wajib. `description`, `eyebrow`, dan slot `actions` opsional. Pada layar sempit, aksi berpindah ke bawah copy heading.

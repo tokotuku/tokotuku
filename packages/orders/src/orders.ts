@@ -1,5 +1,5 @@
 import type { D1Database } from "@cloudflare/workers-types";
-import { findProductById, findProductsByIds } from "@takontuku/catalog";
+import { findItemById, findItemsByIds } from "@karsa/catalog";
 import {
   assertCursor,
   ConstraintViolationError,
@@ -11,11 +11,11 @@ import {
   encodeCursor,
   mapD1Error,
   normalizePageSize,
-} from "@takontuku/core";
+} from "@karsa/core";
 
 // `pending`..`delivered` is the original checkout-and-ship lifecycle.
 // `inquiry`..`in_progress`..`completed` is the lead-and-fulfill lifecycle a
-// module like @takontuku/booking creates orders into via createInquiryOrder
+// module like @karsa/booking creates orders into via createInquiryOrder
 // — a request has no total until an admin quotes it, and "delivered" (a
 // shipment concept) doesn't fit a finished visit or service. Both lifecycles
 // share `confirmed` as their convergence point and `cancelled` as their exit.
@@ -33,7 +33,7 @@ export type OrderStatus = (typeof orderStatuses)[number];
 
 /**
  * Legal next statuses for each current status — the "transisi legalnya"
- * @takontuku/orders is responsible for exporting alongside the vocabulary
+ * @karsa/orders is responsible for exporting alongside the vocabulary
  * itself (no CHECK on orders.status: SQLite can't ALTER a CHECK in place,
  * so legality lives here, in TypeScript, where it can actually change).
  * A status mapped to [] is terminal: nothing, including re-selecting the
@@ -51,7 +51,7 @@ export const orderTransitions: Record<OrderStatus, OrderStatus[]> = {
 };
 
 function generateOrderNumber(): string {
-  return `TK-${new Date().toISOString().slice(0, 10).replaceAll("-", "")}-${crypto.randomUUID().slice(0, 6).toUpperCase()}`;
+  return `KR-${new Date().toISOString().slice(0, 10).replaceAll("-", "")}-${crypto.randomUUID().slice(0, 6).toUpperCase()}`;
 }
 
 export const paymentMethods = ["cash", "transfer"] as const;
@@ -70,6 +70,10 @@ export interface CheckoutDetails {
 export interface CartLineInput {
   id: number;
   quantity: number;
+}
+
+export interface CreateOrderOptions {
+  idempotencyKey?: string;
 }
 
 export interface AdminOrder {
@@ -142,11 +146,25 @@ export async function createOrder(
   details: CheckoutDetails,
   rawCart: CartLineInput[],
   paymentMethod: PaymentMethod,
+  { idempotencyKey }: CreateOrderOptions = {},
 ) {
+  if (idempotencyKey && (idempotencyKey.length > 128 || /[^A-Za-z0-9._:-]/.test(idempotencyKey))) {
+    throw new Error("Kunci checkout tidak valid.");
+  }
+  if (idempotencyKey) {
+    const existing = await db
+      .prepare(
+        "SELECT order_number AS orderNumber, total_cents AS totalCents FROM orders WHERE user_id = ? AND idempotency_key = ?",
+      )
+      .bind(userId, idempotencyKey)
+      .first<{ orderNumber: string; totalCents: number | null }>();
+    if (existing) return existing;
+  }
+
   const cart = normalizeCart(rawCart);
   if (!cart.length) throw new Error("Keranjang belanja kosong.");
 
-  const foundProducts = await findProductsByIds(
+  const foundProducts = await findItemsByIds(
     db,
     cart.map((item) => item.id),
   );
@@ -164,6 +182,8 @@ export async function createOrder(
   for (const item of cart) {
     const product = products.get(item.id);
     if (!product) throw new Error("Ada produk yang sudah tidak tersedia.");
+    if (product.priceCents === null)
+      throw new Error("Produk tanpa harga tidak dapat masuk checkout.");
     subtotalCents += product.priceCents * item.quantity;
   }
   const orderNumber = generateOrderNumber();
@@ -173,8 +193,8 @@ export async function createOrder(
       .prepare(
         `INSERT INTO orders
           (order_number, source, user_id, customer_name, customer_email, customer_phone, shipping_address,
-           shipping_city, shipping_postal_code, customer_note, subtotal_cents, total_cents)
-         VALUES (?, 'web', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+           shipping_city, shipping_postal_code, customer_note, subtotal_cents, total_cents, idempotency_key)
+         VALUES (?, 'web', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       )
       .bind(
         orderNumber,
@@ -188,10 +208,13 @@ export async function createOrder(
         details.note,
         subtotalCents,
         subtotalCents,
+        idempotencyKey ?? null,
       ),
     ...cart.map((item) => {
       const product = products.get(item.id);
       if (!product) throw new Error("Ada produk yang sudah tidak tersedia.");
+      if (product.priceCents === null)
+        throw new Error("Produk tanpa harga tidak dapat masuk checkout.");
       return db
         .prepare(
           `INSERT INTO order_items
@@ -229,6 +252,24 @@ export async function createOrder(
   try {
     await db.batch([...statements, ...hookStatements]);
   } catch (error) {
+    if (
+      idempotencyKey &&
+      error instanceof Error &&
+      /UNIQUE constraint failed: orders\.user_id, orders\.idempotency_key/.test(error.message)
+    ) {
+      const existing = await db
+        .prepare(
+          "SELECT order_number AS orderNumber, total_cents AS totalCents FROM orders WHERE user_id = ? AND idempotency_key = ?",
+        )
+        .bind(userId, idempotencyKey)
+        .first<{ orderNumber: string; totalCents: number | null }>();
+      if (existing) return existing;
+    }
+    if (error instanceof Error && error.message.includes("active_pending_order_limit")) {
+      throw new Error(
+        "Batas order pending aktif sudah tercapai. Selesaikan atau batalkan order lama.",
+      );
+    }
     const mapped = mapD1Error(error);
     if (mapped instanceof ConstraintViolationError) {
       throw new Error("Stok berubah saat checkout. Periksa keranjang lalu coba lagi.");
@@ -254,7 +295,7 @@ export interface InquiryDetails {
 /**
  * Creates an order for a single catalog item with no computed total and no
  * signed-in user — the entry point for a lead that hasn't been quoted yet
- * (a scheduling request from @takontuku/booking, a project inquiry, or any
+ * (a scheduling request from @karsa/booking, a project inquiry, or any
  * future channel that isn't "add to cart and pay now"). Neighbor to
  * createOrder, not a replacement: physical checkout keeps using createOrder.
  *
@@ -270,7 +311,7 @@ export async function createInquiryOrder(
   details: InquiryDetails,
   attributes?: Record<string, unknown>,
 ): Promise<{ orderNumber: string }> {
-  const product = await findProductById(db, itemId);
+  const product = await findItemById(db, itemId, { presentation: "services" });
   if (!product) throw new Error("Layanan yang diminta sudah tidak tersedia.");
 
   const orderNumber = generateOrderNumber();
@@ -328,7 +369,8 @@ export async function findCustomerOrder(db: D1Database, orderNumber: string, use
     .prepare(
       `SELECT o.order_number AS orderNumber, o.total_cents AS totalCents, o.status,
               CASE WHEN p.order_id IS NULL THEN 'cash' ELSE 'transfer' END AS paymentMethod,
-              o.payment_status AS paymentStatus, p.proof_key AS paymentProofKey
+              o.payment_status AS paymentStatus,
+              CASE WHEN p.upload_state = 'ready' THEN p.proof_key ELSE NULL END AS paymentProofKey
        FROM orders o LEFT JOIN payments_bank_transfer_proofs p ON p.order_id = o.id
        WHERE o.order_number = ? AND o.user_id = ?`,
     )
@@ -388,7 +430,8 @@ export async function listOrders(
               o.customer_phone,
               COALESCE(SUM(oi.quantity), 0) AS item_count, o.total_cents, o.status,
               CASE WHEN p.order_id IS NULL THEN 'cash' ELSE 'transfer' END AS payment_method,
-              o.payment_status, p.proof_key AS payment_proof_key
+              o.payment_status,
+              CASE WHEN p.upload_state = 'ready' THEN p.proof_key ELSE NULL END AS payment_proof_key
        FROM orders o
        LEFT JOIN order_items oi ON oi.order_id = o.id
        LEFT JOIN payments_bank_transfer_proofs p ON p.order_id = o.id
@@ -464,7 +507,7 @@ export async function findAdminOrderDetail(
               o.shipping_postal_code, o.customer_note, o.source, o.created_at,
               o.total_cents, o.status, o.payment_status,
               CASE WHEN p.order_id IS NULL THEN 'cash' ELSE 'transfer' END AS payment_method,
-              p.proof_key AS payment_proof_key,
+              CASE WHEN p.upload_state = 'ready' THEN p.proof_key ELSE NULL END AS payment_proof_key,
               oi.item_id, oi.product_name, oi.sku, oi.price_cents,
               oi.quantity, oi.line_total_cents
        FROM orders o
@@ -558,7 +601,7 @@ export async function getOrderDashboardSummary(db: D1Database): Promise<OrderDas
       .first<{ value: number }>(),
     db
       .prepare(
-        "SELECT COUNT(*) AS value FROM orders o JOIN payments_bank_transfer_proofs p ON p.order_id = o.id WHERE o.payment_status = 'unpaid' AND p.proof_key IS NOT NULL",
+        "SELECT COUNT(*) AS value FROM orders o JOIN payments_bank_transfer_proofs p ON p.order_id = o.id WHERE o.payment_status = 'unpaid' AND p.upload_state = 'ready' AND p.proof_key IS NOT NULL",
       )
       .first<{ value: number }>(),
     db
@@ -622,6 +665,88 @@ export async function updateOrderStatus(db: D1Database, id: number, status: Orde
   }
 }
 
+export async function claimPaymentProof(
+  db: D1Database,
+  orderNumber: string,
+  userId: string,
+  proofKey: string,
+): Promise<{ replacedProofKey: string | null }> {
+  const row = await db
+    .prepare(
+      `SELECT p.proof_key AS proofKey, p.upload_state AS uploadState, p.updated_at AS updatedAt
+       FROM payments_bank_transfer_proofs p
+       JOIN orders o ON o.id = p.order_id
+       WHERE o.order_number = ? AND o.user_id = ? AND o.payment_status = 'unpaid'`,
+    )
+    .bind(orderNumber, userId)
+    .first<{ proofKey: string | null; uploadState: string; updatedAt: string }>();
+  if (!row) throw new Error("Order tidak ditemukan atau pembayaran sudah diverifikasi.");
+
+  const stale =
+    row.uploadState === "uploading" &&
+    Date.parse(`${row.updatedAt.replace(" ", "T")}Z`) < Date.now() - 10 * 60 * 1000;
+  if (row.uploadState === "ready" || (row.uploadState === "uploading" && !stale)) {
+    throw new Error("Bukti transfer sudah diunggah untuk order ini.");
+  }
+
+  const result = await db
+    .prepare(
+      `UPDATE payments_bank_transfer_proofs
+       SET proof_key = ?, upload_state = 'uploading', updated_at = datetime('now')
+       WHERE upload_state IN ('empty', 'uploading')
+         AND (upload_state = 'empty' OR updated_at < datetime('now', '-10 minutes'))
+         AND order_id = (
+           SELECT id FROM orders WHERE order_number = ? AND user_id = ? AND payment_status = 'unpaid'
+         )`,
+    )
+    .bind(proofKey, orderNumber, userId)
+    .run();
+  if (result.meta.changes === 0)
+    throw new Error("Order tidak ditemukan atau pembayaran sudah diverifikasi.");
+  return { replacedProofKey: stale ? row.proofKey : null };
+}
+
+export async function completePaymentProof(
+  db: D1Database,
+  orderNumber: string,
+  userId: string,
+  proofKey: string,
+): Promise<void> {
+  const result = await db
+    .prepare(
+      `UPDATE payments_bank_transfer_proofs
+       SET upload_state = 'ready', updated_at = datetime('now')
+       WHERE proof_key = ? AND upload_state = 'uploading'
+         AND order_id = (
+           SELECT id FROM orders WHERE order_number = ? AND user_id = ? AND payment_status = 'unpaid'
+         )`,
+    )
+    .bind(proofKey, orderNumber, userId)
+    .run();
+  if (result.meta.changes === 0)
+    throw new Error("Order tidak ditemukan atau pembayaran sudah diverifikasi.");
+}
+
+export async function releasePaymentProofClaim(
+  db: D1Database,
+  orderNumber: string,
+  userId: string,
+  proofKey: string,
+): Promise<void> {
+  await db
+    .prepare(
+      `UPDATE payments_bank_transfer_proofs
+       SET proof_key = NULL, upload_state = 'empty', updated_at = datetime('now')
+       WHERE proof_key = ? AND upload_state = 'uploading'
+         AND order_id = (
+           SELECT id FROM orders WHERE order_number = ? AND user_id = ? AND payment_status = 'unpaid'
+         )`,
+    )
+    .bind(proofKey, orderNumber, userId)
+    .run();
+}
+
+/** Backwards-compatible direct attach for callers that already completed the R2 write. */
 export async function attachPaymentProof(
   db: D1Database,
   orderNumber: string,
@@ -631,8 +756,8 @@ export async function attachPaymentProof(
   const result = await db
     .prepare(
       `UPDATE payments_bank_transfer_proofs
-       SET proof_key = ?
-       WHERE proof_key IS NULL
+       SET proof_key = ?, upload_state = 'ready', updated_at = datetime('now')
+       WHERE upload_state = 'empty'
          AND order_id = (
            SELECT id FROM orders WHERE order_number = ? AND user_id = ? AND payment_status = 'unpaid'
          )`,
@@ -648,7 +773,10 @@ export async function approvePayment(db: D1Database, id: number) {
     .prepare(
       `UPDATE orders SET payment_status = 'paid', updated_at = datetime('now')
        WHERE id = ? AND payment_status = 'unpaid'
-         AND EXISTS (SELECT 1 FROM payments_bank_transfer_proofs WHERE order_id = orders.id)`,
+         AND EXISTS (
+           SELECT 1 FROM payments_bank_transfer_proofs
+           WHERE order_id = orders.id AND upload_state = 'ready' AND proof_key IS NOT NULL
+         )`,
     )
     .bind(id)
     .run();

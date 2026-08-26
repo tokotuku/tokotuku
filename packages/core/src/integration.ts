@@ -2,26 +2,26 @@
 /// <reference path="./virtual.d.ts" />
 import { existsSync, readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import type { PaletteColors } from "@takontuku/theme/palette";
+import type { PaletteColors } from "@karsa/theme/palette";
 import type { AstroIntegration } from "astro";
 import type { FormattersConfig } from "./format";
 import type { ModuleDefinition } from "./module";
 import { type ResolvedRegistry, resolveModules } from "./registry";
 import { buildThemeAliases } from "./theme-alias";
-import { takontukuVirtualModulesPlugin } from "./virtual-modules-plugin";
+import { karsaVirtualModulesPlugin } from "./virtual-modules-plugin";
 
 export { defineModule } from "./module";
 
-export interface TakontukuAuthBrand {
+export interface KarsaAuthBrand {
   /** Public URL (or path) for the decorative auth panel image. */
   backgroundImage?: string;
   /** CSS object-position used by the auth panel image. */
   backgroundPosition?: string;
 }
 
-export type TakontukuPaletteColors = PaletteColors;
+export type KarsaPaletteColors = PaletteColors;
 
-export interface TakontukuStorefrontBrand {
+export interface KarsaSiteBrand {
   announcement?: string | false;
   hero?: {
     eyebrow?: string;
@@ -29,12 +29,13 @@ export interface TakontukuStorefrontBrand {
     description?: string;
     image?: string;
     imagePosition?: string;
+    primaryAction?: { label: string; href: string };
   };
   links?: Array<{ label: string; href: string }>;
   newsletter?: { action: string };
 }
 
-export type TakontukuAdminDashboardArtwork =
+export type KarsaAdminDashboardArtwork =
   | "abstract"
   | "energy"
   | {
@@ -43,32 +44,32 @@ export type TakontukuAdminDashboardArtwork =
       position?: string;
     };
 
-export interface TakontukuAdminBrand {
+export interface KarsaAdminBrand {
   /** Decorative artwork preset or custom light/dark URLs used by the admin dashboard. */
-  dashboardArtwork?: TakontukuAdminDashboardArtwork;
+  dashboardArtwork?: KarsaAdminDashboardArtwork;
 }
 
-export interface TakontukuBrand extends FormattersConfig {
+export interface KarsaBrand extends FormattersConfig {
   name: string;
   logo?: { src: string; alt?: string };
-  admin?: TakontukuAdminBrand;
+  admin?: KarsaAdminBrand;
   palette?: {
-    light?: TakontukuPaletteColors;
-    dark?: TakontukuPaletteColors;
+    light?: KarsaPaletteColors;
+    dark?: KarsaPaletteColors;
   };
-  storefront?: TakontukuStorefrontBrand;
-  auth?: TakontukuAuthBrand;
+  site?: KarsaSiteBrand;
+  auth?: KarsaAuthBrand;
   /** Optional sparse overrides for package-owned localized dictionaries. */
   messages?: Record<string, string>;
 }
 
-export interface TakontukuOptions {
-  brand: TakontukuBrand;
+export interface KarsaOptions {
+  brand: KarsaBrand;
   modules: ModuleDefinition[];
 }
 
-/** An AstroIntegration, plus the resolved registry `takontuku db sync` reads directly off the config's integrations array. */
-export type TakontukuIntegration = AstroIntegration & { registry: ResolvedRegistry };
+/** An AstroIntegration, plus the resolved registry `karsa db sync` reads directly off the config's integrations array. */
+export type KarsaIntegration = AstroIntegration & { registry: ResolvedRegistry };
 
 /**
  * The admin shell (layout, dashboard, error pages, media proxy) is not
@@ -89,22 +90,28 @@ const CORE_MODULE: ModuleDefinition = {
       order: 0,
     },
   ],
-  storefrontRoutes: [
-    { pattern: "/403", entrypoint: "@takontuku/core/routes/403.astro" },
-    { pattern: "/404", entrypoint: "@takontuku/core/routes/404.astro" },
+  siteRoutes: [
+    { pattern: "/403", entrypoint: "@karsa/core/routes/403.astro" },
+    { pattern: "/404", entrypoint: "@karsa/core/routes/404.astro" },
+    { pattern: "/sitemap.xml", entrypoint: "@karsa/core/routes/sitemap.xml.ts" },
     {
       pattern: "/api/images/[...key]",
-      entrypoint: "@takontuku/core/routes/api/images/[...key].ts",
+      entrypoint: "@karsa/core/routes/api/images/[...key].ts",
     },
   ],
-  adminRoutes: [{ pattern: "/admin", entrypoint: "@takontuku/core/routes/admin/index.astro" }],
+  adminRoutes: [{ pattern: "/admin", entrypoint: "@karsa/core/routes/admin/index.astro" }],
 };
 
-export function takontuku(options: TakontukuOptions): TakontukuIntegration {
+export function karsa(options: KarsaOptions): KarsaIntegration {
   const registry = resolveModules([CORE_MODULE, ...options.modules]);
+  for (const field of registry.requiredBrandFields) {
+    if (!options.brand[field]) {
+      throw new Error(`Karsa configuration error: installed modules require brand.${field}.`);
+    }
+  }
 
   return {
-    name: "@takontuku/core",
+    name: "@karsa/core",
     registry,
     hooks: {
       "astro:config:setup": ({
@@ -122,14 +129,14 @@ export function takontuku(options: TakontukuOptions): TakontukuIntegration {
 
         updateConfig({
           vite: {
-            plugins: [takontukuVirtualModulesPlugin(registry, options.brand)],
+            plugins: [karsaVirtualModulesPlugin(registry, options.brand)],
             ...(alias.length ? { resolve: { alias } } : {}),
           },
         });
 
-        addMiddleware({ entrypoint: "@takontuku/core/middleware", order: "pre" });
+        addMiddleware({ entrypoint: "@karsa/core/middleware", order: "pre" });
 
-        for (const route of registry.storefrontRoutes) {
+        for (const route of registry.siteRoutes) {
           injectRoute({
             pattern: route.pattern,
             entrypoint: route.entrypoint,

@@ -1,19 +1,19 @@
-# @takontuku/jarene
+# @karsa/jarene
 
-Jarene is an optional Takontuku module that adds a small, server-rendered quote to the shared
+Jarene is an optional Karsa module that adds a small, server-rendered quote to the shared
 authentication panel. It is intentionally lightweight: no routes, middleware, database tables,
 seeds, or user data.
 
-Install it in a Takontuku app with:
+Install it in a Karsa app with:
 
 ```sh
-bunx takontuku add jarene
+bunx karsa add jarene
 ```
 
 Remove it with:
 
 ```sh
-bunx takontuku remove jarene
+bunx karsa remove jarene
 ```
 
 The package ships a curated catalog of quotes from economists, mathematicians, and scientists.
@@ -27,7 +27,7 @@ checked.
 Auth imagery remains configurable per brand:
 
 ```js
-takontuku({
+karsa({
   brand: {
     name: "Kedai Senja",
     locale: "id-ID",
@@ -38,6 +38,6 @@ takontuku({
       backgroundPosition: "center 35%",
     },
   },
-  modules: [auth(), jarene()],
+  modules: [auth({ registration: "closed" }), jarene()],
 });
 ```

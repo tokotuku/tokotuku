@@ -13,26 +13,36 @@ uplinks:
     url: https://registry.npmjs.org/
 
 packages:
-  # Private -- catalog/orders are commercial modules, never published to
-  # public npm. Specific patterns must come before the @takontuku/* one
+  # Private -- domain modules are never published to
+  # public npm. Specific patterns must come before the @karsa/* one
   # below: Verdaccio uses the first pattern that matches.
-  "@takontuku/catalog":
+  "@karsa/catalog":
     access: $authenticated
     publish: $authenticated
     unpublish: $authenticated
 
-  "@takontuku/orders":
+  "@karsa/orders":
     access: $authenticated
     publish: $authenticated
     unpublish: $authenticated
 
-  # Public -- core/ui/auth/config/create-takontuku live on real npm once
+  "@karsa/booking":
+    access: $authenticated
+    publish: $authenticated
+    unpublish: $authenticated
+
+  "@karsa/content":
+    access: $authenticated
+    publish: $authenticated
+    unpublish: $authenticated
+
+  # Public -- core/ui/auth/config/create-karsa live on real npm once
   # published there; this registry only needs to serve them locally during
-  # development (moon run verdaccio:up, tools/e2e-install/). No npmjs proxy
+  # development (Docker Compose + tools/e2e-install/). No npmjs proxy
   # for this scope, on purpose: every e2e gate publishes a fresh version and
   # resolves it by "latest", and a proxy would let that resolve against the
-  # real npm registry's @takontuku/* packages instead once they exist there.
-  "@takontuku/*":
+  # real npm registry's @karsa/* packages instead once they exist there.
+  "@karsa/*":
     access: $all
     publish: $authenticated
     unpublish: $authenticated

@@ -1,0 +1,17 @@
+---
+title: Pagination
+description: Navigasi sebelumnya dan berikutnya dengan konteks halaman saat ini.
+sidebar:
+  order: 1
+---
+
+import Pagination from "@karsa/ui/Pagination.astro";
+import ComponentPreview from "../../../../../components/ComponentPreview.astro";
+
+<ComponentPreview label="Contoh pagination" layout="stack"><Pagination page={2} totalPages={8} baseUrl="#page-" /></ComponentPreview>
+
+```astro
+<Pagination page={2} totalPages={8} baseUrl="?page=" />
+```
+
+`page` dan `totalPages` wajib; `baseUrl` default-nya `?page=`. Link sebelumnya dan berikutnya mengekspos `aria-disabled="true"` di batas koleksi dan berada dalam navigasi berlabel “Pagination”.

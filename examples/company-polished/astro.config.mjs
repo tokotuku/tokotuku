@@ -1,0 +1,42 @@
+// @ts-check
+import cloudflare from "@astrojs/cloudflare";
+import { auth } from "@karsa/auth";
+import { karsa } from "@karsa/core";
+import { jarene } from "@karsa/jarene";
+import tailwindcss from "@tailwindcss/vite";
+import { defineConfig } from "astro/config";
+
+// Run "karsa add <module>" or "karsa remove <module>" to change
+// what this client has installed -- it edits this file, src/middleware.ts,
+// and package.json for you.
+export default defineConfig({
+  integrations: [
+    karsa({
+      brand: {
+        name: "Arunika Energi",
+        locale: "id-ID",
+        currency: "IDR",
+        timeZone: "Asia/Jakarta",
+        palette: {
+          light: { accent: "#d88a2c", accentForeground: "#102b3a" },
+          dark: { accent: "#f2b45d", accentForeground: "#102b3a" },
+        },
+        site: {
+          announcement: "Energi yang tumbuh bersama Indonesia",
+          links: [
+            { label: "Tentang kami", href: "/#about" },
+            { label: "Operasi", href: "/#operations" },
+            { label: "Tim", href: "/#team" },
+          ],
+        },
+      },
+      modules: [auth({ registration: "closed" }), jarene()],
+    }),
+  ],
+  // @karsa/ui's Layout.astro imports its own CSS, which needs this plugin.
+  vite: { plugins: [tailwindcss()] },
+  output: "server",
+  adapter: cloudflare({
+    persistState: true,
+  }),
+});

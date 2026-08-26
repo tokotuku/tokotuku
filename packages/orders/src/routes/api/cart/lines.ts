@@ -1,6 +1,6 @@
 import { env } from "cloudflare:workers";
-import { findProductsByIds } from "@takontuku/catalog";
-import { mediaUrl } from "@takontuku/core";
+import { findItemsByIds } from "@karsa/catalog";
+import { mediaUrl } from "@karsa/core";
 import type { APIRoute } from "astro";
 
 export const GET: APIRoute = async ({ url }) => {
@@ -9,7 +9,7 @@ export const GET: APIRoute = async ({ url }) => {
     .map((raw) => Number(raw))
     .filter((id) => Number.isInteger(id) && id > 0);
 
-  const products = ids.length ? await findProductsByIds(env.DB, ids) : [];
+  const products = ids.length ? await findItemsByIds(env.DB, ids) : [];
 
   return new Response(
     JSON.stringify({

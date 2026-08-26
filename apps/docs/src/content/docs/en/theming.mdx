@@ -1,0 +1,74 @@
+---
+title: Theming
+description: Build a resilient visual system with Karsa palettes and semantic --karsa-* tokens.
+sidebar:
+  order: 3
+---
+
+Karsa themes combine Tailwind CSS v4 theme variables with semantic `--karsa-*` custom properties. Components consume semantic tokens rather than raw palette values, so light, dark, forced-colors, and high-contrast modes can share the same markup.
+
+## Load the stylesheet once
+
+Import the theme at the document boundary:
+
+```astro
+---
+import "@karsa/theme/styles.css";
+---
+```
+
+`ThemeScript.astro` handles system preference and the saved choice. Do not add a second local-storage bootstrap script.
+
+## Choose a palette
+
+Set `data-theme` on the root element when a page needs an explicit mode:
+
+```html
+<html data-theme="light">...</html>
+<html data-theme="dark">...</html>
+```
+
+Brand configuration belongs in `astro.config.mjs`:
+
+```js
+{
+  name: "Northwind",
+  locale: "en-US",
+  currency: "USD",
+  palette: {
+    light: { accent: "#3659d6", accentForeground: "#ffffff" },
+    dark: { accent: "#9db0ff", accentForeground: "#12162a" },
+  },
+}
+```
+
+Values fall back independently, so a partial palette is safe. Semantic status colors remain package-owned for consistent meaning.
+
+## Use `--karsa-*` tokens
+
+Scope a semantic override to one surface when a brand needs a local variation:
+
+```css
+.notice {
+  --karsa-color-accent: #3659d6;
+  --karsa-color-accent-fg: #ffffff;
+  --karsa-radius-md: 0.75rem;
+}
+```
+
+Prefer semantic names such as `--karsa-color-background`, `--karsa-color-foreground`, `--karsa-color-border`, `--karsa-color-focus-ring`, and `--karsa-color-danger`. Avoid hard-coded hex values inside reusable components.
+
+## Brand and content
+
+Site identity, locale, copy, logos, and imagery stay in the `brand` block. Use sparse message overrides instead of forking a component. Keep generic theme docs site-neutral; domain-specific imagery and copy belong in the relevant site guide.
+
+```js
+karsa({
+  brand: {
+    name: "Northwind",
+    locale: "en-US",
+    timeZone: "America/New_York",
+    messages: { "auth.login.title": "Sign in to {brand}" },
+  },
+})
+```

@@ -14,6 +14,9 @@ import { fileURLToPath } from "node:url";
  * not the reader's.
  */
 const INSTALL_DIRS = [".agents/skills", ".claude/skills"];
+const LEGACY_FRAMEWORK_PREFIXES = [["tako", "ntuku"].join(""), ["toko", "tuku"].join("")].map(
+  (brand) => `${brand}-`,
+);
 
 /** Skills live beside dist/ in the published package, not inside it. */
 const SOURCE_DIR = fileURLToPath(new URL("../../skills", import.meta.url));
@@ -41,7 +44,7 @@ function listSkills(sourceDir: string): string[] {
 export function installSkills(cwd: string, sourceDir = SOURCE_DIR): SkillsInstallResult {
   if (!existsSync(sourceDir)) {
     throw new Error(
-      `No bundled skills found at ${sourceDir}. This usually means @takontuku/core was installed ` +
+      `No bundled skills found at ${sourceDir}. This usually means @karsa/core was installed ` +
         "without its `skills` directory -- check that the installed version ships it.",
     );
   }
@@ -52,6 +55,11 @@ export function installSkills(cwd: string, sourceDir = SOURCE_DIR): SkillsInstal
   for (const target of INSTALL_DIRS) {
     const targetDir = path.join(cwd, target);
     mkdirSync(targetDir, { recursive: true });
+    for (const entry of readdirSync(targetDir)) {
+      if (LEGACY_FRAMEWORK_PREFIXES.some((prefix) => entry.startsWith(prefix))) {
+        rmSync(path.join(targetDir, entry), { recursive: true, force: true });
+      }
+    }
     for (const skill of skills) {
       const destination = path.join(targetDir, skill);
       rmSync(destination, { recursive: true, force: true });

@@ -1,0 +1,42 @@
+---
+import { env } from "cloudflare:workers";
+import brand from "virtual:karsa/config";
+import { mediaUrl } from "@karsa/core";
+import { money } from "@karsa/core/brand";
+import AdminLayout from "@karsa/core/layouts/AdminLayout.astro";
+import AdminPageHeader from "@karsa/ui/AdminPageHeader.astro";
+import EmptyState from "@karsa/ui/EmptyState.astro";
+import Icon from "@karsa/ui/Icon.astro";
+import { listItems } from "../../catalog-items";
+
+const locale = brand.locale.toLowerCase().startsWith("id") ? "id" : "en";
+const localized = (idText: string, enText: string) => (locale === "id" ? idText : enText);
+const pageTitle = localized("Layanan", "Services");
+const manageTitle = localized("Kelola layanan", "Manage services");
+const pageDescription = localized(
+  "Atur layanan, harga opsional, dan status tayang.",
+  "Manage services, optional pricing, and visibility.",
+);
+const addLabel = localized("Tambah layanan", "Add service");
+const emptyTitle = localized("Belum ada layanan", "No services yet");
+const emptyDescription = localized(
+  "Tambahkan layanan pertama untuk mulai menerima permintaan.",
+  "Add the first service to start receiving inquiries.",
+);
+const quoteLabel = localized("Penawaran", "Quote");
+const { items: services } = await listItems(env.DB, {
+  activeOnly: false,
+  pageSize: 50,
+  presentation: "services",
+});
+---
+<AdminLayout title={pageTitle}>
+  <main class="admin-page">
+    <AdminPageHeader eyebrow={pageTitle} title={manageTitle} description={pageDescription}>
+      <Fragment slot="actions"><a class="admin-button admin-button--primary" href="/admin/services/new"><Icon name="plus" size={16} /> {addLabel}</a></Fragment>
+    </AdminPageHeader>
+    {services.length === 0 ? <EmptyState title={emptyTitle} description={emptyDescription}><a slot="actions" class="admin-button admin-button--primary" href="/admin/services/new">{addLabel}</a></EmptyState> : (
+      <div class="table-wrap"><table><thead><tr><th>{localized("Layanan", "Service")}</th><th>{localized("Kategori", "Category")}</th><th>{localized("Harga", "Price")}</th><th>Status</th><th><span class="sr-only">Actions</span></th></tr></thead><tbody>{services.map((service) => { const priceLabel = service.priceCents === null ? quoteLabel : money(service.priceCents / 100); const statusLabel = service.isActive ? localized("Aktif", "Active") : localized("Nonaktif", "Inactive"); return <tr><td><div class="entity"><img src={mediaUrl(service.imageKey)} alt="" /><strong>{service.name}</strong></div></td><td>{service.category}</td><td>{priceLabel}</td><td>{statusLabel}</td><td><a href={`/admin/services/${service.id}/edit`} aria-label={`Edit ${service.name}`}><Icon name="edit" size={16} /></a></td></tr>; })}</tbody></table></div>
+    )}
+  </main>
+</AdminLayout>

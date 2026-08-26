@@ -9,8 +9,8 @@
 .dashboard-heading h1,
 .dashboard-populated-intro h1 {
   margin: 0;
-  color: var(--tk-color-fg);
-  font-family: var(--tk-font-family-display);
+  color: var(--karsa-color-fg);
+  font-family: var(--karsa-font-family-display);
   font-size: clamp(2.25rem, 4vw, 3.6rem);
   font-weight: 400;
   letter-spacing: -0.045em;
@@ -20,7 +20,7 @@
 .dashboard-populated-copy > p:not(.eyebrow) {
   max-width: 38rem;
   margin: 0.55rem 0 0;
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
   font-size: 0.8rem;
   line-height: 1.55;
 }
@@ -62,7 +62,7 @@
   min-height: 7.1rem;
   padding: 1rem 1.1rem;
   border: 1px solid var(--admin-line);
-  border-radius: var(--tk-radius-md);
+  border-radius: var(--karsa-radius-md);
   background: var(--admin-surface);
 }
 .dashboard-summary-icon {
@@ -71,7 +71,7 @@
   width: 2.8rem;
   height: 2.8rem;
   place-items: center;
-  border-radius: var(--tk-radius-md);
+  border-radius: var(--karsa-radius-md);
   background: var(--admin-accent-soft);
   color: var(--admin-accent);
 }
@@ -90,13 +90,13 @@
   margin: 0;
 }
 .dashboard-summary-card p {
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
   font-size: 0.7rem;
 }
 .dashboard-summary-card strong {
   margin-top: 0.25rem;
-  color: var(--tk-color-fg);
-  font-family: var(--tk-font-family-display);
+  color: var(--karsa-color-fg);
+  font-family: var(--karsa-font-family-display);
   font-size: 1.9rem;
   font-weight: 400;
   letter-spacing: -0.035em;
@@ -107,7 +107,7 @@
 }
 .dashboard-summary-card > div > span {
   margin-top: 0.38rem;
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
   font-size: 0.66rem;
   line-height: 1.45;
 }
@@ -121,7 +121,7 @@
   padding: 0.2rem 0.45rem;
   border: 1px solid var(--admin-line);
   border-radius: 999px;
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
   font-size: 0.6rem;
 }
 .setup-ring {
@@ -134,8 +134,8 @@
   place-items: center;
   border-radius: 50%;
   background: conic-gradient(var(--admin-accent) var(--setup-percent), var(--admin-line) 0);
-  color: var(--tk-color-fg);
-  font-family: var(--tk-font-family-display);
+  color: var(--karsa-color-fg);
+  font-family: var(--karsa-font-family-display);
   font-size: 0.85rem;
 }
 .setup-ring::before {
@@ -185,7 +185,7 @@
 }
 .dashboard-setup-heading h2 {
   margin: 0.25rem 0 0;
-  font-family: var(--tk-font-family-display);
+  font-family: var(--karsa-font-family-display);
   font-size: 1.45rem;
   font-weight: 400;
   letter-spacing: -0.03em;
@@ -202,12 +202,12 @@
   align-items: center;
   gap: 0.55rem;
   min-width: 0;
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
   font-size: 0.72rem;
   line-height: 1.4;
 }
 .dashboard-readiness-list li.is-complete {
-  color: var(--tk-color-fg);
+  color: var(--karsa-color-fg);
 }
 .readiness-check {
   display: grid;
@@ -222,7 +222,7 @@
 .is-complete .readiness-check {
   border-color: var(--admin-green);
   background: var(--admin-green);
-  color: var(--tk-color-accent-fg);
+  color: var(--karsa-color-accent-fg);
 }
 .dashboard-empty-hero {
   display: grid;
@@ -237,7 +237,7 @@
 .dashboard-empty-copy h2 {
   max-width: 22ch;
   margin: 0.4rem 0 0;
-  font-family: var(--tk-font-family-display);
+  font-family: var(--karsa-font-family-display);
   font-size: clamp(2rem, 3.3vw, 3.2rem);
   font-weight: 400;
   letter-spacing: -0.045em;
@@ -246,7 +246,7 @@
 .dashboard-empty-copy > p:not(.eyebrow) {
   max-width: 34rem;
   margin: 0.6rem 0 0;
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
   font-size: 0.78rem;
   line-height: 1.6;
 }
@@ -259,7 +259,7 @@
   display: grid;
   gap: 0.55rem;
   margin-top: 1.15rem;
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
   font-size: 0.68rem;
 }
 .dashboard-installed-modules > div {
@@ -271,9 +271,9 @@
   padding: 0.35rem 0.6rem;
   border: 1px solid var(--admin-line);
   border-radius: 999px;
-  color: var(--tk-color-fg);
+  color: var(--karsa-color-fg);
   font-size: 0.7rem;
-  font-weight: var(--tk-font-weight-semibold);
+  font-weight: var(--karsa-font-weight-semibold);
 }
 .dashboard-next-steps {
   margin-top: 1rem;
@@ -305,9 +305,9 @@
   padding: 0 0.75rem;
   border: 1px solid var(--admin-line);
   border-radius: 8px;
-  color: var(--tk-color-fg);
+  color: var(--karsa-color-fg);
   font-size: 0.72rem;
-  font-weight: var(--tk-font-weight-semibold);
+  font-weight: var(--karsa-font-weight-semibold);
   text-decoration: none;
 }
 .dashboard-module-links a:hover {
@@ -318,7 +318,7 @@
   margin: 0 1.1rem 1.1rem;
   padding-top: 1rem;
   border-top: 1px solid var(--admin-line);
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
   font-size: 0.78rem;
 }
 .status {
@@ -329,7 +329,7 @@
   padding: 0.3rem 0.55rem;
   border-radius: 999px;
   font-size: 0.68rem;
-  font-weight: var(--tk-font-weight-medium);
+  font-weight: var(--karsa-font-weight-medium);
   line-height: 1.2;
 }
 .status::before {
@@ -430,8 +430,8 @@
 .dashboard-empty-welcome h1 {
   max-width: none;
   margin: 0.55rem 0 0;
-  color: var(--tk-color-fg);
-  font-family: var(--tk-font-family-display);
+  color: var(--karsa-color-fg);
+  font-family: var(--karsa-font-family-display);
   font-size: clamp(3rem, 3.7vw, 3.55rem);
   font-weight: 400;
   letter-spacing: -0.052em;
@@ -441,7 +441,7 @@
 .dashboard-empty-welcome > p:not(.eyebrow) {
   max-width: 34rem;
   margin: 0.7rem 0 0;
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
   font-size: 0.82rem;
   line-height: 1.55;
 }
@@ -451,7 +451,7 @@
 .dashboard-empty-start h2 {
   max-width: 17ch;
   margin: 0.45rem 0 0;
-  font-family: var(--tk-font-family-display);
+  font-family: var(--karsa-font-family-display);
   font-size: clamp(2.65rem, 3.35vw, 3.25rem);
   font-weight: 400;
   letter-spacing: -0.048em;
@@ -460,7 +460,7 @@
 .dashboard-empty-start > p:not(.eyebrow) {
   max-width: 31rem;
   margin: 0.75rem 0 0;
-  color: var(--tk-color-fg-muted);
+  color: var(--karsa-color-fg-muted);
   font-size: 0.79rem;
   line-height: 1.55;
 }
@@ -472,14 +472,14 @@
 }
 .dashboard-populated-art .admin-dashboard-artwork__image {
   object-fit: cover;
-  object-position: center right !important;
+  object-position: center right;
 }
 .admin-dashboard-artwork.dashboard-empty-art {
   min-height: 29rem;
   margin: 0 -2.5rem 0 -1.25rem;
 }
 .dashboard-empty-art .admin-dashboard-artwork__image {
-  object-position: center right !important;
+  object-position: center right;
 }
 .dashboard-installed-modules {
   margin-top: 1.2rem;
@@ -501,7 +501,7 @@
   display: none;
 }
 .dashboard-empty-state .dashboard-next-steps .panel-heading h2 {
-  font-family: var(--tk-font-family-display);
+  font-family: var(--karsa-font-family-display);
   font-size: 1.55rem;
   font-weight: 400;
   letter-spacing: -0.035em;
@@ -597,7 +597,7 @@
     opacity: 0.2;
   }
   .dashboard-populated-art .admin-dashboard-artwork__image {
-    object-position: right bottom !important;
+    object-position: right bottom;
     transform: scale(1.1);
     transform-origin: right top;
   }

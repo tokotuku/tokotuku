@@ -14,7 +14,7 @@ describe("resolveModules", () => {
 
   it("throws naming the missing package when a dependency is not installed", () => {
     const orders: ModuleDefinition = { name: "orders", requires: ["catalog"] };
-    expect(() => resolveModules([orders])).toThrow(/requires "catalog".*@takontuku\/catalog/s);
+    expect(() => resolveModules([orders])).toThrow(/requires "catalog".*@karsa\/catalog/s);
   });
 
   it("throws on a circular dependency instead of hanging", () => {
@@ -23,17 +23,21 @@ describe("resolveModules", () => {
     expect(() => resolveModules([a, b])).toThrow(/Circular module dependency/);
   });
 
-  it("merges guardedPrefixes, adminRoutes, and storefrontRoutes across modules", () => {
+  it("rejects duplicate module ids instead of silently replacing a definition", () => {
+    expect(() => resolveModules([{ name: "catalog" }, { name: "catalog" }])).toThrow(
+      /Duplicate module id "catalog"/,
+    );
+  });
+
+  it("merges guardedPrefixes, adminRoutes, and siteRoutes across modules", () => {
     const catalog: ModuleDefinition = {
       name: "catalog",
       guardedPrefixes: ["/admin/products"],
-      storefrontRoutes: [
-        { pattern: "/products", entrypoint: "@takontuku/catalog/routes/products.astro" },
-      ],
+      siteRoutes: [{ pattern: "/products", entrypoint: "@karsa/catalog/routes/products.astro" }],
       adminRoutes: [
         {
           pattern: "/admin/products",
-          entrypoint: "@takontuku/catalog/routes/admin/products.astro",
+          entrypoint: "@karsa/catalog/routes/admin/products.astro",
         },
       ],
     };
@@ -46,7 +50,7 @@ describe("resolveModules", () => {
     const registry = resolveModules([catalog, orders]);
 
     expect(registry.guardedPrefixes).toEqual(["/admin/products", "/admin/orders"]);
-    expect(registry.storefrontRoutes).toHaveLength(1);
+    expect(registry.siteRoutes).toHaveLength(1);
     expect(registry.adminRoutes).toHaveLength(1);
   });
 
@@ -81,12 +85,15 @@ describe("resolveModules", () => {
       guardedPrefixes: [],
       mediaPrefixes: [],
       adminNav: [],
-      storefrontRoutes: [],
+      siteRoutes: [],
       adminRoutes: [],
       ambientScripts: [],
-      storefrontHomeSections: [],
+      siteHomeSections: [],
       adminDashboardWidgets: [],
       authPanelWidgets: [],
+      clientConfig: {},
+      requiredBrandFields: [],
+      sitemapSources: [],
       modules: [],
     });
   });
@@ -95,7 +102,7 @@ describe("resolveModules", () => {
     const registry = resolveModules([
       {
         name: "catalog",
-        storefrontHomeSections: [{ id: "collection", entrypoint: "./collection.astro", order: 20 }],
+        siteHomeSections: [{ id: "collection", entrypoint: "./collection.astro", order: 20 }],
         adminDashboardWidgets: [
           { id: "catalog", entrypoint: "./catalog.astro", area: "main", order: 20 },
         ],
@@ -104,17 +111,14 @@ describe("resolveModules", () => {
       {
         name: "orders",
         requires: ["catalog"],
-        storefrontHomeSections: [{ id: "values", entrypoint: "./values.astro", order: 30 }],
+        siteHomeSections: [{ id: "values", entrypoint: "./values.astro", order: 30 }],
         adminDashboardWidgets: [
           { id: "orders", entrypoint: "./orders.astro", area: "main", order: 20 },
         ],
         authPanelWidgets: [{ id: "orders-auth", entrypoint: "./orders-auth.astro", order: 20 }],
       },
     ]);
-    expect(registry.storefrontHomeSections.map((item) => item.id)).toEqual([
-      "collection",
-      "values",
-    ]);
+    expect(registry.siteHomeSections.map((item) => item.id)).toEqual(["collection", "values"]);
     expect(registry.adminDashboardWidgets.map((item) => item.id)).toEqual(["catalog", "orders"]);
     expect(registry.authPanelWidgets.map((item) => item.id)).toEqual([
       "catalog-auth",
@@ -122,10 +126,10 @@ describe("resolveModules", () => {
     ]);
     expect(() =>
       resolveModules([
-        { name: "one", storefrontHomeSections: [{ id: "same", entrypoint: "./one.astro" }] },
-        { name: "two", storefrontHomeSections: [{ id: "same", entrypoint: "./two.astro" }] },
+        { name: "one", siteHomeSections: [{ id: "same", entrypoint: "./one.astro" }] },
+        { name: "two", siteHomeSections: [{ id: "same", entrypoint: "./two.astro" }] },
       ]),
-    ).toThrow(/Duplicate storefront home section contribution id/);
+    ).toThrow(/Duplicate site home section contribution id/);
     expect(() =>
       resolveModules([
         { name: "one", authPanelWidgets: [{ id: "same", entrypoint: "./one.astro" }] },

@@ -1,0 +1,38 @@
+---
+title: SiteHeader
+description: Navigasi situs aksesibel dengan account, search, theme, dan link domain opsional.
+sidebar:
+  order: 5
+---
+
+`SiteHeader` menyediakan header situs responsif milik aplikasi. Jaga surface default tetap kecil
+dan aktifkan link account, search, atau domain hanya saat preset situs yang dipilih membutuhkannya.
+
+```astro
+---
+import SiteHeader from "@karsa/ui/SiteHeader.astro";
+---
+
+<SiteHeader
+  brand={{ name: "Northwind" }}
+  links={[{ label: "Tentang", href: "/about" }, { label: "Kontak", href: "/contact" }]}
+  actions={[{ label: "Akun", href: "/login", icon: "user" }]}
+  showSearch
+/>
+```
+
+## Props
+
+| Prop | Type | Default |
+| --- | --- | --- |
+| `brand` | `{ name?: string; logo?: { src: string; alt?: string } }` | `{ name: "Karsa" }` |
+| `links` | `{ label: string; href: string; current?: boolean }[]` | `[]` |
+| `actions` | `{ label: string; href: string; icon?: string; badge?: boolean; current?: boolean }[]` | `[]` |
+| `current` | `string` | — |
+| `showSearch` | `boolean` | `false` |
+| `announcement` | `string \| false` | `false` |
+
+Header memiliki drawer mobile yang aksesibel via keyboard, theme toggle, dan form search opsional.
+Berikan `labels` terlokalisasi, object `brand` milik situs, serta `links`/`actions` eksplisit,
+bukan vocabulary domain yang di-hard-code di komponen reusable. Action domain hanya boleh
+ditambahkan panduan yang memiliki domain tersebut.

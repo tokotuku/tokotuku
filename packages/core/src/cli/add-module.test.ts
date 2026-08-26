@@ -7,20 +7,20 @@ import { addModule } from "./add-module";
 let dir: string;
 
 beforeEach(async () => {
-  dir = await mkdtemp(path.join(tmpdir(), "takontuku-add-module-"));
+  dir = await mkdtemp(path.join(tmpdir(), "karsa-add-module-"));
 });
 
 afterEach(async () => {
   await rm(dir, { recursive: true, force: true });
 });
 
-const DEFAULT_ASTRO_CONFIG = `import { auth } from "@takontuku/auth";
-import { takontuku } from "@takontuku/core";
+const DEFAULT_ASTRO_CONFIG = `import { auth } from "@karsa/auth";
+import { karsa } from "@karsa/core";
 import { defineConfig } from "astro/config";
 
 export default defineConfig({
   integrations: [
-    takontuku({
+    karsa({
       brand: { name: "Test", locale: "id-ID", currency: "IDR", timeZone: "Asia/Jakarta" },
       modules: [auth()],
     }),
@@ -43,7 +43,7 @@ async function writeClient(
   await writeFile(
     path.join(dir, "package.json"),
     JSON.stringify(
-      { name: "test-client", dependencies: options.dependencies ?? { "@takontuku/core": "1.0.0" } },
+      { name: "test-client", dependencies: options.dependencies ?? { "@karsa/core": "1.0.0" } },
       null,
       2,
     ),
@@ -71,47 +71,47 @@ async function writeFakeModule(
 describe("addModule", () => {
   it("wires a module with no register export: config only, no middleware touch", async () => {
     await writeClient();
-    await writeFakeModule("@takontuku/blog", {
+    await writeFakeModule("@karsa/blog", {
       moduleSource: 'export function blog() { return { name: "blog", requires: [] }; }\n',
     });
 
     const result = await addModule({
       cwd: dir,
-      packageName: "@takontuku/blog",
+      packageName: "@karsa/blog",
       versionRange: null,
       install: false,
     });
 
     expect(result.alreadyInstalled).toBe(false);
     expect(result.added).toEqual([
-      { packageName: "@takontuku/blog", moduleName: "blog", exportName: "blog" },
+      { packageName: "@karsa/blog", moduleName: "blog", exportName: "blog" },
     ]);
     expect(result.filesChanged.sort()).toEqual(["astro.config.mjs", "package.json"]);
 
     const config = await readFile(path.join(dir, "astro.config.mjs"), "utf8");
-    expect(config).toContain('import { blog } from "@takontuku/blog";');
+    expect(config).toContain('import { blog } from "@karsa/blog";');
     expect(config).toContain("modules: [auth(), blog()]");
 
     const pkgJson = JSON.parse(await readFile(path.join(dir, "package.json"), "utf8"));
-    expect(pkgJson.dependencies["@takontuku/blog"]).toBe("1.0.0");
+    expect(pkgJson.dependencies["@karsa/blog"]).toBe("1.0.0");
   });
 
   it("adds the middleware register line when the package ships a ./register export", async () => {
     await writeClient({
       middleware: `import { defineMiddleware } from "astro:middleware";
-import "@takontuku/auth/register";
+import "@karsa/auth/register";
 
 export const onRequest = defineMiddleware((_context, next) => next());
 `,
     });
-    await writeFakeModule("@takontuku/blog", {
+    await writeFakeModule("@karsa/blog", {
       hasRegister: true,
       moduleSource: 'export function blog() { return { name: "blog", requires: [] }; }\n',
     });
 
     const result = await addModule({
       cwd: dir,
-      packageName: "@takontuku/blog",
+      packageName: "@karsa/blog",
       versionRange: null,
       install: false,
     });
@@ -120,23 +120,23 @@ export const onRequest = defineMiddleware((_context, next) => next());
       ["astro.config.mjs", "package.json", path.join("src", "middleware.ts")].sort(),
     );
     const middleware = await readFile(path.join(dir, "src", "middleware.ts"), "utf8");
-    expect(middleware).toContain('import "@takontuku/blog/register";');
+    expect(middleware).toContain('import "@karsa/blog/register";');
   });
 
   it("pulls in a required dependency transitively before wiring the requesting module", async () => {
     await writeClient();
-    await writeFakeModule("@takontuku/catalog-like", {
+    await writeFakeModule("@karsa/catalog-like", {
       moduleSource:
         'export function catalogLike() { return { name: "catalog-like", requires: [] }; }\n',
     });
-    await writeFakeModule("@takontuku/blog", {
+    await writeFakeModule("@karsa/blog", {
       moduleSource:
         'export function blog() { return { name: "blog", requires: ["catalog-like"] }; }\n',
     });
 
     const result = await addModule({
       cwd: dir,
-      packageName: "@takontuku/blog",
+      packageName: "@karsa/blog",
       versionRange: null,
       install: false,
     });
@@ -150,17 +150,17 @@ export const onRequest = defineMiddleware((_context, next) => next());
   it("is idempotent when the module is already wired", async () => {
     await writeClient({
       astroConfig: DEFAULT_ASTRO_CONFIG.replace(
-        'import { takontuku } from "@takontuku/core";',
-        'import { blog } from "@takontuku/blog";\nimport { takontuku } from "@takontuku/core";',
+        'import { karsa } from "@karsa/core";',
+        'import { blog } from "@karsa/blog";\nimport { karsa } from "@karsa/core";',
       ).replace("modules: [auth()]", "modules: [auth(), blog()]"),
     });
-    await writeFakeModule("@takontuku/blog", {
+    await writeFakeModule("@karsa/blog", {
       moduleSource: 'export function blog() { return { name: "blog", requires: [] }; }\n',
     });
 
     const result = await addModule({
       cwd: dir,
-      packageName: "@takontuku/blog",
+      packageName: "@karsa/blog",
       versionRange: null,
       install: false,
     });
@@ -172,15 +172,15 @@ export const onRequest = defineMiddleware((_context, next) => next());
   it('does not claim to be "also adding" a required dependency that is already wired', async () => {
     await writeClient({
       astroConfig: DEFAULT_ASTRO_CONFIG.replace(
-        'import { auth } from "@takontuku/auth";',
-        'import { auth } from "@takontuku/auth";\nimport { catalogLike } from "@takontuku/catalog-like";',
+        'import { auth } from "@karsa/auth";',
+        'import { auth } from "@karsa/auth";\nimport { catalogLike } from "@karsa/catalog-like";',
       ).replace("modules: [auth()]", "modules: [auth(), catalogLike()]"),
     });
-    await writeFakeModule("@takontuku/catalog-like", {
+    await writeFakeModule("@karsa/catalog-like", {
       moduleSource:
         'export function catalogLike() { return { name: "catalog-like", requires: [] }; }\n',
     });
-    await writeFakeModule("@takontuku/blog", {
+    await writeFakeModule("@karsa/blog", {
       moduleSource:
         'export function blog() { return { name: "blog", requires: ["catalog-like"] }; }\n',
     });
@@ -188,7 +188,7 @@ export const onRequest = defineMiddleware((_context, next) => next());
 
     await addModule({
       cwd: dir,
-      packageName: "@takontuku/blog",
+      packageName: "@karsa/blog",
       versionRange: null,
       install: false,
     });
@@ -200,7 +200,7 @@ export const onRequest = defineMiddleware((_context, next) => next());
   it("refuses to add core", async () => {
     await writeClient();
     await expect(
-      addModule({ cwd: dir, packageName: "@takontuku/core", versionRange: null, install: false }),
+      addModule({ cwd: dir, packageName: "@karsa/core", versionRange: null, install: false }),
     ).rejects.toThrow(/never listed in modules\[\]/);
   });
 });

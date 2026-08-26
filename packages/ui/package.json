@@ -1,6 +1,6 @@
 {
-  "name": "@takontuku/ui",
-  "version": "0.2.0",
+  "name": "@karsa/ui",
+  "version": "0.3.0",
   "publishConfig": {
     "registry": "https://registry.npmjs.org",
     "access": "public"
@@ -34,17 +34,17 @@
     "./SEO.astro": "./src/components/seo/SEO.astro",
     "./Skeleton.astro": "./src/components/feedback/Skeleton.astro",
     "./StatCard.astro": "./src/components/data-display/StatCard.astro",
-    "./StoreHeader.astro": "./src/components/layout/StoreHeader.astro",
-    "./StorefrontHero.astro": "./src/components/storefront/StorefrontHero.astro",
-    "./StoreFooter.astro": "./src/components/storefront/StoreFooter.astro",
-    "./StorefrontEmptyCollection.astro": "./src/components/storefront/StorefrontEmptyCollection.astro",
+    "./SiteHeader.astro": "./src/components/layout/SiteHeader.astro",
+    "./SiteHero.astro": "./src/components/site/SiteHero.astro",
+    "./SiteFooter.astro": "./src/components/site/SiteFooter.astro",
+    "./CatalogEmptyState.astro": "./src/components/site/CatalogEmptyState.astro",
     "./DashboardMetric.astro": "./src/components/data-display/DashboardMetric.astro",
     "./InspectorMetric.astro": "./src/components/data-display/InspectorMetric.astro",
     "./Tabs.astro": "./src/components/navigation/Tabs.astro",
     "./package.json": "./package.json"
   },
   "dependencies": {
-    "@takontuku/theme": "^0.2.0"
+    "@karsa/theme": "workspace:*"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.4",

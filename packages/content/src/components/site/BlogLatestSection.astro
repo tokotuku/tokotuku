@@ -1,0 +1,28 @@
+---
+import { env } from "cloudflare:workers";
+import { mediaUrl } from "@karsa/core";
+import { brand } from "@karsa/core/brand";
+import { listPublishedPosts } from "../../posts";
+
+const posts = await listPublishedPosts(env.DB, { limit: 3 });
+const locale = brand.locale.toLowerCase().startsWith("id") ? "id" : "en";
+
+import "./BlogLatestSection.css";
+---
+
+{posts.length > 0 && (
+  <section class="content-latest-section" aria-labelledby="content-latest-title">
+    <div class="content-latest-heading">
+      <div><p class="eyebrow">{locale === "id" ? "Dari jurnal" : "From the journal"}</p><h2 id="content-latest-title">{locale === "id" ? "Tulisan terbaru" : "Latest writing"}</h2></div>
+      <a href="/blog">{locale === "id" ? "Lihat semua" : "View all"} <span aria-hidden="true">↗</span></a>
+    </div>
+    <div class="content-latest-grid">
+      {posts.map((post) => (
+        <article>
+          {post.coverImageKey && <img src={mediaUrl(post.coverImageKey)} alt="" loading="lazy" />}
+          <div><p class="content-post-date">{post.publishedAt ?? post.updatedAt}</p><h3><a href={`/blog/${post.slug}`}>{post.title}</a></h3>{post.excerpt && <p>{post.excerpt}</p>}</div>
+        </article>
+      ))}
+    </div>
+  </section>
+)}

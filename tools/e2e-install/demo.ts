@@ -9,13 +9,12 @@
 // output, had let ship unnoticed).
 //
 // Prerequisite: a registry reachable at REGISTRY_URL (defaults to Verdaccio
-// on http://localhost:4873). Start one locally with `moon run verdaccio:up`.
+// on http://localhost:4873). Start one locally with Docker Compose; see README.md.
 //
 // The default scaffold is public-only (auth + core + ui), so this adds
-// `catalog` via `takontuku add` before step 1 -- there's nothing to seed or
+// `catalog` via `karsa add` before step 1 -- there's nothing to seed or
 // theme without a storefront module installed.
 
-import { spawn } from "node:child_process";
 import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -26,9 +25,12 @@ import {
   installClient,
   publishAll,
   queryD1,
+  readDevVar,
   scaffoldClient,
   setupAndLogIn,
   sh,
+  spawnWranglerDev,
+  terminateProcessGroup,
   waitForServer,
 } from "./shared.ts";
 
@@ -50,38 +52,34 @@ const { name, price } = Astro.props;
 
 async function bootAndFetch(clientDir: string, paths: string[]): Promise<Map<string, Response>> {
   const origin = `http://localhost:${BOOT_CHECK_PORT}`;
-  const child = spawn("bunx", ["wrangler", "dev", "--port", String(BOOT_CHECK_PORT)], {
-    cwd: clientDir,
-    stdio: "inherit",
-    detached: true,
-  });
+  const child = spawnWranglerDev(clientDir, BOOT_CHECK_PORT);
 
   try {
     await waitForServer(`${origin}/setup`, 30_000);
-    await setupAndLogIn(origin, ADMIN);
+    await setupAndLogIn(origin, ADMIN, readDevVar(clientDir, "KARSA_SETUP_TOKEN"));
     const responses = new Map<string, Response>();
     for (const p of paths) responses.set(p, await fetch(`${origin}${p}`));
     return responses;
   } finally {
-    if (child.pid) process.kill(-child.pid, "SIGTERM");
+    terminateProcessGroup(child);
   }
 }
 
 async function main(): Promise<void> {
   const version = publishAll();
 
-  const scratchParent = mkdtempSync(path.join(tmpdir(), "takontuku-e2e-demo-"));
+  const scratchParent = mkdtempSync(path.join(tmpdir(), "karsa-e2e-demo-"));
   const clientDir = scaffoldClient(scratchParent, "demo-walkthrough", version);
   console.log(`Scaffolded client (public-only default: auth) at ${clientDir}`);
 
   installClient(clientDir);
   addCatalogModule(clientDir);
   console.log(
-    "Added the catalog module via `takontuku add`, so there's a storefront to seed and theme.",
+    "Added the catalog module via `karsa add`, so there's a storefront to seed and theme.",
   );
 
   // --- Step 1: bare install -----------------------------------------------
-  sh("bunx", ["takontuku", "db", "sync"], clientDir);
+  sh("bunx", ["karsa", "db", "sync"], clientDir);
   sh("bunx", ["wrangler", "d1", "migrations", "apply", "DB", "--local"], clientDir);
   sh("bun", ["run", "build"], clientDir);
 
@@ -99,7 +97,7 @@ async function main(): Promise<void> {
   console.log("Step 1 (bare install): storefront is empty, as expected.");
 
   // --- Step 2: seed ---------------------------------------------------------
-  sh("bunx", ["takontuku", "db", "seed"], clientDir);
+  sh("bunx", ["karsa", "db", "seed"], clientDir);
 
   const catalogCount = queryD1(clientDir, "SELECT COUNT(*) as count FROM catalog_items");
   assert(
