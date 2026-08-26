@@ -15,9 +15,9 @@
   "dependencies": {
     "@astrojs/starlight": "0.41.3",
     "astro": "7.0.9",
-    "@karsa/charts": "^0.3.0",
-    "@karsa/theme": "^0.3.0",
-    "@karsa/ui": "^0.3.0"
+    "@karsa/charts": "workspace:*",
+    "@karsa/theme": "workspace:*",
+    "@karsa/ui": "workspace:*"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.4",

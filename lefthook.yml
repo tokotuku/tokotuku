@@ -3,10 +3,10 @@ pre-commit:
   commands:
     biome-check:
       glob: "*.{ts,tsx,js,mjs,cjs,json,jsonc,css}"
-      run: ./scripts/run-biome.sh check --write --no-errors-on-unmatched {staged_files}
+      run: bun run biome check --write --no-errors-on-unmatched {staged_files}
       stage_fixed: true
 
 commit-msg:
   commands:
     conventional-commit:
-      run: ./scripts/verify-commit-msg.sh {1}
+      run: bun scripts/verify-commit-msg.ts {1}

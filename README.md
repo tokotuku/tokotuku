@@ -39,8 +39,8 @@ deployment contracts.
 - [Node.js](https://nodejs.org) 20.16+, 22.19+, or 24+ for Storybook 10
 - git
 
-Workspace gates use Bun directly, so lint, typecheck, test, build, and local-registry rehearsals
-also work in offline environments without downloading a task-runner toolchain plugin.
+The root devDependencies install the pinned Moon CLI. Moon owns the workspace project graph and
+build ordering; its first task run may download the official Bun toolchain plugin.
 
 ## Development
 
@@ -65,7 +65,7 @@ path, and vice versa.
 To run the complete 12-fixture example matrix with stable local ports:
 
 ```sh
-moon run scripts:examples
+bun run moon run scripts:examples
 ```
 
 The examples are served on `http://localhost:4301` through `http://localhost:4312` in the

@@ -1,0 +1,14 @@
+$schema: "https://moonrepo.dev/schemas/tasks.json"
+
+# Every workspace package and fixture has a package.json. Let package manifests
+# define the project graph, and make built package artifacts an upstream
+# prerequisite for every inferred or project-local task that consumes them.
+inheritedBy:
+  file: "package.json"
+
+implicitDeps:
+  - target: "^:build"
+    optional: true
+
+implicitInputs:
+  - "package.json"

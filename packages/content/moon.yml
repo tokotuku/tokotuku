@@ -6,7 +6,6 @@ layer: "library"
 tasks:
   build:
     command: "tsup"
-    deps: ["core:build"]
     inputs:
       - "src/**/*"
       - "migrations/**/*"
@@ -30,7 +29,6 @@ tasks:
 
   typecheck:
     command: "astro check"
-    deps: ["core:build"]
     inputs:
       - "src/**/*"
       - "tsconfig.json"

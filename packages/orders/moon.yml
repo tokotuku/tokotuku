@@ -6,7 +6,6 @@ layer: "library"
 tasks:
   build:
     command: "tsup"
-    deps: ["core:build", "catalog:build"]
     inputs:
       - "src/**/*"
       - "tsup.config.ts"
@@ -22,20 +21,12 @@ tasks:
 
   test:
     command: "vitest run"
-    # orders.ts imports findItemById from @karsa/catalog, resolved
-    # via its built dist/ — same reasoning as the typecheck task below.
-    deps: ["core:build", "catalog:build"]
     inputs:
       - "src/**/*"
       - "vitest.config.ts"
 
   typecheck:
     command: "astro check"
-    # @karsa/core and @karsa/catalog are consumed via their built
-    # dist/ (not raw source) for runtime values like defineModule and
-    # findItemsByIds — without this, typecheck can race tsup's
-    # clean-then-rebuild and read a briefly-missing dist/index.d.ts.
-    deps: ["core:build", "catalog:build"]
     inputs:
       - "src/**/*"
       - "tsconfig.json"
