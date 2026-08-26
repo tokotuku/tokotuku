@@ -20,20 +20,15 @@
     "tools/e2e-install"
   ],
   "scripts": {
-    "build": "WRANGLER_WRITE_LOGS=false bun run --workspaces --if-present --sequential build",
-    "dev": "bun run --workspaces --if-present --parallel dev",
-    "test": "bun run --workspaces --if-present --sequential test",
-    "lint": "bun run --workspaces --if-present --sequential lint",
+    "build": "WRANGLER_WRITE_LOGS=false moon run :build",
+    "dev": "moon run :dev",
+    "test": "moon run :test",
+    "lint": "moon run :lint",
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
-    "check:assets": "node scripts/check-asset-budgets.mjs",
-    "check:exports": "node scripts/check-exports.mjs",
-    "check:performance": "node scripts/check-performance-budgets.mjs",
-    "check:refactor": "node scripts/check-refactor-invariants.mjs",
-    "check:brand": "node scripts/check-brand.mjs",
     "check:docs-i18n": "bun run --cwd apps/docs parity",
-    "typecheck:dependencies": "bun run --cwd packages/core build && bun run --cwd packages/catalog build && bun run --cwd packages/orders build",
-    "typecheck": "bun run typecheck:dependencies && bun run --workspaces --if-present --sequential typecheck",
+    "typecheck": "moon run :typecheck",
+    "ci": "WRANGLER_WRITE_LOGS=false moon run :lint :typecheck :test :build",
     "changeset": "changeset",
     "version": "changeset version",
     "release": "bun run build && changeset publish",
@@ -43,6 +38,7 @@
   "devDependencies": {
     "@biomejs/biome": "2.5.3",
     "@changesets/cli": "2.31.0",
+    "@moonrepo/cli": "2.4.3",
     "@types/bun": "1.3.14",
     "@types/node": "26.1.1",
     "@vitest/coverage-v8": "4.1.10",
@@ -51,5 +47,8 @@
     "tsup": "8.5.1",
     "typescript": "5.9.3",
     "vitest": "4.1.10"
-  }
+  },
+  "trustedDependencies": [
+    "@moonrepo/cli"
+  ]
 }

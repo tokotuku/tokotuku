@@ -12,11 +12,6 @@ tasks:
   # node_modules module resolution failures.
   run:
     command: "bun run.ts"
-    # Deliberately no `deps:` on the other packages' build tasks: moon's CI
-    # runner treats `deps` bidirectionally for affected-propagation, so
-    # declaring them here would pull this task into every plain
-    # `moon ci :build` sweep (which has no registry running). run.ts builds
-    # its own prerequisites as its first step instead.
     inputs:
       - "run.ts"
       - "shared.ts"

@@ -3,14 +3,9 @@ language: "typescript"
 stack: "frontend"
 layer: "application"
 
-dependsOn:
-  - "ui"
-
 tasks:
   build:
     command: "storybook build"
-    deps:
-      - "ui:typecheck"
     inputs:
       - ".storybook/**/*"
       - "src/**/*"

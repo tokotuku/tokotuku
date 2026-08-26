@@ -44,7 +44,7 @@
     "./package.json": "./package.json"
   },
   "dependencies": {
-    "@karsa/theme": "^0.3.0"
+    "@karsa/theme": "workspace:*"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.4",

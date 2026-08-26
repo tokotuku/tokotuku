@@ -36,11 +36,7 @@ jobs:
         timeout-minutes: 10
 
       - name: Run lint, typecheck, test, and build
-        run: |
-          bun run lint
-          bun run typecheck
-          bun run test
-          bun run build
+        run: bun run ci
 
   e2e-install:
     name: "Gates 1-3 + update propagation + demo"
